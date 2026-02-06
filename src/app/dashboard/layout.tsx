@@ -6,8 +6,7 @@ import {
   Users, 
   User,
   LogOut,
-  Menu,
-  X
+  Menu
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -56,7 +55,7 @@ export default function DashboardLayout({
              </div>
              <span className="font-bold">SmartChama</span>
            </div>
-           {/* Note: Real mobile menu toggle requires 'useState', but for now this is static */}
+           {/* Mobile Menu Toggle */}
            <button className="p-2 text-slate-400"><Menu className="w-6 h-6" /></button>
         </header>
 
@@ -86,8 +85,8 @@ export default function DashboardLayout({
   );
 }
 
-// Helper Components
-function NavItem({ icon, label, href }: { icon: any, label: string, href: string }) {
+// Helper Components (FIXED TYPES HERE)
+function NavItem({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
   return (
     <Link href={href} className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-emerald-400 font-medium transition-all hover:pl-5">
       <div className="w-5 h-5">{icon}</div>
@@ -96,7 +95,7 @@ function NavItem({ icon, label, href }: { icon: any, label: string, href: string
   )
 }
 
-function MobileNavItem({ icon, label, href }: { icon: any, label: string, href: string }) {
+function MobileNavItem({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
   return (
     <Link href={href} className="flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-emerald-400">
       <div className="w-5 h-5">{icon}</div>
