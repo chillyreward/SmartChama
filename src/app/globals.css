@@ -1,8 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
+  /* ... keep your existing styles below ... */
   * {
     @apply border-slate-800;
   }
