@@ -1,8 +1,8 @@
-"use client"; // <--- Now a Client Component to read the URL
+"use client";
 
+import { Suspense } from "react"; // <--- NEW IMPORT
 import { useSearchParams } from "next/navigation";
 import { 
-  ArrowUpRight, 
   Plus, 
   Coins, 
   TrendingUp,
@@ -11,9 +11,7 @@ import {
   Bell
 } from "lucide-react";
 
-// ... (Keep your mock data, but we can skip pasting it all here for brevity. 
-// Just ensure 'dashboardData' and 'recentActivity' objects are defined inside or outside component) ...
-
+// --- MOCK DATA ---
 const dashboardData = {
   totalBalance: 1250000,
   monthlyGrowth: 12,
@@ -38,16 +36,16 @@ function formatCurrency(amount: number) {
   return new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 0 }).format(amount);
 }
 
-export default function DashboardPage() {
+// --- 1. THE CONTENT COMPONENT (Reads the URL) ---
+function DashboardContent() {
   const searchParams = useSearchParams();
-  const userName = searchParams.get("user") || "Member"; // Gets "Lenny" from URL or defaults to "Member"
+  const userName = searchParams.get("user") || "Member"; 
 
   return (
     <div className="space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          {/* DYNAMIC NAME HERE */}
           <h2 className="text-2xl lg:text-3xl font-black text-white">Jambo, {userName}</h2>
           <p className="text-slate-400 text-sm mt-1">Welcome back to your group dashboard.</p>
         </div>
@@ -98,7 +96,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-       {/* Recent Activity Table (Simplified for brevity) */}
+       {/* Recent Activity Table */}
        <div>
          <h3 className="text-lg font-bold mb-4">Recent Activity</h3>
          <div className="bg-slate-900/30 border border-slate-800 rounded-2xl p-4">
@@ -118,5 +116,15 @@ export default function DashboardPage() {
        </div>
 
     </div>
+  );
+}
+
+// --- 2. THE MAIN EXPORT (Wraps it in Suspense) ---
+export default function DashboardPage() {
+  return (
+    // This fallback is what shows while Next.js figures out the URL
+    <Suspense fallback={<div className="p-10 text-emerald-400">Loading Dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
