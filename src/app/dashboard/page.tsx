@@ -1,15 +1,15 @@
 // app/dashboard/page.tsx
 import { 
-    ArrowUpRight, 
-    Plus, 
-    Minus, 
-    HandCoins, 
-    TrendingUp,
-    UserPlus,
-    Grid3X3,
-    Bell,
-    MoreHorizontal
-  } from "lucide-react";
+  ArrowUpRight, 
+  Plus, 
+  Minus, 
+  Coins, // <--- CHANGED THIS (Was HandCoins)
+  TrendingUp,
+  UserPlus,
+  Grid3X3,
+  Bell,
+  MoreHorizontal
+} from "lucide-react";
   
   const dashboardData = {
     totalBalance: 1250000,
@@ -64,7 +64,7 @@ import {
   
   const quickActions = [
     { name: "Record Pay", icon: Plus, color: "bg-emerald-500/20 text-emerald-400" },
-    { name: "Borrow", icon: HandCoins, color: "bg-slate-800 text-slate-400" },
+    { name: "Borrow", icon: Coins, color: "bg-slate-800 text-slate-400" }, // <--- CHANGED THIS
     { name: "Invite", icon: UserPlus, color: "bg-slate-800 text-slate-400" },
     { name: "USSD Menu", icon: Grid3X3, color: "bg-slate-800 text-slate-400" },
   ];
