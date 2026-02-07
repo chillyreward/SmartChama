@@ -1,94 +1,204 @@
-import { 
-  Plus, 
-  ArrowRightLeft,
-  Search
-} from "lucide-react";
+"use client";
 
+import { useState } from "react";
+import { 
+  Users, Lock, ArrowRight, ShieldCheck, Keypad, 
+  Loader2, CheckCircle, Wallet 
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+
+// --- MOCK GROUPS DATA ---
 const myGroups = [
-  { id: 1, name: "Family Savings", id_code: "CHM-8829", role: "Admin", status: "Active", color: "from-emerald-600 to-emerald-800" },
-  { id: 2, name: "Business Collective", id_code: "CHM-1043", role: "Member", status: "Active", color: "from-amber-600 to-amber-800" },
-  { id: 3, name: "Education Fund", id_code: "CHM-5521", role: "Member", status: "Active", color: "from-blue-600 to-blue-800" },
-  { id: 4, name: "Holiday Travel", id_code: "CHM-0092", role: "Admin", status: "Active", color: "from-orange-400 to-pink-600" },
+  {
+    id: "g1",
+    name: "Family Savings",
+    role: "Admin",
+    balance: "KES 1,250,000",
+    members: 12,
+    color: "emerald",
+    nextMeeting: "Friday, 8pm"
+  },
+  {
+    id: "g2",
+    name: "CUEA Tech Club",
+    role: "Member",
+    balance: "KES 45,000",
+    members: 48,
+    color: "blue",
+    nextMeeting: "Feb 28th"
+  },
+  {
+    id: "g3",
+    name: "Rongai Investors",
+    role: "Treasurer",
+    balance: "KES 8,500,000",
+    members: 5,
+    color: "purple",
+    nextMeeting: "Monthly"
+  }
 ];
 
-export default function GroupsPage() {
-  return (
-    <div className="space-y-6 lg:space-y-8">
-      {/* Header */}
-      <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search groups..."
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-200 placeholder:text-slate-500 focus:ring-1 focus:ring-emerald-500"
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-400">Dashboard</span>
-          <span className="text-emerald-400 font-bold text-sm">My Groups</span>
-          <span className="text-sm text-slate-400">Transactions</span>
-          <span className="text-sm text-slate-400">Settings</span>
-          <div className="size-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 ml-4" />
-        </div>
-      </header>
+export default function MyGroupsPage() {
+  const router = useRouter();
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [step, setStep] = useState(1); // 1=Prompt, 2=Verifying, 3=Success
+  const [pin, setPin] = useState(["", "", "", ""]);
 
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">My Groups</h1>
-          <p className="text-slate-400 mt-2">Manage and switch between your active group savings accounts</p>
-        </div>
-        <button className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 px-6 rounded-full transition-colors">
-          <Plus className="w-5 h-5" />
-          <span>Create New Chama</span>
-        </button>
+  const handleGroupClick = (group: any) => {
+    setSelectedGroup(group);
+    setStep(1); // Reset
+    setPin(["", "", "", ""]);
+  };
+
+  const handlePinChange = (index: number, value: string) => {
+    if (value.length > 1) return;
+    const newPin = [...pin];
+    newPin[index] = value;
+    setPin(newPin);
+    
+    // Auto-focus next
+    if (value && index < 3) {
+      document.getElementById(`pin-${index + 1}`)?.focus();
+    }
+
+    // Auto-submit on fill
+    if (index === 3 && value) {
+      verifyPin();
+    }
+  };
+
+  const verifyPin = () => {
+    setStep(2); // Loading
+    setTimeout(() => {
+      setStep(3); // Success
+      setTimeout(() => {
+        // Redirect to dashboard with new context
+        router.push(`/dashboard?group=${selectedGroup.id}&role=${selectedGroup.role}`);
+      }, 1000);
+    }, 1500);
+  };
+
+  return (
+    <div className="space-y-8 pb-20">
+      
+      {/* --- HEADER --- */}
+      <div>
+        <h1 className="text-3xl font-black text-white flex items-center gap-3">
+          My Chamas <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-full border border-slate-700">{myGroups.length} Active</span>
+        </h1>
+        <p className="text-slate-400 mt-1">Select a group to access its dashboard. Security verification required.</p>
       </div>
 
-      {/* Groups Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* --- GROUPS GRID --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        {/* ADD NEW GROUP CARD */}
+        <div className="border-2 border-dashed border-slate-800 rounded-[32px] p-6 flex flex-col items-center justify-center text-slate-500 hover:border-emerald-500/50 hover:text-emerald-500 hover:bg-emerald-500/5 transition-all cursor-pointer min-h-[250px] group">
+          <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <Users className="w-6 h-6" />
+          </div>
+          <p className="font-bold">Create / Join Chama</p>
+        </div>
+
+        {/* ACTIVE GROUPS */}
         {myGroups.map((group) => (
-          <div key={group.id} className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all group">
-            <div className={`h-32 bg-gradient-to-br ${group.color} relative p-4`}>
-              {group.role === "Admin" && (
-                <span className="absolute top-3 right-3 bg-white/20 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded">
-                  ADMIN
-                </span>
-              )}
-            </div>
-            <div className="p-4">
-              <h3 className="text-white font-bold text-lg mb-1">{group.name}</h3>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-slate-500 text-sm">ID: {group.id_code}</span>
-                <span className="text-slate-400 text-sm font-medium">{group.role}</span>
+          <div 
+            key={group.id}
+            onClick={() => handleGroupClick(group)}
+            className="relative bg-slate-900 border border-slate-800 rounded-[32px] p-8 hover:border-emerald-500/50 transition-all cursor-pointer group overflow-hidden"
+          >
+            {/* Hover Glow */}
+            <div className={`absolute -right-10 -top-10 w-32 h-32 bg-${group.color}-500/10 blur-[60px] group-hover:bg-${group.color}-500/20 transition-all`}></div>
+
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-6">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-${group.color}-500/10 text-${group.color}-400`}>
+                  <Users className="w-6 h-6" />
+                </div>
+                <div className="bg-slate-950 px-3 py-1 rounded-full border border-slate-800 flex items-center gap-2">
+                  <Lock className="w-3 h-3 text-slate-500" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Encrypted</span>
+                </div>
               </div>
-              <button className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition-colors text-sm">
-                <ArrowRightLeft className="w-4 h-4" />
-                Switch to this Chama
-              </button>
+
+              <h3 className="text-xl font-bold text-white mb-1">{group.name}</h3>
+              <p className="text-sm text-slate-400 mb-6">{group.role}</p>
+
+              <div className="flex justify-between items-end border-t border-slate-800 pt-4">
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase font-bold">Total Assets</p>
+                  <p className="text-lg font-bold text-white blur-[4px] group-hover:blur-0 transition-all duration-500">
+                    {group.balance}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Floating Buttons */}
-      <div className="fixed bottom-24 lg:bottom-8 right-4 lg:right-8">
-        <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 px-6 rounded-full shadow-lg shadow-emerald-500/20 transition-colors">
-          <Plus className="w-5 h-5" />
-          Join a Chama
-        </button>
-      </div>
+      {/* --- SECURITY CHALLENGE MODAL --- */}
+      {selectedGroup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-[#020617] border border-slate-700 w-full max-w-md rounded-[32px] p-8 relative shadow-2xl text-center">
+            
+            <button 
+              onClick={() => setSelectedGroup(null)}
+              className="absolute top-6 right-6 text-slate-500 hover:text-white"
+            >
+              x
+            </button>
 
-      {/* Pro Plan Card */}
-      <div className="fixed bottom-24 lg:bottom-8 left-4 lg:left-80 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 max-w-xs">
-        <p className="text-emerald-400 text-xs font-bold uppercase mb-1">Pro Plan</p>
-        <p className="text-slate-400 text-xs mb-3">Manage up to 10 Chamas effortlessly.</p>
-        <button className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded-lg text-sm transition-colors">
-          Upgrade Now
-        </button>
-      </div>
+            {step === 1 && (
+              <div className="animate-in slide-in-from-bottom-4 duration-300">
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
+                  <ShieldCheck className="w-10 h-10 text-emerald-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-2">Verify Identity</h2>
+                <p className="text-slate-400 text-sm mb-8">
+                  Enter your PIN to access <br />
+                  <span className="text-white font-bold">{selectedGroup.name}</span>
+                </p>
+
+                <div className="flex justify-center gap-4 mb-8">
+                  {pin.map((digit, i) => (
+                    <input
+                      key={i}
+                      id={`pin-${i}`}
+                      type="password"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handlePinChange(i, e.target.value)}
+                      className="w-12 h-14 bg-slate-900 border border-slate-700 rounded-xl text-center text-2xl font-bold text-white focus:border-emerald-500 focus:shadow-[0_0_20px_rgba(16,185,129,0.3)] outline-none transition-all"
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-slate-600">Enter any 4 digits (Demo Mode)</p>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="py-10">
+                <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mx-auto mb-4" />
+                <p className="text-white font-bold">Verifying Credentials...</p>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="py-10">
+                <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4 animate-bounce" />
+                <p className="text-white font-bold text-lg">Access Granted</p>
+                <p className="text-emerald-400 text-sm">Entering Secure Vault...</p>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -1,127 +1,169 @@
 import Link from "next/link";
-import { Wallet, Shield, Phone, ArrowRight, Instagram, Twitter, Linkedin, Facebook } from "lucide-react";
+import { 
+  Wallet, Shield, Phone, ArrowRight, Instagram, Twitter, Linkedin, Facebook, 
+  ChevronRight, Lock, Globe, Zap, PieChart, Users 
+} from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col font-sans selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-[#020617] flex flex-col font-sans text-slate-300 selection:bg-emerald-500/30">
       
-      {/* Navbar */}
-      <nav className="border-b border-slate-800/50 backdrop-blur-md fixed w-full z-50">
+      {/* --- NAVBAR --- */}
+      <nav className="fixed w-full z-50 border-b border-white/5 bg-[#020617]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-tr from-emerald-500 to-emerald-400 p-2 rounded-lg">
-              <Wallet className="w-6 h-6 text-slate-950" />
+            <div className="bg-emerald-500 p-2 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+              <Wallet className="w-5 h-5 text-black" />
             </div>
             <span className="text-xl font-bold text-white tracking-tight">SmartChama</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/login" className="text-slate-300 hover:text-white font-medium text-sm transition-colors">
-              Login
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <a href="#features" className="hover:text-emerald-400 transition-colors">Features</a>
+            <a href="#how-it-works" className="hover:text-emerald-400 transition-colors">How it Works</a>
+            <a href="#ussd" className="hover:text-emerald-400 transition-colors">USSD</a>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-white hover:text-emerald-400 font-medium text-sm transition-colors">
+              Log In
             </Link>
-            <Link href="/login" className="bg-white text-slate-950 hover:bg-emerald-50 px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]">
+            <Link href="/login" className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)]">
               Get Started
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col justify-center pt-32 pb-20 px-6 relative overflow-hidden">
-        {/* Background Glow */}
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-6">
+      {/* --- HERO SECTION --- */}
+      <section className="relative pt-40 pb-32 px-6 overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-emerald-600/20 blur-[120px] rounded-full pointer-events-none opacity-50" />
+        
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-8 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Live on USSD *544#
+            V 2.0 Now Live
           </div>
-          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-tight mb-8">
-            The Modern Way to manage <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Group Savings.</span>
+          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] mb-8">
+            Wealth is <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-400">Better Together.</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            SmartChama brings transparency to your investment group. 
-            Automate contributions, track loans, and get AI financial advice—even without internet via USSD.
+          <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+            The operating system for modern African investment groups. 
+            Automate contributions, instant loans, and blockchain transparency.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-full transition-all flex items-center justify-center gap-2">
+            <Link href="/login" className="w-full sm:w-auto px-10 py-5 bg-white text-black font-bold text-lg rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-2">
               Start a Chama
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="/ussd-demo" className="w-full sm:w-auto px-8 py-4 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white font-bold rounded-full transition-all flex items-center justify-center gap-2">
+            <Link href="/ussd-demo" className="w-full sm:w-auto px-10 py-5 bg-slate-900 border border-slate-700 text-white font-bold text-lg rounded-full hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
               <Phone className="w-5 h-5 text-emerald-400" />
-              Try USSD Demo
+              *544# Demo
             </Link>
           </div>
         </div>
+      </section>
 
-        {/* Features Grid */}
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 mt-32">
-          {[
-            { icon: Shield, title: "Secure & Transparent", desc: "Every shilling is tracked on the blockchain. No more 'lost' records." },
-            { icon: Phone, title: "Works Offline", desc: "Members without smartphones can use *544# to pay and borrow." },
-            { icon: Wallet, title: "Instant Loans", desc: "Get approved instantly based on your savings history." },
-          ].map((f, i) => (
-            <div key={i} className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/30 transition-colors">
-              <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
-                <f.icon className="w-6 h-6 text-emerald-400" />
+      {/* --- BENTO GRID FEATURES --- */}
+      <section id="features" className="py-32 px-6 bg-slate-950/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-20">
+            <h2 className="text-4xl font-bold text-white mb-6">Built for Serious Growth</h2>
+            <p className="text-slate-400 max-w-xl text-lg">Don't just save. Invest. Our tools give your group the power of a hedge fund.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1 */}
+            <div className="col-span-1 md:col-span-2 bg-gradient-to-br from-slate-900 to-slate-900/50 border border-white/10 rounded-[32px] p-10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full group-hover:bg-emerald-500/20 transition-all" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
+                  <PieChart className="w-7 h-7 text-emerald-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">AI Investment Advisor</h3>
+                <p className="text-slate-400 max-w-md">Our Gemini-powered engine analyzes market trends and suggests the best high-yield savings accounts and bonds for your group.</p>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">{f.title}</h3>
-              <p className="text-slate-400 leading-relaxed">{f.desc}</p>
             </div>
-          ))}
-        </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-16 px-6">
+            {/* Card 2 */}
+            <div className="bg-slate-900 border border-white/10 rounded-[32px] p-10 relative group">
+              <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
+                <Zap className="w-7 h-7 text-amber-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">Instant Loans</h3>
+              <p className="text-slate-400">Borrow against your savings instantly. No paperwork. Money in your MPesa in 30 seconds.</p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-slate-900 border border-white/10 rounded-[32px] p-10 relative group">
+              <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
+                <Globe className="w-7 h-7 text-blue-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">Works Offline</h3>
+              <p className="text-slate-400">No data? No problem. Our full USSD suite means you can manage money from a "Mulika Mwizi".</p>
+            </div>
+
+            {/* Card 4 */}
+            <div className="col-span-1 md:col-span-2 bg-gradient-to-br from-slate-900 to-slate-900/50 border border-white/10 rounded-[32px] p-10 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-3xl rounded-full" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center mb-6">
+                  <Shield className="w-7 h-7 text-purple-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Bank-Grade Security</h3>
+                <p className="text-slate-400 max-w-md">Multi-signature wallets require 3 admins to approve withdrawals. Fraud is mathematically impossible.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER (Working Links) --- */}
+      <footer className="border-t border-white/10 bg-[#020617] pt-20 pb-10 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-6">
               <div className="bg-emerald-500 p-1.5 rounded-lg">
-                <Wallet className="w-4 h-4 text-slate-950" />
+                <Wallet className="w-4 h-4 text-black" />
               </div>
-              <span className="font-bold text-white">SmartChama</span>
+              <span className="font-bold text-white text-lg">SmartChama</span>
             </div>
             <p className="text-slate-500 text-sm mb-6">
-              Empowering African investment groups with transparency and AI-driven insights.
+              Empowering the next generation of African investors.
             </p>
             <div className="flex gap-4">
-              {[Twitter, Facebook, Instagram, Linkedin].map((Icon, i) => (
-                <a key={i} href="#" className="text-slate-500 hover:text-emerald-400 transition-colors">
-                  <Icon className="w-5 h-5" />
-                </a>
-              ))}
+              <a href="https://twitter.com" target="_blank" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Twitter className="w-4 h-4" /></a>
+              <a href="https://instagram.com" target="_blank" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Instagram className="w-4 h-4" /></a>
+              <a href="https://linkedin.com" target="_blank" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Linkedin className="w-4 h-4" /></a>
             </div>
           </div>
           
           <div>
-            <h4 className="font-bold text-white mb-6">Platform</h4>
+            <h4 className="font-bold text-white mb-6">Product</h4>
             <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-emerald-400">Features</a></li>
-              <li><a href="#" className="hover:text-emerald-400">USSD Menu</a></li>
-              <li><a href="#" className="hover:text-emerald-400">Pricing</a></li>
+              <li><Link href="/dashboard" className="hover:text-emerald-400 transition-colors">Features</Link></li>
+              <li><Link href="/ussd-demo" className="hover:text-emerald-400 transition-colors">USSD Simulator</Link></li>
+              <li><Link href="/pricing" className="hover:text-emerald-400 transition-colors">Pricing</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-bold text-white mb-6">Company</h4>
             <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-emerald-400">About Us</a></li>
-              <li><a href="#" className="hover:text-emerald-400">Careers</a></li>
-              <li><a href="#" className="hover:text-emerald-400">Contact</a></li>
+              <li><Link href="/about" className="hover:text-emerald-400 transition-colors">About Us</Link></li>
+              <li><Link href="/careers" className="hover:text-emerald-400 transition-colors">Careers</Link></li>
+              <li><Link href="/contact" className="hover:text-emerald-400 transition-colors">Contact</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-bold text-white mb-6">Legal</h4>
             <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-emerald-400">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-emerald-400">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-emerald-400">Cookie Policy</a></li>
+              <li><Link href="/privacy" className="hover:text-emerald-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-emerald-400 transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto pt-8 border-t border-slate-900 text-center text-slate-600 text-sm">
-          &copy; 2026 SmartChama Technologies. Built for the Hackathon.
+        <div className="max-w-7xl mx-auto pt-8 border-t border-white/5 text-center text-slate-600 text-sm">
+          &copy; 2026 SmartChama Technologies.
         </div>
       </footer>
     </div>
