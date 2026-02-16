@@ -6,7 +6,8 @@ import {
   Users, 
   User,
   LogOut,
-  Menu
+  Menu,
+  UserPlus
 } from "lucide-react";
 
 export default function DashboardLayout({

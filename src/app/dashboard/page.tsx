@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { 
@@ -34,15 +34,165 @@ function NeonChart({ data }: { data: number[] }) {
 function DashboardContent() {
   const searchParams = useSearchParams();
   const userName = searchParams.get("user") || "Member";
-  const userRole = searchParams.get("role")?.toLowerCase() || "member";
-  const isAdmin = userRole === "admin";
   
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(""); // 'deposit', 'loan', 'wallet'
+  const [amount, setAmount] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const [balance, setBalance] = useState(0);
+
+  // Fetch transactions on mount
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    try {
+      console.log('Fetching transactions...');
+      
+      // Fetch all transactions for balance calculation
+      const allResponse = await fetch('/api/transactions?limit=1000');
+      const allData = await allResponse.json();
+      
+      console.log('Transactions response:', allData);
+      
+      if (allData.success) {
+        console.log(`Found ${allData.transactions.length} transactions`);
+        
+        // Calculate balance from all completed transactions
+        const totalBalance = allData.transactions.reduce((sum: number, txn: any) => {
+          if (txn.status !== 'completed') return sum;
+          
+          const amount = parseFloat(txn.amount) || 0;
+          
+          // Add deposits, dividends, and repayments
+          if (txn.transaction_type === 'deposit' || txn.transaction_type === 'dividend' || txn.transaction_type === 'repayment') {
+            return sum + amount;
+          } 
+          // Subtract withdrawals, loans, and penalties
+          else if (txn.transaction_type === 'withdrawal' || txn.transaction_type === 'loan' || txn.transaction_type === 'penalty') {
+            return sum - amount;
+          }
+          
+          return sum;
+        }, 0);
+        
+        console.log('Calculated balance:', totalBalance);
+        setBalance(totalBalance);
+        
+        // Show only recent 10 transactions in the list
+        setTransactions(allData.transactions.slice(0, 10));
+      } else {
+        console.error('Failed to fetch transactions:', allData.error);
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
 
   const openModal = (type: string) => {
     setModalType(type);
     setModalOpen(true);
+    setAmount("");
+    setPhoneNumber("");
+    setStatusMessage("");
+  };
+
+  const handleDeposit = async () => {
+    if (!amount || !phoneNumber) {
+      setStatusMessage("Please enter both amount and phone number");
+      return;
+    }
+
+    // Validate phone number format
+    const cleanPhone = phoneNumber.replace(/\s/g, '');
+    if (!/^(254|0)\d{9}$/.test(cleanPhone)) {
+      setStatusMessage("Invalid phone number. Use format: 254712345678 or 0712345678");
+      return;
+    }
+
+    // Format phone number to 254 format
+    const formattedPhone = cleanPhone.startsWith('0') 
+      ? '254' + cleanPhone.slice(1) 
+      : cleanPhone;
+
+    setIsProcessing(true);
+    setStatusMessage("Sending STK Push to your phone...");
+
+    try {
+      const response = await fetch('/api/mpesa/stk-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phoneNumber: formattedPhone,
+          amount: parseFloat(amount),
+          accountReference: 'SmartChama Deposit',
+          transactionDesc: `Deposit to ${userName}'s account`
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setStatusMessage("✅ STK Push sent! Check your phone to complete payment.");
+        setTimeout(() => {
+          setModalOpen(false);
+          // Refresh transactions after a delay to allow callback to process
+          setTimeout(() => fetchTransactions(), 5000);
+        }, 3000);
+      } else {
+        // Handle error object properly
+        const errorMsg = typeof data.error === 'object' 
+          ? JSON.stringify(data.error) 
+          : data.error || 'Failed to send STK Push';
+        console.error('STK Push Error:', data.error);
+        setStatusMessage(`❌ Error: ${errorMsg}`);
+      }
+    } catch (error) {
+      console.error('Deposit error:', error);
+      setStatusMessage("❌ Network error. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleTestTransaction = async () => {
+    setIsProcessing(true);
+    setStatusMessage("Creating test transaction...");
+
+    try {
+      const response = await fetch('/api/test-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: parseFloat(amount) || 1000,
+          phoneNumber: phoneNumber || '254712345678'
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setStatusMessage("✅ Test transaction created! Refreshing...");
+        setTimeout(() => {
+          setModalOpen(false);
+          fetchTransactions();
+        }, 2000);
+      } else {
+        setStatusMessage(`❌ Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Test transaction error:', error);
+      setStatusMessage("❌ Network error. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -91,11 +241,15 @@ function DashboardContent() {
               <div>
                 <p className="text-emerald-400/80 text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  {isAdmin ? "Total Liquidity" : "Available Balance"}
+                  My Wallet Balance
                 </p>
                 <h3 className="text-5xl lg:text-6xl font-black text-white tracking-tighter shadow-black drop-shadow-lg">
                   <span className="text-2xl align-top opacity-50 mr-1">KES</span>
-                  {isAdmin ? "1,250,000" : "45,000"}
+                  {loadingTransactions ? (
+                    <span className="text-slate-600">...</span>
+                  ) : (
+                    balance.toLocaleString()
+                  )}
                 </h3>
               </div>
               <div className="bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs text-white font-mono flex items-center gap-2">
@@ -117,21 +271,12 @@ function DashboardContent() {
             <span className="font-bold text-white mt-4">Deposit</span>
           </button>
           
-          {isAdmin ? (
-             <Link href="/dashboard/create" className="bg-slate-900 border border-slate-800 rounded-[24px] p-6 flex flex-col justify-between hover:border-blue-500/50 hover:bg-blue-950/10 transition-all group">
-               <div className="size-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                 <UserPlus className="w-5 h-5" />
-               </div>
-               <span className="font-bold text-white mt-4">Invite</span>
-             </Link>
-          ) : (
-             <button onClick={() => openModal('loan')} className="bg-slate-900 border border-slate-800 rounded-[24px] p-6 flex flex-col justify-between hover:border-amber-500/50 hover:bg-amber-950/10 transition-all group">
-               <div className="size-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                 <Coins className="w-5 h-5" />
-               </div>
-               <span className="font-bold text-white mt-4">Borrow</span>
-             </button>
-          )}
+          <button onClick={() => openModal('loan')} className="bg-slate-900 border border-slate-800 rounded-[24px] p-6 flex flex-col justify-between hover:border-amber-500/50 hover:bg-amber-950/10 transition-all group">
+            <div className="size-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Coins className="w-5 h-5" />
+            </div>
+            <span className="font-bold text-white mt-4">Borrow</span>
+          </button>
 
           <button onClick={() => openModal('wallet')} className="col-span-2 bg-slate-900 border border-slate-800 rounded-[24px] p-6 flex items-center justify-between hover:bg-slate-800 transition-all group">
             <div className="flex items-center gap-4">
@@ -164,29 +309,50 @@ function DashboardContent() {
          </div>
          
          <div className="space-y-3">
-            {[1,2,3,4].map((i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-white/5 hover:border-emerald-500/20 hover:bg-slate-900 transition-all cursor-pointer group">
-                 <div className="flex items-center gap-4">
-                    <div className="size-10 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs group-hover:bg-emerald-500 group-hover:text-black transition-colors">
-                      {["SM", "DO", "JK", "AL"][i-1]}
-                    </div>
-                    <div>
-                       <p className="font-bold text-white text-sm">
-                         {["Monthly Contribution", "Loan Repayment", "Late Penalty", "Dividend Payout"][i-1]}
-                       </p>
-                       <p className="text-[10px] text-slate-500 font-mono">TXN-{88293 + i}</p>
-                    </div>
-                 </div>
-                 <div className="text-right">
-                    <p className={`font-bold text-sm ${i === 3 ? "text-amber-500" : "text-emerald-400"}`}>
-                      {i === 3 ? "-" : "+"} KES {(Math.random() * 5000 + 1000).toFixed(0)}
-                    </p>
-                    <p className="text-[10px] text-slate-500 uppercase">
-                      {new Date().toLocaleDateString()}
-                    </p>
-                 </div>
-              </div>
-            ))}
+            {loadingTransactions ? (
+              <div className="text-center py-8 text-slate-500">Loading transactions...</div>
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">No transactions yet. Make your first deposit!</div>
+            ) : (
+              transactions.map((txn) => {
+                const isNegative = txn.transaction_type === 'penalty' || txn.transaction_type === 'withdrawal';
+                const typeLabelMap: Record<string, string> = {
+                  'deposit': 'Deposit',
+                  'withdrawal': 'Withdrawal',
+                  'loan': 'Loan Disbursed',
+                  'repayment': 'Loan Repayment',
+                  'penalty': 'Late Penalty',
+                  'dividend': 'Dividend Payout'
+                };
+                const typeLabel = typeLabelMap[txn.transaction_type] || txn.transaction_type;
+
+                const initials = txn.mpesa_receipt_number?.slice(0, 2) || 'TX';
+
+                return (
+                  <div key={txn.id} className="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-white/5 hover:border-emerald-500/20 hover:bg-slate-900 transition-all cursor-pointer group">
+                     <div className="flex items-center gap-4">
+                        <div className="size-10 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs group-hover:bg-emerald-500 group-hover:text-black transition-colors">
+                          {initials}
+                        </div>
+                        <div>
+                           <p className="font-bold text-white text-sm">{typeLabel}</p>
+                           <p className="text-[10px] text-slate-500 font-mono">
+                             {txn.mpesa_receipt_number || `TXN-${txn.id.slice(0, 8)}`}
+                           </p>
+                        </div>
+                     </div>
+                     <div className="text-right">
+                        <p className={`font-bold text-sm ${isNegative ? "text-amber-500" : "text-emerald-400"}`}>
+                          {isNegative ? "-" : "+"} KES {parseFloat(txn.amount).toLocaleString()}
+                        </p>
+                        <p className="text-[10px] text-slate-500 uppercase">
+                          {new Date(txn.created_at).toLocaleDateString()}
+                        </p>
+                     </div>
+                  </div>
+                );
+              })
+            )}
          </div>
        </div>
 
@@ -212,15 +378,72 @@ function DashboardContent() {
               </p>
             </div>
 
-            <form className="space-y-4">
-               <div>
-                 <label className="text-xs text-slate-400 font-bold uppercase ml-1">Amount (KES)</label>
-                 <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white text-lg font-bold outline-none focus:border-emerald-500 transition-colors" placeholder="0.00" />
-               </div>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (modalType === 'deposit') handleDeposit(); }}>
+               {modalType === 'deposit' && (
+                 <>
+                   <div>
+                     <label className="text-xs text-slate-400 font-bold uppercase ml-1">Phone Number</label>
+                     <input 
+                       type="tel" 
+                       value={phoneNumber}
+                       onChange={(e) => setPhoneNumber(e.target.value)}
+                       className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white text-lg font-bold outline-none focus:border-emerald-500 transition-colors" 
+                       placeholder="254712345678" 
+                       disabled={isProcessing}
+                     />
+                     <p className="text-[10px] text-slate-500 mt-1 ml-1">Format: 254712345678 or 0712345678</p>
+                   </div>
+                   <div>
+                     <label className="text-xs text-slate-400 font-bold uppercase ml-1">Amount (KES)</label>
+                     <input 
+                       type="number" 
+                       value={amount}
+                       onChange={(e) => setAmount(e.target.value)}
+                       className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white text-lg font-bold outline-none focus:border-emerald-500 transition-colors" 
+                       placeholder="0.00" 
+                       min="1"
+                       disabled={isProcessing}
+                     />
+                   </div>
+                 </>
+               )}
                
-               <button type="button" onClick={() => setModalOpen(false)} className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                 Confirm {modalType}
+               {modalType !== 'deposit' && (
+                 <div>
+                   <label className="text-xs text-slate-400 font-bold uppercase ml-1">Amount (KES)</label>
+                   <input type="number" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white text-lg font-bold outline-none focus:border-emerald-500 transition-colors" placeholder="0.00" />
+                 </div>
+               )}
+
+               {statusMessage && (
+                 <div className={`p-3 rounded-lg text-sm text-center ${
+                   statusMessage.includes('✅') 
+                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' 
+                     : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                 }`}>
+                   {statusMessage}
+                 </div>
+               )}
+               
+               <button 
+                 type={modalType === 'deposit' ? 'submit' : 'button'}
+                 onClick={modalType !== 'deposit' ? () => setModalOpen(false) : undefined}
+                 disabled={isProcessing}
+                 className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                 {isProcessing ? 'Processing...' : `Confirm ${modalType}`}
                </button>
+
+               {modalType === 'deposit' && (
+                 <button 
+                   type="button"
+                   onClick={handleTestTransaction}
+                   disabled={isProcessing}
+                   className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                 >
+                   🧪 Create Test Transaction (Skip M-Pesa)
+                 </button>
+               )}
             </form>
           </div>
         </div>

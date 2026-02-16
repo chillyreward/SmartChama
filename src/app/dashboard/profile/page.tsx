@@ -1,4 +1,7 @@
-// app/dashboard/profile/page.tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { 
     User, 
     Shield, 
@@ -9,7 +12,8 @@ import {
     Moon,
     Bell,
     Eye,
-    Camera
+    Camera,
+    Loader2
   } from "lucide-react";
   
   const sidebarItems = [
@@ -27,20 +31,73 @@ import {
   ];
   
   export default function ProfilePage() {
+    const [loading, setLoading] = useState(true);
+    const [profile, setProfile] = useState<any>(null);
+
+    useEffect(() => {
+      fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          console.error('No user logged in');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch member profile from database
+        const { data: memberData, error: memberError } = await supabase
+          .from('members')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (memberError) {
+          console.error('Error fetching profile:', memberError);
+        } else {
+          setProfile(memberData);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+        </div>
+      );
+    }
+
+    const displayName = profile?.full_name || "Member";
+    const displayEmail = profile?.email || "member@smartchama.com";
+    const displayPhone = profile?.phone_number || "+254...";
+    const joinedDate = profile?.created_at 
+      ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      : "Recently";
+
     return (
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
         {/* Sidebar */}
         <aside className="w-full lg:w-80 flex-shrink-0">
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
             <div className="flex items-center gap-4 mb-8">
-              <div className="size-14 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 border-2 border-emerald-500 relative">
+              <div className="size-14 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 border-2 border-emerald-500 relative flex items-center justify-center text-white font-bold text-xl">
+                {displayName.charAt(0).toUpperCase()}
                 <div className="absolute bottom-0 right-0 bg-emerald-500 p-1.5 rounded-full border-2 border-slate-900">
                   <Camera className="w-3 h-3 text-slate-950" />
                 </div>
               </div>
               <div>
-                <h2 className="text-white font-bold">Kwame Mensah</h2>
-                <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider">Gold Member</p>
+                <h2 className="text-white font-bold">{displayName}</h2>
+                <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider">Member</p>
               </div>
             </div>
   
@@ -90,15 +147,16 @@ import {
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="size-20 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 border-4 border-slate-800 relative">
+                <div className="size-20 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 border-4 border-slate-800 relative flex items-center justify-center text-white font-bold text-2xl">
+                  {displayName.charAt(0).toUpperCase()}
                   <div className="absolute bottom-0 right-0 bg-emerald-500 p-2 rounded-full border-2 border-slate-900">
                     <Camera className="w-4 h-4 text-slate-950" />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-white text-xl font-bold">Kwame Mensah</h3>
-                  <p className="text-slate-400 text-sm">kwame.m@fintech.africa</p>
-                  <p className="text-emerald-400/70 text-xs mt-1">Joined January 2024</p>
+                  <h3 className="text-white text-xl font-bold">{displayName}</h3>
+                  <p className="text-slate-400 text-sm">{displayEmail}</p>
+                  <p className="text-emerald-400/70 text-xs mt-1">Joined {joinedDate}</p>
                 </div>
               </div>
               <button className="px-6 py-2.5 bg-slate-800 text-white rounded-full font-bold text-sm hover:bg-slate-700 transition-colors">

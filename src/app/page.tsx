@@ -17,17 +17,9 @@ export default function LandingPage() {
             </div>
             <span className="text-xl font-bold text-white tracking-tight">SmartChama</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="#features" className="hover:text-emerald-400 transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-emerald-400 transition-colors">How it Works</a>
-            <a href="#ussd" className="hover:text-emerald-400 transition-colors">USSD</a>
-          </div>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-white hover:text-emerald-400 font-medium text-sm transition-colors">
               Log In
-            </Link>
-            <Link href="/login" className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)]">
-              Get Started
             </Link>
           </div>
         </div>
@@ -44,21 +36,20 @@ export default function LandingPage() {
             V 2.0 Now Live
           </div>
           <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] mb-8">
-            Wealth is <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-400">Better Together.</span>
+            The Future of <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-400">Group Savings.</span>
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-            The operating system for modern African investment groups. 
-            Automate contributions, instant loans, and blockchain transparency.
+            Manage your chama with AI. Automate contributions, instant loans, and blockchain transparency.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/login" className="w-full sm:w-auto px-10 py-5 bg-white text-black font-bold text-lg rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-2">
+            <Link href="/signup" className="w-full sm:w-auto px-10 py-5 bg-white text-black font-bold text-lg rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-2">
               Start a Chama
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="/ussd-demo" className="w-full sm:w-auto px-10 py-5 bg-slate-900 border border-slate-700 text-white font-bold text-lg rounded-full hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
               <Phone className="w-5 h-5 text-emerald-400" />
-              *544# Demo
+              *384*23713# Demo
             </Link>
           </div>
         </div>

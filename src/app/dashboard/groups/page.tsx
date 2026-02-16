@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   Users, Lock, ArrowRight, ShieldCheck, Keypad, 
-  Loader2, CheckCircle, Wallet 
+  Loader2, CheckCircle, Wallet, Plus, X, Building2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 // --- MOCK GROUPS DATA ---
 const myGroups = [
@@ -38,11 +40,72 @@ const myGroups = [
   }
 ];
 
-export default function MyGroupsPage() {
+function MyGroupsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const userRole = searchParams.get("role")?.toLowerCase() || "member";
+  const isAdmin = userRole === "admin";
+
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
-  const [step, setStep] = useState(1); // 1=Prompt, 2=Verifying, 3=Success
+  const [step, setStep] = useState(1);
   const [pin, setPin] = useState(["", "", "", ""]);
+  
+  // Chamas state
+  const [myGroups, setMyGroups] = useState<any[]>([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+  
+  // Create Chama Modal States
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [chamaName, setChamaName] = useState("");
+  const [investmentGoal, setInvestmentGoal] = useState("");
+  const [monthlyGrowth, setMonthlyGrowth] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+
+  // Fetch member's chamas on mount
+  useEffect(() => {
+    fetchMyChamas();
+  }, []);
+
+  const fetchMyChamas = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setLoadingGroups(false);
+        return;
+      }
+
+      // Fetch chamas where user is a member
+      const { data: memberData, error: memberError } = await supabase
+        .from('members')
+        .select('chama_id, chamas(id, name, total_balance, investment_goal, monthly_growth_pct)')
+        .eq('user_id', user.id);
+
+      if (memberError) {
+        console.error('Error fetching chamas:', memberError);
+      } else if (memberData) {
+        // Transform data to match component structure
+        const chamas = memberData
+          .filter((item: any) => item.chamas) // Filter out null chamas
+          .map((item: any) => ({
+            id: item.chamas.id,
+            name: item.chamas.name,
+            role: "Member",
+            balance: `KES ${parseFloat(item.chamas.total_balance || 0).toLocaleString()}`,
+            members: 0, // Will be fetched separately if needed
+            color: "emerald",
+            investmentGoal: item.chamas.investment_goal,
+            monthlyGrowth: item.chamas.monthly_growth_pct
+          }));
+        setMyGroups(chamas);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
 
   const handleGroupClick = (group: any) => {
     setSelectedGroup(group);
@@ -78,6 +141,60 @@ export default function MyGroupsPage() {
     }, 1500);
   };
 
+  const handleCreateChama = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    setCreateError("");
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setCreateError("You must be logged in to create a chama");
+        setCreating(false);
+        return;
+      }
+
+      // Create chama in database
+      const { data: chama, error: chamaError } = await supabase
+        .from('chamas')
+        .insert({
+          name: chamaName,
+          investment_goal: parseFloat(investmentGoal) || 0,
+          monthly_growth_pct: parseFloat(monthlyGrowth) || 0,
+          created_by: user.id,
+          total_balance: 0
+        })
+        .select()
+        .single();
+
+      if (chamaError) {
+        console.error("Error creating chama:", chamaError);
+        setCreateError("Failed to create chama. Please try again.");
+        setCreating(false);
+        return;
+      }
+
+      console.log("Chama created successfully:", chama);
+
+      // Success - close modal and refresh
+      setShowCreateModal(false);
+      setChamaName("");
+      setInvestmentGoal("");
+      setMonthlyGrowth("");
+      
+      // Show success message or redirect
+      alert("Chama created successfully!");
+      
+    } catch (error) {
+      console.error("Create chama error:", error);
+      setCreateError("An error occurred. Please try again.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-20">
       
@@ -89,15 +206,25 @@ export default function MyGroupsPage() {
         <p className="text-slate-400 mt-1">Select a group to access its dashboard. Security verification required.</p>
       </div>
 
-      {/* --- GROUPS GRID --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loadingGroups ? (
+        <div className="text-center py-12">
+          <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mx-auto mb-4" />
+          <p className="text-slate-400">Loading your chamas...</p>
+        </div>
+      ) : (
+        <>
+          {/* --- GROUPS GRID --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* ADD NEW GROUP CARD */}
-        <div className="border-2 border-dashed border-slate-800 rounded-[32px] p-6 flex flex-col items-center justify-center text-slate-500 hover:border-emerald-500/50 hover:text-emerald-500 hover:bg-emerald-500/5 transition-all cursor-pointer min-h-[250px] group">
+        <div 
+          onClick={() => isAdmin ? setShowCreateModal(true) : null}
+          className="border-2 border-dashed border-slate-800 rounded-[32px] p-6 flex flex-col items-center justify-center text-slate-500 hover:border-emerald-500/50 hover:text-emerald-500 hover:bg-emerald-500/5 transition-all cursor-pointer min-h-[250px] group"
+        >
           <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <Users className="w-6 h-6" />
+            {isAdmin ? <Plus className="w-6 h-6" /> : <Users className="w-6 h-6" />}
           </div>
-          <p className="font-bold">Create / Join Chama</p>
+          <p className="font-bold">{isAdmin ? "Create Chama" : "Join Chama"}</p>
         </div>
 
         {/* ACTIVE GROUPS */}
@@ -139,6 +266,106 @@ export default function MyGroupsPage() {
           </div>
         ))}
       </div>
+
+      {!loadingGroups && myGroups.length === 0 && (
+        <div className="text-center py-12 text-slate-500">
+          <Users className="w-16 h-16 mx-auto mb-4 text-slate-700" />
+          <p className="text-lg font-bold text-slate-400 mb-2">No chamas yet</p>
+          <p className="text-sm">You haven't joined any chamas. Ask an admin for an invite link!</p>
+        </div>
+      )}
+    </>
+  )}
+
+      {/* --- CREATE CHAMA MODAL --- */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-[32px] p-8 relative shadow-2xl">
+            
+            <button 
+              onClick={() => setShowCreateModal(false)}
+              className="absolute top-4 right-4 text-slate-500 hover:text-white bg-slate-800 rounded-full p-2 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+                <Building2 className="w-8 h-8 text-emerald-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Create New Chama</h2>
+              <p className="text-slate-400 text-sm">Set up your investment group</p>
+            </div>
+
+            {createError && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+                {createError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateChama} className="space-y-6">
+              <div>
+                <label className="block text-xs font-bold text-emerald-500 uppercase tracking-widest mb-2 ml-1">
+                  Chama Name
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  value={chamaName}
+                  onChange={(e) => setChamaName(e.target.value)}
+                  placeholder="e.g., Family Savings"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white outline-none focus:border-emerald-500 transition-all placeholder:text-slate-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-emerald-500 uppercase tracking-widest mb-2 ml-1">
+                  Investment Goal (KES)
+                </label>
+                <input 
+                  type="number" 
+                  value={investmentGoal}
+                  onChange={(e) => setInvestmentGoal(e.target.value)}
+                  placeholder="e.g., 1000000"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white outline-none focus:border-emerald-500 transition-all placeholder:text-slate-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-emerald-500 uppercase tracking-widest mb-2 ml-1">
+                  Monthly Growth Target (%)
+                </label>
+                <input 
+                  type="number" 
+                  step="0.1"
+                  value={monthlyGrowth}
+                  onChange={(e) => setMonthlyGrowth(e.target.value)}
+                  placeholder="e.g., 5.5"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white outline-none focus:border-emerald-500 transition-all placeholder:text-slate-600"
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={creating}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Building2 className="w-5 h-5" />
+                    Create Chama
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* --- SECURITY CHALLENGE MODAL --- */}
       {selectedGroup && (
@@ -200,5 +427,13 @@ export default function MyGroupsPage() {
       )}
 
     </div>
+  );
+}
+
+export default function MyGroupsPage() {
+  return (
+    <Suspense fallback={<div className="text-emerald-500 p-10">Loading Groups...</div>}>
+      <MyGroupsContent />
+    </Suspense>
   );
 }

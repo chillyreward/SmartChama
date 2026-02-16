@@ -6,37 +6,73 @@ import {
   Landmark, Briefcase, ChevronRight, CheckCircle, X, ExternalLink 
 } from "lucide-react";
 
-// --- MOCK INVESTMENT DATA ---
+// --- REAL INVESTMENT OPPORTUNITIES ---
 const opportunities = [
   {
     id: 1,
-    title: "NCBA Money Market Fund",
+    title: "CIC Money Market Fund",
     type: "Low Risk",
-    returnRate: "14.5%",
+    returnRate: "12.5%",
     minDeposit: 5000,
-    partner: "NCBA Bank",
+    partner: "CIC Asset Management",
     description: "A low-risk fund that invests in short-term interest bearing assets. Your capital is safe and earns daily compounded interest.",
-    color: "emerald"
+    color: "emerald",
+    url: "https://cicassetmanagement.co.ke/money-market-fund/"
   },
   {
     id: 2,
-    title: "Government Infrastructure Bond",
+    title: "Kenya Government Treasury Bonds",
     type: "Medium Risk",
-    returnRate: "16.8%",
+    returnRate: "15.8%",
     minDeposit: 50000,
     partner: "Central Bank of Kenya",
-    description: "Tax-free infrastructure bond. Lock in your savings for 5 years with guaranteed semi-annual coupon payments.",
-    color: "blue"
+    description: "Tax-free government bonds. Lock in your savings with guaranteed semi-annual coupon payments backed by the government.",
+    color: "blue",
+    url: "https://www.centralbank.go.ke/securities/government-securities/"
   },
   {
     id: 3,
-    title: "Nairobi Tech Hub Real Estate",
+    title: "Sanlam Money Market Fund",
+    type: "Low Risk",
+    returnRate: "13.2%",
+    minDeposit: 10000,
+    partner: "Sanlam Investments",
+    description: "Invest in high-quality short-term securities. Offers liquidity and competitive returns with minimal risk.",
+    color: "emerald",
+    url: "https://www.sanlaminvestments.com/money-market-fund"
+  },
+  {
+    id: 4,
+    title: "NCBA Unit Trust Fund",
+    type: "Medium Risk",
+    returnRate: "16.5%",
+    minDeposit: 25000,
+    partner: "NCBA Investment Bank",
+    description: "Diversified portfolio of equities and fixed income securities. Professional fund management with quarterly dividends.",
+    color: "blue",
+    url: "https://ncbabankgroup.com/investment-banking/unit-trusts"
+  },
+  {
+    id: 5,
+    title: "Old Mutual Balanced Fund",
+    type: "Medium Risk",
+    returnRate: "17.3%",
+    minDeposit: 20000,
+    partner: "Old Mutual Kenya",
+    description: "Balanced mix of equities, bonds, and money market instruments. Ideal for medium-term growth with managed risk.",
+    color: "blue",
+    url: "https://www.oldmutual.co.ke/personal/investments/unit-trusts/balanced-fund/"
+  },
+  {
+    id: 6,
+    title: "Fahari I-REIT",
     type: "High Risk",
-    returnRate: "22.4%",
-    minDeposit: 100000,
-    partner: "Mi Vida Homes",
-    description: "Equity stake in the upcoming tech city housing project. High growth potential driven by rental yield and appreciation.",
-    color: "purple"
+    returnRate: "8.5%",
+    minDeposit: 20,
+    partner: "Nairobi Securities Exchange",
+    description: "Kenya's first Real Estate Investment Trust. Invest in commercial real estate with rental income and capital appreciation potential.",
+    color: "purple",
+    url: "https://www.nse.co.ke/listed-companies/fahari-i-reit/"
   }
 ];
 
@@ -63,18 +99,23 @@ export default function SmartGrowPage() {
       {/* --- PORTFOLIO SUMMARY --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-gradient-to-br from-emerald-900/40 to-slate-900 border border-emerald-500/20 rounded-3xl p-6">
-          <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">Total Invested</p>
-          <h3 className="text-4xl font-black text-white">KES 850,000</h3>
+          <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-2">My Investment Portfolio</p>
+          <h3 className="text-4xl font-black text-white">KES 0</h3>
           <p className="text-slate-400 text-sm mt-2 flex items-center gap-1">
-            <TrendingUp className="w-4 h-4 text-emerald-500" /> +12.4% All Time
+            <TrendingUp className="w-4 h-4 text-emerald-500" /> Start investing today
           </p>
         </div>
         <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-center">
-           <h4 className="font-bold text-white mb-4">Trusted Partners</h4>
+           <h4 className="font-bold text-white mb-4">Investment Categories</h4>
            <div className="flex flex-wrap gap-4">
-             {["NCBA Loop", "KCB Capital", "Old Mutual", "Sanlam"].map((bank, i) => (
+             {[
+               { name: "Money Market", icon: "💰" },
+               { name: "Government Bonds", icon: "🏛️" },
+               { name: "Unit Trusts", icon: "📊" },
+               { name: "Real Estate", icon: "🏢" }
+             ].map((category, i) => (
                <div key={i} className="px-6 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-400 font-bold hover:border-emerald-500/50 hover:text-white transition-all cursor-pointer flex items-center gap-2">
-                 <Landmark className="w-4 h-4" /> {bank}
+                 <span>{category.icon}</span> {category.name}
                </div>
              ))}
            </div>
@@ -192,9 +233,14 @@ export default function SmartGrowPage() {
                 <button onClick={() => setSelectedInvest(null)} className="flex-1 py-4 rounded-xl font-bold text-slate-400 hover:bg-slate-900 transition-colors">
                   Cancel
                 </button>
-                <button onClick={() => alert("Redirecting to Bank API...")} className="flex-[2] bg-emerald-500 hover:bg-emerald-400 text-black py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                  Start Investment <ExternalLink className="w-4 h-4" />
-                </button>
+                <a 
+                  href={selectedInvest.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-[2] bg-emerald-500 hover:bg-emerald-400 text-black py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                >
+                  View Opportunity <ExternalLink className="w-4 h-4" />
+                </a>
               </div>
             </div>
 
