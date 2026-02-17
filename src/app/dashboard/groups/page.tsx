@@ -72,9 +72,12 @@ function MyGroupsContent() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        console.log("No user found");
         setLoadingGroups(false);
         return;
       }
+
+      console.log("Fetching chamas for user:", user.id);
 
       // Fetch chamas where user is a member
       const { data: memberData, error: memberError } = await supabase
@@ -84,7 +87,13 @@ function MyGroupsContent() {
 
       if (memberError) {
         console.error('Error fetching chamas:', memberError);
-      } else if (memberData) {
+        setLoadingGroups(false);
+        return;
+      }
+
+      console.log("Member data fetched:", memberData);
+
+      if (memberData && memberData.length > 0) {
         // Transform data to match component structure
         const chamas = memberData
           .filter((item: any) => item.chamas) // Filter out null chamas
@@ -98,7 +107,12 @@ function MyGroupsContent() {
             investmentGoal: item.chamas.investment_goal,
             monthlyGrowth: item.chamas.monthly_growth_pct
           }));
+        
+        console.log("Transformed chamas:", chamas);
         setMyGroups(chamas);
+      } else {
+        console.log("No chamas found for this user");
+        setMyGroups([]);
       }
     } catch (error) {
       console.error('Error:', error);

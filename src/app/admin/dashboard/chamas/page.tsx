@@ -4,10 +4,12 @@ import { Suspense, useState, useEffect } from "react";
 import { 
   Users, Lock, ArrowRight, ShieldCheck, 
   Loader2, CheckCircle, Plus, X, Building2,
-  CreditCard, Settings
+  CreditCard, Settings, Receipt, TrendingUp, Crown
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import BlockchainBadge from "@/components/BlockchainBadge";
+import PredictiveInsights from "@/components/PredictiveInsights";
 
 function MyChamasContent() {
   const router = useRouter();
@@ -35,6 +37,10 @@ function MyChamasContent() {
   const [inviteChama, setInviteChama] = useState<any>(null);
   const [generatingInvite, setGeneratingInvite] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
+
+  // Ledger/Transactions state
+  const [chamaTransactions, setChamaTransactions] = useState<any[]>([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
 
   // Fetch chamas on mount
   useEffect(() => {
@@ -97,9 +103,32 @@ function MyChamasContent() {
     }
   };
 
-  const handleGroupClick = (group: any) => {
-    // Navigate to chama detail page with PIN verification
-    router.push(`/admin/dashboard/chamas/${group.id}`);
+  const handleGroupClick = async (group: any) => {
+    setSelectedGroup(group);
+    // Fetch transactions for this chama
+    await fetchChamaTransactions(group.id);
+  };
+
+  const fetchChamaTransactions = async (chamaId: string) => {
+    setLoadingTransactions(true);
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('chama_id', chamaId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching transactions:', error);
+      } else {
+        setChamaTransactions(data || []);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoadingTransactions(false);
+    }
   };
 
   const handlePinChange = (index: number, value: string) => {
@@ -782,6 +811,146 @@ function MyChamasContent() {
                     </div>
                   </li>
                 </ul>
+              </div>
+
+              {/* Transaction Ledger */}
+              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6">
+                <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                  <Receipt className="w-5 h-5 text-blue-400" />
+                  Transaction Ledger
+                </h3>
+                {loadingTransactions ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto mb-2" />
+                    <p className="text-slate-500 text-sm">Loading transactions...</p>
+                  </div>
+                ) : chamaTransactions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Receipt className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+                    <p className="text-slate-500 text-sm">No transactions yet</p>
+                    <p className="text-slate-600 text-xs mt-1">Transactions will appear here once members start contributing</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {chamaTransactions.map((txn) => {
+                      const isCredit = txn.transaction_type === 'deposit' || txn.transaction_type === 'repayment';
+                      return (
+                        <div key={txn.id} className="p-4 bg-slate-900 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isCredit ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                                {isCredit ? '+' : '-'}
+                              </div>
+                              <div>
+                                <p className="text-white font-semibold text-sm capitalize">{txn.transaction_type}</p>
+                                <p className="text-slate-500 text-xs">{new Date(txn.created_at).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className={`font-bold ${isCredit ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                {isCredit ? '+' : '-'} KES {parseFloat(txn.amount).toLocaleString()}
+                              </p>
+                              <p className="text-slate-500 text-xs capitalize">{txn.status}</p>
+                            </div>
+                          </div>
+                          {/* Blockchain Badge */}
+                          {txn.blockchain_hash && (
+                            <div className="pt-3 border-t border-slate-800">
+                              <BlockchainBadge
+                                transactionHash={txn.blockchain_hash}
+                                qrCode={txn.blockchain_qr_code}
+                                explorerUrl={txn.blockchain_explorer_url}
+                                size="sm"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    <button className="w-full py-3 text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
+                      View All Transactions →
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Pricing & Upgrade Section */}
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-2xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Crown className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-white font-bold mb-2 flex items-center gap-2">
+                      Current Plan: Pay-as-you-go
+                    </h3>
+                    <p className="text-slate-300 text-sm mb-4">
+                      You're on our flexible pay-as-you-go plan. Only pay for what you use with no monthly commitments.
+                    </p>
+                    
+                    <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 mb-4">
+                      <h4 className="text-white font-semibold text-sm mb-3">Pay-as-you-go Pricing:</h4>
+                      <ul className="space-y-2 text-sm text-slate-300">
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+                          <span>1.5% on deposits</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+                          <span>2% on loan disbursements</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+                          <span>0.5% on withdrawals</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+                          <span>No monthly fees</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/40 rounded-xl p-4 mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Crown className="w-5 h-5 text-purple-400" />
+                        <h4 className="text-white font-bold">Upgrade to Pro - $5/month</h4>
+                      </div>
+                      <ul className="space-y-2 text-sm text-slate-300 mb-3">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <span>Unlimited members (vs 20 on free)</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <span>Advanced analytics & reports</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <span>Priority support</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <span>Custom branding</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <span>Reduced transaction fees (1% deposits, 1.5% loans)</span>
+                        </li>
+                      </ul>
+                      <button 
+                        onClick={() => alert('🚀 Upgrade to Pro\n\nContact us to upgrade your chama to Pro:\n\n📧 Email: pro@smartchama.com\n📱 WhatsApp: +254 XXX XXX XXX\n\nOr visit our pricing page for more details.')}
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                      >
+                        <Crown className="w-5 h-5" />
+                        Upgrade to Pro
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-slate-500 text-center">
+                      💡 Pro plan saves you money if you process over KES 100,000/month
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

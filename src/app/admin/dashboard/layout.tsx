@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Users, Building2, TrendingUp, 
   MessageSquare, Settings, LogOut, UserPlus, Crown
 } from "lucide-react";
+import VoiceAssistant from "@/components/VoiceAssistant";
 
 // Create context for invite modal
 const InviteModalContext = createContext<{
@@ -102,6 +103,9 @@ export default function AdminDashboardLayout({
       <main className="flex-1 p-8 overflow-y-auto">
         {children}
       </main>
+
+      {/* Voice Assistant - Available on all admin pages */}
+      <VoiceAssistant />
     </div>
   );
 }

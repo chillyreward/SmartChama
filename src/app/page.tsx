@@ -17,11 +17,7 @@ export default function LandingPage() {
             </div>
             <span className="text-xl font-bold text-white tracking-tight">SmartChama</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="#how-it-works" className="hover:text-emerald-400 transition-colors">How it Works</a>
-            <a href="#features" className="hover:text-emerald-400 transition-colors">Features</a>
-            <a href="#ussd" className="hover:text-emerald-400 transition-colors">USSD</a>
-          </div>
+
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-white hover:text-emerald-400 font-medium text-sm transition-colors">
               Log In
@@ -44,12 +40,11 @@ export default function LandingPage() {
               V 2.0 Now Live
             </div>
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[1.1] mb-8">
-              Wealth is <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-400">Better Together.</span>
+              Turning Informal <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-400">Savings into Bankable Credit.</span>
             </h1>
             <p className="text-lg text-slate-400 max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
-              The operating system for modern African investment groups. 
-              Automate contributions, instant loans, and blockchain transparency.
+              Africa's first treasurer-less, AI-powered group savings infrastructure.
             </p>
             <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-4">
               <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-2">

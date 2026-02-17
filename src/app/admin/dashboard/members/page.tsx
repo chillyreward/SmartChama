@@ -6,6 +6,7 @@ import {
   MoreVertical, CheckCircle, XCircle, Crown, Plus, X
 } from "lucide-react";
 import { createClient } from '@supabase/supabase-js';
+import PredictiveInsights from "@/components/PredictiveInsights";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,6 +33,8 @@ export default function MembersPage() {
   const [selectedChama, setSelectedChama] = useState("");
   const [adding, setAdding] = useState(false);
   const [viewMode, setViewMode] = useState<"unassigned" | "chama">("chama"); // Default to chama members
+  const [showMemberDetails, setShowMemberDetails] = useState(false);
+  const [selectedMemberForInsights, setSelectedMemberForInsights] = useState<any>(null);
 
   // Fetch unassigned members and chama members on mount
   useEffect(() => {
