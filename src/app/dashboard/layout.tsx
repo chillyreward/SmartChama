@@ -16,10 +16,11 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30 overflow-hidden">
+    // FIXED: Changed h-screen to h-[100dvh] which prevents mobile browser bar issues
+    <div className="flex h-[100dvh] bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30 overflow-hidden">
       
       {/* --- DESKTOP SIDEBAR --- */}
-      <aside className="w-64 border-r border-slate-800 bg-slate-950 hidden lg:flex flex-col">
+      <aside className="w-64 border-r border-slate-800 bg-slate-950 hidden lg:flex flex-col shrink-0">
         <div className="p-6 flex items-center gap-3">
           <div className="h-10 w-10 bg-emerald-500 rounded-xl flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20">
             <Wallet className="w-6 h-6" />
@@ -47,29 +48,32 @@ export default function DashboardLayout({
       </aside>
 
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 flex flex-col h-full relative">
-        {/* Mobile Header (Only shows on small screens) */}
-        <header className="lg:hidden h-16 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-950/50 backdrop-blur-md z-20">
+      {/* FIXED: min-w-0 ensures content doesn't break out of the flex container */}
+      <main className="flex-1 flex flex-col h-full relative min-w-0">
+        
+        {/* Mobile Header (Added shrink-0 so it never squishes) */}
+        <header className="lg:hidden shrink-0 h-16 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-950/50 backdrop-blur-md z-20">
            <div className="flex items-center gap-2">
              <div className="h-8 w-8 bg-emerald-500 rounded-lg flex items-center justify-center text-slate-950">
                 <Wallet className="w-4 h-4" />
              </div>
              <span className="font-bold">SmartChama</span>
            </div>
-           {/* Mobile Menu Toggle */}
            <button className="p-2 text-slate-400"><Menu className="w-6 h-6" /></button>
         </header>
 
-        {/* The Page Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8">
+        {/* The Page Content - This is the ONLY part that will scroll now */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {children}
         </div>
 
-        {/* --- MOBILE BOTTOM NAV (Sticky Bottom) --- */}
-        <div className="lg:hidden fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 pb-safe z-30">
-          <div className="flex justify-around items-center p-2">
+        {/* --- MOBILE BOTTOM NAV --- */}
+        {/* FIXED: Removed 'fixed bottom-0'. Now it sits naturally at the bottom of the flex column */}
+        <div className="lg:hidden shrink-0 bg-slate-950 border-t border-slate-800 z-30 relative">
+          <div className="flex justify-around items-center p-2 pb-safe">
             <MobileNavItem href="/dashboard" icon={<LayoutDashboard />} label="Home" />
             <MobileNavItem href="/dashboard/savings" icon={<Wallet />} label="Save" />
+            
             <div className="relative -top-6">
               <Link href="/dashboard/smartgrow">
                 <div className="h-14 w-14 bg-emerald-500 rounded-full flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/30 border-4 border-slate-950">
@@ -77,6 +81,7 @@ export default function DashboardLayout({
                 </div>
               </Link>
             </div>
+            
             <MobileNavItem href="/dashboard/groups" icon={<Users />} label="Groups" />
             <MobileNavItem href="/dashboard/profile" icon={<User />} label="Profile" />
           </div>
@@ -86,7 +91,7 @@ export default function DashboardLayout({
   );
 }
 
-// Helper Components (FIXED TYPES HERE)
+// Helper Components
 function NavItem({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
   return (
     <Link href={href} className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-emerald-400 font-medium transition-all hover:pl-5">
