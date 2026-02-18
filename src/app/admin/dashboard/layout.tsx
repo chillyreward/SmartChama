@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, Building2, TrendingUp, 
-  MessageSquare, Settings, LogOut, UserPlus, Crown
+  MessageSquare, Settings, LogOut, UserPlus, Crown, User
 } from "lucide-react";
 import VoiceAssistant from "@/components/VoiceAssistant";
 
@@ -40,8 +40,10 @@ export default function AdminDashboardLayout({
     { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "My Chamas", href: "/admin/dashboard/chamas", icon: Building2 },
     { name: "Members", href: "/admin/dashboard/members", icon: Users },
+    { name: "SmartGrow", href: "/admin/dashboard/smartgrow", icon: TrendingUp },
     { name: "Analytics", href: "/admin/dashboard/analytics", icon: TrendingUp },
     { name: "AI Advisor", href: "/admin/dashboard/ai-advisor", icon: MessageSquare },
+    { name: "Profile", href: "/admin/dashboard/profile", icon: User },
     { name: "Settings", href: "/admin/dashboard/settings", icon: Settings },
   ];
 

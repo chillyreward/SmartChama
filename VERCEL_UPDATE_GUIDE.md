@@ -43,7 +43,7 @@ Go to your Vercel project: https://vercel.com/chillyrewards-projects/smart-chama
 
 ---
 
-**Variable Name:** `BLOCKCHAIN_PRIVATE_KEY`  
+**Variable Name:** ` `  
 **Value:** Your MetaMask wallet private key (optional)
 
 **How to get:**

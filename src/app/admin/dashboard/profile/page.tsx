@@ -34,40 +34,59 @@ export default function ProfilePage() {
         return;
       }
 
-      // Fetch admin profile
+      // Fetch admin profile using email
       const { data: adminData, error: adminError } = await supabase
         .from('chama_admins')
         .select('*')
-        .eq('admin_user_id', user.id)
+        .eq('email', user.email)
         .single();
 
       if (adminError) {
         console.error('Error fetching admin profile:', adminError);
+        // Set default values if admin not found
+        setProfile({
+          name: user.user_metadata?.full_name || "Admin User",
+          email: user.email || "admin@smartchama.com",
+          phone: user.user_metadata?.phone_number || "+254712345678",
+          location: "Nairobi, Kenya",
+          joined: new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        });
       } else if (adminData) {
         setProfile({
-          name: adminData.full_name || "Admin User",
+          name: adminData.full_name || user.user_metadata?.full_name || "Admin User",
           email: adminData.email || user.email || "admin@smartchama.com",
-          phone: adminData.phone_number || "254712345678",
+          phone: adminData.phone_number || "+254712345678",
           location: "Nairobi, Kenya",
           joined: adminData.created_at 
             ? new Date(adminData.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
             : "January 2026"
         });
-      }
 
-      // Fetch stats
-      const { data: chamasData, error: chamasError } = await supabase
-        .from('chamas')
-        .select('id, total_balance', { count: 'exact' })
-        .eq('created_by', user.id);
+        // Fetch stats using admin_id
+        const { data: chamasData, error: chamasError } = await supabase
+          .from('chamas')
+          .select('id, total_balance')
+          .eq('admin_id', adminData.id);
 
-      if (!chamasError && chamasData) {
-        const totalBalance = chamasData.reduce((sum, chama) => sum + (parseFloat(chama.total_balance) || 0), 0);
-        setStats({
-          chamasCreated: chamasData.length,
-          totalMembers: 0, // Will need to count members across all chamas
-          totalManaged: totalBalance
-        });
+        if (!chamasError && chamasData) {
+          const totalBalance = chamasData.reduce((sum, chama) => sum + (parseFloat(chama.total_balance) || 0), 0);
+          
+          // Count total members across all chamas
+          let totalMembers = 0;
+          for (const chama of chamasData) {
+            const { count } = await supabase
+              .from('members')
+              .select('*', { count: 'exact', head: true })
+              .eq('chama_id', chama.id);
+            totalMembers += count || 0;
+          }
+
+          setStats({
+            chamasCreated: chamasData.length,
+            totalMembers: totalMembers,
+            totalManaged: totalBalance
+          });
+        }
       }
 
     } catch (error) {
@@ -89,7 +108,7 @@ export default function ProfilePage() {
           full_name: profile.name,
           phone_number: profile.phone
         })
-        .eq('admin_user_id', user.id);
+        .eq('email', user.email);
 
       if (error) {
         console.error('Error updating profile:', error);
