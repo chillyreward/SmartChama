@@ -263,21 +263,21 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
+      {/* HEADER - FIXED FOR MOBILE */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black text-white tracking-tight">Admin Overview</h2>
-          <p className="text-slate-400 text-sm">Manage your chamas and monitor performance</p>
+          <p className="text-slate-400 text-sm mt-1">Manage your chamas and monitor performance</p>
         </div>
         
         {adminProfile && (
-          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3">
-            <div className="size-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-bold">
+          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 w-full md:w-auto">
+            <div className="size-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-bold shrink-0">
               {adminProfile.full_name?.charAt(0).toUpperCase() || 'A'}
             </div>
-            <div>
-              <p className="text-white font-bold text-sm">{adminProfile.full_name || 'Admin'}</p>
-              <p className="text-slate-400 text-xs">{adminProfile.email || ''}</p>
+            <div className="min-w-0">
+              <p className="text-white font-bold text-sm truncate">{adminProfile.full_name || 'Admin'}</p>
+              <p className="text-slate-400 text-xs truncate">{adminProfile.email || ''}</p>
             </div>
           </div>
         )}
@@ -287,7 +287,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* BALANCE CARD */}
-        <div className="lg:col-span-2 relative overflow-hidden rounded-[32px] p-8 border border-amber-500/20 bg-slate-900">
+        <div className="lg:col-span-2 relative overflow-hidden rounded-[32px] p-6 md:p-8 border border-amber-500/20 bg-slate-900">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 to-slate-900"></div>
           
           <div className="relative z-10 flex flex-col h-full justify-between">
@@ -297,12 +297,12 @@ export default function AdminDashboardPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                   Total Liquidity
                 </p>
-                <h3 className="text-5xl lg:text-6xl font-black text-white tracking-tighter">
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter">
                   <span className="text-2xl align-top opacity-50 mr-1">KES</span>
                   {loadingTransactions ? "..." : balance.toLocaleString()}
                 </h3>
               </div>
-              <div className="bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs text-white font-mono flex items-center gap-2">
+              <div className="hidden md:flex bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs text-white font-mono items-center gap-2">
                 <ShieldCheck className="w-3 h-3 text-amber-400" /> AES-256
               </div>
             </div>
@@ -317,14 +317,14 @@ export default function AdminDashboardPage() {
             <div className="size-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Building2 className="w-5 h-5" />
             </div>
-            <span className="font-bold text-white mt-4">My Chamas</span>
+            <span className="font-bold text-white mt-4 text-sm md:text-base">My Chamas</span>
           </Link>
           
-          <button onClick={openInviteModal} className="bg-slate-900 border border-slate-800 rounded-[24px] p-6 flex flex-col justify-between hover:border-emerald-500/50 hover:bg-emerald-950/10 transition-all group">
+          <button onClick={openInviteModal} className="text-left bg-slate-900 border border-slate-800 rounded-[24px] p-6 flex flex-col justify-between hover:border-emerald-500/50 hover:bg-emerald-950/10 transition-all group">
             <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <UserPlus className="w-5 h-5" />
             </div>
-            <span className="font-bold text-white mt-4">Invite</span>
+            <span className="font-bold text-white mt-4 text-sm md:text-base">Invite</span>
           </button>
 
           <Link href="/admin/dashboard/analytics" className="col-span-2 bg-slate-900 border border-slate-800 rounded-[24px] p-6 flex items-center justify-between hover:bg-slate-800 transition-all group">
@@ -342,54 +342,50 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 md:p-6">
           <div className="flex items-center justify-between mb-2">
-            <Users className="w-8 h-8 text-blue-400" />
-            <span className="text-xs text-slate-500 font-bold">TOTAL</span>
+            <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
           </div>
-          <h4 className="text-3xl font-black text-white">{stats.totalMembers}</h4>
-          <p className="text-xs text-slate-400 mt-1">Active Members</p>
+          <h4 className="text-2xl md:text-3xl font-black text-white">{stats.totalMembers}</h4>
+          <p className="text-[10px] md:text-xs text-slate-400 mt-1 uppercase font-bold tracking-wider">Members</p>
         </div>
 
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 md:p-6">
           <div className="flex items-center justify-between mb-2">
-            <Building2 className="w-8 h-8 text-amber-400" />
-            <span className="text-xs text-slate-500 font-bold">CHAMAS</span>
+            <Building2 className="w-6 h-6 md:w-8 md:h-8 text-amber-400" />
           </div>
-          <h4 className="text-3xl font-black text-white">{stats.totalChamas}</h4>
-          <p className="text-xs text-slate-400 mt-1">Groups Managed</p>
+          <h4 className="text-2xl md:text-3xl font-black text-white">{stats.totalChamas}</h4>
+          <p className="text-[10px] md:text-xs text-slate-400 mt-1 uppercase font-bold tracking-wider">Chamas</p>
         </div>
 
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 md:p-6">
           <div className="flex items-center justify-between mb-2">
-            <TrendingUp className="w-8 h-8 text-emerald-400" />
-            <span className="text-xs text-slate-500 font-bold">GROWTH</span>
+            <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-emerald-400" />
           </div>
-          <h4 className="text-3xl font-black text-white">{stats.monthlyGrowth}%</h4>
-          <p className="text-xs text-slate-400 mt-1">This Month</p>
+          <h4 className="text-2xl md:text-3xl font-black text-white">{stats.monthlyGrowth}%</h4>
+          <p className="text-[10px] md:text-xs text-slate-400 mt-1 uppercase font-bold tracking-wider">Growth</p>
         </div>
 
-        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 md:p-6">
           <div className="flex items-center justify-between mb-2">
-            <CreditCard className="w-8 h-8 text-purple-400" />
-            <span className="text-xs text-slate-500 font-bold">LOANS</span>
+            <CreditCard className="w-6 h-6 md:w-8 md:h-8 text-purple-400" />
           </div>
-          <h4 className="text-3xl font-black text-white">{stats.activeLoans}</h4>
-          <p className="text-xs text-slate-400 mt-1">Active Loans</p>
+          <h4 className="text-2xl md:text-3xl font-black text-white">{stats.activeLoans}</h4>
+          <p className="text-[10px] md:text-xs text-slate-400 mt-1 uppercase font-bold tracking-wider">Loans</p>
         </div>
       </div>
 
       {/* TRANSACTIONS */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-[32px] p-6 lg:p-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-slate-900/50 border border-slate-800 rounded-[32px] p-6 lg:p-8 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             Recent Activity
             <span className="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-full">LIVE</span>
           </h3>
           <button 
             onClick={() => alert("📊 Export Feature\n\nUpgrade to Pro to export transaction data to CSV/Excel.\n\nPro features include:\n• Unlimited exports\n• Advanced analytics\n• Custom reports\n• Priority support")}
-            className="text-xs bg-slate-800 hover:bg-amber-500 hover:text-black px-4 py-2 rounded-full text-white flex items-center gap-2 transition-all font-bold"
+            className="text-xs bg-slate-800 hover:bg-amber-500 hover:text-black px-4 py-2 rounded-full text-white flex items-center justify-center gap-2 transition-all font-bold w-full sm:w-auto"
           >
             <Download className="w-3 h-3" /> Export
           </button>
@@ -416,22 +412,22 @@ export default function AdminDashboardPage() {
 
               return (
                 <div key={txn.id} className="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-white/5 hover:border-amber-500/20 hover:bg-slate-900 transition-all cursor-pointer group">
-                  <div className="flex items-center gap-4">
-                    <div className="size-10 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                  <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                    <div className="size-10 shrink-0 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-xs group-hover:bg-amber-500 group-hover:text-black transition-colors">
                       {initials}
                     </div>
-                    <div>
-                      <p className="font-bold text-white text-sm">{typeLabel}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">
+                    <div className="min-w-0">
+                      <p className="font-bold text-white text-sm truncate">{typeLabel}</p>
+                      <p className="text-[10px] text-slate-500 font-mono truncate">
                         {txn.mpesa_receipt_number || `TXN-${txn.id.slice(0, 8)}`}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0 pl-2">
                     <p className={`font-bold text-sm ${isNegative ? "text-amber-500" : "text-emerald-400"}`}>
                       {isNegative ? "-" : "+"} KES {parseFloat(txn.amount).toLocaleString()}
                     </p>
-                    <p className="text-[10px] text-slate-500 uppercase">
+                    <p className="text-[10px] text-slate-500 uppercase hidden sm:block">
                       {new Date(txn.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -445,15 +441,15 @@ export default function AdminDashboardPage() {
       {/* INVITE MODAL */}
       {inviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-[32px] p-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-[32px] p-6 relative shadow-2xl max-h-[90vh] flex flex-col">
             <button 
               onClick={() => setInviteModalOpen(false)} 
-              className="absolute top-4 right-4 text-slate-500 hover:text-white bg-slate-800 rounded-full p-2 transition-colors z-10"
+              className="absolute top-4 right-4 text-slate-500 hover:text-white bg-slate-800 rounded-full p-2 transition-colors z-10 shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
             
-            <div className="mb-6 text-center pt-4">
+            <div className="mb-6 text-center pt-4 shrink-0">
               <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
                 <UserPlus className="w-8 h-8 text-emerald-500" />
               </div>
@@ -463,122 +459,124 @@ export default function AdminDashboardPage() {
               </p>
             </div>
 
-            {!selectedChama ? (
-              // CHAMA SELECTION VIEW
-              <div className="space-y-4">
-                <p className="text-xs text-slate-400 font-bold uppercase ml-1">Select Chama</p>
-                
-                {loadingChamas ? (
-                  <div className="text-center py-8 text-slate-500">Loading chamas...</div>
-                ) : chamas.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-slate-500 mb-4">No chamas found. Create one first!</p>
-                    <Link 
-                      href="/admin/dashboard/chamas"
-                      className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 px-6 rounded-xl transition-all"
-                    >
-                      Create Chama
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="grid gap-3">
-                    {chamas.map((chama) => (
-                      <button
-                        key={chama.id}
-                        onClick={() => generateInviteLink(chama)}
-                        disabled={generatingInvite}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 hover:border-emerald-500 hover:bg-slate-900 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+            <div className="overflow-y-auto pr-2">
+              {!selectedChama ? (
+                // CHAMA SELECTION VIEW
+                <div className="space-y-4">
+                  <p className="text-xs text-slate-400 font-bold uppercase ml-1">Select Chama</p>
+                  
+                  {loadingChamas ? (
+                    <div className="text-center py-8 text-slate-500">Loading chamas...</div>
+                  ) : chamas.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-slate-500 mb-4">No chamas found. Create one first!</p>
+                      <Link 
+                        href="/admin/dashboard/chamas"
+                        className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 px-6 rounded-xl transition-all"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="size-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
-                              {chama.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="font-bold text-white text-lg">{chama.name}</p>
-                              <p className="text-xs text-slate-500">
-                                Balance: KES {parseFloat(chama.total_balance || 0).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <UserPlus className="w-5 h-5" />
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              // INVITE LINK VIEW
-              <div className="space-y-4">
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="size-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
-                      {selectedChama.name.charAt(0).toUpperCase()}
+                        Create Chama
+                      </Link>
                     </div>
-                    <div>
-                      <p className="font-bold text-white text-lg">{selectedChama.name}</p>
-                      <p className="text-xs text-slate-500">Invite link generated</p>
-                    </div>
-                  </div>
-                </div>
-
-                {generatingInvite ? (
-                  <div className="text-center py-8 text-slate-500">Generating invite link...</div>
-                ) : inviteLink ? (
-                  <>
-                    <div>
-                      <label className="text-xs text-slate-400 font-bold uppercase ml-1 mb-2 block">
-                        Invite Link
-                      </label>
-                      <div className="flex gap-2">
-                        <input 
-                          type="text" 
-                          value={inviteLink}
-                          readOnly
-                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-white text-sm font-mono outline-none"
-                        />
+                  ) : (
+                    <div className="grid gap-3">
+                      {chamas.map((chama) => (
                         <button
-                          onClick={copyInviteLink}
-                          className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-6 rounded-xl transition-all"
+                          key={chama.id}
+                          onClick={() => generateInviteLink(chama)}
+                          disabled={generatingInvite}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 hover:border-emerald-500 hover:bg-slate-900 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Copy
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 min-w-0">
+                              <div className="size-12 shrink-0 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
+                                {chama.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-white text-base md:text-lg truncate">{chama.name}</p>
+                                <p className="text-xs text-slate-500 truncate">
+                                  Balance: KES {parseFloat(chama.total_balance || 0).toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
+                              <UserPlus className="w-5 h-5" />
+                            </div>
+                          </div>
                         </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // INVITE LINK VIEW
+                <div className="space-y-4">
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="size-12 shrink-0 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
+                        {selectedChama.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-white text-lg truncate">{selectedChama.name}</p>
+                        <p className="text-xs text-slate-500">Invite link generated</p>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-                      <p className="text-xs text-amber-400 font-bold mb-2">📋 INVITE DETAILS</p>
-                      <ul className="text-xs text-slate-300 space-y-1">
-                        <li>• Valid for 30 days</li>
-                        <li>• Maximum 30 uses</li>
-                        <li>• Members will be added to {selectedChama.name}</li>
-                      </ul>
-                    </div>
+                  {generatingInvite ? (
+                    <div className="text-center py-8 text-slate-500">Generating invite link...</div>
+                  ) : inviteLink ? (
+                    <>
+                      <div>
+                        <label className="text-xs text-slate-400 font-bold uppercase ml-1 mb-2 block">
+                          Invite Link
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input 
+                            type="text" 
+                            value={inviteLink}
+                            readOnly
+                            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-white text-sm font-mono outline-none w-full"
+                          />
+                          <button
+                            onClick={copyInviteLink}
+                            className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-6 py-4 sm:py-0 rounded-xl transition-all whitespace-nowrap"
+                          >
+                            Copy Link
+                          </button>
+                        </div>
+                      </div>
 
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => {
-                          setSelectedChama(null);
-                          setInviteLink("");
-                        }}
-                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all"
-                      >
-                        Generate Another
-                      </button>
-                      <button
-                        onClick={() => setInviteModalOpen(false)}
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all"
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </>
-                ) : null}
-              </div>
-            )}
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                        <p className="text-xs text-amber-400 font-bold mb-2">📋 INVITE DETAILS</p>
+                        <ul className="text-xs text-slate-300 space-y-1">
+                          <li>• Valid for 30 days</li>
+                          <li>• Maximum 30 uses</li>
+                          <li>• Members will be added to {selectedChama.name}</li>
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                        <button
+                          onClick={() => {
+                            setSelectedChama(null);
+                            setInviteLink("");
+                          }}
+                          className="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all"
+                        >
+                          Generate Another
+                        </button>
+                        <button
+                          onClick={() => setInviteModalOpen(false)}
+                          className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-4 rounded-xl transition-all"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
