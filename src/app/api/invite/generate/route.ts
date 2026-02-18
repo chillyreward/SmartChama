@@ -7,18 +7,11 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(req: Request) {
   try {
-    const { chamaId, maxUses = 10, expiresInDays = 30, userId } = await req.json();
+    const { chamaId, maxUses = 10, expiresInDays = 30 } = await req.json();
 
     if (!chamaId) {
       return NextResponse.json(
         { success: false, error: 'Chama ID is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
         { status: 400 }
       );
     }
@@ -33,13 +26,12 @@ export async function POST(req: Request) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
-    // Insert invite token
+    // Insert invite token (without created_by to avoid foreign key issues)
     const { data, error } = await supabase
       .from('invite_tokens')
       .insert({
         token,
         chama_id: chamaId,
-        created_by: userId,
         max_uses: maxUses,
         current_uses: 0,
         expires_at: expiresAt.toISOString(),

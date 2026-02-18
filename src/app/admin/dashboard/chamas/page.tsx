@@ -285,7 +285,6 @@ function MyChamasContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chamaId: chama.id,
-          userId: admin.id,
           maxUses: 30,
           expiresInDays: 30
         })
