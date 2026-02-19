@@ -66,8 +66,15 @@ export default function MemberSignup() {
         return;
       }
 
-      setChamaName(tokenData.chamas?.name || "");
-      setChamaId(tokenData.chamas?.id || "");
+      // Validate that we have chama data
+      if (!tokenData.chamas || !tokenData.chamas.id) {
+        setError("Invalid invite code - chama not found.");
+        setTokenValid(false);
+        return;
+      }
+
+      setChamaName(tokenData.chamas.name);
+      setChamaId(tokenData.chamas.id);
       setTokenValid(true);
     } catch (err) {
       console.error("Error validating token:", err);
@@ -83,6 +90,11 @@ export default function MemberSignup() {
     
     if (!fullName || !idNumber || !email || !phone || !password) {
       setError("Please fill in all fields");
+      return;
+    }
+
+    if (!chamaId) {
+      setError("Invalid invite code - missing chama information. Please request a new invite link.");
       return;
     }
 
@@ -180,13 +192,21 @@ export default function MemberSignup() {
       }
 
       console.log("Token validated, creating member record...");
+      console.log("Chama ID:", chamaId, "Token data chama_id:", tokenData.chama_id);
+
+      // Use chama_id from token data to ensure we have the correct UUID
+      const memberChamaId = tokenData.chama_id || chamaId;
+      
+      if (!memberChamaId) {
+        throw new Error("Invalid invite code - missing chama information.");
+      }
 
       const { error: memberError } = await supabase
         .from("members")
         .insert([
           {
             user_id: authData.user.id,
-            chama_id: chamaId,
+            chama_id: memberChamaId,
             full_name: fullName,
             id_number: idNumber,
             phone_number: phone,
