@@ -40,6 +40,7 @@ export default function AdminDashboardLayout({
     { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "My Chamas", href: "/admin/dashboard/chamas", icon: Building2 },
     { name: "Members", href: "/admin/dashboard/members", icon: Users },
+    { name: "Credit Scores", href: "/admin/dashboard/credit-scores", icon: Crown },
     { name: "SmartGrow", href: "/admin/dashboard/smartgrow", icon: TrendingUp },
     { name: "Analytics", href: "/admin/dashboard/analytics", icon: TrendingUp },
     { name: "AI Advisor", href: "/admin/dashboard/ai-advisor", icon: MessageSquare },
