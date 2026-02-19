@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 import { 
   Plus, Coins, TrendingUp, UserPlus, Grid3X3, Bell, Wallet, 
   ArrowUpRight, ShieldCheck, Users, X, Download, CreditCard,
@@ -33,7 +34,7 @@ function NeonChart({ data }: { data: number[] }) {
 
 function DashboardContent() {
   const searchParams = useSearchParams();
-  const userName = searchParams.get("user") || "Member";
+  const [userName, setUserName] = useState(searchParams.get("user") || "Member");
   
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(""); // 'deposit', 'loan', 'wallet'
@@ -45,10 +46,38 @@ function DashboardContent() {
   const [loadingTransactions, setLoadingTransactions] = useState(true);
   const [balance, setBalance] = useState(0);
 
-  // Fetch transactions on mount
+  // Fetch user profile and transactions on mount
   useEffect(() => {
+    fetchUserProfile();
     fetchTransactions();
   }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error('No user logged in');
+        return;
+      }
+
+      // Fetch member profile from database
+      const { data: memberData, error: memberError } = await supabase
+        .from('members')
+        .select('full_name, phone_number')
+        .eq('user_id', user.id)
+        .single();
+
+      if (memberError) {
+        console.error('Error fetching profile:', memberError);
+      } else if (memberData && memberData.full_name) {
+        setUserName(memberData.full_name);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {

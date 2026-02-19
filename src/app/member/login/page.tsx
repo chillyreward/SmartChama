@@ -84,8 +84,9 @@ export default function MemberLogin() {
       }
 
       console.log("Login successful, redirecting...");
-      // Redirect to member dashboard (regular dashboard, not admin)
-      router.push("/dashboard");
+      // Redirect to member dashboard with member name
+      const memberName = memberData.full_name || "Member";
+      router.push(`/dashboard?user=${encodeURIComponent(memberName)}`);
     } catch (err: any) {
       console.error("Login error:", err);
       
