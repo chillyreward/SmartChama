@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { 
-  Wallet, Shield, Phone, ArrowRight, Instagram, Twitter, Linkedin, Facebook, 
+  Wallet, Shield, Phone, ArrowRight, Camera, MessageSquare, Briefcase, 
   PieChart, Zap, Globe, UserPlus, TrendingUp, CreditCard 
 } from "lucide-react";
 
@@ -193,9 +193,9 @@ export default function LandingPage() {
               Empowering the next generation of African investors.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Twitter className="w-4 h-4" /></a>
-              <a href="#" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Instagram className="w-4 h-4" /></a>
-              <a href="#" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Linkedin className="w-4 h-4" /></a>
+              <a href="#" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><MessageSquare className="w-4 h-4" /></a>
+              <a href="#" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Camera className="w-4 h-4" /></a>
+              <a href="#" className="p-2 bg-slate-900 rounded-full text-slate-400 hover:text-white hover:bg-emerald-600 transition-all"><Briefcase className="w-4 h-4" /></a>
             </div>
           </div>
           
