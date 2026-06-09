@@ -1,310 +1,167 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Wallet, Users, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, Shield } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { createAdminProfile } from "@/app/actions/admin-signup";
 
 export default function SignupPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"member" | "admin">("admin");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // Form states
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  // Password strength checker
-  const checkPasswordStrength = (pwd: string) => {
-    if (pwd.length < 8) {
-      setPasswordStrength("weak");
-      return false;
-    }
-    const hasUpperCase = /[A-Z]/.test(pwd);
-    const hasLowerCase = /[a-z]/.test(pwd);
-    const hasNumbers = /\d/.test(pwd);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
-
-    const strength = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
-
-    if (strength < 3) {
-      setPasswordStrength("weak");
-      return false;
-    } else if (strength === 3) {
-      setPasswordStrength("medium");
-      return true;
-    } else {
-      setPasswordStrength("strong");
-      return true;
-    }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-    checkPasswordStrength(newPassword);
-  };
-
-  const handleAdminSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    // Validate email format
-    if (!email.includes("@") || !email.includes(".")) {
-      setError("Please enter a valid email address");
-      setLoading(false);
-      return;
-    }
-
-    // Validate password strength
-    if (passwordStrength === "weak") {
-      setError("Password must be at least 8 characters and include uppercase, lowercase, numbers, and special characters");
-      setLoading(false);
-      return;
-    }
-
-    // Validate terms acceptance
-    if (!agreedToTerms) {
-      setError("Please accept the Terms and Conditions to continue");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Step 1: Create user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/login`,
-          data: {
-            full_name: fullName,
-            phone: phone,
-            role: "admin"
-          }
-        }
-      });
-
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error("User creation failed");
-      }
-
-      // Step 2: Insert admin details into chama_admins table using Server Action
-      const result = await createAdminProfile(
-        authData.user.id,
-        fullName,
-        phone,
-        email
-      );
-
-      if (!result.success) {
-        await supabase.auth.signOut();
-        throw new Error(`Failed to create admin profile: ${result.error}`);
-      }
-
-      alert(`Registration successful!\n\nYour account has been created.\nPlease check your email to verify your account before logging in.`);
-      router.push("/login");
-    } catch (err: any) {
-      console.error("Admin signup error:", err);
-      setError(err.message || "Signup failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0e1a] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
-      
-      {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500" />
+    <div className="min-h-screen bg-[#FAFAFA] flex font-inter">
+      {/* LEFT PANEL */}
+      <div className="hidden md:flex w-1/2 bg-[#0B0F0C] flex-col justify-between p-12">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>eco</span>
+          <span className="text-headline-lg font-black font-geist text-white">SmartChama</span>
+        </div>
 
-      {/* Main Card */}
-      <div className="w-full max-w-md relative z-10">
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl flex items-center justify-center border border-slate-700 shadow-lg">
-            <Wallet className="w-8 h-8 text-emerald-400" />
+        <div>
+          <h2 className="text-display-sm font-geist text-white max-w-sm leading-tight">
+            Join thousands of Kenyan chamas already building their financial identity with SmartChama.
+          </h2>
+          
+          <div className="flex flex-col gap-4 mt-8">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[#22C55E]">shield_check</span>
+              <span className="text-body-sm text-gray-400">256-bit Encryption</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[#22C55E]">payments</span>
+              <span className="text-body-sm text-gray-400">M-Pesa Connected & Verified</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[#22C55E]">verified_user</span>
+              <span className="text-body-sm text-gray-400">Tamper-Proof Contribution Ledger</span>
+            </div>
           </div>
         </div>
 
-        {/* Card */}
-        <div className="bg-gradient-to-b from-slate-900/90 to-slate-900/50 backdrop-blur-xl rounded-3xl border border-slate-800 shadow-2xl p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome Admin</h1>
-            <p className="text-slate-400 text-sm">Enter your credentials to access the vault.</p>
+        <div className="text-body-sm text-gray-600">
+          © 2025 SmartChama Technologies Ltd.
+        </div>
+      </div>
+
+      {/* RIGHT PANEL */}
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-[#FAFAFA] p-6 sm:p-8">
+        <div className="w-full max-w-md bg-white border border-[#E5E7EB] rounded-xl p-8 sm:p-10 shadow-sm">
+          <div className="flex flex-col items-center mb-8">
+            <h1 className="text-display-sm font-geist text-on-surface text-center">Create your account</h1>
+            <p className="text-body-lg text-on-secondary-container text-center mt-1">Free forever. No bank account required.</p>
           </div>
 
-          {error && (
-            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleAdminSignup} className="space-y-5">
-            {/* Full Name */}
+          <form method="POST" action="#" className="flex flex-col gap-4">
+            
+            {/* 1. Full Name */}
             <div>
-              <label className="block text-xs font-semibold text-emerald-400 mb-2 uppercase tracking-wider">
-                Full Name
-              </label>
-              <div className="relative">
-                <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-                <input
-                  type="text"
+              <label className="block text-label-caps text-on-surface-variant mb-2">Full Name</label>
+              <input 
+                type="text" 
+                name="full_name"
+                required
+                placeholder="e.g. Grace Wanjiku"
+                className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-body-sm text-on-surface focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] placeholder:text-gray-400 transition-colors"
+              />
+            </div>
+
+            {/* 2. Phone Number */}
+            <div>
+              <label className="block text-label-caps text-on-surface-variant mb-2">Phone Number</label>
+              <div className="flex border border-[#E5E7EB] rounded focus-within:border-[#22C55E] focus-within:ring-1 focus-within:ring-[#22C55E] transition-colors overflow-hidden">
+                <div className="bg-surface-container-low border-r border-[#E5E7EB] px-3 flex items-center gap-2">
+                  <span className="text-lg">🇰🇪</span>
+                  <span className="text-body-sm text-on-secondary-container font-medium">+254</span>
+                </div>
+                <input 
+                  type="tel" 
+                  name="phone"
                   required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                  placeholder="712 345 678"
+                  className="flex-1 px-4 py-3 text-body-sm text-on-surface focus:outline-none placeholder:text-gray-400 bg-white"
                 />
               </div>
+              <p className="text-body-sm text-on-secondary-container mt-1">
+                Used for M-Pesa integration and login
+              </p>
             </div>
 
-            {/* Phone */}
+            {/* 3. Email Address */}
             <div>
-              <label className="block text-xs font-semibold text-emerald-400 mb-2 uppercase tracking-wider">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-                <input
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+254712345678"
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                />
-              </div>
+              <label className="block text-label-caps text-on-surface-variant mb-2">Email Address</label>
+              <input 
+                type="email" 
+                name="email"
+                required
+                placeholder="name@example.com"
+                className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-body-sm text-on-surface focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] placeholder:text-gray-400 transition-colors"
+              />
             </div>
 
-            {/* Email */}
+            {/* 4. Create Password */}
             <div>
-              <label className="block text-xs font-semibold text-emerald-400 mb-2 uppercase tracking-wider">
-                Email Address
-              </label>
+              <label className="block text-label-caps text-on-surface-variant mb-2">Create Password</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@smartchama.com"
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-xs font-semibold text-emerald-400 mb-2 uppercase tracking-wider">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
-                <input
+                <input 
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   required
-                  value={password}
-                  onChange={handlePasswordChange}
-                  placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                  placeholder="Min. 8 characters"
+                  className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-body-sm text-on-surface focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] placeholder:text-gray-400 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  <span className="material-symbols-outlined text-[20px]">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
                 </button>
               </div>
             </div>
 
-            {/* Password strength indicator */}
-            {password && (
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full transition-all ${
-                      passwordStrength === "weak" ? "w-1/3 bg-red-500" :
-                      passwordStrength === "medium" ? "w-2/3 bg-yellow-500" :
-                      "w-full bg-emerald-500"
-                    }`}
-                  />
-                </div>
-                <span
-                  className={`text-xs font-medium ${
-                    passwordStrength === "weak" ? "text-red-400" :
-                    passwordStrength === "medium" ? "text-yellow-400" :
-                    "text-emerald-400"
-                  }`}
+            {/* 5. Confirm Password */}
+            <div>
+              <label className="block text-label-caps text-on-surface-variant mb-2">Confirm Password</label>
+              <div className="relative">
+                <input 
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="password_confirm"
+                  required
+                  placeholder="Re-enter password"
+                  className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-body-sm text-on-surface focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] placeholder:text-gray-400 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                 >
-                  {passwordStrength === "weak" ? "Weak" :
-                   passwordStrength === "medium" ? "Medium" : "Strong"}
-                </span>
+                  <span className="material-symbols-outlined text-[20px]">
+                    {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
               </div>
-            )}
-
-            {/* Terms and Conditions Checkbox */}
-            <div className="flex items-start gap-3 p-4 bg-slate-950/50 rounded-xl border border-slate-800">
-              <input
-                type="checkbox"
-                id="terms"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 text-emerald-500 bg-slate-900 border-slate-700 rounded focus:ring-emerald-500 focus:ring-2"
-              />
-              <label htmlFor="terms" className="text-sm text-slate-300">
-                I accept SmartChama's{" "}
-                <Link href="/terms" target="_blank" className="text-emerald-400 font-semibold hover:text-emerald-300 underline">
-                  Terms and Conditions
-                </Link>
-                {" "}concerning this application
-                <span className="text-red-400 ml-1">*</span>
-              </label>
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading || passwordStrength === "weak" || !agreedToTerms}
-              className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-white/10 mt-8"
+            <button 
+              type="submit" 
+              className="w-full bg-[#22C55E] text-white py-3 rounded text-headline-sm font-geist hover:bg-[#006e2f] transition-colors mt-2"
             >
-              {loading ? "Creating Account..." : "Create Admin Account"}
-              <ArrowRight className="w-5 h-5" />
+              Create Account  →
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-slate-500 text-sm">
-              Already have an admin account?{" "}
-              <Link href="/admin/login" className="text-emerald-400 font-semibold hover:text-emerald-300 transition-colors">
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </div>
+          <p className="text-center text-body-sm text-on-secondary-container mt-4">
+            By signing up, you agree to our{" "}
+            <Link href="#" className="text-[#22C55E] hover:underline">Terms of Service</Link>
+            {" "}and{" "}
+            <Link href="#" className="text-[#22C55E] hover:underline">Privacy Policy</Link>
+          </p>
 
-        {/* Security Badge */}
-        <div className="flex items-center justify-center gap-2 mt-6 text-slate-600 text-xs">
-          <Shield className="w-4 h-4" />
-          <span>256-Bit End-to-End Encryption</span>
+          <div className="text-center mt-6">
+            <span className="text-body-sm text-on-secondary-container">Already have an account? </span>
+            <Link href="/login" className="text-body-sm text-[#22C55E] font-semibold hover:underline">Sign in</Link>
+          </div>
         </div>
       </div>
     </div>

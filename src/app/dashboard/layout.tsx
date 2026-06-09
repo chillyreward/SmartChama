@@ -1,111 +1,110 @@
+"use client";
+
 import Link from 'next/link';
-import { 
-  LayoutDashboard, 
-  Wallet, 
-  PieChart, 
-  Users, 
-  User,
-  LogOut,
-  Menu,
-  UserPlus
-} from "lucide-react";
+import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname();
+
+  const navItems = [
+    { icon: 'dashboard', label: 'Overview', href: '/dashboard' },
+    { icon: 'savings', label: 'My Savings', href: '/dashboard/savings' },
+    { icon: 'payments', label: 'Contributions', href: '/dashboard/contributions' },
+    { icon: 'account_balance', label: 'Loans', href: '/dashboard/loans' },
+    { icon: 'group', label: 'Members', href: '/dashboard/members' },
+    { icon: 'account_balance_wallet', label: 'Wallet', href: '/dashboard/wallet' },
+    { icon: 'receipt_long', label: 'Transactions', href: '/dashboard/transactions' },
+    { icon: 'trending_up', label: 'SmartGrow', href: '/dashboard/smartgrow' },
+    { icon: 'analytics', label: 'Analytics', href: '/dashboard/analytics' },
+    { icon: 'settings', label: 'Settings', href: '/dashboard/settings' },
+  ];
+
   return (
-    // FIXED: Changed h-screen to h-[100dvh] which prevents mobile browser bar issues
-    <div className="flex h-[100dvh] bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30 overflow-hidden">
+    <div className="flex h-screen bg-[#FAFAFA] font-inter overflow-hidden">
       
-      {/* --- DESKTOP SIDEBAR --- */}
-      <aside className="w-64 border-r border-slate-800 bg-slate-950 hidden lg:flex flex-col shrink-0">
-        <div className="p-6 flex items-center gap-3">
-          <div className="h-10 w-10 bg-emerald-500 rounded-xl flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20">
-            <Wallet className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg tracking-tight">SmartChama</h1>
-            <p className="text-xs text-slate-500 font-medium">Wealth Management</p>
-          </div>
+      {/* SIDEBAR */}
+      <aside className="w-64 fixed left-0 top-0 h-screen bg-white border-r border-[#E5E7EB] flex flex-col z-20">
+        
+        {/* Top */}
+        <div className="px-6 py-6 border-b border-[#E5E7EB]">
+          <h1 className="text-headline-lg text-primary font-bold font-geist">SmartChama</h1>
+          <div className="text-label-caps text-on-secondary-container mt-1 uppercase">Investment Group</div>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
-          <NavItem href="/dashboard" icon={<LayoutDashboard />} label="Overview" />
-          <NavItem href="/dashboard/savings" icon={<Wallet />} label="My Savings" />
-          <NavItem href="/dashboard/groups" icon={<Users />} label="My Groups" />
-          <NavItem href="/dashboard/smartgrow" icon={<PieChart />} label="SmartGrow" />
-          <NavItem href="/dashboard/profile" icon={<User />} label="Profile" />
+        {/* Action button */}
+        <div className="px-4 py-3">
+          <button className="w-full bg-[#22C55E] text-white rounded px-4 py-3 flex items-center justify-center gap-2 hover:bg-[#006e2f] transition-colors">
+            <span className="material-symbols-outlined text-sm">add</span>
+            <span className="text-headline-sm font-geist">New Contribution</span>
+          </button>
+        </div>
+
+        {/* Nav items */}
+        <nav className="flex-1 flex flex-col gap-1 px-4 overflow-y-auto pt-2">
+          {navItems.map(item => {
+            const isActive = pathname === item.href || (pathname === '/dashboard' && item.href === '/dashboard');
+            
+            return (
+              <Link 
+                key={item.label} 
+                href={item.href} 
+                className={`flex items-center gap-3 px-4 py-3 rounded transition-colors ${
+                  isActive 
+                    ? "text-primary font-bold border-l-2 border-[#22C55E] bg-surface-container-low rounded-r" 
+                    : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high"
+                }`}
+              >
+                <span className="material-symbols-outlined" style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                  {item.icon}
+                </span>
+                <span className="text-body-sm">{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
-          <Link href="/login" className="flex items-center gap-3 w-full px-4 py-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors text-sm font-medium">
-            <LogOut className="w-5 h-5" />
-            Logout
+        {/* Bottom */}
+        <div className="border-t border-[#E5E7EB] pt-4 pb-4 px-4 flex flex-col gap-1">
+          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors rounded">
+            <span className="material-symbols-outlined">help</span>
+            <span className="text-body-sm">Support</span>
+          </Link>
+          <Link href="/login" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors rounded">
+            <span className="material-symbols-outlined">logout</span>
+            <span className="text-body-sm">Logout</span>
           </Link>
         </div>
       </aside>
 
-      {/* --- MAIN CONTENT AREA --- */}
-      {/* FIXED: min-w-0 ensures content doesn't break out of the flex container */}
-      <main className="flex-1 flex flex-col h-full relative min-w-0">
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
         
-        {/* Mobile Header (Added shrink-0 so it never squishes) */}
-        <header className="lg:hidden shrink-0 h-16 border-b border-slate-800 flex items-center justify-between px-4 bg-slate-950/50 backdrop-blur-md z-20">
-           <div className="flex items-center gap-2">
-             <div className="h-8 w-8 bg-emerald-500 rounded-lg flex items-center justify-center text-slate-950">
-                <Wallet className="w-4 h-4" />
-             </div>
-             <span className="font-bold">SmartChama</span>
-           </div>
-           <button className="p-2 text-slate-400"><Menu className="w-6 h-6" /></button>
+        {/* TOP NAV */}
+        <header className="h-16 bg-white border-b border-[#E5E7EB] sticky top-0 flex justify-between items-center px-6 shrink-0 z-10">
+          <div className="text-headline-sm text-on-surface font-geist">Good morning, Grace 👋</div>
+          <div className="flex items-center gap-4">
+            <button className="text-on-surface-variant hover:text-primary transition-colors">
+              <span className="material-symbols-outlined">notifications</span>
+            </button>
+            <button className="text-on-surface-variant hover:text-primary transition-colors">
+              <span className="material-symbols-outlined">help</span>
+            </button>
+            <div className="w-12 h-12 rounded-full bg-[#22C55E] text-white flex items-center justify-center font-bold text-sm">
+              GW
+            </div>
+          </div>
         </header>
 
-        {/* The Page Content - This is the ONLY part that will scroll now */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        {/* SCROLLABLE CONTENT */}
+        <div className="flex-1 overflow-y-auto bg-[#FAFAFA]">
           {children}
         </div>
 
-        {/* --- MOBILE BOTTOM NAV --- */}
-        {/* FIXED: Removed 'fixed bottom-0'. Now it sits naturally at the bottom of the flex column */}
-        <div className="lg:hidden shrink-0 bg-slate-950 border-t border-slate-800 z-30 relative">
-          <div className="flex justify-around items-center p-2 pb-safe">
-            <MobileNavItem href="/dashboard" icon={<LayoutDashboard />} label="Home" />
-            <MobileNavItem href="/dashboard/savings" icon={<Wallet />} label="Save" />
-            
-            <div className="relative -top-6">
-              <Link href="/dashboard/smartgrow">
-                <div className="h-14 w-14 bg-emerald-500 rounded-full flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/30 border-4 border-slate-950">
-                  <PieChart className="w-6 h-6" />
-                </div>
-              </Link>
-            </div>
-            
-            <MobileNavItem href="/dashboard/groups" icon={<Users />} label="Groups" />
-            <MobileNavItem href="/dashboard/profile" icon={<User />} label="Profile" />
-          </div>
-        </div>
       </main>
     </div>
   );
-}
-
-// Helper Components
-function NavItem({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
-  return (
-    <Link href={href} className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-emerald-400 font-medium transition-all hover:pl-5">
-      <div className="w-5 h-5">{icon}</div>
-      <span className="text-sm">{label}</span>
-    </Link>
-  )
-}
-
-function MobileNavItem({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
-  return (
-    <Link href={href} className="flex flex-col items-center gap-1 p-2 text-slate-500 hover:text-emerald-400">
-      <div className="w-5 h-5">{icon}</div>
-      <span className="text-[10px] font-medium">{label}</span>
-    </Link>
-  )
 }
