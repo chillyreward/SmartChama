@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Wallet, Users, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, Shield } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { createAdminProfile } from "@/app/actions/admin-signup";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -99,21 +100,17 @@ export default function SignupPage() {
         throw new Error("User creation failed");
       }
 
-      // Step 2: Insert admin details into chama_admins table
-      const { error: adminError } = await supabase
-        .from('chama_admins')
-        .insert([
-          {
-            admin_user_id: authData.user.id,
-            full_name: fullName,
-            phone_number: phone,
-            email: email
-          }
-        ]);
+      // Step 2: Insert admin details into chama_admins table using Server Action
+      const result = await createAdminProfile(
+        authData.user.id,
+        fullName,
+        phone,
+        email
+      );
 
-      if (adminError) {
+      if (!result.success) {
         await supabase.auth.signOut();
-        throw new Error(`Failed to create admin profile: ${adminError.message}`);
+        throw new Error(`Failed to create admin profile: ${result.error}`);
       }
 
       alert(`Registration successful!\n\nYour account has been created.\nPlease check your email to verify your account before logging in.`);
