@@ -98,7 +98,7 @@ export async function POST(req: Request) {
               method: 'POST',
               body: JSON.stringify({
                 phone: formattedPhone,
-                message: `SmartChama: Your KSh ${result.amount} contribution to ${member.chamas?.name || 'your group'} is confirmed. Receipt: ${result.mpesaReceiptNumber}.`
+                message: `SmartChama: Your KSh ${result.amount} contribution to ${(Array.isArray(member.chamas) ? member.chamas[0]?.name : member.chamas?.name) || 'your group'} is confirmed. Receipt: ${result.mpesaReceiptNumber}.`
               })
             });
           } catch (chainErr) {
