@@ -68,8 +68,7 @@ export default function SignupPage() {
             <div>
               <label className="block text-label-caps text-on-surface-variant mb-2">Phone Number</label>
               <div className="flex border border-[#E5E7EB] rounded focus-within:border-[#22C55E] focus-within:ring-1 focus-within:ring-[#22C55E] transition-colors overflow-hidden">
-                <div className="bg-surface-container-low border-r border-[#E5E7EB] px-3 flex items-center gap-2">
-                  <span className="text-lg">🇰🇪</span>
+                <div className="bg-surface-container-low border-r border-[#E5E7EB] px-3 flex items-center justify-center">
                   <span className="text-body-sm text-on-secondary-container font-medium">+254</span>
                 </div>
                 <input 

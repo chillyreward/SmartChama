@@ -85,7 +85,7 @@ export default function DashboardLayout({
         
         {/* TOP NAV */}
         <header className="h-16 bg-white border-b border-[#E5E7EB] sticky top-0 flex justify-between items-center px-6 shrink-0 z-10">
-          <div className="text-headline-sm text-on-surface font-geist">Good morning, Grace 👋</div>
+          <div className="text-headline-sm text-on-surface font-geist">Good morning, Grace</div>
           <div className="flex items-center gap-4">
             <button className="text-on-surface-variant hover:text-primary transition-colors">
               <span className="material-symbols-outlined">notifications</span>

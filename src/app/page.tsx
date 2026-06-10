@@ -28,7 +28,7 @@ export default function LandingPage() {
           {/* Left Column */}
           <div>
             <div className="inline-block bg-surface-container-low border border-outline-variant px-3 py-1 rounded-full text-label-caps text-on-surface mb-6 uppercase">
-              Now available across Kenya 🇰🇪
+              Now available across Kenya
             </div>
             <h1 className="text-display-lg font-geist text-on-surface mb-4">
               Your Chama, Upgraded.<br/>
@@ -101,7 +101,7 @@ export default function LandingPage() {
                   <div className="w-10 h-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-bold text-gray-700">+8</div>
                 </div>
                 <div className="text-[#22C55E] font-medium text-sm">
-                  Streak 🔥 24 Weeks
+                  24-Week Streak
                 </div>
               </div>
 
@@ -443,7 +443,7 @@ export default function LandingPage() {
           
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-body-sm text-gray-500 text-center md:text-left">
-              © 2026 SmartChama Technologies Ltd. Built with pride in Nairobi, Kenya 🇰🇪
+              © 2026 SmartChama Technologies Ltd. Built with pride in Nairobi, Kenya
             </div>
             <div className="text-body-sm text-gray-500">
               Regulated by the Central Bank of Kenya.

@@ -6,7 +6,7 @@ import {
   MoreVertical, CheckCircle, XCircle, Crown, Plus, X
 } from "lucide-react";
 import { createClient } from '@supabase/supabase-js';
-import PredictiveInsights from "@/components/PredictiveInsights";
+import BlockchainBadge from "@/components/BlockchainBadge";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
