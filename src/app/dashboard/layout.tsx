@@ -1,7 +1,10 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
+import { useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function DashboardLayout({
   children,
@@ -9,6 +12,30 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { session, member, group, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !session) {
+      router.push('/login');
+    }
+  }, [isLoading, session, router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
+  if (isLoading || !session) {
+    return (
+      <div className="flex h-screen bg-[#FAFAFA] items-center justify-center font-inter">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-body-sm text-secondary animate-pulse">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const navItems = [
     { icon: 'dashboard', label: 'Overview', href: '/dashboard' },
@@ -23,6 +50,13 @@ export default function DashboardLayout({
     { icon: 'settings', label: 'Settings', href: '/dashboard/settings' },
   ];
 
+  const firstName = member?.full_name?.split(' ')[0] || 'Member';
+  
+  const getInitials = (name: string) => {
+    if (!name) return '??';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
   return (
     <div className="flex h-screen bg-[#FAFAFA] font-inter overflow-hidden">
       
@@ -32,7 +66,9 @@ export default function DashboardLayout({
         {/* Top */}
         <div className="px-6 py-6 border-b border-[#E5E7EB]">
           <h1 className="text-headline-lg text-primary font-bold font-geist">SmartChama</h1>
-          <div className="text-label-caps text-on-secondary-container mt-1 uppercase">Investment Group</div>
+          <div className="text-label-caps text-on-secondary-container mt-1 uppercase">
+            {group?.name || 'Investment Group'}
+          </div>
         </div>
 
         {/* Action button */}
@@ -73,10 +109,10 @@ export default function DashboardLayout({
             <span className="material-symbols-outlined">help</span>
             <span className="text-body-sm">Support</span>
           </Link>
-          <Link href="/login" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors rounded">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors rounded text-left">
             <span className="material-symbols-outlined">logout</span>
             <span className="text-body-sm">Logout</span>
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -85,7 +121,7 @@ export default function DashboardLayout({
         
         {/* TOP NAV */}
         <header className="h-16 bg-white border-b border-[#E5E7EB] sticky top-0 flex justify-between items-center px-6 shrink-0 z-10">
-          <div className="text-headline-sm text-on-surface font-geist">Good morning, Grace</div>
+          <div className="text-headline-sm text-on-surface font-geist">Good morning, {firstName} 👋</div>
           <div className="flex items-center gap-4">
             <button className="text-on-surface-variant hover:text-primary transition-colors">
               <span className="material-symbols-outlined">notifications</span>
@@ -93,9 +129,9 @@ export default function DashboardLayout({
             <button className="text-on-surface-variant hover:text-primary transition-colors">
               <span className="material-symbols-outlined">help</span>
             </button>
-            <div className="w-12 h-12 rounded-full bg-[#22C55E] text-white flex items-center justify-center font-bold text-sm">
-              GW
-            </div>
+            <Link href="/dashboard/profile" className="w-10 h-10 rounded-full bg-[#22C55E] hover:bg-[#006e2f] transition-colors text-white flex items-center justify-center font-bold text-sm cursor-pointer shadow-sm">
+              {getInitials(member?.full_name)}
+            </Link>
           </div>
         </header>
 

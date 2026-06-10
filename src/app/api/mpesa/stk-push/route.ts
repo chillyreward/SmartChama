@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server';
 import { initiateSTKPush } from '@/lib/mpesa';
 
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export async function POST(req: Request) {
   try {
-    const { phoneNumber, amount, accountReference, transactionDesc } = await req.json();
+    const { phoneNumber, amount, accountReference, transactionDesc, chama_id } = await req.json();
 
-    console.log('STK Push Request:', { phoneNumber, amount, accountReference, transactionDesc });
+    console.log('STK Push Request:', { phoneNumber, amount, accountReference, transactionDesc, chama_id });
 
     // Validate inputs
     if (!phoneNumber || !amount) {
@@ -13,6 +20,24 @@ export async function POST(req: Request) {
         { success: false, error: 'Phone number and amount are required' },
         { status: 400 }
       );
+    }
+
+    if (chama_id) {
+      const { data: rules } = await supabaseAdmin
+        .from('chama_rules')
+        .select('*')
+        .eq('chama_id', chama_id)
+        .single();
+        
+      if (rules) {
+        if (amount < rules.min_contribution) {
+          return NextResponse.json({ 
+            success: false, 
+            error: `Minimum contribution is KSh ${rules.min_contribution}` 
+          }, { status: 400 });
+        }
+        // In a full implementation, we'd add late_penalty handling here
+      }
     }
 
     // Validate phone number format

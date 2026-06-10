@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
     // 2. Input Validation
     const body = await req.json().catch(() => ({}));
-    const { chama_id } = body;
+    const { chama_id, inviteePhone } = body;
 
     if (!chama_id) {
       return NextResponse.json(
@@ -87,6 +87,24 @@ export async function POST(req: Request) {
         { error: `Database error: ${insertError.message}` },
         { status: 500 }
       );
+    }
+
+    // 5.1 Send SMS Notification
+    if (inviteePhone) {
+      try {
+        const { data: chamaData } = await supabaseAdmin.from('chamas').select('name').eq('id', chama_id).single();
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        
+        await fetch(`${appUrl}/api/sms/send`, {
+          method: 'POST',
+          body: JSON.stringify({
+            phone: inviteePhone,
+            message: `You've been invited to join ${chamaData?.name || 'a group'} on SmartChama! Click to join: ${appUrl}/signup?token=${tokenCode} Expires in 7 days.`
+          })
+        });
+      } catch (smsErr) {
+        console.error("SMS Invite sending failed:", smsErr);
+      }
     }
 
     // 6. The Response

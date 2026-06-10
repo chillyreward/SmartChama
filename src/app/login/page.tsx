@@ -13,6 +13,35 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const handleGoogleLogin = async () => {
+    try {
+      await supabase.auth.signInWithOAuth({ provider: 'google' });
+    } catch (err) {
+      setError("Failed to initialize Google login.");
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Please enter your email address to reset your password.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) {
+        setError(error.message);
+      } else {
+        setError("Password reset email sent. Please check your inbox.");
+      }
+    } catch (err) {
+      setError("Failed to send reset email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -30,34 +59,23 @@ export default function LoginPage() {
         return;
       }
 
-      // Check if user is an admin
-      const { data: adminData } = await supabase
-        .from('chama_admins')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      if (adminData) {
-        router.push('/admin/dashboard');
-        return;
-      }
-
-      // Check if user is a member
-      const { data: memberData } = await supabase
+      // Fetch member profile
+      const { data: member } = await supabase
         .from('members')
-        .select('*')
+        .select('role, chama_id, full_name')
         .eq('user_id', authData.user.id)
         .single();
 
-      if (memberData) {
-        router.push('/dashboard');
+      if (!member) {
+        router.push('/onboarding');
         return;
       }
 
-      // If neither admin nor member, sign out and show error
-      await supabase.auth.signOut();
-      setError("No account found. Please contact your administrator.");
-      setLoading(false);
+      if (member.role === 'admin' || member.role === 'chairlady' || member.role === 'treasurer') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
       
     } catch (err: any) {
       setError("Invalid credentials. Please check your information and try again.");
@@ -134,7 +152,7 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="text-label-caps text-on-surface-variant">Password</label>
-                <Link href="#" className="text-body-sm text-[#22C55E] hover:underline">Forgot password?</Link>
+                <button type="button" onClick={handleForgotPassword} className="text-body-sm text-[#22C55E] hover:underline bg-transparent border-none p-0 cursor-pointer">Forgot password?</button>
               </div>
               <div className="relative">
                 <input 
@@ -173,7 +191,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <button className="w-full flex items-center justify-center gap-3 bg-white border border-[#E5E7EB] text-on-surface py-3 rounded text-body-sm font-medium hover:bg-gray-50 transition-colors">
+            <button type="button" onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-3 bg-white border border-[#E5E7EB] text-on-surface py-3 rounded text-body-sm font-medium hover:bg-gray-50 transition-colors">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.64 9.20455C17.64 8.56636 17.5827 7.95273 17.4764 7.36364H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8195H14.9564C16.6582 14.2527 17.64 11.9455 17.64 9.20455Z" fill="#4285F4"/>
                 <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5614C11.2418 14.1014 10.2109 14.4205 9 14.4205C6.65591 14.4205 4.67182 12.8373 3.96409 10.71H0.957275V13.0418C2.43818 15.9832 5.48182 18 9 18Z" fill="#34A853"/>

@@ -46,6 +46,65 @@ export async function POST(req: Request) {
         console.error('Database Error:', error);
       } else {
         console.log('Transaction saved to database:', transaction);
+        
+        // Lookup member using phone number to get chama_id
+        const cleanPhone = result.phoneNumber.toString();
+        const formattedPhone = cleanPhone.startsWith('254') ? `+${cleanPhone}` : cleanPhone;
+        
+        const { data: member } = await supabaseAdmin
+          .from('members')
+          .select('id, chama_id, chamas(name)')
+          .eq('phone', formattedPhone)
+          .single();
+          
+        if (member && member.chama_id) {
+          try {
+            // 1. UPDATE WALLET BALANCE
+            await supabaseAdmin.rpc('increment_wallet_balance', {
+              p_chama_id: member.chama_id,
+              p_amount: result.amount
+            });
+            
+            // 2. WRITE TO BLOCKCHAIN
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+            const blockchainResult = await fetch(`${appUrl}/api/blockchain/record`, {
+              method: 'POST',
+              body: JSON.stringify({
+                type: 'CONTRIBUTION',
+                member_id: member.id,
+                chama_id: member.chama_id,
+                amount: result.amount,
+                mpesa_receipt: result.mpesaReceiptNumber,
+                timestamp: new Date().toISOString()
+              })
+            });
+            const { tx_hash } = await blockchainResult.json();
+            
+            // 3. SAVE TX HASH TO DATABASE
+            if (tx_hash) {
+              await supabaseAdmin.from('transactions')
+                .update({ blockchain_tx_hash: tx_hash })
+                .eq('id', transaction.id);
+            }
+            
+            // 4. RECALCULATE TRUST SCORE
+            await fetch(`${appUrl}/api/trust-score/calculate`, {
+              method: 'POST',
+              body: JSON.stringify({ member_id: member.id })
+            });
+            
+            // 5. SEND SMS
+            await fetch(`${appUrl}/api/sms/send`, {
+              method: 'POST',
+              body: JSON.stringify({
+                phone: formattedPhone,
+                message: `SmartChama: Your KSh ${result.amount} contribution to ${member.chamas?.name || 'your group'} is confirmed. Receipt: ${result.mpesaReceiptNumber}.`
+              })
+            });
+          } catch (chainErr) {
+            console.error("Error executing callback chain:", chainErr);
+          }
+        }
       }
 
       return NextResponse.json({
