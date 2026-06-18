@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 
 export default function SettingsPage() {
-  const { session, member, group, isLoading: authLoading, refreshMemberData } = useAuth();
+  const { session, member, group, isLoading: authLoading, refreshUser } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

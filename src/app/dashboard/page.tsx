@@ -151,154 +151,153 @@ export default function MemberDashboard() {
 
   if (authLoading || loading) {
     return (
-      <div className="p-8 max-w-7xl mx-auto w-full font-inter">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="p-6 max-w-[1280px] mx-auto w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           {[1,2,3,4].map(i => (
-             <div key={i} className="bg-white border border-gray-200 rounded-xl p-6 h-32 animate-pulse flex flex-col justify-between">
-                <div className="bg-gray-100 h-3 w-24 rounded"></div>
-                <div className="bg-gray-100 h-6 w-32 rounded"></div>
+             <div key={i} className="bg-white border border-[#E5E7EB] rounded-lg p-6 h-32 animate-pulse flex flex-col justify-between shadow-sm">
+                <div className="bg-gray-100 h-4 w-24 rounded"></div>
+                <div className="bg-gray-100 h-8 w-32 rounded"></div>
              </div>
           ))}
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-6 h-64 animate-pulse mb-8"></div>
+        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 h-64 animate-pulse mb-6"></div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white border border-[#E5E7EB] rounded-lg p-6 h-80 animate-pulse"></div>
+          <div className="lg:col-span-1 bg-white border border-[#E5E7EB] rounded-lg p-6 h-80 animate-pulse"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full pt-32">
-        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mb-4">
-          <div className="w-3 h-3 bg-red-600 rounded-full"></div>
-        </div>
-        <p className="text-sm font-medium text-black mb-2">{error}</p>
-        <button onClick={fetchDashboardData} className="text-xs font-semibold text-gray-500 hover:text-black uppercase tracking-wider transition-colors">Retry</button>
+      <div className="flex flex-col items-center justify-center h-full pt-20">
+        <span className="material-symbols-outlined text-error text-5xl mb-4">error_outline</span>
+        <p className="text-body-sm text-error">{error}</p>
+        <button onClick={fetchDashboardData} className="mt-4 text-primary hover:underline font-medium">Retry</button>
       </div>
     );
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-black';
-    if (score >= 60) return 'text-orange-500';
-    return 'text-red-600';
-  };
+  const trustColor = (member.trust_score >= 80) ? 'text-[#22C55E]' : (member.trust_score >= 60 ? 'text-yellow-500' : 'text-error');
 
   return (
-    <div className="p-8 max-w-7xl mx-auto w-full relative font-inter bg-white min-h-screen">
+    <div className="p-6 max-w-[1280px] mx-auto w-full relative">
       
       {toastMsg && (
-        <div className="fixed top-6 right-6 bg-black text-white px-4 py-3 rounded-lg shadow-xl z-50 flex items-center gap-3 animate-fade-in">
-          <div className="w-2 h-2 rounded-full bg-green-500"></div>
-          <span className="text-sm font-medium">{toastMsg}</span>
+        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
+          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+          <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-black">Member Overview</h1>
-        <p className="text-sm text-gray-500">Track your contributions and group health.</p>
-      </div>
-
       {/* ROW 1: Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         
         {/* Card 1 */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between hover:border-gray-300 transition-colors">
-          <div className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-6">Total Savings</div>
-          <div className="text-3xl font-bold tracking-tight text-black">KSh {formatCurrency(totalSavings)}</div>
+        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
+          <div className="flex justify-between items-start mb-4">
+            <div className="text-label-caps text-on-surface-variant">TOTAL SAVINGS</div>
+            <span className="material-symbols-outlined text-outline-variant">savings</span>
+          </div>
+          <div className="text-display-sm text-on-surface font-geist">KSh {formatCurrency(totalSavings)}</div>
         </div>
 
         {/* Card 2 */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between hover:border-gray-300 transition-colors">
-          <div className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-6">Active Loans</div>
-          <div className="text-3xl font-bold tracking-tight text-black">{activeLoans}</div>
+        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
+          <div className="text-label-caps text-on-surface-variant mb-4">ACTIVE LOANS</div>
+          <div className="text-display-sm text-on-surface font-geist">{activeLoans}</div>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between hover:border-gray-300 transition-colors">
-          <div className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-6">Repayment Rate</div>
-          <div className="text-3xl font-bold tracking-tight text-black">{repaymentRate !== null ? `${repaymentRate}%` : '—'}</div>
+        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
+          <div className="text-label-caps text-on-surface-variant mb-4">REPAYMENT RATE</div>
+          <div className="flex items-center gap-3">
+            <div className="text-display-sm text-on-surface font-geist">{repaymentRate !== null ? `${repaymentRate}%` : '—'}</div>
+          </div>
         </div>
 
         {/* Card 4 */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between hover:border-gray-300 transition-colors">
-          <div className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-6">Trust Score</div>
-          <div className={`text-3xl font-bold tracking-tight ${getScoreColor(member.trust_score || 0)}`}>{member.trust_score || 0}<span className="text-gray-400 text-lg">/100</span></div>
+        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
+          <div className="flex justify-between items-start mb-4">
+            <div className="text-label-caps text-on-surface-variant">TRUST SCORE</div>
+            <span className={`material-symbols-outlined ${trustColor}`}>verified</span>
+          </div>
+          <div className={`text-display-sm font-geist ${trustColor}`}>{member.trust_score || 0}/100</div>
         </div>
 
       </div>
 
       {/* ROW 2: Contribution Trend Chart */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-black">Contribution Trend</h2>
+      <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 mb-6 shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-headline-sm text-on-surface font-geist">Contribution Trend</h2>
         </div>
         
         {trendData.length > 0 ? (
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData} margin={{ top: 5, right: 0, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF' }} dx={-10} tickFormatter={(val) => `KSh ${val.toLocaleString()}`} />
+              <LineChart data={trendData} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dx={-10} tickFormatter={(val) => `KSh ${val.toLocaleString()}`} />
                 <Tooltip 
-                  formatter={(value: any) => [`KSh ${value.toLocaleString()}`, 'Amount']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', fontSize: '14px' }}
-                  cursor={{ stroke: '#F3F4F6', strokeWidth: 2 }}
+                  formatter={(value: number) => [`KSh ${value.toLocaleString()}`, 'Amount']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
                 />
-                <Line type="monotone" dataKey="amount" stroke="#000000" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#000000' }} />
+                <Line type="monotone" dataKey="amount" stroke="#22C55E" strokeWidth={2} dot={{ r: 4, fill: '#fff', stroke: '#22C55E', strokeWidth: 2 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-64 w-full flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-lg">
-            <p className="text-sm font-medium text-gray-500 mb-1">No contributions yet</p>
-            <p className="text-xs text-gray-400">Make your first deposit to see your trend.</p>
+          <div className="h-64 w-full flex flex-col items-center justify-center">
+            <span className="material-symbols-outlined text-gray-300 text-5xl mb-2">payments</span>
+            <p className="text-headline-sm text-secondary">No contributions yet</p>
+            <p className="text-body-sm text-secondary">Make your first contribution to get started.</p>
           </div>
         )}
       </div>
 
       {/* ROW 3: Two columns */}
-      <div className="grid lg:grid-cols-3 gap-6 mb-12">
+      <div className="grid lg:grid-cols-3 gap-6 mt-6 mb-12">
         
         {/* Left: Recent Transactions */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-black">Recent Ledger</h2>
+        <div className="lg:col-span-2 bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-headline-sm text-on-surface font-geist">Recent Transactions</h2>
           </div>
 
           <div className="overflow-x-auto">
             {transactions.length > 0 ? (
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse min-w-[500px]">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Member</th>
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Amount</th>
+                  <tr className="border-b border-[#E5E7EB]">
+                    <th className="py-3 text-label-caps text-on-secondary-container font-medium">DATE</th>
+                    <th className="py-3 text-label-caps text-on-secondary-container font-medium">MEMBER</th>
+                    <th className="py-3 text-label-caps text-on-secondary-container font-medium">TYPE</th>
+                    <th className="py-3 text-label-caps text-on-secondary-container font-medium text-right">AMOUNT</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map(tx => {
                     const date = new Date(tx.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                     const isIncoming = tx.type === 'contribution' || tx.type === 'repayment' || tx.type === 'penalty';
+                    const amountColor = isIncoming ? 'text-[#22C55E]' : 'text-on-surface';
                     const sign = isIncoming ? '+' : '-';
                     
                     return (
-                      <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors last:border-0">
-                        <td className="py-4 px-6 text-sm text-gray-500 whitespace-nowrap">{date}</td>
-                        <td className="py-4 px-6">
-                          <span className="text-sm text-black font-medium">{tx.members?.full_name || 'System'}</span>
+                      <tr key={tx.id} className="border-b border-[#E5E7EB] hover:bg-gray-50 transition-colors last:border-0">
+                        <td className="py-4 text-body-sm text-on-surface whitespace-nowrap">{date}</td>
+                        <td className="py-4">
+                          <span className="text-body-sm text-on-surface font-medium">{tx.members?.full_name || 'System'}</span>
                         </td>
-                        <td className="py-4 px-6">
-                          <span className="inline-block border border-gray-200 text-gray-600 px-2 py-0.5 rounded text-xs font-medium capitalize bg-white">
+                        <td className="py-4">
+                          <span className="inline-block bg-surface-container-low border border-[#E5E7EB] text-on-surface px-2 py-1 rounded text-xs font-medium capitalize">
                             {tx.type}
                           </span>
                         </td>
-                        <td className="py-4 px-6 text-right whitespace-nowrap">
-                          <span className={`text-sm font-medium ${isIncoming ? 'text-black' : 'text-gray-500'}`}>
-                            {sign} KSh {formatCurrency(tx.amount)}
-                          </span>
+                        <td className={`py-4 text-right text-body-sm font-medium ${amountColor} whitespace-nowrap`}>
+                          {sign} KSh {formatCurrency(tx.amount)}
                         </td>
                       </tr>
                     )
@@ -306,48 +305,59 @@ export default function MemberDashboard() {
                 </tbody>
               </table>
             ) : (
-              <div className="flex flex-col items-center justify-center py-16">
-                <p className="text-sm font-medium text-gray-500">No transactions recorded</p>
+              <div className="flex flex-col items-center justify-center py-10">
+                <span className="material-symbols-outlined text-gray-300 text-4xl mb-2">receipt_long</span>
+                <p className="text-body-sm text-secondary">No transactions found</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Right: Group Health Score */}
-        <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-6 flex flex-col">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-black mb-8">Group Health</h2>
+        <div className="lg:col-span-1 bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col shadow-sm">
+          <h2 className="text-headline-sm text-on-surface font-geist mb-6">Group Health</h2>
           
           {groupHealth ? (
             <>
-              <div className="flex flex-col items-center mb-10">
-                <div className="text-5xl font-bold tracking-tight text-black mb-1">{groupHealth.overall}</div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  {groupHealth.overall >= 80 ? 'Excellent Standing' : (groupHealth.overall >= 60 ? 'Good Standing' : 'Needs Attention')}
+              <div className="flex flex-col items-center mb-8">
+                <div className="relative w-32 h-32 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#E5E7EB" strokeWidth="8" />
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#22C55E" strokeWidth="8" strokeLinecap="round" 
+                      strokeDasharray={`${(groupHealth.overall / 100) * 282.7} 282.7`} />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center mt-2">
+                    <span className="text-display-sm font-geist text-on-surface leading-none">{groupHealth.overall}</span>
+                    <span className="text-label-caps text-on-secondary-container mt-1">
+                      {groupHealth.overall >= 80 ? 'Excellent' : (groupHealth.overall >= 60 ? 'Good' : 'Needs Attention')}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-6 flex-1">
+              <div className="space-y-5 flex-1">
                 {[
                   { label: 'Participation', value: groupHealth.participation },
                   { label: 'Repayment', value: groupHealth.repayment },
                   { label: 'Consistency', value: groupHealth.consistency },
-                  { label: 'Group Trust', value: groupHealth.trust },
+                  { label: 'Trust', value: groupHealth.trust },
                 ].map((stat, i) => (
                   <div key={i}>
                     <div className="flex justify-between items-end mb-2">
-                      <span className="text-xs font-medium text-gray-500">{stat.label}</span>
-                      <span className="text-xs font-bold text-black">{stat.value}%</span>
+                      <span className="text-label-caps text-on-surface-variant">{stat.label}</span>
+                      <span className="text-mono-data text-on-surface">{stat.value}%</span>
                     </div>
-                    <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-black transition-all" style={{ width: `${stat.value}%` }}></div>
+                    <div className="w-full h-1.5 bg-[#E5E7EB] rounded-full overflow-hidden">
+                      <div className="h-full bg-[#22C55E] transition-all" style={{ width: `${stat.value}%` }}></div>
                     </div>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-             <div className="flex flex-col items-center justify-center py-16 flex-1 text-center">
-                <p className="text-sm font-medium text-gray-500">Not enough data to calculate health score</p>
+             <div className="flex flex-col items-center justify-center py-10 flex-1">
+                <span className="material-symbols-outlined text-gray-300 text-4xl mb-2">monitoring</span>
+                <p className="text-body-sm text-secondary">Not enough data to calculate health score</p>
              </div>
           )}
         </div>

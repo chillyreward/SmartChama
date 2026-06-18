@@ -1,13 +1,27 @@
 @import "tailwindcss";
+/* ... rest of your CSS ... */
 
 @layer base {
+  /* ... keep your existing styles below ... */
+  * {
+    @apply border-slate-800;
+  }
+  
   body {
-    @apply bg-white text-gray-900 antialiased;
+    @apply bg-slate-950 text-slate-100;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+  
+  .glass-card {
+    @apply bg-slate-900/50 backdrop-blur-xl border border-slate-800/50;
+  }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -26,23 +40,23 @@ html {
 }
 
 ::selection {
-  @apply bg-green-100 text-green-900;
+  @apply bg-emerald-500/30 text-emerald-100;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #0f172a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
+  background: #334155;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+  background: #475569;
 }
