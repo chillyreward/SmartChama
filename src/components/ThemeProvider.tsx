@@ -35,5 +35,9 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     return () => observer.disconnect();
   }, []);
 
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+  return (
+    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem {...props}>
+      {children}
+    </NextThemesProvider>
+  );
 }

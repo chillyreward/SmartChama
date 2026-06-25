@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -18,7 +18,6 @@ export default function MemberDashboard() {
   const [loadingHealth, setLoadingHealth] = useState(true);
   const [error, setError] = useState('');
   
-  const supabase = getSupabaseBrowser();
   
   const [totalSavings, setTotalSavings] = useState(0);
   const [activeLoans, setActiveLoans] = useState(0);
