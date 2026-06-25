@@ -1,65 +1,96 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function LoginClient() {
   const router = useRouter();
-  const supabase = getSupabaseBrowser();
+  const { session, member, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && session) {
+      if (member) {
+        const isAdmin = ['admin', 'chairlady', 'treasurer', 'secretary'].includes(member.role);
+        router.push(isAdmin ? '/admin/dashboard' : '/dashboard');
+      } else {
+        router.push('/onboarding');
+      }
+    }
+  }, [authLoading, session, member, router]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ 
-      email, password 
-    });
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ 
+        email, password 
+      });
 
-    if (authError) {
-      setError(
-        authError.message.includes('Invalid')
-          ? 'Incorrect email or password.'
-          : authError.message.includes('confirmed')
-          ? 'Please confirm your email first.'
-          : 'Could not sign in. Please try again.'
-      );
+      if (authError) {
+        setError(
+          authError.message.includes('Invalid')
+            ? 'Incorrect email or password.'
+            : authError.message.includes('confirmed')
+            ? 'Please confirm your email first.'
+            : 'Could not sign in. Please try again.'
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (!data.user) {
+        setError('Login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const { data: memberships, error: dbError } = await supabase
+        .from('chama_memberships')
+        .select(`
+          role, status,
+          chamas_v2 ( id, name )
+        `)
+        .eq('profile_id', data.user.id)
+        .eq('status', 'active');
+
+      if (dbError) {
+        console.error('Memberships lookup error:', dbError);
+        setError('Failed to load memberships. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      if (!memberships || memberships.length === 0) {
+        router.push('/onboarding');
+        return;
+      }
+
+      if (memberships.length > 1) {
+        router.push('/select-group');
+        return;
+      }
+
+      const m = memberships[0];
+      sessionStorage.setItem('active_chama_id', (m.chamas_v2 as any).id);
+
+      const isAdmin = ['admin', 'chairlady', 'treasurer', 'secretary'].includes(m.role);
+
+      router.push(isAdmin ? '/admin/dashboard' : '/dashboard');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again.');
       setLoading(false);
-      return;
     }
-
-    const { data: memberships } = await supabase
-      .from('chama_memberships')
-      .select(`
-        role, status,
-        chamas_v2 ( id, name )
-      `)
-      .eq('profile_id', data.user.id)
-      .eq('status', 'active');
-
-    if (!memberships || memberships.length === 0) {
-      router.push('/onboarding');
-      return;
-    }
-
-    if (memberships.length > 1) {
-      router.push('/select-group');
-      return;
-    }
-
-    const m = memberships[0];
-    sessionStorage.setItem('active_chama_id', (m.chamas_v2 as any).id);
-
-    const isAdmin = ['admin', 'chairlady', 'treasurer', 'secretary'].includes(m.role);
-
-    router.push(isAdmin ? '/admin/dashboard' : '/dashboard');
   }
 
   return (

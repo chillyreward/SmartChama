@@ -3,12 +3,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getSupabaseBrowser } from '@/lib/supabase-browser'
+import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
 
 export default function GroupSwitcher() {
   const router = useRouter()
-  const supabase = getSupabaseBrowser()
   const { group: currentGroup, member: currentMember } = useAuth()
   
   const [memberships, setMemberships] = useState<any[]>([])

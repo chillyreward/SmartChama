@@ -109,14 +109,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let mounted = true;
 
     async function getInitialSession() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchMemberData(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          if (session) {
+            // Verify session validity with getUser to avoid stale local storage sessions
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+              await supabase.auth.signOut();
+              setSession(null);
+              setUser(null);
+              setMember(null);
+              setGroup(null);
+            } else {
+              setSession(session);
+              setUser(user);
+              await fetchMemberData(user.id);
+            }
+          } else {
+            setSession(null);
+            setUser(null);
+            setMember(null);
+            setGroup(null);
+          }
+          setIsLoading(false);
         }
-        setIsLoading(false);
+      } catch (err) {
+        console.error("Error in getInitialSession:", err);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     }
 

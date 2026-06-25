@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function SelectGroupClient() {
   const router = useRouter();
-  const supabase = getSupabaseBrowser();
   const [memberships, setMemberships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

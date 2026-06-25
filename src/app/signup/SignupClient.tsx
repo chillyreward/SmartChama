@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function SignupClient() {
   const router = useRouter();
-  const supabase = getSupabaseBrowser();
+  const { session, member, isLoading: authLoading } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [phoneInput, setPhoneInput] = useState('');
@@ -23,6 +24,17 @@ export default function SignupClient() {
   if (password.length >= 8) strength++;
   if (password.match(/[A-Z]/) && password.match(/[a-z]/)) strength++;
   if (password.match(/[0-9!@#$%^&*]/)) strength++;
+
+  useEffect(() => {
+    if (!authLoading && session) {
+      if (member) {
+        const isAdmin = ['admin', 'chairlady', 'treasurer', 'secretary'].includes(member.role);
+        router.push(isAdmin ? '/admin/dashboard' : '/dashboard');
+      } else {
+        router.push('/onboarding');
+      }
+    }
+  }, [authLoading, session, member, router]);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -49,60 +61,72 @@ export default function SignupClient() {
       phone = '+254' + phone;
     }
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { 
-          full_name: fullName, 
-          phone_number: phone 
-        }
-      }
-    });
-
-    if (authError) {
-      setError(
-        authError.message.includes('already registered')
-          ? 'An account with this email already exists.'
-          : authError.message
-      );
-      setLoading(false);
-      return;
-    }
-
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: authData.user!.id,
-        full_name: fullName,
-        phone_number: phone,
-        email: email
-      });
-
-    if (profileError) {
-      if (profileError.code === '23505') {
-        setError('This phone number is already registered.');
-      } else {
-        setError('Account created but profile setup failed. Contact support.');
-      }
-      setLoading(false);
-      return;
-    }
-
     try {
-      await fetch('/api/sms/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          phone,
-          message: `Welcome to SmartChama, ${fullName}. Your account is ready. Sign in at ${process.env.NEXT_PUBLIC_APP_URL}`
-        })
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { 
+            full_name: fullName, 
+            phone_number: phone 
+          }
+        }
       });
-    } catch (e) {
-      console.error('Welcome SMS failed:', e);
-    }
 
-    router.push('/onboarding');
+      if (authError) {
+        setError(
+          authError.message.includes('already registered')
+            ? 'An account with this email already exists.'
+            : authError.message
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (!authData.user) {
+        setError('Sign up failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          full_name: fullName,
+          phone_number: phone,
+          email: email
+        });
+
+      if (profileError) {
+        if (profileError.code === '23505') {
+          setError('This phone number is already registered.');
+        } else {
+          setError('Account created but profile setup failed. Contact support.');
+        }
+        setLoading(false);
+        return;
+      }
+
+      try {
+        await fetch('/api/sms/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone,
+            message: `Welcome to SmartChama, ${fullName}. Your account is ready. Sign in at ${process.env.NEXT_PUBLIC_APP_URL}`
+          })
+        });
+      } catch (e) {
+        console.error('Welcome SMS failed:', e);
+      }
+
+      router.push('/onboarding');
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      setError('An unexpected error occurred. Please try again.');
+      setLoading(false);
+    }
   }
 
   return (
