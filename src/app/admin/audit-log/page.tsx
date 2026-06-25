@@ -67,79 +67,87 @@ export default function AdminAuditLogPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="h-96 bg-white border border-[#E5E7EB] rounded-lg animate-pulse shadow-sm"></div>
+      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
+        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 font-inter min-h-full">
+    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6 md:mb-8">
         <div>
-          <h1 className="text-headline-lg font-semibold text-on-surface font-geist">Audit Log</h1>
-          <p className="text-body-sm text-secondary mt-1">Immutable record of all administrative actions</p>
+          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+            <span>Admin Dashboard</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span>Audit Log</span>
+          </p>
+          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Audit Log</h1>
+          <p className="text-[14px] text-[var(--text-muted)] mt-1">Immutable record of all administrative actions</p>
         </div>
-        <button className="bg-white border border-[#E5E7EB] text-on-surface px-4 py-2 rounded text-body-sm font-medium hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">download</span>
-          Export Log
-        </button>
+        <div className="w-full md:w-auto">
+          <button className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm flex items-center justify-center gap-2 w-full md:w-auto">
+            <span className="material-symbols-outlined text-[18px]">download</span>
+            Export Log
+          </button>
+        </div>
       </div>
 
-      <div className="bg-surface-container-low border border-[#E5E7EB] rounded-lg p-4 mb-6 flex items-start gap-3">
-        <span className="material-symbols-outlined text-secondary shrink-0 mt-0.5">shield</span>
-        <p className="text-body-sm text-secondary leading-relaxed">
+      <div className="bg-transparent border border-[var(--border)] rounded-2xl p-4 mb-6 flex items-start gap-3 text-[var(--text-muted)]">
+        <span className="material-symbols-outlined text-[var(--text-muted)] shrink-0 mt-0.5">shield</span>
+        <p className="text-xs leading-relaxed">
           For compliance and transparency, all actions taken by administrators, chairladies, and treasurers are logged here permanently. This log cannot be altered or deleted.
         </p>
       </div>
 
-      <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm overflow-hidden min-h-[400px]">
+      <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden min-h-[400px] hover:shadow-md transition-all duration-200">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          {/* Desktop Table View */}
+          <table className="hidden md:table w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50 border-b border-[#E5E7EB]">
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">TIMESTAMP</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">ADMINISTRATOR</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">ACTION / TYPE</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">DETAILS & NOTES</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium text-right">REFERENCE</th>
+              <tr className="bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+                <th className="px-6 py-4">TIMESTAMP</th>
+                <th className="px-6 py-4">ADMINISTRATOR</th>
+                <th className="px-6 py-4">ACTION / TYPE</th>
+                <th className="px-6 py-4">DETAILS & NOTES</th>
+                <th className="px-6 py-4 text-right">REFERENCE</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
               {logs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-secondary text-body-sm">
+                  <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
                     No admin actions recorded yet.
                   </td>
                 </tr>
               ) : (
                 logs.map(log => (
-                  <tr key={log.id} className="border-b border-[#E5E7EB] last:border-0 hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-body-sm text-secondary whitespace-nowrap">
+                  <tr key={log.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                    <td className="px-6 py-4 text-xs text-[var(--text-muted)] whitespace-nowrap">
                       {new Date(log.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-[10px]">
+                        <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] shadow-sm">
                           {log.admin_name.charAt(0)}
                         </div>
-                        <span className="text-body-sm font-medium text-on-surface">{log.admin_name}</span>
+                        <span className="text-sm font-semibold text-[var(--text-main)]">{log.admin_name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded text-label-caps font-bold capitalize bg-gray-100 border border-gray-200 text-gray-700">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold capitalize bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-[var(--text-muted)]">
                         {log.type?.replace('_', ' ') || 'SYSTEM ACTION'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-body-sm text-on-surface max-w-md">
+                    <td className="px-6 py-4 text-sm text-[var(--text-main)] max-w-md font-medium">
                       {log.notes ? (
-                        <span className="text-secondary">{log.notes}</span>
+                        <span className="text-[var(--text-muted)]">{log.notes}</span>
                       ) : (
-                        <span>Recorded amount of <span className="font-mono font-medium">KSh {Math.abs(log.amount).toLocaleString()}</span></span>
+                        <span>Recorded amount of <span className="font-mono font-bold">KSh {Math.abs(log.amount).toLocaleString()}</span></span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right text-body-sm font-mono text-secondary">
+                    <td className="px-6 py-4 text-right text-xs font-mono text-[var(--text-muted)]">
                       {log.reference || log.id.substring(0,8)}
                     </td>
                   </tr>
@@ -147,6 +155,48 @@ export default function AdminAuditLogPage() {
               )}
             </tbody>
           </table>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] p-4">
+            {logs.length === 0 ? (
+              <div className="text-center py-8 text-[var(--text-muted)] text-sm">
+                No admin actions recorded yet.
+              </div>
+            ) : (
+              logs.map(log => (
+                <div key={log.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] shadow-sm">
+                        {log.admin_name.charAt(0)}
+                      </div>
+                      <span className="text-sm font-semibold text-[var(--text-main)]">{log.admin_name}</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold capitalize bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-[var(--text-muted)]">
+                      {log.type?.replace('_', ' ') || 'SYSTEM ACTION'}
+                    </span>
+                  </div>
+                  
+                  <div className="text-sm text-[var(--text-main)] font-medium">
+                    {log.notes ? (
+                      <span className="text-[var(--text-muted)]">{log.notes}</span>
+                    ) : (
+                      <span>Recorded amount of <span className="font-mono font-bold">KSh {Math.abs(log.amount).toLocaleString()}</span></span>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] text-[var(--text-muted)]">
+                    <span>
+                      {new Date(log.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="font-mono">
+                      REF: {log.reference || log.id.substring(0,8)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

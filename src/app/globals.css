@@ -1,15 +1,85 @@
 @import "tailwindcss";
-/* ... rest of your CSS ... */
+
+:root {
+  --bg-page: #FAFAFA;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --border: #E5E7EB;
+  --text-main: #161d16;
+  --text-muted: #60645f;
+  
+  --brand-green: #22C55E;
+  --brand-hover: #006e2f;
+}
+
+.dark {
+  --bg-page: #000000;
+  --bg-card: #0A0A0A;
+  --bg-sidebar: #050505;
+  --bg-input: #111111;
+  --border: #1A1A1A;
+  --text-main: #FFFFFF;
+  --text-muted: #A1A1AA;
+  
+  --brand-green: #22C55E;
+  --brand-hover: #4ae176;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Force override Tailwind's hardcoded classes */
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-\[\#FAFAFA\],
+.dark .bg-\[\#0B0F0C\] {
+  background-color: transparent !important; 
+}
+
+/* Base utility classes for pages, cards, and sidebars */
+.page-bg { background-color: var(--bg-page); }
+.card-bg { background-color: var(--bg-card); border-color: var(--border); }
+.sidebar-bg { background-color: var(--bg-sidebar); }
+
+@keyframes elephantWalk {
+  0%   { transform: translateY(0px) rotate(0deg); }
+  25%  { transform: translateY(-2px) rotate(0.5deg); }
+  50%  { transform: translateY(0px) rotate(0deg); }
+  75%  { transform: translateY(-1px) rotate(-0.5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes trunkSway {
+  0%, 100% { transform: rotate(0deg); transform-origin: top center; }
+  50%      { transform: rotate(-5deg); transform-origin: top center; }
+}
+
+.elephant-walk {
+  animation: elephantWalk 0.8s ease-in-out infinite;
+}
+.trunk-sway {
+  animation: trunkSway 1.6s ease-in-out infinite;
+}
+
+/* Ensure inputs are always readable */
+input, textarea, select {
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  border-color: var(--border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
 
 @layer base {
-  /* ... keep your existing styles below ... */
   * {
-    @apply border-slate-800;
-  }
-  
-  body {
-    @apply bg-slate-950 text-slate-100;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    border-color: var(--border);
   }
 }
 
@@ -40,7 +110,7 @@ html {
 }
 
 ::selection {
-  @apply bg-emerald-500/30 text-emerald-100;
+  @apply bg-[#22C55E]/30 text-[#ECFDF5];
 }
 
 ::-webkit-scrollbar {
@@ -49,14 +119,32 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: var(--bg-page);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--brand-green);
+}
+
+/* Elephant Walking Splash Screen Styles */
+.sc-splash-hidden #sc-splash-screen {
+  display: none !important;
+}
+
+/* iOS safe area support */
+.pb-safe {
+  padding-bottom: env(
+    safe-area-inset-bottom, 0px
+  );
+}
+
+.pt-safe {
+  padding-top: env(
+    safe-area-inset-top, 0px
+  );
 }

@@ -81,7 +81,7 @@ export default function ChamaDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 text-[#22C55E] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#006e2f] animate-spin" />
       </div>
     );
   }
@@ -103,7 +103,7 @@ export default function ChamaDetailPage() {
           {step === 'pin' && (
             <div>
               <div className="w-20 h-20 bg-surface-container-low rounded-full flex items-center justify-center mx-auto mb-6 border border-[#E5E7EB]">
-                <ShieldCheck className="w-10 h-10 text-[#22C55E]" />
+                <ShieldCheck className="w-10 h-10 text-[#006e2f]" />
               </div>
               <h2 className="text-headline-sm font-geist font-bold text-on-surface mb-2">Verify Identity</h2>
               <p className="text-secondary text-sm mb-8">
@@ -120,7 +120,7 @@ export default function ChamaDetailPage() {
                     maxLength={1}
                     value={digit}
                     onChange={(e) => handlePinChange(i, e.target.value)}
-                    className="w-12 h-14 bg-surface-container-lowest border border-[#E5E7EB] rounded-xl text-center text-headline-sm font-geist font-bold text-on-surface focus:border-[#22C55E] focus:shadow-sm outline-none transition-all"
+                    className="w-12 h-14 bg-surface-container-lowest border border-[#E5E7EB] rounded-xl text-center text-headline-sm font-geist font-bold text-on-surface focus:border-[#006e2f] focus:shadow-sm outline-none transition-all"
                   />
                 ))}
               </div>
@@ -138,16 +138,16 @@ export default function ChamaDetailPage() {
 
           {step === 'verifying' && (
             <div className="py-10">
-              <Loader2 className="w-12 h-12 text-[#22C55E] animate-spin mx-auto mb-4" />
+              <Loader2 className="w-12 h-12 text-[#006e2f] animate-spin mx-auto mb-4" />
               <p className="text-on-surface font-bold">Verifying Credentials...</p>
             </div>
           )}
 
           {step === 'success' && (
             <div className="py-10">
-              <CheckCircle className="w-16 h-16 text-[#22C55E] mx-auto mb-4 animate-bounce" />
+              <CheckCircle className="w-16 h-16 text-[#006e2f] mx-auto mb-4 animate-bounce" />
               <p className="text-on-surface font-bold text-lg">Access Granted</p>
-              <p className="text-[#22C55E] text-sm">Loading Chama Details...</p>
+              <p className="text-[#006e2f] text-sm">Loading Chama Details...</p>
             </div>
           )}
 
@@ -164,7 +164,7 @@ export default function ChamaDetailPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 bg-white border border-[#E5E7EB] rounded-xl flex items-center justify-center text-secondary hover:text-on-surface hover:border-[#22C55E] transition-all"
+          className="w-10 h-10 bg-white border border-[#E5E7EB] rounded-xl flex items-center justify-center text-secondary hover:text-on-surface hover:border-[#006e2f] transition-all"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -181,20 +181,20 @@ export default function ChamaDetailPage() {
         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-surface-container-low rounded-xl flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-[#22C55E]" />
+              <Wallet className="w-5 h-5 text-[#006e2f]" />
             </div>
             <p className="text-xs text-secondary uppercase font-bold">Total Balance</p>
           </div>
           <p className="text-3xl font-bold text-on-surface mb-1">
             KES {parseFloat(chama.total_balance || 0).toLocaleString()}
           </p>
-          <p className="text-xs text-[#22C55E]">+0% this month</p>
+          <p className="text-xs text-[#006e2f]">+0% this month</p>
         </div>
 
         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-surface-container-low rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-[#22C55E]" />
+              <TrendingUp className="w-5 h-5 text-[#006e2f]" />
             </div>
             <p className="text-xs text-secondary uppercase font-bold">Investment Goal</p>
           </div>
@@ -207,7 +207,7 @@ export default function ChamaDetailPage() {
         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
-              <Users className="w-5 h-5 text-[#22C55E]" />
+              <Users className="w-5 h-5 text-[#006e2f]" />
             </div>
             <p className="text-xs text-secondary uppercase font-bold">Members</p>
           </div>
@@ -221,7 +221,7 @@ export default function ChamaDetailPage() {
       {/* Quick Actions */}
       <div>
         <h3 className="text-on-surface font-bold mb-4 flex items-center gap-2">
-          <span className="w-1 h-5 bg-[#22C55E] rounded-full"></span>
+          <span className="w-1 h-5 bg-[#006e2f] rounded-full"></span>
           Quick Actions
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -232,14 +232,14 @@ export default function ChamaDetailPage() {
                 window.dispatchEvent(new CustomEvent('openInviteModal'));
               }, 100);
             }}
-            className="bg-white border border-[#E5E7EB] hover:border-[#22C55E] rounded-xl p-6 text-center transition-all group"
+            className="bg-white border border-[#E5E7EB] hover:border-[#006e2f] rounded-xl p-6 text-center transition-all group"
           >
-            <Users className="w-8 h-8 text-[#22C55E] mx-auto mb-3 group-hover:scale-110 transition-transform" />
+            <Users className="w-8 h-8 text-[#006e2f] mx-auto mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-bold text-on-surface">Invite Members</p>
           </button>
 
-          <button className="bg-white border border-[#E5E7EB] hover:border-[#22C55E] rounded-xl p-6 text-center transition-all group">
-            <CreditCard className="w-8 h-8 text-[#22C55E] mx-auto mb-3 group-hover:scale-110 transition-transform" />
+          <button className="bg-white border border-[#E5E7EB] hover:border-[#006e2f] rounded-xl p-6 text-center transition-all group">
+            <CreditCard className="w-8 h-8 text-[#006e2f] mx-auto mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-bold text-on-surface">Transactions</p>
           </button>
 
@@ -247,7 +247,7 @@ export default function ChamaDetailPage() {
             onClick={() => router.push('/admin/dashboard/members')}
             className="bg-white border border-[#E5E7EB] hover:border-blue-500 rounded-xl p-6 text-center transition-all group"
           >
-            <Users className="w-8 h-8 text-[#22C55E] mx-auto mb-3 group-hover:scale-110 transition-transform" />
+            <Users className="w-8 h-8 text-[#006e2f] mx-auto mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-bold text-on-surface">Manage Members</p>
           </button>
 
@@ -255,7 +255,7 @@ export default function ChamaDetailPage() {
             onClick={() => router.push('/admin/dashboard/settings')}
             className="bg-white border border-[#E5E7EB] hover:border-purple-500 rounded-xl p-6 text-center transition-all group"
           >
-            <Settings className="w-8 h-8 text-[#22C55E] mx-auto mb-3 group-hover:scale-110 transition-transform" />
+            <Settings className="w-8 h-8 text-[#006e2f] mx-auto mb-3 group-hover:scale-110 transition-transform" />
             <p className="text-sm font-bold text-on-surface">Settings</p>
           </button>
         </div>
@@ -264,7 +264,7 @@ export default function ChamaDetailPage() {
       {/* About This Chama */}
       <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
         <h3 className="text-on-surface font-bold mb-6 flex items-center gap-2">
-          <Building2 className="w-5 h-5 text-[#22C55E]" />
+          <Building2 className="w-5 h-5 text-[#006e2f]" />
           About This Chama
         </h3>
         <div className="grid md:grid-cols-2 gap-6 text-sm">
@@ -284,14 +284,14 @@ export default function ChamaDetailPage() {
           </div>
           <div>
             <p className="text-secondary mb-2">Status</p>
-            <p className="text-[#22C55E] font-semibold flex items-center gap-2">
-              <span className="w-2 h-2 bg-[#22C55E] rounded-full"></span>
+            <p className="text-[#006e2f] font-semibold flex items-center gap-2">
+              <span className="w-2 h-2 bg-[#006e2f] rounded-full"></span>
               Active
             </p>
           </div>
           <div>
             <p className="text-secondary mb-2">Your Role</p>
-            <p className="text-[#22C55E] font-semibold">Administrator</p>
+            <p className="text-[#006e2f] font-semibold">Administrator</p>
           </div>
           <div>
             <p className="text-secondary mb-2">Monthly Growth Target</p>
@@ -311,21 +311,21 @@ export default function ChamaDetailPage() {
         </h3>
         <ul className="space-y-3 text-sm">
           <li className="flex items-start gap-3">
-            <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#22C55E] font-bold text-xs">1</span>
+            <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#006e2f] font-bold text-xs">1</span>
             <div>
               <p className="text-on-surface font-semibold">Invite your first members</p>
               <p className="text-secondary text-xs">Click "Invite Members" to generate invite links</p>
             </div>
           </li>
           <li className="flex items-start gap-3">
-            <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#22C55E] font-bold text-xs">2</span>
+            <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#006e2f] font-bold text-xs">2</span>
             <div>
               <p className="text-on-surface font-semibold">Set up contribution rules</p>
               <p className="text-secondary text-xs">Define monthly contribution amounts and schedules</p>
             </div>
           </li>
           <li className="flex items-start gap-3">
-            <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#22C55E] font-bold text-xs">3</span>
+            <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#006e2f] font-bold text-xs">3</span>
             <div>
               <p className="text-on-surface font-semibold">Start collecting contributions</p>
               <p className="text-secondary text-xs">Members can deposit via M-Pesa once they join</p>

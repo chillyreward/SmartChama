@@ -1,24 +1,50 @@
 import { NextResponse } from 'next/server';
 import { initiateSTKPush } from '@/lib/mpesa';
-
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(req: Request) {
   try {
-    const { phoneNumber, amount, accountReference, transactionDesc, chama_id } = await req.json();
+    const body = await req.json();
+    const phone = body.phone || body.phoneNumber;
+    const amount = body.amount;
+    const chama_id = body.chama_id;
+    const account_ref = body.account_ref || body.accountReference || 'SmartChama';
+    const membership_id = body.membership_id;
 
-    console.log('STK Push Request:', { phoneNumber, amount, accountReference, transactionDesc, chama_id });
+    console.log('STK Push Request:', { phone, amount, account_ref, chama_id, membership_id });
 
     // Validate inputs
-    if (!phoneNumber || !amount) {
+    if (!phone || !amount) {
       return NextResponse.json(
         { success: false, error: 'Phone number and amount are required' },
         { status: 400 }
+      );
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+
+    // Validate phone number format
+    const cleanPhone = phone.replace(/\s/g, '').replace('+', '');
+    if (!/^254\d{9}$/.test(cleanPhone)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid phone number format. Use 254XXXXXXXXX' },
+        { status: 400 }
+      );
+    }
+
+    // Rate Limiting Check (30 seconds deduplication)
+    const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
+    const { data: recentTx } = await supabaseAdmin
+      .from('transactions')
+      .select('id')
+      .eq('phone', cleanPhone)
+      .gte('created_at', thirtySecondsAgo)
+      .limit(1);
+
+    if (recentTx && recentTx.length > 0) {
+      return NextResponse.json(
+        { success: false, error: 'Please wait 30 seconds before requesting another STK Push.' },
+        { status: 429 }
       );
     }
 
@@ -36,17 +62,7 @@ export async function POST(req: Request) {
             error: `Minimum contribution is KSh ${rules.min_contribution}` 
           }, { status: 400 });
         }
-        // In a full implementation, we'd add late_penalty handling here
       }
-    }
-
-    // Validate phone number format
-    const cleanPhone = phoneNumber.replace(/\s/g, '');
-    if (!/^254\d{9}$/.test(cleanPhone)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid phone number format. Use 254XXXXXXXXX' },
-        { status: 400 }
-      );
     }
 
     // Validate amount
@@ -61,8 +77,8 @@ export async function POST(req: Request) {
     const result = await initiateSTKPush(
       cleanPhone,
       amount,
-      accountReference || 'SmartChama',
-      transactionDesc || 'Chama Contribution'
+      account_ref,
+      body.transactionDesc || 'Chama Contribution'
     );
 
     console.log('STK Push Result:', result);

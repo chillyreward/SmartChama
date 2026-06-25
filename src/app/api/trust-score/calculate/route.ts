@@ -1,107 +1,113 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(request: Request) {
+  const supabase = getSupabaseAdmin()
+  
   try {
-    const { member_id } = await request.json();
+    const { membership_id } = await request.json()
     
-    // Fetch all member data
-    const { data: member, error: memberError } = await supabaseAdmin
-      .from('members')
-      .select('*, chamas(*)')
-      .eq('id', member_id)
-      .single();
-      
-    if (memberError || !member) {
-      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    if (!membership_id) {
+      return new Response(JSON.stringify({ error: 'Missing membership_id' }), { status: 400 })
     }
-    
-    const { data: contributions } = await supabaseAdmin
-      .from('contributions')
-      .select('amount, status, created_at')
-      .eq('member_id', member_id) || { data: [] };
-    
-    const { data: loans } = await supabaseAdmin
-      .from('loans')
-      .select('amount, status, due_date')
-      .eq('member_id', member_id) || { data: [] };
-    
-    // Calculate months active
-    const joinDate = new Date(member.created_at || new Date());
-    const now = new Date();
-    const monthsActive = Math.max(1,
-      (now.getFullYear() - joinDate.getFullYear()) * 12 +
-      (now.getMonth() - joinDate.getMonth())
-    );
-    
-    // Contribution score (40%)
-    const confirmed = (contributions || []).filter(c => c.status === 'confirmed').length;
-    const onTimeRate = confirmed / monthsActive;
-    const contributionScore = Math.min(onTimeRate, 1) * 40;
-    
-    // Repayment score (30%)
-    const totalLoans = (loans || []).length;
-    const repaidLoans = (loans || []).filter(l => l.status === 'repaid').length;
-    const repaymentRate = totalLoans > 0 ? repaidLoans / totalLoans : 1;
-    const repaymentScore = repaymentRate * 30;
-    
-    // Tenure score (20%)
-    const tenureScore = Math.min(monthsActive / 24, 1) * 20;
-    
-    // Participation score (10%)
-    const participationScore = Math.min(confirmed / monthsActive, 1) * 10;
-    
-    // Final score
-    const trustScore = Math.round(
-      contributionScore + 
-      repaymentScore + 
-      tenureScore + 
-      participationScore
-    );
-    
-    // Calculate streak
-    let streak = 0;
-    const sortedContributions = (contributions || [])
-      .filter(c => c.status === 'confirmed')
-      .sort((a, b) => 
-        new Date(b.created_at).getTime() - 
-        new Date(a.created_at).getTime()
-      );
-    
-    for (let i = 0; i < sortedContributions.length; i++) {
-      const contribMonth = new Date(sortedContributions[i].created_at).getMonth();
-      const expectedMonth = (now.getMonth() - i + 12) % 12;
-      if (contribMonth === expectedMonth) {
-        streak++;
-      } else break;
+
+    // Fetch membership details
+    const { data: membership, error: memErr } = await supabase
+      .from('chama_memberships')
+      .select('joined_at, chama_id')
+      .eq('id', membership_id)
+      .single()
+
+    if (memErr || !membership) {
+      return new Response(JSON.stringify({ error: 'Membership not found' }), { status: 404 })
     }
+
+    // Fetch confirmed contributions for this membership
+    const { data: contributions, error: contErr } = await supabase
+      .from('contributions_v2')
+      .select('created_at, status')
+      .eq('membership_id', membership_id)
+      .eq('status', 'confirmed')
+      .order('created_at', { ascending: true })
+
+    if (contErr) throw contErr
+
+    // Fetch all loans for this membership
+    const { data: loans, error: loanErr } = await supabase
+      .from('loans_v2')
+      .select('status')
+      .eq('membership_id', membership_id)
+
+    if (loanErr) throw loanErr
+
+    // Calculations
+    const joinedAt = new Date(membership.joined_at)
+    const now = new Date()
     
-    // Save to database
-    await supabaseAdmin.from('members')
-      .update({ 
-        trust_score: trustScore,
-        contribution_streak: streak,
-        last_score_update: new Date().toISOString()
-      })
-      .eq('id', member_id);
+    // months_active = months since joined_at (minimum 1)
+    let months_active = (now.getFullYear() - joinedAt.getFullYear()) * 12 + (now.getMonth() - joinedAt.getMonth()) + 1
+    if (months_active < 1) months_active = 1
+
+    // confirmed_months = count of distinct months with confirmed contributions
+    const distinctMonths = new Set()
+    contributions?.forEach(c => {
+      const d = new Date(c.created_at)
+      distinctMonths.add(`${d.getFullYear()}-${d.getMonth()}`)
+    })
+    const confirmed_months = distinctMonths.size
+
+    // on_time_rate = confirmed_months / months_active (capped at 1)
+    const on_time_rate = Math.min(confirmed_months / months_active, 1)
+    const contribution_score = on_time_rate * 40
+
+    // Loans repayment
+    const repaid = loans?.filter(l => l.status === 'repaid').length || 0
+    const total_loans = loans?.length || 0
+    const repayment_rate = total_loans > 0 ? repaid / total_loans : 1
+    const repayment_score = repayment_rate * 30
+
+    // Tenure
+    const tenure_score = Math.min(months_active / 24, 1) * 20
+
+    // Streak Calculation (consecutive months contributed up to current month)
+    let streak = 0
+    let currentCheckMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     
-    return NextResponse.json({ 
-      trust_score: trustScore,
-      streak,
-      breakdown: {
-        contribution: contributionScore,
-        repayment: repaymentScore,
-        tenure: tenureScore,
-        participation: participationScore
+    while (true) {
+      const monthStr = `${currentCheckMonth.getFullYear()}-${currentCheckMonth.getMonth()}`
+      if (distinctMonths.has(monthStr)) {
+        streak++
+        currentCheckMonth.setMonth(currentCheckMonth.getMonth() - 1)
+      } else {
+        break
       }
-    });
-  } catch (err: any) {
-    console.error("Trust score calculation error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+    
+    const streak_capped = Math.min(streak, 12)
+    const participation_score = (streak_capped / 12) * 10
+
+    const trust_score = Math.round(
+      contribution_score +
+      repayment_score +
+      tenure_score +
+      participation_score
+    )
+
+    // Update membership
+    await supabase
+      .from('chama_memberships')
+      .update({ 
+        trust_score,
+        contribution_streak: streak
+      })
+      .eq('id', membership_id)
+
+    return new Response(JSON.stringify({ trust_score, streak }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+  } catch (error: any) {
+    console.error('Trust score calculation error:', error)
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
   }
 }

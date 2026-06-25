@@ -1,0 +1,19 @@
+AILANG: src\components\CreditScoreCard.tsx:303: : 'Improve score, retention, and reduce defaults to unlock investment opportunities.'}
+EMOJI: src\lib\credit-scoring.ts:366: insights.push('🌟 Excellent credit! You qualify for the best loan rates.');
+EMOJI: src\lib\credit-scoring.ts:368: insights.push('✅ Good credit standing. You have strong borrowing power.');
+EMOJI: src\lib\credit-scoring.ts:370: insights.push('⚠️ Fair credit. Focus on consistent payments to improve.');
+EMOJI: src\lib\credit-scoring.ts:372: insights.push('❌ Poor credit. Rebuild by making regular contributions.');
+EMOJI: src\lib\credit-scoring.ts:376: insights.push('📉 Payment history needs improvement. Avoid missed payments.');
+EMOJI: src\lib\credit-scoring.ts:380: insights.push('📊 Contribution amounts vary significantly. Try to maintain consistency.');
+EMOJI: src\lib\credit-scoring.ts:384: insights.push('💳 Loan repayment history affects your score. Pay on time.');
+EMOJI: src\lib\credit-scoring.ts:388: insights.push('🕐 New member. Your score will improve with time and activity.');
+EMOJI: src\lib\credit-scoring.ts:405: insights.push('🏆 Exceptional chama health! Ready for institutional partnerships.');
+EMOJI: src\lib\credit-scoring.ts:407: insights.push('✅ Strong chama performance. Good investment opportunities available.');
+EMOJI: src\lib\credit-scoring.ts:409: insights.push('⚠️ Moderate health. Focus on member engagement and retention.');
+EMOJI: src\lib\credit-scoring.ts:411: insights.push('❌ Chama needs attention. Address defaults and member activity.');
+EMOJI: src\lib\credit-scoring.ts:415: insights.push('📉 Member retention is low. Improve engagement and benefits.');
+EMOJI: src\lib\credit-scoring.ts:419: insights.push('⚠️ High default rate. Implement stricter loan approval criteria.');
+EMOJI: src\lib\credit-scoring.ts:423: insights.push('📈 Excellent growth! Savings increased significantly.');
+EMOJI: src\lib\credit-scoring.ts:425: insights.push('📉 Negative growth. Review contribution requirements.');
+EMOJI: src\lib\credit-scoring.ts:429: insights.push('👥 Average member credit is low. Provide financial literacy training.');
+EMOJI: src\lib\credit-scoring.ts:433: insights.push('💰 Strong savings base. Consider diversified investments.');

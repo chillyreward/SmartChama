@@ -1,141 +1,117 @@
-import { NextResponse } from 'next/server';
-import { processMpesaCallback } from '@/lib/mpesa';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-// Create Supabase admin client for server-side operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export async function POST(request: Request) {
+  const supabase = getSupabaseAdmin()
+  const body = await request.json()
 
-export async function POST(req: Request) {
-  try {
-    const callbackData = await req.json();
-    
-    console.log('M-Pesa Callback Received:', JSON.stringify(callbackData, null, 2));
+  const callback = body.Body?.stkCallback
+  const resultCode = callback?.ResultCode
+  const checkoutId = callback?.CheckoutRequestID
 
-    // Process the callback
-    const result = processMpesaCallback(callbackData);
+  // Always return 200 to Safaricom first, regardless of result.
+  // If you return an error, Safaricom will retry indefinitely.
+  const respond = (data: object) =>
+    new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
 
-    if (result.success) {
-      // Payment successful - Save to database
-      console.log('Payment Successful:', result);
-
-      // Parse transaction date (format: 20260213011719 -> 2026-02-13T01:17:19)
-      const dateStr = result.transactionDate.toString();
-      const formattedDate = `${dateStr.slice(0,4)}-${dateStr.slice(4,6)}-${dateStr.slice(6,8)}T${dateStr.slice(8,10)}:${dateStr.slice(10,12)}:${dateStr.slice(12,14)}`;
-
-      // Save transaction to database
-      const { data: transaction, error } = await supabaseAdmin
-        .from('transactions')
-        .insert({
-          transaction_type: 'deposit',
-          amount: result.amount,
-          phone_number: result.phoneNumber.toString(),
-          mpesa_receipt_number: result.mpesaReceiptNumber,
-          merchant_request_id: result.merchantRequestID,
-          checkout_request_id: result.checkoutRequestID,
-          transaction_date: formattedDate,
-          description: 'M-Pesa Deposit',
-          status: 'completed',
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Database Error:', error);
-      } else {
-        console.log('Transaction saved to database:', transaction);
-        
-        // Lookup member using phone number to get chama_id
-        const cleanPhone = result.phoneNumber.toString();
-        const formattedPhone = cleanPhone.startsWith('254') ? `+${cleanPhone}` : cleanPhone;
-        
-        const { data: member } = await supabaseAdmin
-          .from('members')
-          .select('id, chama_id, chamas(name)')
-          .eq('phone', formattedPhone)
-          .single();
-          
-        if (member && member.chama_id) {
-          try {
-            // 1. UPDATE WALLET BALANCE
-            await supabaseAdmin.rpc('increment_wallet_balance', {
-              p_chama_id: member.chama_id,
-              p_amount: result.amount
-            });
-            
-            // 2. WRITE TO BLOCKCHAIN
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-            const blockchainResult = await fetch(`${appUrl}/api/blockchain/record`, {
-              method: 'POST',
-              body: JSON.stringify({
-                type: 'CONTRIBUTION',
-                member_id: member.id,
-                chama_id: member.chama_id,
-                amount: result.amount,
-                mpesa_receipt: result.mpesaReceiptNumber,
-                timestamp: new Date().toISOString()
-              })
-            });
-            const { tx_hash } = await blockchainResult.json();
-            
-            // 3. SAVE TX HASH TO DATABASE
-            if (tx_hash) {
-              await supabaseAdmin.from('transactions')
-                .update({ blockchain_tx_hash: tx_hash })
-                .eq('id', transaction.id);
-            }
-            
-            // 4. RECALCULATE TRUST SCORE
-            await fetch(`${appUrl}/api/trust-score/calculate`, {
-              method: 'POST',
-              body: JSON.stringify({ member_id: member.id })
-            });
-            
-            // 5. SEND SMS
-            await fetch(`${appUrl}/api/sms/send`, {
-              method: 'POST',
-              body: JSON.stringify({
-                phone: formattedPhone,
-                message: `SmartChama: Your KSh ${result.amount} contribution to ${member.chamas?.name || 'your group'} is confirmed. Receipt: ${result.mpesaReceiptNumber}.`
-              })
-            });
-          } catch (chainErr) {
-            console.error("Error executing callback chain:", chainErr);
-          }
-        }
-      }
-
-      return NextResponse.json({
-        ResultCode: 0,
-        ResultDesc: 'Success',
-      });
-    } else {
-      // Payment failed
-      console.log('Payment Failed:', result);
-
-      // Save failed transaction
-      await supabaseAdmin
-        .from('transactions')
-        .insert({
-          transaction_type: 'deposit',
-          merchant_request_id: result.merchantRequestID,
-          checkout_request_id: result.checkoutRequestID,
-          description: result.resultDesc || 'Payment failed',
-          status: 'failed',
-        });
-
-      return NextResponse.json({
-        ResultCode: 1,
-        ResultDesc: 'Failed',
-      });
-    }
-  } catch (error: any) {
-    console.error('Callback Error:', error);
-    return NextResponse.json(
-      { ResultCode: 1, ResultDesc: 'Error processing callback' },
-      { status: 500 }
-    );
+  if (resultCode !== 0) {
+    // Payment was cancelled or failed
+    await supabase
+      .from('contributions_v2')
+      .update({ status: 'failed' })
+      .eq('mpesa_checkout_request_id', checkoutId)
+    return respond({ ResultCode: 0, ResultDesc: 'Accepted' })
   }
+
+  // Payment succeeded
+  const items = callback.CallbackMetadata?.Item || []
+  const get = (name: string) => items.find((i: any) => i.Name === name)?.Value
+
+  const amount = get('Amount')
+  const receipt = get('MpesaReceiptNumber')
+  const phone = get('PhoneNumber')?.toString()
+
+  // Update contribution record
+  const { data: contribution } = await supabase
+    .from('contributions_v2')
+    .update({
+      status: 'confirmed',
+      mpesa_receipt: receipt,
+      confirmed_at: new Date().toISOString()
+    })
+    .eq('mpesa_checkout_request_id', checkoutId)
+    .select(`
+      id, amount, membership_id, chama_id
+    `)
+    .single()
+
+  if (!contribution) {
+    return respond({ ResultCode: 0, ResultDesc: 'Accepted' })
+  }
+
+  // Update wallet balance
+  await supabase.rpc('increment_wallet_balance', {
+    p_chama_id: contribution.chama_id,
+    p_amount: contribution.amount
+  })
+
+  // Record in transactions ledger
+  await supabase
+    .from('transactions_v2')
+    .insert({
+      chama_id: contribution.chama_id,
+      membership_id: contribution.membership_id,
+      type: 'contribution',
+      amount: contribution.amount,
+      reference: receipt,
+      status: 'confirmed'
+    })
+
+  // Trigger trust score recalculation
+  await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/trust-score/calculate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      membership_id: contribution.membership_id
+    })
+  })
+
+  // Get member profile for SMS
+  const { data: membership } = await supabase
+    .from('chama_memberships')
+    .select(`
+      profiles ( full_name, phone_number ),
+      chamas_v2 ( name )
+    `)
+    .eq('id', contribution.membership_id)
+    .single()
+
+  // Send SMS confirmation
+  if (membership?.profiles) {
+    const memberPhone = (membership.profiles as any).phone_number
+    const memberName = (membership.profiles as any).full_name
+    const chamaName = (membership.chamas_v2 as any).name
+
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sms/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: memberPhone,
+        message: `SmartChama: Your KSh ${amount?.toLocaleString('en-KE')} contribution to ${chamaName} is confirmed. Receipt: ${receipt}.`
+      })
+    })
+  }
+
+  // Add to group activity feed
+  await supabase
+    .from('group_activity')
+    .insert({
+      chama_id: contribution.chama_id,
+      event_type: 'contribution_received',
+      description: `A contribution of KSh ${amount?.toLocaleString('en-KE')} was received.`
+    })
+
+  return respond({ ResultCode: 0, ResultDesc: 'Accepted' })
 }

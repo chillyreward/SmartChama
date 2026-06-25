@@ -22,19 +22,19 @@ export async function GET() {
 
   // Add recommendations
   if (!diagnostics.checks.credentialsConfigured) {
-    diagnostics.recommendations.push('⚠️ Set MPESA_CONSUMER_KEY and MPESA_CONSUMER_SECRET in .env.local');
+    diagnostics.recommendations.push('️ Set MPESA_CONSUMER_KEY and MPESA_CONSUMER_SECRET in .env.local');
   }
   
   if (!diagnostics.checks.callbackIsHttps) {
-    diagnostics.recommendations.push('⚠️ MPESA_CALLBACK_URL must be HTTPS. Use ngrok or webhook.site for local testing');
+    diagnostics.recommendations.push('️ MPESA_CALLBACK_URL must be HTTPS. Use ngrok or webhook.site for local testing');
   }
   
   if (!diagnostics.checks.shortCodeValid) {
-    diagnostics.recommendations.push('⚠️ For sandbox, use MPESA_BUSINESS_SHORT_CODE=174379');
+    diagnostics.recommendations.push('️ For sandbox, use MPESA_BUSINESS_SHORT_CODE=174379');
   }
 
   if (diagnostics.recommendations.length === 0) {
-    diagnostics.recommendations.push('✅ Configuration looks good! Try testing with /api/mpesa/test');
+    diagnostics.recommendations.push(' Configuration looks good! Try testing with /api/mpesa/test');
   }
 
   return NextResponse.json(diagnostics, { status: 200 });

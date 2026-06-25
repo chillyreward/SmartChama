@@ -14,7 +14,7 @@ export async function GET(req: Request) {
       }, { status: 400 });
     }
 
-    const testMessage = "🎉 SmartChama SMS Test\n\nIf you receive this, Africa's Talking integration is working!\n\nThank you!";
+    const testMessage = " SmartChama SMS Test\n\nIf you receive this, Africa's Talking integration is working!\n\nThank you!";
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sms/send`, {
       method: 'POST',

@@ -331,7 +331,7 @@ function MyChamasContent() {
       <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-surface-container-low rounded-xl flex items-center justify-center flex-shrink-0">
-            <Building2 className="w-6 h-6 text-[#22C55E]" />
+            <Building2 className="w-6 h-6 text-[#006e2f]" />
           </div>
           <div className="flex-1">
             <h3 className="text-on-surface font-bold mb-2 flex items-center gap-2">
@@ -339,19 +339,19 @@ function MyChamasContent() {
             </h3>
             <ul className="text-sm text-on-surface-variant space-y-2">
               <li className="flex items-start gap-2">
-                <span className="text-[#22C55E] mt-0.5">•</span>
+                <span className="text-[#006e2f] mt-0.5">•</span>
                 <span><strong className="text-on-surface">Create a Chama:</strong> Click the "Create New Chama" card to set up your investment group</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#22C55E] mt-0.5">•</span>
+                <span className="text-[#006e2f] mt-0.5">•</span>
                 <span><strong className="text-on-surface">Invite Members:</strong> After creating, use the "Invite" button to generate invite links for members</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#22C55E] mt-0.5">•</span>
+                <span className="text-[#006e2f] mt-0.5">•</span>
                 <span><strong className="text-on-surface">Track Growth:</strong> Monitor your chama's balance, member contributions, and investment goals</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#22C55E] mt-0.5">•</span>
+                <span className="text-[#006e2f] mt-0.5">•</span>
                 <span><strong className="text-on-surface">Manage Members:</strong> View member activity, approve loans, and distribute dividends</span>
               </li>
             </ul>
@@ -361,7 +361,7 @@ function MyChamasContent() {
 
       {loadingChamas ? (
         <div className="text-center py-12">
-          <Loader2 className="w-8 h-8 text-[#22C55E] animate-spin mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 text-[#006e2f] animate-spin mx-auto mb-4" />
           <p className="text-secondary">Loading your chamas...</p>
         </div>
       ) : (
@@ -370,7 +370,7 @@ function MyChamasContent() {
           {/* CREATE NEW CHAMA CARD */}
           <div 
             onClick={() => setShowCreateModal(true)}
-            className="border-2 border-dashed border-[#E5E7EB] rounded-[32px] p-6 flex flex-col items-center justify-center text-secondary hover:border-[#22C55E]/50 hover:text-[#22C55E] hover:bg-[#22C55E]/5 transition-all cursor-pointer min-h-[250px] group"
+            className="border-2 border-dashed border-[#E5E7EB] rounded-[32px] p-6 flex flex-col items-center justify-center text-secondary hover:border-[#006e2f]/50 hover:text-[#006e2f] hover:bg-[#006e2f]/5 transition-all cursor-pointer min-h-[250px] group"
           >
             <div className="w-16 h-16 rounded-full bg-white border border-[#E5E7EB] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Plus className="w-6 h-6" />
@@ -385,7 +385,7 @@ function MyChamasContent() {
               <div 
                 key={chama.id}
                 onClick={() => handleGroupClick(chama)}
-                className="relative bg-white border border-[#E5E7EB] rounded-[32px] p-8 hover:border-[#22C55E]/50 transition-all cursor-pointer group overflow-hidden"
+                className="relative bg-white border border-[#E5E7EB] rounded-[32px] p-8 hover:border-[#006e2f]/50 transition-all cursor-pointer group overflow-hidden"
               >
                 <div className={`absolute -right-10 -top-10 w-32 h-32 bg-${color}-500/10 blur-[60px] group-hover:bg-${color}-500/20 transition-all`}></div>
 
@@ -443,7 +443,7 @@ function MyChamasContent() {
 
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-surface-container-low rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#E5E7EB]">
-                <Building2 className="w-8 h-8 text-[#22C55E]" />
+                <Building2 className="w-8 h-8 text-[#006e2f]" />
               </div>
               <h2 className="text-headline-sm font-geist font-bold text-on-surface mb-2">Create New Chama</h2>
               <p className="text-secondary text-sm">Set up your investment group in 3 easy steps</p>
@@ -451,7 +451,7 @@ function MyChamasContent() {
 
             {/* HELPFUL TIPS */}
             <div className="mb-6 p-4 bg-surface-container-lowest border border-[#E5E7EB] rounded-xl">
-              <p className="text-xs text-[#22C55E] font-bold mb-2 uppercase tracking-wider">Quick Tips</p>
+              <p className="text-xs text-[#006e2f] font-bold mb-2 uppercase tracking-wider">Quick Tips</p>
               <ul className="text-xs text-secondary space-y-1">
                 <li>• Choose a memorable name for your chama</li>
                 <li>• Set realistic investment goals</li>
@@ -468,7 +468,7 @@ function MyChamasContent() {
 
             <form onSubmit={handleCreateChama} className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-[#22C55E] uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold text-[#006e2f] uppercase tracking-widest mb-2 ml-1">
                   Chama Name
                 </label>
                 <input 
@@ -477,12 +477,12 @@ function MyChamasContent() {
                   value={chamaName}
                   onChange={(e) => setChamaName(e.target.value)}
                   placeholder="e.g., Family Savings"
-                  className="w-full bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-4 text-on-surface outline-none focus:border-[#22C55E] transition-all placeholder:text-secondary"
+                  className="w-full bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-4 text-on-surface outline-none focus:border-[#006e2f] transition-all placeholder:text-secondary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#22C55E] uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold text-[#006e2f] uppercase tracking-widest mb-2 ml-1">
                   Investment Goal (KES)
                 </label>
                 <input 
@@ -490,12 +490,12 @@ function MyChamasContent() {
                   value={investmentGoal}
                   onChange={(e) => setInvestmentGoal(e.target.value)}
                   placeholder="e.g., 1000000"
-                  className="w-full bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-4 text-on-surface outline-none focus:border-[#22C55E] transition-all placeholder:text-secondary"
+                  className="w-full bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-4 text-on-surface outline-none focus:border-[#006e2f] transition-all placeholder:text-secondary"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#22C55E] uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold text-[#006e2f] uppercase tracking-widest mb-2 ml-1">
                   Monthly Growth Target (%)
                 </label>
                 <input 
@@ -504,19 +504,19 @@ function MyChamasContent() {
                   value={monthlyGrowth}
                   onChange={(e) => setMonthlyGrowth(e.target.value)}
                   placeholder="e.g., 5.5"
-                  className="w-full bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-4 text-on-surface outline-none focus:border-[#22C55E] transition-all placeholder:text-secondary"
+                  className="w-full bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-4 text-on-surface outline-none focus:border-[#006e2f] transition-all placeholder:text-secondary"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2 ml-1">
-                  <label className="block text-xs font-bold text-[#22C55E] uppercase tracking-widest">
+                  <label className="block text-xs font-bold text-[#006e2f] uppercase tracking-widest">
                     Chama Rules (Optional)
                   </label>
                   <button
                     type="button"
                     onClick={addRule}
-                    className="text-xs text-[#22C55E] hover:text-[#006e2f] font-bold flex items-center gap-1"
+                    className="text-xs text-[#006e2f] hover:text-[#006e2f] font-bold flex items-center gap-1"
                   >
                     <Plus className="w-3 h-3" />
                     Add Rule
@@ -533,7 +533,7 @@ function MyChamasContent() {
                         value={rule}
                         onChange={(e) => updateRule(index, e.target.value)}
                         placeholder={`Rule ${index + 1} (e.g., Monthly contribution: KES 5,000)`}
-                        className="flex-1 bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-on-surface text-sm outline-none focus:border-[#22C55E] transition-all placeholder:text-secondary"
+                        className="flex-1 bg-surface-container-lowest border border-[#E5E7EB] rounded-xl px-4 py-2.5 text-on-surface text-sm outline-none focus:border-[#006e2f] transition-all placeholder:text-secondary"
                       />
                       {chamaRules.length > 1 && (
                         <button
@@ -555,7 +555,7 @@ function MyChamasContent() {
               <button 
                 type="submit" 
                 disabled={creating}
-                className="w-full bg-[#22C55E] hover:bg-[#006e2f] text-white font-medium py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="w-full bg-[#006e2f] hover:bg-[#006e2f] text-white font-medium py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {creating ? (
                   <>
@@ -589,7 +589,7 @@ function MyChamasContent() {
             {step === 1 && (
               <div>
                 <div className="w-20 h-20 bg-surface-container-low rounded-full flex items-center justify-center mx-auto mb-6 border border-[#E5E7EB]">
-                  <ShieldCheck className="w-10 h-10 text-[#22C55E]" />
+                  <ShieldCheck className="w-10 h-10 text-[#006e2f]" />
                 </div>
                 <h2 className="text-headline-sm font-geist font-bold text-on-surface mb-2">Verify Identity</h2>
                 <p className="text-secondary text-sm mb-8">
@@ -606,7 +606,7 @@ function MyChamasContent() {
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handlePinChange(i, e.target.value)}
-                      className="w-12 h-14 bg-white border border-[#E5E7EB] rounded-xl text-center text-headline-sm font-geist font-bold text-on-surface focus:border-[#22C55E] focus:shadow-sm outline-none transition-all"
+                      className="w-12 h-14 bg-white border border-[#E5E7EB] rounded-xl text-center text-headline-sm font-geist font-bold text-on-surface focus:border-[#006e2f] focus:shadow-sm outline-none transition-all"
                     />
                   ))}
                 </div>
@@ -616,16 +616,16 @@ function MyChamasContent() {
 
             {step === 2 && (
               <div className="py-10">
-                <Loader2 className="w-12 h-12 text-[#22C55E] animate-spin mx-auto mb-4" />
+                <Loader2 className="w-12 h-12 text-[#006e2f] animate-spin mx-auto mb-4" />
                 <p className="text-on-surface font-bold">Verifying Credentials...</p>
               </div>
             )}
 
             {step === 3 && (
               <div className="py-10">
-                <CheckCircle className="w-16 h-16 text-[#22C55E] mx-auto mb-4 animate-bounce" />
+                <CheckCircle className="w-16 h-16 text-[#006e2f] mx-auto mb-4 animate-bounce" />
                 <p className="text-on-surface font-bold text-lg">Access Granted</p>
-                <p className="text-[#22C55E] text-sm">Loading Chama Details...</p>
+                <p className="text-[#006e2f] text-sm">Loading Chama Details...</p>
               </div>
             )}
 
@@ -654,7 +654,7 @@ function MyChamasContent() {
             <div className="mb-8">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 bg-surface-container-low rounded-2xl flex items-center justify-center border border-[#E5E7EB]">
-                  <Building2 className="w-8 h-8 text-[#22C55E]" />
+                  <Building2 className="w-8 h-8 text-[#006e2f]" />
                 </div>
                 <div>
                   <h2 className="text-3xl font-bold text-on-surface">{selectedGroup.name}</h2>
@@ -670,7 +670,7 @@ function MyChamasContent() {
                 <p className="text-3xl font-bold text-on-surface mb-1">
                   KES {parseFloat(selectedGroup.total_balance || 0).toLocaleString()}
                 </p>
-                <p className="text-xs text-[#22C55E]">+0% this month</p>
+                <p className="text-xs text-[#006e2f]">+0% this month</p>
               </div>
 
               <div className="bg-surface-container-lowest border border-[#E5E7EB] rounded-2xl p-6">
@@ -693,7 +693,7 @@ function MyChamasContent() {
             {/* Quick Actions */}
             <div className="mb-8">
               <h3 className="text-on-surface font-bold mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 bg-[#22C55E] rounded-full"></span>
+                <span className="w-1 h-5 bg-[#006e2f] rounded-full"></span>
                 Quick Actions
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -701,24 +701,24 @@ function MyChamasContent() {
                   onClick={() => {
                     handleInviteMember(selectedGroup);
                   }}
-                  className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-[#22C55E] rounded-xl p-4 text-center transition-all group"
+                  className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-[#006e2f] rounded-xl p-4 text-center transition-all group"
                 >
-                  <Users className="w-6 h-6 text-[#22C55E] mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <Users className="w-6 h-6 text-[#006e2f] mx-auto mb-2 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold text-on-surface">Invite Members</p>
                 </button>
 
-                <button className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-[#22C55E] rounded-xl p-4 text-center transition-all group">
-                  <CreditCard className="w-6 h-6 text-[#22C55E] mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                <button className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-[#006e2f] rounded-xl p-4 text-center transition-all group">
+                  <CreditCard className="w-6 h-6 text-[#006e2f] mx-auto mb-2 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold text-on-surface">View Transactions</p>
                 </button>
 
                 <button className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-blue-500 rounded-xl p-4 text-center transition-all group">
-                  <Users className="w-6 h-6 text-[#22C55E] mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <Users className="w-6 h-6 text-[#006e2f] mx-auto mb-2 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold text-on-surface">Manage Members</p>
                 </button>
 
                 <button className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-purple-500 rounded-xl p-4 text-center transition-all group">
-                  <Settings className="w-6 h-6 text-[#22C55E] mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <Settings className="w-6 h-6 text-[#006e2f] mx-auto mb-2 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold text-on-surface">Settings</p>
                 </button>
               </div>
@@ -729,7 +729,7 @@ function MyChamasContent() {
               {/* About This Chama */}
               <div className="bg-surface-container-lowest border border-[#E5E7EB] rounded-2xl p-6">
                 <h3 className="text-on-surface font-bold mb-4 flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-[#22C55E]" />
+                  <Building2 className="w-5 h-5 text-[#006e2f]" />
                   About This Chama
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -749,14 +749,14 @@ function MyChamasContent() {
                   </div>
                   <div>
                     <p className="text-secondary mb-1">Status</p>
-                    <p className="text-[#22C55E] font-semibold flex items-center gap-2">
-                      <span className="w-2 h-2 bg-[#22C55E] rounded-full"></span>
+                    <p className="text-[#006e2f] font-semibold flex items-center gap-2">
+                      <span className="w-2 h-2 bg-[#006e2f] rounded-full"></span>
                       Active
                     </p>
                   </div>
                   <div>
                     <p className="text-secondary mb-1">Your Role</p>
-                    <p className="text-[#22C55E] font-semibold">Administrator</p>
+                    <p className="text-[#006e2f] font-semibold">Administrator</p>
                   </div>
                 </div>
 
@@ -764,13 +764,13 @@ function MyChamasContent() {
                 {selectedGroup.rules && selectedGroup.rules.length > 0 && (
                   <div className="mt-6 pt-6 border-t border-[#E5E7EB]">
                     <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-[#22C55E]" />
+                      <ShieldCheck className="w-4 h-4 text-[#006e2f]" />
                       Chama Rules
                     </h4>
                     <ul className="space-y-2">
                       {selectedGroup.rules.map((rule: string, index: number) => (
                         <li key={index} className="flex items-start gap-3 text-sm">
-                          <span className="flex-shrink-0 w-5 h-5 bg-surface-container-low rounded-full flex items-center justify-center text-[#22C55E] font-bold text-xs mt-0.5">
+                          <span className="flex-shrink-0 w-5 h-5 bg-surface-container-low rounded-full flex items-center justify-center text-[#006e2f] font-bold text-xs mt-0.5">
                             {index + 1}
                           </span>
                           <span className="text-on-surface-variant">{rule}</span>
@@ -788,21 +788,21 @@ function MyChamasContent() {
                 </h3>
                 <ul className="space-y-3 text-sm">
                   <li className="flex items-start gap-3">
-                    <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#22C55E] font-bold text-xs">1</span>
+                    <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#006e2f] font-bold text-xs">1</span>
                     <div>
                       <p className="text-on-surface font-semibold">Invite your first members</p>
                       <p className="text-secondary text-xs">Click "Invite Members" to generate invite links</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#22C55E] font-bold text-xs">2</span>
+                    <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#006e2f] font-bold text-xs">2</span>
                     <div>
                       <p className="text-on-surface font-semibold">Set up contribution rules</p>
                       <p className="text-secondary text-xs">Define monthly contribution amounts and schedules</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#22C55E] font-bold text-xs">3</span>
+                    <span className="w-6 h-6 bg-surface-container-low rounded-full flex items-center justify-center flex-shrink-0 text-[#006e2f] font-bold text-xs">3</span>
                     <div>
                       <p className="text-on-surface font-semibold">Start collecting contributions</p>
                       <p className="text-secondary text-xs">Members can deposit via M-Pesa once they join</p>
@@ -814,12 +814,12 @@ function MyChamasContent() {
               {/* Transaction Ledger */}
               <div className="bg-surface-container-lowest border border-[#E5E7EB] rounded-2xl p-6">
                 <h3 className="text-on-surface font-bold mb-4 flex items-center gap-2">
-                  <Receipt className="w-5 h-5 text-[#22C55E]" />
+                  <Receipt className="w-5 h-5 text-[#006e2f]" />
                   Transaction Ledger
                 </h3>
                 {loadingTransactions ? (
                   <div className="text-center py-8">
-                    <Loader2 className="w-6 h-6 text-[#22C55E] animate-spin mx-auto mb-2" />
+                    <Loader2 className="w-6 h-6 text-[#006e2f] animate-spin mx-auto mb-2" />
                     <p className="text-secondary text-sm">Loading transactions...</p>
                   </div>
                 ) : chamaTransactions.length === 0 ? (
@@ -836,7 +836,7 @@ function MyChamasContent() {
                         <div key={txn.id} className="p-4 bg-white rounded-xl border border-[#E5E7EB] hover:border-[#E5E7EB] transition-all">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isCredit ? 'bg-surface-container-low text-[#22C55E]' : 'bg-surface-container-low text-[#22C55E]'}`}>
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isCredit ? 'bg-surface-container-low text-[#006e2f]' : 'bg-surface-container-low text-[#006e2f]'}`}>
                                 {isCredit ? '+' : '-'}
                               </div>
                               <div>
@@ -845,7 +845,7 @@ function MyChamasContent() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className={`font-bold ${isCredit ? 'text-[#22C55E]' : 'text-[#22C55E]'}`}>
+                              <p className={`font-bold ${isCredit ? 'text-[#006e2f]' : 'text-[#006e2f]'}`}>
                                 {isCredit ? '+' : '-'} KES {parseFloat(txn.amount).toLocaleString()}
                               </p>
                               <p className="text-secondary text-xs capitalize">{txn.status}</p>
@@ -865,7 +865,7 @@ function MyChamasContent() {
                         </div>
                       );
                     })}
-                    <button className="w-full py-3 text-[#22C55E] hover:text-blue-300 text-sm font-semibold transition-colors">
+                    <button className="w-full py-3 text-[#006e2f] hover:text-blue-300 text-sm font-semibold transition-colors">
                       View All Transactions →
                     </button>
                   </div>
@@ -876,7 +876,7 @@ function MyChamasContent() {
               <div className="bg-white border border-purple-500/30 rounded-2xl p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Crown className="w-6 h-6 text-[#22C55E]" />
+                    <Crown className="w-6 h-6 text-[#006e2f]" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-on-surface font-bold mb-2 flex items-center gap-2">
@@ -910,34 +910,34 @@ function MyChamasContent() {
 
                     <div className="bg-surface-container-low border border-purple-500/40 rounded-xl p-4 mb-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Crown className="w-5 h-5 text-[#22C55E]" />
+                        <Crown className="w-5 h-5 text-[#006e2f]" />
                         <h4 className="text-on-surface font-bold">Upgrade to Pro - $5/month</h4>
                       </div>
                       <ul className="space-y-2 text-sm text-on-surface-variant mb-3">
                         <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#22C55E]" />
+                          <CheckCircle className="w-4 h-4 text-[#006e2f]" />
                           <span>Unlimited members (vs 20 on free)</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#22C55E]" />
+                          <CheckCircle className="w-4 h-4 text-[#006e2f]" />
                           <span>Advanced analytics & reports</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#22C55E]" />
+                          <CheckCircle className="w-4 h-4 text-[#006e2f]" />
                           <span>Priority support</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#22C55E]" />
+                          <CheckCircle className="w-4 h-4 text-[#006e2f]" />
                           <span>Custom branding</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-[#22C55E]" />
+                          <CheckCircle className="w-4 h-4 text-[#006e2f]" />
                           <span>Reduced transaction fees (1% deposits, 1.5% loans)</span>
                         </li>
                       </ul>
                       <button 
-                        onClick={() => alert('Upgrade to Pro\n\nContact us to upgrade your chama to Pro:\n\n📧 Email: pro@smartchama.com\n📱 WhatsApp: +254 XXX XXX XXX\n\nOr visit our pricing page for more details.')}
-                        className="w-full bg-[#22C55E] hover:bg-[#006e2f] text-on-surface font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                        onClick={() => alert('Upgrade to Pro\n\nContact us to upgrade your chama to Pro:\n\n Email: pro@smartchama.com\n WhatsApp: +254 XXX XXX XXX\n\nOr visit our pricing page for more details.')}
+                        className="w-full bg-[#006e2f] hover:bg-[#006e2f] text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
                       >
                         <Crown className="w-5 h-5" />
                         Upgrade to Pro
@@ -974,7 +974,7 @@ function MyChamasContent() {
 
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-surface-container-low rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#E5E7EB]">
-                <Users className="w-8 h-8 text-[#22C55E]" />
+                <Users className="w-8 h-8 text-[#006e2f]" />
               </div>
               <h2 className="text-headline-sm font-geist font-bold text-on-surface mb-2">Invite Members</h2>
               <p className="text-secondary text-sm">
@@ -984,20 +984,20 @@ function MyChamasContent() {
 
             {generatingInvite ? (
               <div className="text-center py-8">
-                <Loader2 className="w-8 h-8 text-[#22C55E] animate-spin mx-auto mb-4" />
+                <Loader2 className="w-8 h-8 text-[#006e2f] animate-spin mx-auto mb-4" />
                 <p className="text-secondary">Generating invite link...</p>
               </div>
             ) : inviteLink ? (
               <div className="space-y-6">
                 <div className="bg-surface-container-lowest border border-[#E5E7EB] rounded-xl p-4">
                   <p className="text-xs text-secondary uppercase font-bold mb-2">Invite Link</p>
-                  <p className="text-sm text-[#22C55E] break-all font-mono">{inviteLink}</p>
+                  <p className="text-sm text-[#006e2f] break-all font-mono">{inviteLink}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={copyInviteLink}
-                    className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-[#22C55E] text-on-surface font-bold py-3 rounded-xl transition-all"
+                    className="bg-surface-container-lowest border border-[#E5E7EB] hover:border-[#006e2f] text-on-surface font-bold py-3 rounded-xl transition-all"
                   >
                     Copy Link
                   </button>
@@ -1006,7 +1006,7 @@ function MyChamasContent() {
                       const message = `Join our chama "${inviteChama.name}" on SmartChama!\n\n${inviteLink}`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
                     }}
-                    className="bg-[#22C55E] hover:bg-[#006e2f] text-white font-medium py-3 rounded-xl transition-all"
+                    className="bg-[#006e2f] hover:bg-[#006e2f] text-white font-medium py-3 rounded-xl transition-all"
                   >
                     Share via WhatsApp
                   </button>
@@ -1030,7 +1030,7 @@ function MyChamasContent() {
 
 export default function MyChamasPage() {
   return (
-    <Suspense fallback={<div className="text-[#22C55E] p-10">Loading Chamas...</div>}>
+    <Suspense fallback={<div className="text-[#006e2f] p-10">Loading Chamas...</div>}>
       <MyChamasContent />
     </Suspense>
   );

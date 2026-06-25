@@ -425,7 +425,7 @@ export default function MemberSignup() {
                 />
                 <label htmlFor="terms" className="text-sm text-slate-400">
                   I agree to the{" "}
-                  <Link href="/privacy-policy" target="_blank" className="text-emerald-400 font-semibold hover:text-emerald-300">
+                  <Link href="/privacy" target="_blank" className="text-emerald-400 font-semibold hover:text-emerald-300">
                     Privacy Policy
                   </Link>
                   {" & "}

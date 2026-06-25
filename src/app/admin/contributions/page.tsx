@@ -11,6 +11,10 @@ export default function AdminContributionsPage() {
   const [members, setMembers] = useState<any[]>([]);
   const [toastMsg, setToastMsg] = useState("");
 
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 50;
+
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [recordMemberId, setRecordMemberId] = useState("");
   const [recordAmount, setRecordAmount] = useState("");
@@ -35,9 +39,11 @@ export default function AdminContributionsPage() {
         .from('contributions')
         .select('*, members(full_name)')
         .eq('group_id', group.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
       
       setContributions(contribData || []);
+      setHasMore((contribData?.length || 0) === PAGE_SIZE);
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,7 +53,7 @@ export default function AdminContributionsPage() {
 
   useEffect(() => {
     fetchData();
-  }, [adminMember, group]);
+  }, [adminMember, group, page]);
 
   const handleRecord = async () => {
     try {
@@ -134,35 +140,40 @@ export default function AdminContributionsPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="h-96 bg-white border border-[#E5E7EB] rounded-lg animate-pulse shadow-sm"></div>
+      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
+        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 font-inter relative min-h-full">
+    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[#161d16] dark:bg-[#E8F0E4] text-white dark:text-[#161d16] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
+          <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-headline-lg font-semibold text-on-surface font-geist">Contributions</h1>
-          <p className="text-body-sm text-secondary mt-1">Manage all group contributions and payments</p>
+          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+            <span>Admin Dashboard</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span>Contributions</span>
+          </p>
+          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Contributions</h1>
+          <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Manage all group contributions and payments</p>
         </div>
-        <div className="flex gap-3">
-          <button onClick={handleBulkRemind} className="bg-orange-100 text-orange-800 border border-orange-200 px-4 py-2 rounded text-body-sm font-medium hover:bg-orange-200 transition-colors shadow-sm flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <button onClick={handleBulkRemind} className="w-full sm:w-auto bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-355 border border-orange-200 dark:border-orange-900/30 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-orange-100 dark:hover:bg-orange-950/40 transition-all shadow-sm flex items-center justify-center gap-2">
             <span className="material-symbols-outlined text-[18px]">notifications_active</span>
             Bulk Remind
           </button>
           <button 
             onClick={() => setShowRecordModal(true)}
-            className="bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2 rounded text-body-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+            className="w-full sm:w-auto bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Record Contribution
@@ -170,50 +181,51 @@ export default function AdminContributionsPage() {
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm overflow-hidden min-h-[400px]">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+      {/* TABLE / CARD LIST */}
+      <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 min-h-[400px]">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50 border-b border-[#E5E7EB]">
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">DATE</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">MEMBER</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">AMOUNT</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">METHOD</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">REFERENCE</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium">STATUS</th>
-                <th className="px-6 py-3 text-label-caps text-secondary font-medium text-right">ACTIONS</th>
+              <tr className="bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+                <th className="px-6 py-4">DATE</th>
+                <th className="px-6 py-4">MEMBER</th>
+                <th className="px-6 py-4">AMOUNT</th>
+                <th className="px-6 py-4">METHOD</th>
+                <th className="px-6 py-4">REFERENCE</th>
+                <th className="px-6 py-4">STATUS</th>
+                <th className="px-6 py-4 text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
               {contributions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-secondary text-body-sm">
+                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
                     No contributions found for this group.
                   </td>
                 </tr>
               ) : (
                 contributions.map(c => (
-                  <tr key={c.id} className="border-b border-[#E5E7EB] last:border-0 hover:bg-gray-50 transition-colors group">
-                    <td className="px-6 py-4 text-body-sm text-secondary whitespace-nowrap">
+                  <tr key={c.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors group">
+                    <td className="px-6 py-4 text-sm text-[var(--text-muted)] whitespace-nowrap">
                       {new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4 text-body-sm font-medium text-on-surface whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm font-semibold text-[var(--text-main)] whitespace-nowrap">
                       {c.members?.full_name || 'Unknown'}
                     </td>
-                    <td className="px-6 py-4 font-mono font-medium text-on-surface whitespace-nowrap">
+                    <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)] whitespace-nowrap">
                       KSh {formatCurrency(Number(c.amount))}
                     </td>
-                    <td className="px-6 py-4 text-body-sm text-secondary">
+                    <td className="px-6 py-4 text-sm text-[var(--text-muted)]">
                       {c.payment_method || '—'}
                     </td>
-                    <td className="px-6 py-4 text-body-sm font-mono text-secondary">
+                    <td className="px-6 py-4 text-sm font-mono text-[var(--text-muted)]">
                       {c.reference || '—'}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded text-label-caps font-medium capitalize ${
-                        c.status === 'confirmed' ? 'bg-[#22C55E]/10 text-[#005321]' :
-                        c.status === 'late' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-700'
+                      <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
+                        c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                        c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                       }`}>
                         {c.status}
                       </span>
@@ -222,13 +234,13 @@ export default function AdminContributionsPage() {
                       <div className="flex justify-end gap-2">
                         <button 
                           onClick={() => { setEditContribution({...c}); setShowEditModal(true); }}
-                          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-200 text-secondary transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f2a1f] text-[var(--text-muted)] hover:text-[#161d16] dark:hover:text-[#E8F0E4] transition-colors"
                         >
                           <span className="material-symbols-outlined text-[18px]">edit</span>
                         </button>
                         <button 
                           onClick={() => handleDelete(c.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded hover:bg-red-50 text-error transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 transition-colors"
                         >
                           <span className="material-symbols-outlined text-[18px]">delete</span>
                         </button>
@@ -240,46 +252,149 @@ export default function AdminContributionsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card List View */}
+        <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+          {contributions.length === 0 ? (
+            <div className="p-6 text-center text-[var(--text-muted)] text-sm">
+              No contributions found for this group.
+            </div>
+          ) : (
+            contributions.map(c => (
+              <div key={c.id} className="p-4 flex flex-col gap-2 hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-semibold text-[var(--text-main)] text-sm">
+                      {c.members?.full_name || 'Unknown'}
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                      {new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono font-bold text-sm text-[var(--text-main)]">
+                      KSh {formatCurrency(Number(c.amount))}
+                    </div>
+                    <div className="mt-1">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
+                        c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                        c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                      }`}>
+                        {c.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-xs text-[var(--text-muted)] pt-1 border-t border-dashed border-[#f5f5f5] dark:border-[#2d3d2d] mt-1">
+                  <div>
+                    <span className="font-medium">Method:</span> {c.payment_method || '—'}
+                    {c.reference && <span className="ml-3"><span className="font-medium">Ref:</span> <span className="font-mono">{c.reference}</span></span>}
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => { setEditContribution({...c}); setShowEditModal(true); }}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-[#1f2a1f] text-[var(--text-muted)] hover:text-[#161d16] dark:hover:text-[#E8F0E4] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">edit</span>
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(c.id)}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/20 text-red-500 hover:bg-red-100 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between border-t border-[var(--border)] px-6 py-4 card-bg">
+          <div className="text-xs text-[var(--text-muted)]">
+            Showing Page {page + 1}
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm"
+            >
+              Previous
+            </button>
+            <button 
+              onClick={() => setPage(p => p + 1)}
+              disabled={!hasMore}
+              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* RECORD MODAL */}
       {showRecordModal && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/40 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
-            <h2 className="text-headline-sm font-geist font-bold text-on-surface mb-6">Record Contribution</h2>
+        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-md shadow-2xl text-[var(--text-main)]">
+            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Record Contribution</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Member</label>
-                <select value={recordMemberId} onChange={e => setRecordMemberId(e.target.value)} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] bg-white">
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Member</label>
+                <select 
+                  value={recordMemberId} 
+                  onChange={e => setRecordMemberId(e.target.value)} 
+                  className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-[#22C55E]"
+                >
                   <option value="">Select Member...</option>
                   {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Amount (KSh)</label>
-                <input type="number" value={recordAmount} onChange={e => setRecordAmount(e.target.value)} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E]" />
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
+                <input 
+                  type="number" 
+                  value={recordAmount} 
+                  onChange={e => setRecordAmount(e.target.value)} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
+                />
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Payment Method</label>
-                <select value={recordMethod} onChange={e => setRecordMethod(e.target.value)} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] bg-white">
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Payment Method</label>
+                <select 
+                  value={recordMethod} 
+                  onChange={e => setRecordMethod(e.target.value)} 
+                  className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-[#22C55E]"
+                >
                   <option value="M-Pesa">M-Pesa</option>
                   <option value="Bank Transfer">Bank Transfer</option>
                   <option value="Cash">Cash</option>
                 </select>
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Reference Code</label>
-                <input type="text" value={recordReference} onChange={e => setRecordReference(e.target.value)} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] font-mono" />
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reference Code</label>
+                <input 
+                  type="text" 
+                  value={recordReference} 
+                  onChange={e => setRecordReference(e.target.value)} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E] font-mono" 
+                />
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Date</label>
-                <input type="date" value={recordDate} onChange={e => setRecordDate(e.target.value)} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E]" />
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Date</label>
+                <input 
+                  type="date" 
+                  value={recordDate} 
+                  onChange={e => setRecordDate(e.target.value)} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
+                />
               </div>
             </div>
-
+ 
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowRecordModal(false)} className="flex-1 bg-white border border-[#E5E7EB] rounded py-2 text-body-sm font-medium hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setShowRecordModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
               <button onClick={handleRecord} disabled={!recordMemberId || !recordAmount} className="flex-1 bg-[#22C55E] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Save Record</button>
             </div>
           </div>
@@ -288,31 +403,45 @@ export default function AdminContributionsPage() {
 
       {/* EDIT MODAL */}
       {showEditModal && editContribution && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/40 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl">
-            <h2 className="text-headline-sm font-geist font-bold text-on-surface mb-6">Edit Contribution</h2>
+        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
+            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Edit Contribution</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Amount (KSh)</label>
-                <input type="number" value={editContribution.amount} onChange={e => setEditContribution({...editContribution, amount: e.target.value})} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E]" />
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
+                <input 
+                  type="number" 
+                  value={editContribution.amount} 
+                  onChange={e => setEditContribution({...editContribution, amount: e.target.value})} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
+                />
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Status</label>
-                <select value={editContribution.status} onChange={e => setEditContribution({...editContribution, status: e.target.value})} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] bg-white">
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Status</label>
+                <select 
+                  value={editContribution.status} 
+                  onChange={e => setEditContribution({...editContribution, status: e.target.value})} 
+                  className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-[#22C55E]"
+                >
                   <option value="confirmed">Confirmed</option>
                   <option value="pending">Pending</option>
                   <option value="late">Late</option>
                 </select>
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Reference Code</label>
-                <input type="text" value={editContribution.reference || ''} onChange={e => setEditContribution({...editContribution, reference: e.target.value})} className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] font-mono" />
+                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reference Code</label>
+                <input 
+                  type="text" 
+                  value={editContribution.reference || ''} 
+                  onChange={e => setEditContribution({...editContribution, reference: e.target.value})} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E] font-mono" 
+                />
               </div>
             </div>
 
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowEditModal(false)} className="flex-1 bg-white border border-[#E5E7EB] rounded py-2 text-body-sm font-medium hover:bg-gray-50">Cancel</button>
+              <button onClick={() => setShowEditModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
               <button onClick={handleEdit} className="flex-1 bg-[#22C55E] text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Update</button>
             </div>
           </div>

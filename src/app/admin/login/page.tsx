@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      console.log("✅ Authentication successful");
+      console.log(" Authentication successful");
       console.log("User ID:", authData.user.id);
 
       // Step 2: Query chama_admins table to verify admin authorization
@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
 
       // Step 3: Check if user is an admin
       if (adminError || !adminData) {
-        console.error("❌ User is not an admin");
+        console.error(" User is not an admin");
         // Sign out the user since they're not authorized
         await supabase.auth.signOut();
         setError("Access denied. Admin credentials required.");
@@ -76,14 +76,14 @@ export default function AdminLoginPage() {
       }
 
       // Step 4: Success - User is authorized as admin
-      console.log("✅ Admin authorization successful!");
+      console.log(" Admin authorization successful!");
       console.log("Admin Name:", adminData.full_name);
 
       // Redirect to admin dashboard
       router.push(`/admin/dashboard`);
       
     } catch (err: any) {
-      console.error("❌ Login error:", err);
+      console.error(" Login error:", err);
       setError("Invalid credentials. Please check your information and try again.");
     } finally {
       setLoading(false);

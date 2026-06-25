@@ -209,66 +209,81 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter relative">
-      {/* HEADER */}
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className="text-headline-lg text-on-surface font-geist font-bold">Analytics</h1>
-          <p className="text-body-sm text-secondary mt-1">{group.name} · Last 12 months</p>
-        </div>
-        <div className="flex gap-4 items-center">
-          <div className="bg-white border border-[#E5E7EB] rounded px-4 py-2 text-body-sm flex items-center gap-2 text-on-surface cursor-pointer shadow-sm">
-            <span className="material-symbols-outlined text-lg">calendar_today</span>
-            Last 12 Months
-            <span className="material-symbols-outlined text-lg">expand_more</span>
+    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
+      {/* Page Header */}
+      <div className="mb-8">
+        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <span>Dashboard</span>
+          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span>Analytics</span>
+        </p>
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+              Chama Analytics
+            </h1>
+            <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">
+              {group?.name || 'Group'} · Financial trends and group performance metrics.
+            </p>
           </div>
-          <button className="bg-[#22C55E] text-white rounded px-4 py-2 text-body-sm font-medium hover:bg-[#006e2f] transition-colors shadow-sm">
-            Export Report
-          </button>
+          <div className="flex gap-3 items-center w-full md:w-auto">
+            <div className="card-bg border border-[var(--border)] rounded-lg px-4 py-2 text-sm flex items-center gap-2 justify-center text-[var(--text-main)] cursor-pointer shadow-sm flex-1 md:flex-initial">
+              <span className="material-symbols-outlined text-lg">calendar_today</span>
+              Last 12 Months
+              <span className="material-symbols-outlined text-lg">expand_more</span>
+            </div>
+            <button className="bg-[#22C55E] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[#006e2f] transition-all shadow-sm flex-1 md:flex-initial">
+              Export Report
+            </button>
+          </div>
         </div>
       </div>
 
       {/* METRIC CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
         {/* Card 1 */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
-          <div className="text-label-caps text-on-surface-variant mb-4">TOTAL SAVED (GROUP)</div>
-          <div className="text-display-sm text-on-surface font-geist mb-2">KSh {formatCurrency(stats.totalSaved)}</div>
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">TOTAL SAVED (GROUP)</div>
+          <div className="text-[20px] md:text-3xl font-bold text-[var(--text-main)] font-geist mb-2">KSh {formatCurrency(stats.totalSaved)}</div>
           <div>
-            <span className="inline-flex items-center bg-surface-container-low text-[#22C55E] border border-[#4ae176] px-2 py-0.5 rounded text-mono-data">
+            <span className="inline-flex items-center bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border border-[#4ae176]/30 px-2 py-0.5 rounded text-[10px] md:text-[11px] font-semibold">
               ↑ 18% vs last year
             </span>
           </div>
         </div>
 
         {/* Card 2 */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
-          <div className="text-label-caps text-on-surface-variant mb-4">LOANS ISSUED</div>
-          <div className="text-display-sm text-on-surface font-geist mb-2">KSh {formatCurrency(stats.loansIssued)}</div>
-          <div className="text-label-caps text-secondary">{stats.loansCount} loans total</div>
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">LOANS ISSUED</div>
+          <div className="text-[20px] md:text-3xl font-bold text-[var(--text-main)] font-geist mb-2">KSh {formatCurrency(stats.loansIssued)}</div>
+          <div className="text-[11px] md:text-[12px] text-[var(--text-muted)]">{stats.loansCount} loans total</div>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
-          <div className="text-label-caps text-on-surface-variant mb-4">AVG CONTRIBUTION RATE</div>
-          <div className="text-display-sm text-[#22C55E] font-geist">{stats.avgContributionRate}%</div>
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-amber-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">AVG CONTRIBUTION RATE</div>
+          <div className="text-[20px] md:text-3xl font-bold text-[#22C55E] font-geist mb-2">{stats.avgContributionRate}%</div>
+          <div className="text-[11px] md:text-[12px] text-[var(--text-muted)]">Expected target: 90%+</div>
         </div>
 
         {/* Card 4 */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col justify-between shadow-sm">
-          <div className="text-label-caps text-on-surface-variant mb-4">GROUP TRUST SCORE</div>
-          <div className="text-display-sm text-[#22C55E] font-geist mb-2">{stats.groupTrustScore}/100</div>
-          <div className="text-body-sm text-[#22C55E] font-medium">↑ 6 points</div>
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">GROUP TRUST SCORE</div>
+          <div className="text-[20px] md:text-3xl font-bold text-[var(--brand-green)] font-geist mb-2">{stats.groupTrustScore}/100</div>
+          <div className="text-[11px] md:text-[12px] text-[var(--brand-green)] font-semibold flex items-center gap-0.5">
+            <span className="material-symbols-outlined text-[14px]">trending_up</span>
+            ↑ 6 points
+          </div>
         </div>
       </div>
 
-      {/* CHART ROW 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         
         {/* Left: Savings Growth */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm">
-          <h2 className="text-headline-sm text-on-surface font-geist mb-6">Total group savings over time</h2>
-          <div className="h-64 w-full">
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Total group savings over time</h2>
+          <div className="h-[200px] md:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={savingsGrowthData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
@@ -277,12 +292,12 @@ export default function AnalyticsPage() {
                     <stop offset="95%" stopColor="#22C55E" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dx={-10} tickFormatter={(val) => `${(val/1000)}k`} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dx={-10} tickFormatter={(val) => `${(val/1000)}k`} />
                 <Tooltip 
-                  formatter={(value: number) => [`KSh ${value.toLocaleString()}`, 'Total Saved']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                  formatter={(value: any) => [`KSh ${value.toLocaleString()}`, 'Total Saved']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                 />
                 <Area type="monotone" dataKey="amount" stroke="#22C55E" strokeWidth={2} fillOpacity={1} fill="url(#colorSavings)" />
               </AreaChart>
@@ -291,18 +306,18 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Right: Contribution Rate */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm">
-          <h2 className="text-headline-sm text-on-surface font-geist mb-6">Monthly collection rate</h2>
-          <div className="h-64 w-full">
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Monthly collection rate</h2>
+          <div className="h-[200px] md:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={collectionRateData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dx={-10} domain={[0, 100]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dx={-10} domain={[0, 100]} />
                 <Tooltip 
-                  formatter={(value: number) => [`${value}%`, 'Collection Rate']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
-                  cursor={{ fill: '#F3F4F6' }}
+                  formatter={(value: any) => [`${value}%`, 'Collection Rate']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
+                  cursor={{ fill: 'var(--color-bg-hover)' }}
                 />
                 <Bar dataKey="rate" fill="#22C55E" radius={[4, 4, 0, 0]} maxBarSize={40} />
               </BarChart>
@@ -316,27 +331,27 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         
         {/* Left: Loan Performance */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm">
-          <h2 className="text-headline-sm text-on-surface font-geist mb-6">Loans issued vs repaid (6 Mo)</h2>
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Loans issued vs repaid (6 Mo)</h2>
           <div className="flex items-center gap-6 mb-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-[#22C55E]"></div>
-              <span className="text-body-sm text-secondary">Repaid</span>
+              <span className="text-sm text-[var(--text-muted)]">Repaid</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#9CA3AF]"></div>
-              <span className="text-body-sm text-secondary">Issued</span>
+              <div className="w-3 h-3 rounded-full bg-[#9CA3AF] dark:bg-[#5a6e5a]"></div>
+              <span className="text-sm text-[var(--text-muted)]">Issued</span>
             </div>
           </div>
-          <div className="h-48 w-full">
+          <div className="h-[200px] md:h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={loanPerformanceData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dx={-10} tickFormatter={(val) => `${(val/1000)}k`} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dx={-10} tickFormatter={(val) => `${(val/1000)}k`} />
                 <Tooltip 
-                  formatter={(value: number, name: string) => [`KSh ${value.toLocaleString()}`, name === 'repaid' ? 'Repaid' : 'Issued']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                  formatter={(value: any, name: any) => [`KSh ${value.toLocaleString()}`, name === 'repaid' ? 'Repaid' : 'Issued']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                 />
                 <Line type="monotone" dataKey="issued" stroke="#9CA3AF" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: '#9CA3AF' }} />
                 <Line type="monotone" dataKey="repaid" stroke="#22C55E" strokeWidth={2} dot={{ r: 4, fill: '#22C55E' }} />
@@ -346,9 +361,9 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Right: Member Activity Breakdown */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col items-center shadow-sm">
-          <h2 className="text-headline-sm text-on-surface font-geist mb-6 w-full text-left">Member contribution status — this month</h2>
-          <div className="h-48 w-full relative mb-6">
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 flex flex-col items-center shadow-sm hover:shadow-md transition-all duration-200">
+          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6 w-full text-left text-[16px] md:text-xl">Member contribution status — this month</h2>
+          <div className="h-[200px] w-full relative mb-6">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -366,18 +381,18 @@ export default function AnalyticsPage() {
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: number) => [`${value} members`, 'Count']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                  formatter={(value: any) => [`${value} members`, 'Count']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                 />
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-headline-sm font-geist text-on-surface font-bold">{totalMembers}</span>
-              <span className="text-label-caps text-on-secondary-container">Members</span>
+              <span className="text-2xl font-bold font-geist text-[var(--text-main)]">{totalMembers}</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">Members</span>
             </div>
           </div>
           
-          <div className="flex gap-4 text-body-sm text-on-surface w-full justify-center">
+          <div className="flex gap-4 text-sm text-[var(--text-main)] w-full justify-center">
             {memberStatusData.map(m => (
               <div key={m.name} className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full" style={{ backgroundColor: m.color }}></span> 
@@ -390,10 +405,10 @@ export default function AnalyticsPage() {
       </div>
 
       {/* GROUP HEALTH SCORE WIDGET */}
-      <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 w-full mb-12 shadow-sm">
+      <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 w-full mb-12 shadow-sm hover:shadow-md transition-all duration-200">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-headline-sm text-on-surface font-geist">Group Health Score</h2>
-          <div className="text-headline-sm text-[#22C55E] font-geist">{healthScore}/100</div>
+          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist">Group Health Score</h2>
+          <div className="text-2xl font-bold text-[var(--brand-green)] font-geist">{healthScore}/100</div>
         </div>
 
         <div className="flex flex-col items-center mb-10">
@@ -413,18 +428,18 @@ export default function AnalyticsPage() {
                   isAnimationActive={false}
                 >
                   <Cell fill="#22C55E" />
-                  <Cell fill="#E5E7EB" />
+                  <Cell fill="var(--color-border)" />
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-display-sm font-geist text-[#22C55E] leading-none mt-2">{healthScore}</span>
-              <span className="text-label-caps text-[#22C55E] mt-1 text-center">{healthScore >= 80 ? 'Excellent' : healthScore >= 60 ? 'Good' : 'Needs Review'}<br/>Health</span>
+              <span className="text-3xl font-bold font-geist text-[#22C55E] leading-none mt-2">{healthScore}</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)] mt-1 text-center">{healthScore >= 80 ? 'Excellent' : healthScore >= 60 ? 'Good' : 'Needs Review'}<br/>Health</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-8">
           {[
             { label: 'Participation Rate', value: `${Math.round(totalMembers > 0 ? (memberStatusData.find(m => m.name === 'Paid')?.value || 0) / totalMembers * 100 : 0)}%` },
             { label: 'Repayment Consistency', value: `${stats.loansIssued > 0 ? 88 : 100}%` },
@@ -433,10 +448,10 @@ export default function AnalyticsPage() {
           ].map((stat, i) => (
             <div key={i}>
               <div className="flex justify-between items-end mb-2">
-                <span className="text-label-caps text-on-surface-variant">{stat.label}</span>
-                <span className="text-mono-data text-on-surface">{stat.value}</span>
+                <span className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">{stat.label}</span>
+                <span className="text-sm font-semibold text-[var(--text-main)]">{stat.value}</span>
               </div>
-              <div className="w-full h-2 bg-[#E5E7EB] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-gray-100 dark:bg-[#1a2218] rounded-full overflow-hidden">
                 <div className="h-full bg-[#22C55E] transition-all duration-1000" style={{ width: stat.value }}></div>
               </div>
             </div>
@@ -444,11 +459,11 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex justify-center">
-          <div className={`bg-surface-container-low border px-4 py-2 rounded inline-flex items-center gap-2 ${healthScore >= 80 ? 'border-[#4ae176]' : 'border-yellow-400'}`}>
-            <span className={`material-symbols-outlined text-sm ${healthScore >= 80 ? 'text-[#22C55E]' : 'text-yellow-600'}`}>
+          <div className={`bg-transparent text-[var(--brand-green)] border px-4 py-2 rounded-lg inline-flex items-center gap-2 ${healthScore >= 80 ? 'border-[#4ae176]/30' : 'border-yellow-400/30'}`}>
+            <span className={`material-symbols-outlined text-sm ${healthScore >= 80 ? 'text-[var(--brand-green)]' : 'text-yellow-600'}`}>
               {healthScore >= 80 ? 'check_circle' : 'warning'}
             </span>
-            <span className={`text-body-sm font-medium ${healthScore >= 80 ? 'text-[#22C55E]' : 'text-yellow-600'}`}>
+            <span className={`text-sm font-semibold ${healthScore >= 80 ? 'text-[var(--brand-green)]' : 'text-yellow-600'}`}>
               Your group is in {healthScore >= 80 ? 'Excellent' : healthScore >= 60 ? 'Good' : 'Fair'} Health
             </span>
           </div>

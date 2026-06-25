@@ -34,32 +34,71 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchMemberData = async (userId: string) => {
     try {
-      const { data: memberData, error: memberError } = await supabase
-        .from("members")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
+      // 1. Find the active chama from cookies
+      let activeChamaId: string | null = null;
+      if (typeof document !== 'undefined') {
+        const match = document.cookie.match(new RegExp('(^| )active_chama_id=([^;]+)'));
+        if (match) activeChamaId = match[2];
+      }
 
-      if (memberError || !memberData) {
+      // 2. Fetch memberships and active group data concurrently
+      const membershipsPromise = supabase
+        .from("chama_memberships")
+        .select("*, profiles(*)")
+        .eq("profile_id", userId)
+        .eq("status", "active");
+
+      const groupPromise = activeChamaId
+        ? supabase.from("chamas_v2").select("*").eq("id", activeChamaId).single()
+        : Promise.resolve({ data: null, error: null });
+
+      const [
+        { data: memberships, error: memberError },
+        { data: groupData, error: groupError }
+      ] = await Promise.all([membershipsPromise, groupPromise]);
+
+      if (memberError || !memberships || memberships.length === 0) {
         console.error("Error fetching member:", memberError);
         setMember(null);
         setGroup(null);
         return;
       }
+      
+      let currentMembership = memberships.find(m => m.chama_id === activeChamaId);
+      let finalGroupData = groupData;
 
-      setMember(memberData);
-
-      if (memberData.chama_id || memberData.group_id) {
-        const targetId = memberData.chama_id || memberData.group_id;
-        const { data: groupData, error: groupError } = await supabase
-          .from("chamas")
-          .select("*")
-          .eq("id", targetId)
-          .single();
-
-        if (!groupError && groupData) {
-          setGroup(groupData);
+      if (!currentMembership) {
+        currentMembership = memberships[0];
+        activeChamaId = currentMembership.chama_id;
+        if (typeof document !== 'undefined') {
+          document.cookie = `active_chama_id=${activeChamaId}; path=/; max-age=${60 * 60 * 24 * 30}`;
         }
+        
+        // If we didn't fetch the group because we didn't have activeChamaId, fetch it now
+        if (!groupData) {
+          const { data: fallbackGroup, error: fallbackError } = await supabase
+            .from("chamas_v2")
+            .select("*")
+            .eq("id", activeChamaId)
+            .single();
+          if (!fallbackError) {
+            finalGroupData = fallbackGroup;
+          }
+        }
+      }
+
+      // Format for legacy compatibility in components
+      const enrichedMember = {
+        ...currentMembership,
+        id: currentMembership.id,
+        user_id: currentMembership.profile_id,
+        full_name: currentMembership.profiles?.full_name
+      };
+
+      setMember(enrichedMember);
+
+      if (finalGroupData) {
+        setGroup(finalGroupData);
       }
     } catch (err) {
       console.error(err);

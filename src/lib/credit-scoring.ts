@@ -363,29 +363,29 @@ function generateMemberInsights(factors: {
   const insights: string[] = [];
 
   if (factors.score >= 800) {
-    insights.push('🌟 Excellent credit! You qualify for the best loan rates.');
+    insights.push('Excellent credit! You qualify for the best loan rates.');
   } else if (factors.score >= 670) {
-    insights.push('✅ Good credit standing. You have strong borrowing power.');
+    insights.push('Good credit standing. You have strong borrowing power.');
   } else if (factors.score >= 580) {
-    insights.push('⚠️ Fair credit. Focus on consistent payments to improve.');
+    insights.push('Fair credit. Focus on consistent payments to improve.');
   } else {
-    insights.push('❌ Poor credit. Rebuild by making regular contributions.');
+    insights.push('Poor credit. Rebuild by making regular contributions.');
   }
 
   if (factors.paymentHistoryScore < 80) {
-    insights.push('📉 Payment history needs improvement. Avoid missed payments.');
+    insights.push('Payment history needs improvement. Avoid missed payments.');
   }
 
   if (factors.consistencyScore < 70) {
-    insights.push('📊 Contribution amounts vary significantly. Try to maintain consistency.');
+    insights.push('Contribution amounts vary significantly. Try to maintain consistency.');
   }
 
   if (factors.loanRepaymentScore < 90 && factors.loanRepaymentScore > 0) {
-    insights.push('💳 Loan repayment history affects your score. Pay on time.');
+    insights.push('Loan repayment history affects your score. Pay on time.');
   }
 
   if (factors.accountAgeScore < 50) {
-    insights.push('🕐 New member. Your score will improve with time and activity.');
+    insights.push('New member. Your score will improve with time and activity.');
   }
 
   return insights;
@@ -402,35 +402,35 @@ function generateChamaInsights(metrics: {
   const insights: string[] = [];
 
   if (metrics.score >= 800) {
-    insights.push('🏆 Exceptional chama health! Ready for institutional partnerships.');
+    insights.push('Exceptional chama health! Ready for institutional partnerships.');
   } else if (metrics.score >= 700) {
-    insights.push('✅ Strong chama performance. Good investment opportunities available.');
+    insights.push('Strong chama performance. Good investment opportunities available.');
   } else if (metrics.score >= 600) {
-    insights.push('⚠️ Moderate health. Focus on member engagement and retention.');
+    insights.push('Moderate health. Focus on member engagement and retention.');
   } else {
-    insights.push('❌ Chama needs attention. Address defaults and member activity.');
+    insights.push('Chama needs attention. Address defaults and member activity.');
   }
 
   if (metrics.memberRetention < 80) {
-    insights.push('📉 Member retention is low. Improve engagement and benefits.');
+    insights.push('Member retention is low. Improve engagement and benefits.');
   }
 
   if (metrics.defaultRate > 10) {
-    insights.push('⚠️ High default rate. Implement stricter loan approval criteria.');
+    insights.push('High default rate. Implement stricter loan approval criteria.');
   }
 
   if (metrics.growthRate > 20) {
-    insights.push('📈 Excellent growth! Savings increased significantly.');
+    insights.push('Excellent growth! Savings increased significantly.');
   } else if (metrics.growthRate < 0) {
-    insights.push('📉 Negative growth. Review contribution requirements.');
+    insights.push('Negative growth. Review contribution requirements.');
   }
 
   if (metrics.averageMemberScore < 600) {
-    insights.push('👥 Average member credit is low. Provide financial literacy training.');
+    insights.push('Average member credit is low. Provide financial literacy training.');
   }
 
   if (metrics.totalSavings > 1000000) {
-    insights.push('💰 Strong savings base. Consider diversified investments.');
+    insights.push('Strong savings base. Consider diversified investments.');
   }
 
   return insights;

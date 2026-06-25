@@ -67,50 +67,59 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="p-8 font-inter relative min-h-full">
+    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in animate-bounce-subtle">
+          <span className="material-symbols-outlined text-[20px]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-headline-lg font-semibold text-on-surface font-geist">Group Settings</h1>
-          <p className="text-body-sm text-secondary mt-1">Configure core chama parameters</p>
+          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+            <span>Admin Dashboard</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span>Settings</span>
+          </p>
+          <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+            Group Settings
+          </h1>
+          <p className="text-[14px] text-[var(--text-muted)] mt-1">Configure core chama parameters and rules</p>
         </div>
-        <button 
-          onClick={handleSave}
-          className="bg-[#22C55E] hover:bg-[#006e2f] text-white px-6 py-2 rounded text-body-sm font-medium transition-colors shadow-sm"
-        >
-          Save Changes
-        </button>
+        <div>
+          <button 
+            onClick={handleSave}
+            className="bg-[#22C55E] hover:bg-[#1ea94e] text-white px-6 py-2.5 rounded-lg text-body-sm font-semibold transition-colors shadow-sm"
+          >
+            Save Changes
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <div className="lg:col-span-2 space-y-6">
           {/* GENERAL INFO */}
-          <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm p-6">
-            <h2 className="text-headline-sm font-geist text-on-surface mb-6">General Information</h2>
+          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">General Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Group Name</label>
+                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Group Name</label>
                 <input 
                   type="text" 
                   value={formData.name} 
                   onChange={e => setFormData({...formData, name: e.target.value})} 
-                  className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] max-w-md" 
+                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
                 />
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Currency</label>
+                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Currency</label>
                 <select 
                   value={formData.currency} 
                   onChange={e => setFormData({...formData, currency: e.target.value})} 
-                  className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] max-w-md bg-white"
+                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all"
                 >
                   <option value="KSh">KES - Kenyan Shilling</option>
                   <option value="USD">USD - US Dollar</option>
@@ -121,36 +130,36 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* FINANCIAL RULES */}
-          <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm p-6">
-            <h2 className="text-headline-sm font-geist text-on-surface mb-6">Financial Rules</h2>
+          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Financial Rules</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Standard Contribution Amount ({formData.currency})</label>
+                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Standard Contribution Amount ({formData.currency})</label>
                 <input 
                   type="number" 
                   value={formData.contribution_amount} 
                   onChange={e => setFormData({...formData, contribution_amount: Number(e.target.value)})} 
-                  className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] max-w-md" 
+                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
                 />
-                <p className="text-body-sm text-secondary mt-1">Expected amount per member per cycle.</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Expected amount per member per cycle.</p>
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Late Payment Penalty ({formData.currency})</label>
+                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Late Payment Penalty ({formData.currency})</label>
                 <input 
                   type="number" 
                   value={formData.late_penalty} 
                   onChange={e => setFormData({...formData, late_penalty: Number(e.target.value)})} 
-                  className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] max-w-md" 
+                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
                 />
-                <p className="text-body-sm text-secondary mt-1">Applied automatically when a payment misses the deadline.</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Applied automatically when a payment misses the deadline.</p>
               </div>
               <div>
-                <label className="block text-label-caps text-secondary mb-2">Cycle Start Date</label>
+                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Cycle Start Date</label>
                 <input 
                   type="date" 
                   value={formData.cycle_start} 
                   onChange={e => setFormData({...formData, cycle_start: e.target.value})} 
-                  className="w-full border border-[#E5E7EB] rounded px-4 py-2 text-on-surface outline-none focus:border-[#22C55E] max-w-md" 
+                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
                 />
               </div>
             </div>
@@ -159,30 +168,30 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="space-y-6">
-          {/* LOAN SETTINGS (Placeholder info) */}
-          <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm p-6">
-            <h2 className="text-headline-sm font-geist text-on-surface mb-2">Loan Policies</h2>
-            <p className="text-body-sm text-secondary mb-4">Manage interest rates, guarantor requirements, and maximum borrowing limits.</p>
-            <button className="w-full bg-surface-container-low border border-[#E5E7EB] text-primary py-2 rounded text-body-sm font-medium hover:bg-gray-50 transition-colors">
+          {/* LOAN SETTINGS */}
+          <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <h2 className="text-lg font-bold text-[var(--text-main)] font-geist mb-2">Loan Policies</h2>
+            <p className="text-xs text-[var(--text-muted)] mb-4">Manage interest rates, guarantor requirements, and maximum borrowing limits.</p>
+            <button className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] py-2.5 rounded-lg text-body-sm font-bold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all">
               Configure Loan Policies
             </button>
           </div>
 
           {/* DANGER ZONE */}
-          <div className="bg-white border border-red-200 rounded-lg shadow-sm p-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-error"></div>
-            <h2 className="text-headline-sm font-geist text-error mb-2 flex items-center gap-2">
+          <div className="card-bg border border-red-200 dark:border-red-900/30 border-t-2 border-t-red-600 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-red-600"></div>
+            <h2 className="text-lg font-bold text-red-600 dark:text-red-400 font-geist mb-2 flex items-center gap-2">
               <span className="material-symbols-outlined">warning</span>
               Danger Zone
             </h2>
-            <p className="text-body-sm text-secondary mb-4">Irreversible actions that affect the entire group data.</p>
+            <p className="text-xs text-[var(--text-muted)] mb-4">Irreversible actions that affect the entire group data.</p>
             
             <div className="space-y-3">
-              <button className="w-full bg-white border border-red-200 text-error py-2 rounded text-body-sm font-medium hover:bg-red-50 transition-colors text-left px-4 flex justify-between items-center">
+              <button className="w-full bg-white dark:bg-[#1a1c1a] border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 py-2.5 rounded-lg text-body-sm font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all text-left px-4 flex justify-between items-center">
                 Archive Group
                 <span className="material-symbols-outlined text-[16px]">inventory_2</span>
               </button>
-              <button className="w-full bg-error text-white py-2 rounded text-body-sm font-medium hover:bg-red-700 transition-colors text-left px-4 flex justify-between items-center">
+              <button className="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg text-body-sm font-bold transition-all text-left px-4 flex justify-between items-center">
                 Delete Group
                 <span className="material-symbols-outlined text-[16px]">delete_forever</span>
               </button>

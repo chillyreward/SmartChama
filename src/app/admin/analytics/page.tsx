@@ -38,22 +38,35 @@ export default function AdminAnalyticsPage() {
         ]);
 
         // Fetch Contributions
-        const { data: contribs } = await supabase.from('contributions').select('status, amount, member_id, members(full_name)').eq('group_id', group.id);
+        const { data: contribs } = await supabase
+          .from('contributions_v2')
+          .select(`
+            status, 
+            amount, 
+            membership_id, 
+            membership:chama_memberships (
+              profile:profiles (
+                full_name
+              )
+            )
+          `)
+          .eq('chama_id', group.id);
         
         let total = 0, late = 0, confirmed = 0;
         const memberTotals: Record<string, {name: string, total: number}> = {};
 
-        contribs?.forEach(c => {
+        contribs?.forEach((c: any) => {
           const amt = Number(c.amount);
           total += amt;
           if (c.status === 'confirmed') confirmed += amt;
           if (c.status === 'late') late += amt;
 
-          if (c.status === 'confirmed' && c.members?.full_name) {
-            if (!memberTotals[c.member_id]) {
-              memberTotals[c.member_id] = { name: c.members.full_name, total: 0 };
+          const memberName = c.membership?.profile?.full_name;
+          if (c.status === 'confirmed' && memberName) {
+            if (!memberTotals[c.membership_id]) {
+              memberTotals[c.membership_id] = { name: memberName, total: 0 };
             }
-            memberTotals[c.member_id].total += amt;
+            memberTotals[c.membership_id].total += amt;
           }
         });
 
@@ -74,23 +87,34 @@ export default function AdminAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="h-96 bg-white border border-[#E5E7EB] rounded-lg animate-pulse shadow-sm"></div>
+      <div className="p-8 max-w-[1280px] mx-auto w-full font-inter">
+        <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 font-inter">
-      <div className="mb-6">
-        <h1 className="text-headline-lg font-semibold text-on-surface font-geist">Analytics</h1>
-        <p className="text-body-sm text-secondary mt-1">Deep dive into group financial health</p>
+    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)]">
+      {/* Page Header */}
+      <div className="mb-8">
+        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <span>Admin Dashboard</span>
+          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span>Analytics</span>
+        </p>
+        
+        <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+          Admin Analytics
+        </h1>
+        <p className="text-[14px] text-[var(--text-muted)] mt-1">
+          Deep dive into group financial health and member contribution compliance.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* LOAN BOOK HEALTH */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm p-6 flex flex-col">
-          <h2 className="text-headline-sm font-geist text-on-surface mb-6">Loan Book Health</h2>
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 flex flex-col">
+          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Loan Book Health</h2>
           <div className="flex-1 flex flex-col md:flex-row items-center">
             <div className="w-full md:w-1/2 h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -103,14 +127,15 @@ export default function AdminAnalyticsPage() {
                     outerRadius={80}
                     paddingAngle={5}
                     dataKey="value"
+                    stroke="none"
                   >
                     {loanHealth.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip 
-                    formatter={(value: number) => [`KSh ${formatCurrency(value)}`, 'Amount']}
-                    contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    formatter={(value: any) => [`KSh ${formatCurrency(value)}`, 'Amount']}
+                    contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -120,9 +145,9 @@ export default function AdminAnalyticsPage() {
                 <div key={idx} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                    <span className="text-body-sm text-secondary">{item.name}</span>
+                    <span className="text-sm text-[var(--text-muted)]">{item.name}</span>
                   </div>
-                  <span className="font-mono font-medium text-on-surface">KSh {formatCurrency(item.value)}</span>
+                  <span className="font-mono font-bold text-[var(--text-main)]">KSh {formatCurrency(item.value)}</span>
                 </div>
               ))}
             </div>
@@ -130,54 +155,56 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* CONTRIBUTION STATS */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm p-6">
-          <h2 className="text-headline-sm font-geist text-on-surface mb-6">Contribution Compliance</h2>
-          
-          <div className="mb-8">
-            <div className="flex justify-between items-end mb-2">
-              <div className="text-display-sm font-geist font-bold text-[#22C55E]">
-                {contributionStats.total > 0 ? Math.round((contributionStats.confirmed / contributionStats.total) * 100) : 0}%
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 flex flex-col justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Contribution Compliance</h2>
+            
+            <div className="mb-8">
+              <div className="flex justify-between items-end mb-2">
+                <div className="text-3xl font-bold text-[#22C55E] font-geist">
+                  {contributionStats.total > 0 ? Math.round((contributionStats.confirmed / contributionStats.total) * 100) : 0}%
+                </div>
+                <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">ALL-TIME RECOVERY RATE</div>
               </div>
-              <div className="text-label-caps text-secondary">ALL-TIME RECOVERY RATE</div>
-            </div>
-            <div className="w-full bg-gray-100 rounded-full h-3">
-              <div 
-                className="bg-[#22C55E] h-3 rounded-full" 
-                style={{ width: `${contributionStats.total > 0 ? (contributionStats.confirmed / contributionStats.total) * 100 : 0}%` }}
-              ></div>
+              <div className="w-full bg-gray-100 dark:bg-[#1a2218] rounded-full h-3 overflow-hidden">
+                <div 
+                  className="bg-[#22C55E] h-3 rounded-full transition-all duration-500" 
+                  style={{ width: `${contributionStats.total > 0 ? (contributionStats.confirmed / contributionStats.total) * 100 : 0}%` }}
+                ></div>
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-surface-container-low border border-[#E5E7EB] rounded-lg">
-              <div className="text-label-caps text-secondary mb-1">CONFIRMED FUNDS</div>
-              <div className="font-mono font-bold text-on-surface text-lg">KSh {formatCurrency(contributionStats.confirmed)}</div>
+            <div className="p-4 bg-transparent text-[var(--brand-green)] border border-[#22C55E]/20 dark:border-[#22C55E]/10 rounded-xl">
+              <div className="text-[11px] font-bold tracking-wider text-[var(--brand-green)] uppercase mb-1">CONFIRMED FUNDS</div>
+              <div className="font-mono font-bold text-[var(--text-main)] text-lg">KSh {formatCurrency(contributionStats.confirmed)}</div>
             </div>
-            <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg">
-              <div className="text-label-caps text-orange-800 mb-1">OUTSTANDING (LATE)</div>
-              <div className="font-mono font-bold text-orange-800 text-lg">KSh {formatCurrency(contributionStats.late)}</div>
+            <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-950/30 rounded-xl">
+              <div className="text-[11px] font-bold tracking-wider text-red-800 dark:text-red-400 uppercase mb-1">OUTSTANDING (LATE)</div>
+              <div className="font-mono font-bold text-red-800 dark:text-red-400 text-lg">KSh {formatCurrency(contributionStats.late)}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm p-6">
-        <h2 className="text-headline-sm font-geist text-on-surface mb-6">Top Contributors All-Time</h2>
+      <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
+        <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Top Contributors All-Time</h2>
         <div className="flex flex-col gap-4">
           {topMembers.map((m, idx) => (
-            <div key={idx} className="flex justify-between items-center p-3 border border-[#E5E7EB] rounded-lg hover:bg-gray-50">
+            <div key={idx} className="flex justify-between items-center p-4 border border-[var(--border)] rounded-xl hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-all">
               <div className="flex items-center gap-4">
                 <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-xs ${
-                  idx === 0 ? 'bg-yellow-100 text-yellow-800' :
-                  idx === 1 ? 'bg-gray-200 text-gray-700' :
-                  idx === 2 ? 'bg-orange-100 text-orange-800' :
-                  'bg-surface-container-high text-secondary'
+                  idx === 0 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400' :
+                  idx === 1 ? 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300' :
+                  idx === 2 ? 'bg-[#fff7ed] dark:bg-orange-950/30 text-[#9a3412] dark:text-orange-400' :
+                  'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]'
                 }`}>
                   #{idx + 1}
                 </div>
-                <div className="font-medium text-on-surface">{m.name}</div>
+                <div className="font-semibold text-[var(--text-main)]">{m.name}</div>
               </div>
-              <div className="font-mono font-bold text-[#22C55E]">KSh {formatCurrency(m.total)}</div>
+              <div className="font-mono font-bold text-[#22C55E] text-lg">KSh {formatCurrency(m.total)}</div>
             </div>
           ))}
         </div>

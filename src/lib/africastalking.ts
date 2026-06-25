@@ -1,3 +1,4 @@
+// @ts-ignore
 import AfricasTalking from 'africastalking';
 
 const credentials = {

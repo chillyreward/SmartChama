@@ -207,10 +207,10 @@ export default function MembersPage() {
       </div>
 
       {/* VIEW MODE TABS */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <button
           onClick={() => setViewMode("chama")}
-          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+          className={`px-6 py-3 rounded-xl font-bold transition-all text-center w-full sm:w-auto ${
             viewMode === "chama"
               ? "bg-amber-500 text-black"
               : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
@@ -220,7 +220,7 @@ export default function MembersPage() {
         </button>
         <button
           onClick={() => setViewMode("unassigned")}
-          className={`px-6 py-3 rounded-xl font-bold transition-all ${
+          className={`px-6 py-3 rounded-xl font-bold transition-all text-center w-full sm:w-auto ${
             viewMode === "unassigned"
               ? "bg-amber-500 text-black"
               : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
@@ -256,7 +256,8 @@ export default function MembersPage() {
       {!loading && viewMode === "unassigned" && filteredMembers.length > 0 && (
         <div className="bg-slate-900 border border-slate-800 rounded-[32px] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            {/* Desktop Table View */}
+            <table className="hidden md:table w-full">
               <thead>
                 <tr className="border-b border-slate-800">
                   <th className="text-left p-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Member</th>
@@ -325,6 +326,60 @@ export default function MembersPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Mobile Card List View */}
+            <div className="md:hidden divide-y divide-slate-800 p-4">
+              {filteredMembers.map((member) => (
+                <div key={member.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center font-bold text-black shrink-0">
+                      {(member.full_name || member.name || '?').charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-white truncate">{member.full_name || member.name || 'Unknown'}</p>
+                      <p className="text-xs text-slate-500 truncate">{member.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800/50">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Mail className="w-4 h-4 shrink-0" />
+                      <span className="text-xs truncate">{member.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Phone className="w-4 h-4 shrink-0" />
+                      <span className="text-xs">{member.phone_number}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Calendar className="w-4 h-4 shrink-0" />
+                      <span className="text-xs">
+                        Joined {new Date(member.created_at).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          year: 'numeric' 
+                        })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                      <Users className="w-3 h-3" />
+                      Not in Chama
+                    </span>
+                    <button 
+                      onClick={() => {
+                        setSelectedMember(member);
+                        setShowAddModal(true);
+                      }}
+                      className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-2 rounded-lg transition-all text-xs"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -333,7 +388,8 @@ export default function MembersPage() {
       {!loading && viewMode === "chama" && filteredChamaMembers.length > 0 && (
         <div className="bg-slate-900 border border-slate-800 rounded-[32px] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            {/* Desktop Table View */}
+            <table className="hidden md:table w-full">
               <thead>
                 <tr className="border-b border-slate-800">
                   <th className="text-left p-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Member</th>
@@ -396,6 +452,54 @@ export default function MembersPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Mobile Card List View */}
+            <div className="md:hidden divide-y divide-slate-800 p-4">
+              {filteredChamaMembers.map((member) => (
+                <div key={member.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center font-bold text-black shrink-0">
+                      {(member.full_name || member.name || '?').charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-white truncate">{member.full_name || member.name || 'Unknown'}</p>
+                      <p className="text-xs text-slate-500 truncate">{member.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800/50">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Mail className="w-4 h-4 shrink-0" />
+                      <span className="text-xs truncate">{member.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Phone className="w-4 h-4 shrink-0" />
+                      <span className="text-xs">{member.phone_number}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Calendar className="w-4 h-4 shrink-0" />
+                      <span className="text-xs">
+                        Joined {new Date(member.created_at).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          year: 'numeric' 
+                        })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap justify-between items-center gap-2">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                      <CheckCircle className="w-3 h-3" />
+                      {member.chamas?.name || 'Unknown Chama'}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                      <CheckCircle className="w-3 h-3" />
+                      Active
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
-  Users, Lock, ArrowRight, ShieldCheck, Keypad, 
+  Users, Lock, ArrowRight, ShieldCheck, 
   Loader2, CheckCircle, Wallet, Plus, X, Building2
 } from "lucide-react";
 import { useRouter } from "next/navigation";

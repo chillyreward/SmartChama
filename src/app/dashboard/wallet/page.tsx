@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 
 export default function WalletPage() {
-  const { session, member, group, isLoading: authLoading } = useAuth();
+  const { member, group, isLoading: authLoading } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,7 +70,6 @@ export default function WalletPage() {
 
       const activeLoansTotal = loansData?.reduce((sum, l) => sum + Number(l.amount), 0) || 0;
       
-      // Derived metrics
       const emergencyFund = balance * 0.05;
       const savingsPool = Math.max(0, balance - emergencyFund);
 
@@ -101,25 +100,45 @@ export default function WalletPage() {
 
   const handleWithdrawalRequest = async () => {
     if (!member || !group) return;
-    const amountVal = parseFloat(withdrawalAmount.replace(/,/g, ""));
+    const amountVal = parseFloat(withdrawalAmount);
     if (isNaN(amountVal) || amountVal <= 0) {
-      alert("Invalid amount");
+      alert("Please enter a valid amount.");
       return;
     }
-    
-    // Simulating withdrawal request
-    setToastMsg("Withdrawal request submitted to Admins.");
-    setTimeout(() => setToastMsg(""), 3000);
-    setWithdrawalAmount("");
-    setWithdrawalReason("");
+
+    if (amountVal > walletStats.balance) {
+      alert("Insufficient total recorded balance.");
+      return;
+    }
+
+    const { error: insertErr } = await supabase
+      .from('withdrawal_requests')
+      .insert({
+        group_id: member.group_id,
+        requested_by: member.id,
+        amount: amountVal,
+        reason: withdrawalReason,
+        status: 'pending',
+        approvals: []
+      });
+
+    if (insertErr) {
+      alert("Failed to submit request: " + insertErr.message);
+    } else {
+      setWithdrawalAmount("");
+      setWithdrawalReason("");
+      setToastMsg("Withdrawal request submitted successfully!");
+      setTimeout(() => setToastMsg(""), 3000);
+      fetchData();
+    }
   };
 
   if (authLoading || loading) {
     return (
-      <div className="p-8">
-        <div className="bg-[#0B0F0C] rounded-xl p-8 mb-6 h-64 animate-pulse shadow-sm"></div>
+      <div className="p-6 max-w-[1280px] mx-auto w-full text-[var(--text-main)]">
+        <div className="bg-[#0B0F0C] rounded-2xl p-8 mb-6 h-64 animate-pulse shadow-sm"></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {[1,2,3].map(i => <div key={i} className="bg-white border border-[#E5E7EB] rounded-lg p-6 h-32 animate-pulse shadow-sm"></div>)}
+          {[1,2,3].map(i => <div key={i} className="card-bg border border-[var(--border)] rounded-2xl p-6 h-32 animate-pulse shadow-sm"></div>)}
         </div>
       </div>
     );
@@ -127,49 +146,78 @@ export default function WalletPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full pt-20">
-        <span className="material-symbols-outlined text-error text-5xl mb-4">error_outline</span>
-        <p className="text-body-sm text-error">{error}</p>
-        <button onClick={fetchData} className="mt-4 text-primary hover:underline font-medium">Retry</button>
+      <div className="flex flex-col items-center justify-center h-full pt-20 text-[var(--text-main)]">
+        <span className="material-symbols-outlined text-red-500 text-5xl mb-4">error_outline</span>
+        <p className="text-body-sm text-red-500">{error}</p>
+        <button onClick={fetchData} className="mt-4 text-[var(--brand-green)] hover:underline font-medium">Retry</button>
       </div>
     );
   }
 
-  // Calculate percentages
   const totalAssets = walletStats.balance + walletStats.activeLoansTotal;
   const savingsPct = totalAssets > 0 ? Math.round((walletStats.savingsPool / totalAssets) * 100) : 0;
   const loansPct = totalAssets > 0 ? Math.round((walletStats.activeLoansTotal / totalAssets) * 100) : 0;
   const emergencyPct = totalAssets > 0 ? Math.round((walletStats.emergencyFund / totalAssets) * 100) : 0;
 
+  const chamaName = group?.name || 'Group';
+
   return (
-    <div className="p-8 font-inter relative min-h-full">
+    <div className="p-6 max-w-[1280px] mx-auto w-full relative font-inter text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
+        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in">
           <span className="material-symbols-outlined text-[18px]">check_circle</span>
-          <span className="text-body-sm font-medium">{toastMsg}</span>
+          <span className="text-body-sm font-semibold">{toastMsg}</span>
         </div>
       )}
 
-      {/* HEADER */}
+      {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-headline-lg font-semibold text-on-surface font-geist">Wallet</h1>
-        <p className="text-body-sm text-secondary mt-1">{group.name} Group Wallet</p>
+        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <span>Dashboard</span>
+          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span>Wallet</span>
+        </p>
+        
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+              Wallet
+            </h1>
+            <p className="text-[14px] text-[var(--text-muted)] mt-1">
+              {chamaName} — Manage group wallet funds, deposits and withdrawals.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* HERO WALLET CARD */}
-      <div className="w-full bg-[#0B0F0C] rounded-xl p-8 mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 shadow-sm">
+      {/* LEDGER DISCLAIMER BANNER */}
+      <div className="bg-[#EDF6EA] dark:bg-[#1a2a1a] border border-[#22C55E]/30 rounded-xl p-4 mb-6 flex gap-3 items-start shadow-sm">
+        <span className="material-symbols-outlined text-[#006e2f] dark:text-[#4ae176] shrink-0 mt-0.5">info</span>
+        <div>
+          <h3 className="text-sm font-bold text-[#006e2f] dark:text-[#4ae176] mb-1">How SmartChama tracks money</h3>
+          <p className="text-xs text-[#006e2f]/80 dark:text-[#4ae176]/80 leading-relaxed">
+            SmartChama is a ledger app. We <strong>DO NOT</strong> hold money. The balances shown here are records of money you have saved in your group's bank account or mobile money paybill.
+          </p>
+        </div>
+      </div>
+
+      {/* HERO WALLET CARD (Stays dark as requested) */}
+      <div className="w-full bg-[#0B0F0C] border border-[#163822] rounded-2xl p-4 md:p-8 mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 shadow-sm">
         {/* Left */}
         <div className="flex-1 w-full">
-          <div className="text-label-caps text-gray-400">GROUP WALLET BALANCE</div>
-          <div className="text-[56px] font-geist font-bold text-white mt-2 leading-none">KSh {formatCurrency(walletStats.balance)}</div>
-          <div className="text-body-sm text-gray-400 mt-3">Available for loans and disbursements</div>
+          <div className="text-[11px] font-bold tracking-wider text-gray-400">TOTAL RECORDED</div>
+          <div className="text-[32px] md:text-[56px] font-geist font-bold text-white mt-2 leading-none">KSh {formatCurrency(walletStats.balance)}</div>
+          <div className="text-body-sm text-gray-400 mt-3 flex items-center gap-1.5">
+             <span className="material-symbols-outlined text-[16px]">security</span>
+             SmartChama does not hold money. This is a record only.
+          </div>
           
           <div className="flex flex-wrap gap-3 mt-8">
-            <button className="bg-[#22C55E] hover:bg-[#006e2f] transition-colors text-white px-6 py-3 rounded text-headline-sm flex items-center gap-2 font-medium shadow-sm">
+            <button className="bg-[#22C55E] hover:bg-[#006e2f] transition-all text-white px-6 py-3 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm">
               <span className="material-symbols-outlined text-[20px]">payments</span>
               Deposit
             </button>
-            <button className="bg-transparent hover:bg-white/5 transition-colors border border-white/30 text-white px-6 py-3 rounded text-headline-sm flex items-center gap-2 font-medium">
+            <button className="bg-transparent hover:bg-white/5 transition-all border border-white/30 text-white px-6 py-3 rounded-lg text-sm font-bold flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px]">arrow_outward</span>
               Withdraw
             </button>
@@ -177,67 +225,64 @@ export default function WalletPage() {
         </div>
 
         {/* Right */}
-        <div className="w-full lg:w-[340px] bg-white/5 border border-white/10 rounded-lg p-6 shrink-0">
+        <div className="w-full lg:w-[340px] bg-white/5 border border-white/10 rounded-xl p-6 shrink-0">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-[#22C55E] text-[20px]">arrow_upward</span>
-              <span className="text-body-sm text-white font-medium">KSh {formatCurrency(walletStats.inThisMonth)} in this month</span>
+              <span className="text-body-sm text-white font-semibold">KSh {formatCurrency(walletStats.inThisMonth)} in this month</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-gray-400 text-[20px]">arrow_downward</span>
-              <span className="text-body-sm text-gray-400 font-medium">KSh {formatCurrency(walletStats.outThisMonth)} out this month</span>
+              <span className="text-body-sm text-gray-400 font-semibold">KSh {formatCurrency(walletStats.outThisMonth)} out this month</span>
             </div>
           </div>
           <div className="border-t border-white/10 my-5"></div>
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-[#22C55E] text-[20px]">payments</span>
-            <span className="text-body-sm text-[#22C55E] font-medium">M-Pesa Connected</span>
+            <span className="text-body-sm text-[#22C55E] font-bold">M-Pesa Connected</span>
           </div>
         </div>
       </div>
 
       {/* WALLET BREAKDOWN */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Card 1 */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm">
-          <div className="text-label-caps text-secondary mb-2 uppercase">SAVINGS POOL</div>
-          <div className="text-display-sm font-geist font-bold text-on-surface mb-1">KSh {formatCurrency(walletStats.savingsPool)}</div>
-          <div className="text-label-caps text-secondary mb-5">Available to lend to members</div>
-          <div className="bg-[#E5E7EB] h-2 rounded-full w-full overflow-hidden">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8">
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">SAVINGS POOL</div>
+          <div className="text-[18px] md:text-2xl font-bold text-[var(--text-main)] mb-1 font-geist">KSh {formatCurrency(walletStats.savingsPool)}</div>
+          <div className="text-xs text-[var(--text-muted)] mb-5">Available to lend</div>
+          <div className="bg-gray-100 dark:bg-[#1a2218] h-2 rounded-full w-full overflow-hidden">
             <div className="bg-[#22C55E] h-full rounded-full transition-all" style={{ width: `${savingsPct}%` }}></div>
           </div>
-          <div className="text-label-caps text-[#22C55E] mt-3 font-medium">{savingsPct}% of assets</div>
+          <div className="text-[10px] font-bold text-[var(--brand-green)] mt-3 uppercase tracking-wider">{savingsPct}% of assets</div>
         </div>
 
-        {/* Card 2 */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm">
-          <div className="text-label-caps text-secondary mb-2 uppercase">ACTIVE LOANS</div>
-          <div className="text-display-sm font-geist font-bold text-on-surface mb-1">KSh {formatCurrency(walletStats.activeLoansTotal)}</div>
-          <div className="text-label-caps text-secondary mb-5">Currently disbursed</div>
-          <div className="bg-[#E5E7EB] h-2 rounded-full w-full overflow-hidden">
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">ACTIVE LOANS</div>
+          <div className="text-[18px] md:text-2xl font-bold text-[var(--text-main)] mb-1 font-geist">KSh {formatCurrency(walletStats.activeLoansTotal)}</div>
+          <div className="text-xs text-[var(--text-muted)] mb-5">Currently disbursed</div>
+          <div className="bg-gray-100 dark:bg-[#1a2218] h-2 rounded-full w-full overflow-hidden">
             <div className="bg-blue-400 h-full rounded-full transition-all" style={{ width: `${loansPct}%` }}></div>
           </div>
-          <div className="text-label-caps text-blue-500 mt-3 font-medium">{loansPct}% of assets</div>
+          <div className="text-[10px] font-bold text-blue-500 mt-3 uppercase tracking-wider">{loansPct}% of assets</div>
         </div>
 
-        {/* Card 3 */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm">
-          <div className="text-label-caps text-secondary mb-2 uppercase">EMERGENCY FUND</div>
-          <div className="text-display-sm font-geist font-bold text-on-surface mb-1">KSh {formatCurrency(walletStats.emergencyFund)}</div>
-          <div className="text-label-caps text-secondary mb-5">Reserved — not for lending</div>
-          <div className="bg-[#E5E7EB] h-2 rounded-full w-full overflow-hidden">
-            <div className="bg-gray-400 h-full rounded-full transition-all" style={{ width: `${emergencyPct}%` }}></div>
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 last:col-span-2 md:last:col-span-1">
+          <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">EMERGENCY FUND</div>
+          <div className="text-[18px] md:text-2xl font-bold text-[var(--text-main)] mb-1 font-geist">KSh {formatCurrency(walletStats.emergencyFund)}</div>
+          <div className="text-xs text-[var(--text-muted)] mb-5">Reserved fund</div>
+          <div className="bg-gray-100 dark:bg-[#1a2218] h-2 rounded-full w-full overflow-hidden">
+            <div className="bg-gray-400 dark:bg-[#2d3d2d] h-full rounded-full transition-all" style={{ width: `${emergencyPct}%` }}></div>
           </div>
-          <div className="text-label-caps text-secondary mt-3 font-medium">{emergencyPct}% of assets</div>
+          <div className="text-[10px] font-bold text-[var(--text-muted)] mt-3 uppercase tracking-wider">{emergencyPct}% of assets</div>
         </div>
       </div>
 
       {/* TWO COLUMNS BOTTOM */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left - Recent Activity */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm">
-          <h2 className="text-headline-sm font-geist text-on-surface mb-2">Recent activity</h2>
-          <div className="flex flex-col divide-y divide-[#E5E7EB] mt-2">
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
+          <h2 className="text-xl font-bold font-geist text-[var(--text-main)] mb-4">Recent activity</h2>
+          <div className="flex flex-col divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
             {recentActivity.length > 0 ? recentActivity.map((tx) => {
               const date = new Date(tx.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
               const isIncoming = ['contribution', 'repayment', 'penalty', 'interest'].includes(tx.type);
@@ -246,25 +291,25 @@ export default function WalletPage() {
               if (tx.members?.full_name) desc += ` — ${tx.members.full_name}`;
 
               return (
-                <div key={tx.id} className="flex items-center justify-between py-4 group hover:bg-gray-50 -mx-6 px-6 transition-colors">
+                <div key={tx.id} className="flex items-center justify-between py-4 hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] px-2 rounded-lg transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isIncoming ? 'bg-[#22C55E]/10' : 'bg-red-50'}`}>
-                      <span className={`material-symbols-outlined ${isIncoming ? 'text-[#22C55E]' : 'text-error'}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isIncoming ? 'bg-transparent text-[var(--brand-green)]' : 'bg-red-50 dark:bg-red-950/20'}`}>
+                      <span className={`material-symbols-outlined ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
                         {isIncoming ? 'arrow_downward' : 'arrow_upward'}
                       </span>
                     </div>
                     <div>
-                      <div className="text-body-sm text-on-surface font-medium group-hover:text-primary transition-colors capitalize">{desc}</div>
-                      <div className="text-label-caps text-secondary mt-1">{date}</div>
+                      <div className="text-sm text-[var(--text-main)] font-semibold capitalize">{desc}</div>
+                      <div className="text-xs text-[var(--text-muted)] mt-1">{date}</div>
                     </div>
                   </div>
-                  <div className={`font-mono font-medium text-sm ${isIncoming ? 'text-[#22C55E]' : 'text-error'}`}>
-                    {isIncoming ? '+' : '-'}KSh {formatCurrency(tx.amount)}
+                  <div className={`font-mono font-bold text-sm ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
+                    {isIncoming ? '+' : '-'} KSh {formatCurrency(tx.amount)}
                   </div>
                 </div>
-              )
+              );
             }) : (
-              <div className="py-6 text-center text-body-sm text-secondary">
+              <div className="py-6 text-center text-sm text-[var(--text-muted)]">
                 No recent activity.
               </div>
             )}
@@ -272,15 +317,15 @@ export default function WalletPage() {
         </div>
 
         {/* Right - Withdrawal Request */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 shadow-sm self-start">
-          <h2 className="text-headline-sm font-geist text-on-surface">Request Withdrawal</h2>
-          <p className="text-body-sm text-secondary mt-1 mb-6">Requires 2 of 3 admin approvals</p>
+        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 self-start">
+          <h2 className="text-xl font-bold font-geist text-[var(--text-main)] mb-2">Request Withdrawal</h2>
+          <p className="text-sm text-[var(--text-muted)] mb-6">Requires 2 of 3 admin approvals</p>
 
           <div className="flex flex-col gap-5">
             <div>
-              <label className="block text-label-caps text-secondary mb-2" htmlFor="amount">Amount</label>
+              <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2" htmlFor="amount">Amount</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-medium">KSh</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] font-semibold">KSh</span>
                 <input 
                   type="number" 
                   id="amount"
@@ -288,19 +333,19 @@ export default function WalletPage() {
                   value={withdrawalAmount}
                   onChange={(e) => setWithdrawalAmount(e.target.value)}
                   placeholder="0"
-                  className="w-full border border-[#E5E7EB] rounded px-4 py-3 pl-14 text-on-surface outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] transition-all font-medium"
+                  className="w-full border border-[var(--border)] rounded-lg px-4 py-3 pl-14 text-[var(--text-main)] bg-transparent outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] transition-all font-semibold"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-label-caps text-secondary mb-2" htmlFor="reason">Reason</label>
+              <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2" htmlFor="reason">Reason</label>
               <select 
                 id="reason"
                 name="reason"
                 value={withdrawalReason}
                 onChange={(e) => setWithdrawalReason(e.target.value)}
-                className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-on-surface outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] transition-all bg-white font-medium"
+                className="w-full border border-[var(--border)] rounded-lg px-4 py-3 text-[var(--text-main)] bg-transparent outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] transition-all font-semibold"
               >
                 <option value="">Select a reason</option>
                 <option value="payout">Member Payout</option>
@@ -310,15 +355,15 @@ export default function WalletPage() {
               </select>
             </div>
 
-            <div className="bg-surface-container-low border border-[#E5E7EB] rounded-lg p-4 flex items-start gap-3 mt-1 shadow-sm">
-              <span className="material-symbols-outlined text-on-secondary-container mt-0.5">group</span>
-              <span className="text-body-sm text-on-surface font-medium pt-0.5 leading-relaxed">2 admins must approve this withdrawal</span>
+            <div className="bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] rounded-lg p-4 flex items-start gap-3 mt-1 shadow-sm">
+              <span className="material-symbols-outlined text-[var(--text-muted)] mt-0.5">group</span>
+              <span className="text-sm text-[var(--text-main)] font-semibold pt-0.5 leading-relaxed">2 admins must approve this withdrawal</span>
             </div>
 
             <button 
               onClick={handleWithdrawalRequest}
               disabled={!withdrawalAmount || !withdrawalReason}
-              className="w-full bg-[#22C55E] hover:bg-[#006e2f] text-white rounded py-3 text-headline-sm font-medium transition-colors mt-2 disabled:opacity-50 shadow-sm"
+              className="w-full bg-[#22C55E] hover:bg-[#006e2f] text-white rounded-lg py-3 text-sm font-bold transition-all disabled:opacity-50 shadow-sm mt-2"
             >
               Submit Request
             </button>

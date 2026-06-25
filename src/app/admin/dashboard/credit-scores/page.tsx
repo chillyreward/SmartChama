@@ -285,7 +285,7 @@ export default function CreditScoresPage() {
             <h4 className="text-white font-bold">Member Scores</h4>
           </div>
           <p className="text-slate-400 text-sm">
-            Individual credit scores range from 300-850, similar to FICO scores. Higher scores unlock better loan terms.
+            Individual credit scores range from 300-850, similar to FICO scores. Higher scores Access better loan terms.
           </p>
         </div>
 

@@ -300,7 +300,7 @@ function ChamaCreditScoreCard({ creditScore }: { creditScore: any }) {
         <p className="text-slate-400 text-xs">
           {creditScore.investmentReadiness 
             ? 'This chama qualifies for institutional partnerships and investment opportunities.'
-            : 'Improve score, retention, and reduce defaults to unlock investment opportunities.'}
+            : 'Improve score, retention, and reduce defaults to access investment opportunities.'}
         </p>
       </div>
 

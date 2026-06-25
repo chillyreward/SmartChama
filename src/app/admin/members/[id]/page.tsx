@@ -62,11 +62,11 @@ export default function AdminMemberDetailPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="h-48 bg-white border border-[#E5E7EB] rounded-lg animate-pulse mb-6"></div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="h-96 bg-white border border-[#E5E7EB] rounded-lg animate-pulse"></div>
-          <div className="h-96 bg-white border border-[#E5E7EB] rounded-lg animate-pulse"></div>
+      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
+        <div className="h-48 card-bg border border-[var(--border)] rounded-2xl animate-pulse mb-6 shadow-sm"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
+          <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
         </div>
       </div>
     );
@@ -74,9 +74,11 @@ export default function AdminMemberDetailPage() {
 
   if (!member) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-headline-sm font-geist text-on-surface">Member not found</h2>
-        <Link href="/admin/members" className="text-primary mt-2 inline-block">← Back to Members</Link>
+      <div className="p-8 text-center text-[var(--text-main)]">
+        <h2 className="text-[22px] font-geist font-bold">Member not found</h2>
+        <Link href="/admin/members" className="text-[#22C55E] dark:text-[#4ae176] mt-4 inline-block hover:underline font-semibold">
+          ← Back to Members
+        </Link>
       </div>
     );
   }
@@ -88,65 +90,71 @@ export default function AdminMemberDetailPage() {
   const activeLoan = loans.find(l => l.status === 'active' || l.status === 'overdue');
 
   const roleColors: Record<string, string> = {
-    'admin': 'bg-red-50 text-red-700 border-red-200',
-    'chairlady': 'bg-[#22C55E]/10 text-[#005321] border-[#4ae176]',
-    'treasurer': 'bg-blue-50 text-blue-700 border-blue-200',
-    'secretary': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    'member': 'bg-gray-100 text-gray-700 border-gray-200'
+    'admin': 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab] border border-red-200 dark:border-red-900/30',
+    'chairlady': 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border border-[#edf6ea] dark:border-[#1a2a1a]',
+    'treasurer': 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/30',
+    'secretary': 'bg-yellow-50 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900/30',
+    'member': 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
   };
 
-  return (
-    <div className="p-8 font-inter relative">
+  return (    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <span className="material-symbols-outlined text-[18px]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[#161d16] dark:bg-[#E8F0E4] text-white dark:text-[#161d16] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
+          <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
 
       {/* HEADER */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/admin/members" className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
-          <span className="material-symbols-outlined text-secondary">arrow_back</span>
+      <div className="flex items-center gap-4 mb-8">
+        <Link href="/admin/members" className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-[#1f2a1f] flex items-center justify-center transition-colors border border-[var(--border)] card-bg">
+          <span className="material-symbols-outlined text-[var(--text-muted)]">arrow_back</span>
         </Link>
         <div>
-          <h1 className="text-headline-lg font-semibold text-on-surface font-geist">Member Profile</h1>
+          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+            <span>Admin Dashboard</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span>Members</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span>Profile</span>
+          </p>
+          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Member Profile</h1>
         </div>
       </div>
 
       {/* PROFILE CARD */}
-      <div className="bg-white border border-[#E5E7EB] rounded-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="w-20 h-20 bg-[#22C55E] text-white flex items-center justify-center rounded-full text-[32px] font-bold shadow-sm">
+      <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="flex items-center gap-6 w-full md:w-auto">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center rounded-full text-2xl md:text-[32px] font-bold shadow-sm border border-[#22C55E]/20 shrink-0">
             {getInitials(member.full_name)}
           </div>
           <div>
-            <h2 className="text-display-sm font-geist font-bold text-on-surface">{member.full_name}</h2>
-            <div className="flex items-center gap-3 mt-2">
-              <span className={`px-2 py-0.5 rounded text-label-caps font-bold border capitalize ${roleColors[member.role] || roleColors['member']}`}>
-                {member.role}
+            <h2 className="text-[20px] md:text-2xl font-bold font-geist text-[var(--text-main)] tracking-tight">{member.full_name}</h2>
+            <div className="flex flex-wrap items-center gap-3 mt-1 md:mt-2">
+              <span className={`px-2.5 py-0.5 rounded text-xs font-bold capitalize ${roleColors[member.role] || roleColors['member']}`}>
+                {member.role || 'Member'}
               </span>
-              <span className="text-body-sm text-secondary flex items-center gap-1">
+              <span className="text-sm text-[var(--text-muted)] flex items-center gap-1 font-semibold">
                 <span className="material-symbols-outlined text-[16px]">phone</span>
                 {member.phone_number || 'No phone'}
               </span>
             </div>
-            <div className="text-body-sm text-secondary mt-1">
+            <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a] mt-1 md:mt-2">
               Joined {new Date(member.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
             </div>
           </div>
         </div>
 
-        <div className="flex gap-4">
-          <div className="bg-surface-container-low border border-[#E5E7EB] rounded-lg p-4 text-center min-w-[120px]">
-            <div className="text-label-caps text-secondary">TRUST SCORE</div>
-            <div className={`text-headline-lg font-geist font-bold mt-1 ${member.trust_score >= 80 ? 'text-[#22C55E]' : member.trust_score >= 50 ? 'text-yellow-500' : 'text-error'}`}>
+        <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex-1 bg-[#FAFAFA] dark:bg-[#0f1410] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[130px] shadow-sm">
+            <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">TRUST SCORE</div>
+            <div className={`text-[20px] md:text-[28px] font-geist font-bold mt-1 ${member.trust_score >= 80 ? 'text-[var(--brand-green)]' : member.trust_score >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
               {member.trust_score || 0}
             </div>
           </div>
-          <div className="bg-surface-container-low border border-[#E5E7EB] rounded-lg p-4 text-center min-w-[120px]">
-            <div className="text-label-caps text-secondary">TOTAL SAVED</div>
-            <div className="text-headline-lg font-geist font-bold mt-1 text-[#22C55E]">
+          <div className="flex-1 bg-[#FAFAFA] dark:bg-[#0f1410] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[150px] shadow-sm">
+            <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">TOTAL SAVED</div>
+            <div className="text-[20px] md:text-[28px] font-geist font-bold mt-1 text-[var(--brand-green)] whitespace-nowrap">
               KSh {formatCurrency(totalSaved)}
             </div>
           </div>
@@ -156,38 +164,40 @@ export default function AdminMemberDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* CONTRIBUTIONS HISTORY */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm overflow-hidden flex flex-col h-[500px]">
-          <div className="p-6 border-b border-[#E5E7EB] flex justify-between items-center shrink-0">
-            <h3 className="text-headline-sm font-geist text-on-surface">Contributions</h3>
-            <span className="bg-[#22C55E]/10 text-[#005321] text-label-caps px-2 py-0.5 rounded font-bold">
+        <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
+          <div className="p-4 md:p-6 border-b border-[var(--border)] flex justify-between items-center shrink-0">
+            <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Contributions</h3>
+            <span className="bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] text-xs px-2.5 py-0.5 rounded font-bold">
               {contributions.length} Records
             </span>
           </div>
-          <div className="overflow-y-auto flex-1 p-0">
+          
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-y-auto flex-1 p-0">
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-gray-50 border-b border-[#E5E7EB]">
+              <thead className="sticky top-0 bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-6 py-3 text-label-caps text-secondary font-medium">DATE</th>
-                  <th className="px-6 py-3 text-label-caps text-secondary font-medium">AMOUNT</th>
-                  <th className="px-6 py-3 text-label-caps text-secondary font-medium text-right">STATUS</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">DATE</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">AMOUNT</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] text-right">STATUS</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
                 {contributions.length === 0 ? (
-                  <tr><td colSpan={3} className="px-6 py-8 text-center text-secondary text-body-sm">No contributions found.</td></tr>
+                  <tr><td colSpan={3} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No contributions found.</td></tr>
                 ) : (
                   contributions.map(c => (
-                    <tr key={c.id} className="border-b border-[#E5E7EB] last:border-0 hover:bg-gray-50">
-                      <td className="px-6 py-4 text-body-sm text-on-surface">
+                    <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors">
+                      <td className="px-6 py-4 text-sm text-[var(--text-main)]">
                         {new Date(c.created_at).toLocaleDateString('en-GB')}
                       </td>
-                      <td className="px-6 py-4 font-mono font-medium text-on-surface">
+                      <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)]">
                         KSh {formatCurrency(Number(c.amount))}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className={`px-2 py-0.5 rounded text-label-caps font-medium capitalize ${
-                          c.status === 'confirmed' ? 'bg-[#22C55E]/10 text-[#005321]' :
-                          c.status === 'late' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-700'
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
+                          c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                          c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                         }`}>
                           {c.status}
                         </span>
@@ -198,56 +208,86 @@ export default function AdminMemberDetailPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] overflow-y-auto flex-1">
+            {contributions.length === 0 ? (
+              <div className="p-6 text-center text-[var(--text-muted)] text-sm">No contributions found.</div>
+            ) : (
+              contributions.map(c => (
+                <div key={c.id} className="p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors">
+                  <div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {new Date(c.created_at).toLocaleDateString('en-GB')}
+                    </div>
+                    <div className="font-mono font-bold text-sm text-[var(--text-main)] mt-0.5">
+                      KSh {formatCurrency(Number(c.amount))}
+                    </div>
+                  </div>
+                  <div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
+                      c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                      c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                    }`}>
+                      {c.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* LOANS HISTORY */}
-        <div className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm overflow-hidden flex flex-col h-[500px]">
-          <div className="p-6 border-b border-[#E5E7EB] flex justify-between items-center shrink-0">
-            <h3 className="text-headline-sm font-geist text-on-surface">Loans</h3>
-            <span className="bg-blue-50 text-blue-700 text-label-caps px-2 py-0.5 rounded font-bold border border-blue-200">
+        <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
+          <div className="p-4 md:p-6 border-b border-[var(--border)] flex justify-between items-center shrink-0">
+            <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Loans</h3>
+            <span className="bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 text-xs px-2.5 py-0.5 rounded font-bold border border-blue-200 dark:border-blue-900/30">
               {loans.length} Requests
             </span>
           </div>
-          <div className="p-6 border-b border-[#E5E7EB] bg-surface-container-low shrink-0 flex justify-between items-center">
+          <div className="p-4 md:p-6 border-b border-[var(--border)] bg-[#FAFAFA] dark:bg-[#0f1410] shrink-0 flex justify-between items-center gap-4">
             <div>
-              <div className="text-label-caps text-secondary mb-1">CURRENT ACTIVE LOAN</div>
+              <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-1">CURRENT ACTIVE LOAN</div>
               {activeLoan ? (
-                <div className="font-mono font-bold text-on-surface text-[18px]">KSh {formatCurrency(Number(activeLoan.amount))}</div>
+                <div className="font-mono font-bold text-red-500 text-sm md:text-[18px]">KSh {formatCurrency(Number(activeLoan.amount))}</div>
               ) : (
-                <div className="text-body-sm text-secondary">None</div>
+                <div className="text-xs md:text-sm text-[#656864] dark:text-[#8FA88F] font-semibold">None</div>
               )}
             </div>
             <div className="text-right">
-              <div className="text-label-caps text-secondary mb-1">TOTAL BORROWED ALL-TIME</div>
-              <div className="font-mono font-bold text-on-surface text-[18px]">KSh {formatCurrency(totalLoaned)}</div>
+              <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-1">TOTAL BORROWED ALL-TIME</div>
+              <div className="font-mono font-bold text-[var(--text-main)] text-sm md:text-[18px] whitespace-nowrap">KSh {formatCurrency(totalLoaned)}</div>
             </div>
           </div>
-          <div className="overflow-y-auto flex-1 p-0">
+          
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-y-auto flex-1 p-0">
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-gray-50 border-b border-[#E5E7EB]">
+              <thead className="sticky top-0 bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-6 py-3 text-label-caps text-secondary font-medium">DATE</th>
-                  <th className="px-6 py-3 text-label-caps text-secondary font-medium">AMOUNT</th>
-                  <th className="px-6 py-3 text-label-caps text-secondary font-medium text-right">STATUS</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">DATE</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">AMOUNT</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] text-right">STATUS</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
                 {loans.length === 0 ? (
-                  <tr><td colSpan={3} className="px-6 py-8 text-center text-secondary text-body-sm">No loans found.</td></tr>
+                  <tr><td colSpan={3} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No loans found.</td></tr>
                 ) : (
                   loans.map(l => (
-                    <tr key={l.id} className="border-b border-[#E5E7EB] last:border-0 hover:bg-gray-50">
-                      <td className="px-6 py-4 text-body-sm text-on-surface">
+                    <tr key={l.id} className="hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors">
+                      <td className="px-6 py-4 text-sm text-[var(--text-main)]">
                         {new Date(l.created_at).toLocaleDateString('en-GB')}
                       </td>
-                      <td className="px-6 py-4 font-mono font-medium text-on-surface">
+                      <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)]">
                         KSh {formatCurrency(Number(l.amount))}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className={`px-2 py-0.5 rounded text-label-caps font-medium capitalize ${
-                          l.status === 'repaid' ? 'bg-[#22C55E]/10 text-[#005321]' :
-                          l.status === 'active' ? 'bg-blue-100 text-blue-800' : 
-                          l.status === 'overdue' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
+                          l.status === 'repaid' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                          l.status === 'active' ? 'bg-blue-55 dark:bg-blue-950/20 text-blue-800 dark:text-blue-300' : 
+                          l.status === 'overdue' ? 'bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-400' : 'bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300'
                         }`}>
                           {l.status}
                         </span>
@@ -257,6 +297,35 @@ export default function AdminMemberDetailPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] overflow-y-auto flex-1">
+            {loans.length === 0 ? (
+              <div className="p-6 text-center text-[var(--text-muted)] text-sm">No loans found.</div>
+            ) : (
+              loans.map(l => (
+                <div key={l.id} className="p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors">
+                  <div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {new Date(l.created_at).toLocaleDateString('en-GB')}
+                    </div>
+                    <div className="font-mono font-bold text-sm text-[var(--text-main)] mt-0.5">
+                      KSh {formatCurrency(Number(l.amount))}
+                    </div>
+                  </div>
+                  <div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
+                      l.status === 'repaid' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                      l.status === 'active' ? 'bg-blue-55 dark:bg-blue-950/20 text-blue-800 dark:text-blue-300' : 
+                      l.status === 'overdue' ? 'bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-400' : 'bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300'
+                    }`}>
+                      {l.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

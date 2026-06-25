@@ -147,7 +147,7 @@ export default function TestAfricasTalkingPage() {
               {result && (
                 <div className={`p-4 rounded-xl border ${result.success ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
                   <p className={`text-sm font-bold mb-2 ${result.success ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {result.success ? '✅ Success!' : '❌ Error'}
+                    {result.success ? ' Success!' : ' Error'}
                   </p>
                   <pre className="text-xs text-slate-400 overflow-auto">
                     {JSON.stringify(result, null, 2)}
@@ -160,7 +160,7 @@ export default function TestAfricasTalkingPage() {
 
         {/* Instructions */}
         <div className="mt-8 bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h3 className="text-lg font-bold text-white mb-4">📚 Testing Instructions</h3>
+          <h3 className="text-lg font-bold text-white mb-4"> Testing Instructions</h3>
           
           <div className="space-y-4 text-sm text-slate-400">
             <div>
