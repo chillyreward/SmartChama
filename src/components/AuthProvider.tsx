@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
+import { usePathname } from "next/navigation";
 
 type Member = any;
 type Group = any;
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [member, setMember] = useState<Member | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
 
   const fetchMemberData = async (userId: string) => {
     try {
@@ -82,7 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       let currentMembership = memberships.find(m => m.chama_id === activeChamaId);
-      let finalGroupData = groupData;
 
       if (!currentMembership) {
         currentMembership = memberships[0];
@@ -90,17 +91,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (typeof document !== 'undefined') {
           document.cookie = `active_chama_id=${activeChamaId}; path=/; max-age=${60 * 60 * 24 * 30}`;
         }
-        
-        // If we didn't fetch the group because we didn't have activeChamaId, fetch it now
-        if (!groupData) {
-          const { data: fallbackGroup, error: fallbackError } = await supabase
-            .from("chamas_v2")
-            .select("*")
-            .eq("id", activeChamaId)
-            .single();
-          if (!fallbackError) {
-            finalGroupData = fallbackGroup;
-          }
+      }
+
+      let finalGroupData = null;
+      if (groupData && groupData.id === activeChamaId) {
+        finalGroupData = groupData;
+      } else if (activeChamaId) {
+        const { data: fetchedGroup, error: fetchErr } = await supabase
+          .from("chamas_v2")
+          .select("*")
+          .eq("id", activeChamaId)
+          .single();
+        if (!fetchErr) {
+          finalGroupData = fetchedGroup;
         }
       }
 
@@ -113,10 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
 
       setMember(enrichedMember);
-
-      if (finalGroupData) {
-        setGroup(finalGroupData);
-      }
+      setGroup(finalGroupData);
     } catch (err) {
       console.error(err);
     }
@@ -172,6 +172,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Listen to path and cookie changes to sync member and group state
+  useEffect(() => {
+    let active = true;
+    async function syncState() {
+      if (session?.user && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
+        let activeChamaId: string | null = null;
+        if (typeof document !== 'undefined') {
+          const match = document.cookie.match(new RegExp('(^| )active_chama_id=([^;]+)'));
+          if (match) activeChamaId = match[2];
+        }
+        if (!group || group.id !== activeChamaId || !member) {
+          if (active) {
+            await fetchMemberData(session.user.id);
+          }
+        }
+      }
+    }
+    syncState();
+    return () => {
+      active = false;
+    };
+  }, [pathname, session, group, member]);
 
   const refreshMemberData = async () => {
     if (user) {
