@@ -23,10 +23,14 @@ export default function DashboardLayout({
   const [showContributionModal, setShowContributionModal] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !session) {
-      router.push('/login');
+    if (!isLoading) {
+      if (!session) {
+        router.push('/login');
+      } else if (!member || !group) {
+        router.push('/onboarding');
+      }
     }
-  }, [isLoading, session, router]);
+  }, [isLoading, session, member, group, router]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -34,7 +38,7 @@ export default function DashboardLayout({
     router.push('/login');
   };
 
-  if (isLoading || !session) {
+  if (isLoading || !session || !member || !group) {
     return (
       <div className="flex h-screen page-bg items-center justify-center font-inter">
         <div className="flex flex-col items-center gap-4">

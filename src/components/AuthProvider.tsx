@@ -59,8 +59,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (memberError || !memberships || memberships.length === 0) {
         console.error("Error fetching member:", memberError);
-        setMember(null);
-        setGroup(null);
+        
+        const isAuthError = memberError && (
+          memberError.status === 401 ||
+          memberError.message?.includes('JWT') ||
+          memberError.message?.includes('token') ||
+          memberError.message?.includes('unauthorized') ||
+          memberError.code === 'PGRST301'
+        );
+
+        if (isAuthError) {
+          supabase.auth.signOut().catch(err => console.error("SignOut error:", err));
+          setMember(null);
+          setGroup(null);
+          setSession(null);
+          setUser(null);
+        } else {
+          setMember(null);
+          setGroup(null);
+        }
         return;
       }
       
@@ -113,19 +130,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (mounted) {
           if (session) {
-            // Verify session validity with getUser to avoid stale local storage sessions
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (error || !user) {
-              await supabase.auth.signOut();
-              setSession(null);
-              setUser(null);
-              setMember(null);
-              setGroup(null);
-            } else {
-              setSession(session);
-              setUser(user);
-              await fetchMemberData(user.id);
-            }
+            setSession(session);
+            setUser(session.user);
+            await fetchMemberData(session.user.id);
           } else {
             setSession(null);
             setUser(null);

@@ -58,8 +58,29 @@ export default function OnboardingClient() {
           .eq('status', 'active');
           
         if (memberships && memberships.length > 0) {
-          router.push('/dashboard');
-          return;
+          const chamaIds = memberships.map(m => m.chama_id);
+          const { data: validChamas } = await supabase
+            .from('chamas_v2')
+            .select('id')
+            .in('id', chamaIds);
+
+          if (validChamas && validChamas.length > 0) {
+            let activeChamaId = null;
+            if (typeof document !== 'undefined') {
+              const match = document.cookie.match(new RegExp('(^| )active_chama_id=([^;]+)'));
+              if (match) activeChamaId = match[2];
+            }
+            if (!activeChamaId || !validChamas.some(c => c.id === activeChamaId)) {
+              const firstValidId = validChamas[0].id;
+              if (typeof document !== 'undefined') {
+                document.cookie = `active_chama_id=${firstValidId}; path=/; max-age=${60 * 60 * 24 * 30}`;
+              }
+            }
+            router.push('/dashboard');
+            return;
+          } else {
+            setStep(2);
+          }
         } else {
           setStep(2); // Has profile, needs chama
         }
