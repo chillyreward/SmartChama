@@ -6,10 +6,15 @@ import { supabase } from "@/lib/supabase";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 
 export default function AnalyticsPage() {
-  const { session, member, group, isLoading: authLoading } = useAuth();
+  const { member, group, isLoading: authLoading } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [dateFilter, setDateFilter] = useState<'30days' | '3months' | '12months'>('12months');
+
+  const [rawTxData, setRawTxData] = useState<any[]>([]);
+  const [rawMembersData, setRawMembersData] = useState<any[]>([]);
+  const [rawLoansData, setRawLoansData] = useState<any[]>([]);
 
   const [stats, setStats] = useState({
     totalSaved: 0,
@@ -34,140 +39,40 @@ export default function AnalyticsPage() {
       setLoading(true);
       setError("");
 
-      const { data: txData } = await supabase
-        .from('transactions')
+      const { data: txData, error: txErr } = await supabase
+        .from('transactions_v2')
         .select('*')
-        .eq('group_id', member.group_id)
+        .eq('chama_id', member.chama_id)
         .order('created_at', { ascending: true });
 
-      const { data: membersData } = await supabase
-        .from('members')
+      if (txErr) throw txErr;
+
+      const { data: membershipsData, error: memErr } = await supabase
+        .from('chama_memberships')
+        .select(`
+          *,
+          profile:profiles (
+            full_name
+          )
+        `)
+        .eq('chama_id', member.chama_id);
+
+      if (memErr) throw memErr;
+
+      const { data: loansData, error: loanErr } = await supabase
+        .from('loans_v2')
         .select('*')
-        .eq('group_id', member.group_id);
+        .eq('chama_id', member.chama_id);
 
-      const { data: loansData } = await supabase
-        .from('loans')
-        .select('*')
-        .eq('group_id', member.group_id);
+      if (loanErr) throw loanErr;
 
-      setTotalMembers(membersData?.length || 0);
+      setRawTxData(txData || []);
+      setRawMembersData(membershipsData || []);
+      setRawLoansData(loansData || []);
 
-      let totalSaved = 0;
-      let cumulativeSavings = 0;
-      const monthlySavingsMap: Record<string, number> = {};
-
-      txData?.forEach(tx => {
-        if (['contribution', 'repayment', 'penalty', 'interest'].includes(tx.type)) {
-          totalSaved += Number(tx.amount);
-        }
-      });
-
-      const today = new Date();
-      for (let i = 11; i >= 0; i--) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        monthlySavingsMap[d.toLocaleString('default', { month: 'short' })] = cumulativeSavings; 
-      }
-
-      txData?.forEach(tx => {
-        if (['contribution', 'repayment'].includes(tx.type)) {
-          cumulativeSavings += Number(tx.amount);
-          const monthStr = new Date(tx.created_at).toLocaleString('default', { month: 'short' });
-          let found = false;
-          Object.keys(monthlySavingsMap).forEach(m => {
-            if (m === monthStr) found = true;
-            if (found) monthlySavingsMap[m] = cumulativeSavings;
-          });
-        }
-      });
-
-      const savingsGrowth = Object.keys(monthlySavingsMap).map(month => ({
-        month,
-        amount: monthlySavingsMap[month]
-      }));
-
-      const loansCount = loansData?.length || 0;
-      const loansIssued = loansData?.reduce((sum, l) => sum + Number(l.amount), 0) || 0;
-
-      const monthlyLoanMap: Record<string, { issued: number, repaid: number }> = {};
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        monthlyLoanMap[d.toLocaleString('default', { month: 'short' })] = { issued: 0, repaid: 0 };
-      }
-
-      loansData?.forEach(l => {
-        const issuedMonth = new Date(l.created_at).toLocaleString('default', { month: 'short' });
-        if (monthlyLoanMap[issuedMonth]) {
-          monthlyLoanMap[issuedMonth].issued += Number(l.amount);
-        }
-      });
-
-      txData?.forEach(tx => {
-        if (tx.type === 'repayment') {
-          const repaidMonth = new Date(tx.created_at).toLocaleString('default', { month: 'short' });
-          if (monthlyLoanMap[repaidMonth]) {
-            monthlyLoanMap[repaidMonth].repaid += Number(tx.amount);
-          }
-        }
-      });
-
-      const loanPerformance = Object.keys(monthlyLoanMap).map(month => ({
-        month,
-        issued: monthlyLoanMap[month].issued,
-        repaid: monthlyLoanMap[month].repaid
-      }));
-
-      const avgTrust = membersData && membersData.length > 0 
-        ? Math.round(membersData.reduce((sum, m) => sum + (m.trust_score || 0), 0) / membersData.length)
-        : 0;
-
-      // Mock collection rate based on realistic parameters
-      const collectionRate = Object.keys(monthlySavingsMap).map(month => ({
-        month,
-        rate: Math.floor(Math.random() * 15) + 85 
-      }));
-
-      const avgContribRate = Math.round(collectionRate.reduce((s, c) => s + c.rate, 0) / collectionRate.length) || 0;
-
-      const thisMonthTxs = txData?.filter(tx => {
-        const d = new Date(tx.created_at);
-        return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear() && tx.type === 'contribution';
-      }) || [];
-
-      let paid = 0, partial = 0, unpaid = 0;
-      const groupAmount = group.contribution_amount || 5000;
-      
-      membersData?.forEach(m => {
-        const mContribs = thisMonthTxs.filter(tx => tx.member_id === m.id);
-        const totalPaid = mContribs.reduce((sum, tx) => sum + Number(tx.amount), 0);
-        if (totalPaid >= groupAmount) paid++;
-        else if (totalPaid > 0) partial++;
-        else unpaid++;
-      });
-
-      const memberStatus = [
-        { name: 'Paid', value: paid, color: '#22C55E' },
-        { name: 'Partial', value: partial, color: '#FCD34D' },
-        { name: 'Unpaid', value: unpaid, color: '#FCA5A5' },
-      ];
-
-      setStats({
-        totalSaved,
-        loansIssued,
-        loansCount,
-        avgContributionRate: avgContribRate,
-        groupTrustScore: avgTrust
-      });
-
-      setSavingsGrowthData(savingsGrowth);
-      setCollectionRateData(collectionRate);
-      setLoanPerformanceData(loanPerformance);
-      // Ensure we don't pass empty data arrays to piechart which crashes it
-      setMemberStatusData(memberStatus.some(m => m.value > 0) ? memberStatus : [{ name: 'Unpaid', value: 1, color: '#FCA5A5' }]); 
-      setHealthScore(avgTrust + 5 > 100 ? 100 : avgTrust + 5);
-
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to load analytics.");
+      setError(err.message || "Failed to load analytics.");
     } finally {
       setLoading(false);
     }
@@ -179,14 +84,147 @@ export default function AnalyticsPage() {
     }
   }, [authLoading, member, group]);
 
+  // Recalculate stats when rawData or dateFilter changes
+  useEffect(() => {
+    if (rawMembersData.length === 0) return;
+
+    const today = new Date();
+    const filterDate = new Date();
+    if (dateFilter === '30days') {
+      filterDate.setDate(today.getDate() - 30);
+    } else if (dateFilter === '3months') {
+      filterDate.setMonth(today.getMonth() - 3);
+    } else {
+      filterDate.setFullYear(today.getFullYear() - 1);
+    }
+
+    const filteredTx = rawTxData.filter(tx => new Date(tx.created_at) >= filterDate);
+    const filteredLoans = rawLoansData.filter(l => new Date(l.created_at) >= filterDate);
+
+    setTotalMembers(rawMembersData.length);
+
+    let totalSaved = 0;
+    let cumulativeSavings = 0;
+    const monthlySavingsMap: Record<string, number> = {};
+
+    filteredTx.forEach(tx => {
+      if (['contribution', 'repayment', 'penalty', 'interest'].includes(tx.type)) {
+        totalSaved += Number(tx.amount);
+      }
+    });
+
+    const monthsCount = dateFilter === '30days' ? 1 : dateFilter === '3months' ? 3 : 12;
+    for (let i = monthsCount - 1; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      monthlySavingsMap[d.toLocaleString('default', { month: 'short' })] = cumulativeSavings; 
+    }
+
+    filteredTx.forEach(tx => {
+      if (['contribution', 'repayment'].includes(tx.type)) {
+        cumulativeSavings += Number(tx.amount);
+        const monthStr = new Date(tx.created_at).toLocaleString('default', { month: 'short' });
+        let found = false;
+        Object.keys(monthlySavingsMap).forEach(m => {
+          if (m === monthStr) found = true;
+          if (found) monthlySavingsMap[m] = cumulativeSavings;
+        });
+      }
+    });
+
+    const savingsGrowth = Object.keys(monthlySavingsMap).map(month => ({
+      month,
+      amount: monthlySavingsMap[month]
+    }));
+
+    const loansCount = filteredLoans.length;
+    const loansIssued = filteredLoans.reduce((sum, l) => sum + Number(l.amount), 0);
+
+    const monthlyLoanMap: Record<string, { issued: number, repaid: number }> = {};
+    for (let i = monthsCount - 1; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      monthlyLoanMap[d.toLocaleString('default', { month: 'short' })] = { issued: 0, repaid: 0 };
+    }
+
+    filteredLoans.forEach(l => {
+      const issuedMonth = new Date(l.created_at).toLocaleString('default', { month: 'short' });
+      if (monthlyLoanMap[issuedMonth]) {
+        monthlyLoanMap[issuedMonth].issued += Number(l.amount);
+      }
+    });
+
+    filteredTx.forEach(tx => {
+      if (tx.type === 'loan_repayment') {
+        const repaidMonth = new Date(tx.created_at).toLocaleString('default', { month: 'short' });
+        if (monthlyLoanMap[repaidMonth]) {
+          monthlyLoanMap[repaidMonth].repaid += Number(tx.amount);
+        }
+      }
+    });
+
+    const loanPerformance = Object.keys(monthlyLoanMap).map(month => ({
+      month,
+      issued: monthlyLoanMap[month].issued,
+      repaid: monthlyLoanMap[month].repaid
+    }));
+
+    const avgTrust = rawMembersData.length > 0 
+      ? Math.round(rawMembersData.reduce((sum, m) => sum + (m.trust_score || 0), 0) / rawMembersData.length)
+      : 0;
+
+    // Simulate collection rate based on realistic parameters
+    const collectionRate = Object.keys(monthlySavingsMap).map(month => ({
+      month,
+      rate: Math.floor(Math.random() * 15) + 85 
+    }));
+
+    const avgContribRate = Math.round(collectionRate.reduce((s, c) => s + c.rate, 0) / collectionRate.length) || 0;
+
+    const thisMonthTxs = filteredTx.filter(tx => {
+      const d = new Date(tx.created_at);
+      return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear() && tx.type === 'contribution';
+    });
+
+    let paid = 0, partial = 0, unpaid = 0;
+    const groupAmount = group?.contribution_amount || 5000;
+    
+    rawMembersData.forEach(m => {
+      const mContribs = thisMonthTxs.filter(tx => tx.membership_id === m.id);
+      const totalPaid = mContribs.reduce((sum, tx) => sum + Number(tx.amount), 0);
+      if (totalPaid >= groupAmount) paid++;
+      else if (totalPaid > 0) partial++;
+      else unpaid++;
+    });
+
+    const memberStatus = [
+      { name: 'Paid', value: paid, color: '#22C55E' },
+      { name: 'Partial', value: partial, color: '#FCD34D' },
+      { name: 'Unpaid', value: unpaid, color: '#FCA5A5' },
+    ];
+
+    setStats({
+      totalSaved,
+      loansIssued,
+      loansCount,
+      avgContributionRate: avgContribRate,
+      groupTrustScore: avgTrust
+    });
+
+    setSavingsGrowthData(savingsGrowth);
+    setCollectionRateData(collectionRate);
+    setLoanPerformanceData(loanPerformance);
+    setMemberStatusData(memberStatus.some(m => m.value > 0) ? memberStatus : [{ name: 'Unpaid', value: 1, color: '#FCA5A5' }]); 
+    setHealthScore(avgTrust + 5 > 100 ? 100 : avgTrust + 5);
+
+  }, [rawTxData, rawMembersData, rawLoansData, dateFilter]);
+
   if (authLoading || loading) {
     return (
       <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[1,2,3,4].map(i => <div key={i} className="bg-white border border-[#E5E7EB] rounded-lg p-6 h-32 animate-pulse shadow-sm"></div>)}
+          {[1,2,3,4].map(i => <div key={i} className="bg-white dark:bg-[#111111] border border-[var(--border)] rounded-lg p-6 h-32 animate-pulse shadow-sm"></div>)}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {[1,2].map(i => <div key={i} className="bg-white border border-[#E5E7EB] rounded-lg p-6 h-64 animate-pulse shadow-sm"></div>)}
+          {[1,2].map(i => <div key={i} className="bg-white dark:bg-[#111111] border border-[var(--border)] rounded-lg p-6 h-64 animate-pulse shadow-sm"></div>)}
         </div>
       </div>
     );
@@ -202,16 +240,40 @@ export default function AnalyticsPage() {
     );
   }
 
-  const RADIAN = Math.PI / 180;
   const healthData = [
     { name: 'Health', value: healthScore },
     { name: 'Remaining', value: 100 - healthScore }
   ];
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
+    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)] print-full-width">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          .no-print, header, nav, button, select, [class*="Sidebar"], [class*="sidebar"] {
+            display: none !important;
+          }
+          .print-full-width {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+          }
+          .card-bg {
+            border: 1px solid #ccc !important;
+            background: white !important;
+            color: black !important;
+            page-break-inside: avoid;
+          }
+        }
+      ` }} />
+
       {/* Page Header */}
-      <div className="mb-8">
+      <div className="mb-8 no-print">
         <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
           <span>Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
@@ -228,12 +290,19 @@ export default function AnalyticsPage() {
             </p>
           </div>
           <div className="flex gap-3 items-center w-full md:w-auto">
-            <div className="card-bg border border-[var(--border)] rounded-lg px-4 py-2 text-sm flex items-center gap-2 justify-center text-[var(--text-main)] cursor-pointer shadow-sm flex-1 md:flex-initial">
-              <span className="material-symbols-outlined text-lg">calendar_today</span>
-              Last 12 Months
-              <span className="material-symbols-outlined text-lg">expand_more</span>
-            </div>
-            <button className="bg-[#22C55E] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[#006e2f] transition-all shadow-sm flex-1 md:flex-initial">
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as any)}
+              className="bg-white dark:bg-[#111111] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] outline-hidden cursor-pointer shadow-sm"
+            >
+              <option value="30days">Last 30 Days</option>
+              <option value="3months">Last 3 Months</option>
+              <option value="12months">Last 12 Months</option>
+            </select>
+            <button 
+              onClick={() => window.print()}
+              className="bg-[#22C55E] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[#006e2f] transition-all shadow-sm cursor-pointer"
+            >
               Export Report
             </button>
           </div>
@@ -247,7 +316,7 @@ export default function AnalyticsPage() {
           <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">TOTAL SAVED (GROUP)</div>
           <div className="text-[20px] md:text-3xl font-bold text-[var(--text-main)] font-geist mb-2">KSh {formatCurrency(stats.totalSaved)}</div>
           <div>
-            <span className="inline-flex items-center bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border border-[#4ae176]/30 px-2 py-0.5 rounded text-[10px] md:text-[11px] font-semibold">
+            <span className="inline-flex items-center bg-transparent text-[var(--brand-green)] border border-[#4ae176]/30 px-2 py-0.5 rounded text-[10px] md:text-[11px] font-semibold">
               ↑ 18% vs last year
             </span>
           </div>
@@ -299,7 +368,7 @@ export default function AnalyticsPage() {
                   formatter={(value: any) => [`KSh ${value.toLocaleString()}`, 'Total Saved']}
                   contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                 />
-                <Area type="monotone" dataKey="amount" stroke="#22C55E" strokeWidth={2} fillOpacity={1} fill="url(#colorSavings)" />
+                <Area type="monotone" dataKey="amount" stroke="#22C55E" strokeWidth={2} fillOpacity={1} fill="url(#colorSavings)" isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -319,7 +388,7 @@ export default function AnalyticsPage() {
                   contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                   cursor={{ fill: 'var(--color-bg-hover)' }}
                 />
-                <Bar dataKey="rate" fill="#22C55E" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="rate" fill="#22C55E" radius={[4, 4, 0, 0]} maxBarSize={40} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -353,8 +422,8 @@ export default function AnalyticsPage() {
                   formatter={(value: any, name: any) => [`KSh ${value.toLocaleString()}`, name === 'repaid' ? 'Repaid' : 'Issued']}
                   contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                 />
-                <Line type="monotone" dataKey="issued" stroke="#9CA3AF" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: '#9CA3AF' }} />
-                <Line type="monotone" dataKey="repaid" stroke="#22C55E" strokeWidth={2} dot={{ r: 4, fill: '#22C55E' }} />
+                <Line type="monotone" dataKey="issued" stroke="#9CA3AF" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: '#9CA3AF' }} isAnimationActive={false} />
+                <Line type="monotone" dataKey="repaid" stroke="#22C55E" strokeWidth={2} dot={{ r: 4, fill: '#22C55E' }} isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -375,6 +444,7 @@ export default function AnalyticsPage() {
                   paddingAngle={5}
                   dataKey="value"
                   stroke="none"
+                  isAnimationActive={false}
                 >
                   {memberStatusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

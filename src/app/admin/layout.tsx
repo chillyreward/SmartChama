@@ -15,6 +15,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('admin-sidebar-collapsed');
+    if (saved === 'true') {
+      setIsCollapsed(true);
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    const nextVal = !isCollapsed;
+    setIsCollapsed(nextVal);
+    localStorage.setItem('admin-sidebar-collapsed', String(nextVal));
+  };
 
   useEffect(() => {
     if (!isLoading) {
@@ -36,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       supabase
         .from('notifications')
         .select('id', { count: 'exact', head: true })
-        .eq('group_id', group.id)
+        .eq('chama_id', group.id) // Corrected group_id -> chama_id
         .eq('read', false)
         .then(({ count }) => setUnreadCount(count || 0));
     }
@@ -87,27 +101,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex h-screen page-bg font-inter overflow-hidden text-[var(--text-main)]">
       
       {/* SIDEBAR */}
-      <aside className="w-64 sidebar-bg border-r border-[var(--border)] flex flex-col shrink-0 overflow-y-auto hidden md:flex">
-        <div className="px-6 py-6 border-b border-[var(--border)]">
-          <h1 className="text-headline-lg text-primary dark:text-[#22C55E] font-bold font-geist">SmartChama</h1>
-          <div className="text-label-caps text-error uppercase tracking-wider mt-1">Admin Panel</div>
-          
-          <div className="mt-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#006e2f] dark:bg-[#22C55E] text-white flex items-center justify-center font-bold text-lg shrink-0">
-              {getInitials(member.full_name)}
-            </div>
-            <div className="min-w-0">
-              <div className="text-body-sm font-medium text-on-surface dark:text-[#E8F0E4] truncate">{member.full_name}</div>
-              <div className={`text-label-caps px-2 py-0.5 rounded inline-block mt-0.5 font-bold ${badge.bg} ${badge.text}`}>
-                {badge.label}
+      <aside className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 sidebar-bg border-r border-[var(--border)] flex flex-col shrink-0 overflow-hidden hidden md:flex`}>
+        <div className={`py-6 border-b border-[var(--border)] ${isCollapsed ? 'px-0 flex flex-col items-center' : 'px-6'}`}>
+          {!isCollapsed ? (
+            <>
+              <h1 className="text-headline-lg text-primary dark:text-[#22C55E] font-bold font-geist">SmartChama</h1>
+              <div className="text-label-caps text-error uppercase tracking-wider mt-1">Admin Panel</div>
+              
+              <div className="mt-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#006e2f] dark:bg-[#22C55E] text-white flex items-center justify-center font-bold text-lg shrink-0">
+                  {getInitials(member.full_name)}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-body-sm font-medium text-on-surface dark:text-[#E8F0E4] truncate">{member.full_name}</div>
+                  <div className={`text-label-caps px-2 py-0.5 rounded inline-block mt-0.5 font-bold ${badge.bg} ${badge.text}`}>
+                    {badge.label}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          
-          <button className="mt-6 w-full bg-[#006e2f] dark:bg-[#22C55E] hover:bg-[#005321] dark:hover:bg-[#1ea94e] text-white flex items-center justify-center gap-2 py-2.5 rounded transition-colors shadow-sm font-medium">
-            <span className="material-symbols-outlined text-[20px]">person_add</span>
-            Add Member
-          </button>
+              
+              <Link href="/admin/settings" className="mt-6 w-full bg-[#006e2f] dark:bg-[#22C55E] hover:bg-[#005321] dark:hover:bg-[#1ea94e] text-white flex items-center justify-center gap-2 py-2.5 rounded transition-colors shadow-sm font-medium">
+                <span className="material-symbols-outlined text-[20px]">person_add</span>
+                Add Member
+              </Link>
+            </>
+          ) : (
+            <>
+              <div className="w-10 h-10 rounded-full bg-[#006e2f] dark:bg-[#22C55E] text-white flex items-center justify-center font-bold text-lg shrink-0" title={member.full_name}>
+                {getInitials(member.full_name)}
+              </div>
+              <Link href="/admin/settings" className="mt-6 w-10 h-10 bg-[#006e2f] dark:bg-[#22C55E] hover:bg-[#005321] dark:hover:bg-[#1ea94e] text-white flex items-center justify-center rounded-full transition-colors shadow-sm" title="Add Member">
+                <span className="material-symbols-outlined text-[20px]">person_add</span>
+              </Link>
+            </>
+          )}
         </div>
 
         <nav className="flex-1 py-4 px-3 flex flex-col gap-1 overflow-y-auto">
@@ -117,38 +144,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group text-body-sm font-medium shrink-0 ${
+                title={isCollapsed ? item.name : undefined}
+                className={`flex items-center gap-3 py-2.5 rounded-lg transition-colors group text-body-sm font-medium shrink-0 ${isCollapsed ? 'justify-center px-0' : 'px-3'} ${
                   isActive
                     ? 'bg-surface-container-low dark:bg-[#1a2a1a] text-primary dark:text-[#22C55E] border-l-2 border-[#006e2f] dark:border-[#22C55E]'
                     : 'text-on-surface-variant dark:text-[#8FA88F] hover:bg-surface-container-high dark:hover:bg-[#1f2a1f] hover:text-on-surface border-l-2 border-transparent'
                 }`}
               >
-                <span className={`material-symbols-outlined text-[22px] transition-colors ${
+                <span className={`material-symbols-outlined text-[22px] transition-colors shrink-0 ${
                   isActive ? 'text-primary dark:text-[#22C55E]' : 'text-secondary dark:text-[#5a6e5a] group-hover:text-on-surface dark:group-hover:text-[#E8F0E4]'
                 }`}>
                   {item.icon}
                 </span>
-                {item.name}
+                {!isCollapsed && item.name}
               </Link>
             )
           })}
         </nav>
         
-        <div className="p-3 border-t border-[var(--border)] shrink-0">
-          <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-on-surface-variant dark:text-[#8FA88F] hover:bg-surface-container-high dark:hover:bg-[#1f2a1f] hover:text-on-surface text-body-sm font-medium">
-            <span className="material-symbols-outlined text-[22px] text-secondary dark:text-[#5a6e5a]">switch_account</span>
-            Member View
+        <div className="p-3 border-t border-[var(--border)] shrink-0 flex flex-col gap-1">
+          <Link 
+            href="/dashboard" 
+            title={isCollapsed ? "Member View" : undefined}
+            className={`flex items-center gap-3 py-2.5 rounded-lg transition-colors text-on-surface-variant dark:text-[#8FA88F] hover:bg-surface-container-high dark:hover:bg-[#1f2a1f] hover:text-on-surface text-body-sm font-medium ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
+          >
+            <span className="material-symbols-outlined text-[22px] text-secondary dark:text-[#5a6e5a] shrink-0">switch_account</span>
+            {!isCollapsed && "Member View"}
           </Link>
+          <button 
+            onClick={toggleSidebar} 
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            className={`w-full flex items-center gap-3 py-2.5 rounded-lg transition-colors text-on-surface-variant dark:text-[#8FA88F] hover:bg-surface-container-high dark:hover:bg-[#1f2a1f] hover:text-on-surface text-body-sm font-medium text-left cursor-pointer ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
+          >
+            <span className="material-symbols-outlined text-[22px] text-secondary dark:text-[#5a6e5a] shrink-0">
+              {isCollapsed ? "keyboard_double_arrow_right" : "keyboard_double_arrow_left"}
+            </span>
+            {!isCollapsed && "Collapse"}
+          </button>
           <button 
             onClick={async () => {
               await supabase.auth.signOut();
               sessionStorage.removeItem('active_chama_id');
               router.push('/login');
             }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-error hover:bg-red-50 dark:hover:bg-red-950/20 text-body-sm font-medium text-left"
+            title={isCollapsed ? "Logout" : undefined}
+            className={`w-full flex items-center gap-3 py-2.5 rounded-lg transition-colors text-error hover:bg-red-50 dark:hover:bg-red-950/20 text-body-sm font-medium text-left cursor-pointer ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >
-            <span className="material-symbols-outlined text-[22px]">logout</span>
-            Logout
+            <span className="material-symbols-outlined text-[22px] shrink-0">logout</span>
+            {!isCollapsed && "Logout"}
           </button>
         </div>
       </aside>

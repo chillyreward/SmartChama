@@ -10,7 +10,7 @@ export default function LandingNav() {
 
   return (
     <header className="sidebar-bg border-b border-[var(--border)] sticky top-0 z-50 transition-colors duration-300">
-      <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-14 md:h-16 flex items-center justify-between">
         
         {/* Logo */}
         <Link href="/">

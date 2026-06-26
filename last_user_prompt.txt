@@ -1,0 +1,1567 @@
+<USER_REQUEST>
+You are doing the most comprehensive 
+update to SmartChama yet.
+
+Read every instruction carefully.
+Work through each part completely.
+Do not skip anything.
+
+This prompt covers:
+1.  Dark/Light mode final fix 
+    (matte black + light green / 
+    light green + white)
+2.  Landing page mobile fix
+3.  AI chatbot (no API, rule-based)
+4.  M-Pesa money flow + tracking
+5.  Trust score accuracy + anti-fraud
+6.  My Savings — PDF export
+7.  Loans page + settings
+8.  Wallet page — deposit/withdraw
+9.  Transactions page — full detail
+10. Analytics — export + calendar
+11. Settings page — complete rebuild
+12. Collapsible sidebar
+13. Mobile UI fix (all pages)
+14. Support page
+15. Multi-chama membership
+16. Admin member behavior tracking
+17. Admin invite in settings
+18. Notification system
+19. SmartGrow get started flow
+20. New database tables needed
+21. Anti-fraud system
+22. Withdrawal consent system
+
+═══════════════════════════════════════════
+PART 1 — COLOR SYSTEM FINAL FIX
+
+DARK MODE: Matte black + light green
+LIGHT MODE: Light green tints + white
+
+These two modes must be CLEARLY 
+different and ALL text must be 
+readable in BOTH modes.
+═══════════════════════════════════════════
+
+In globals.css replace everything 
+color-related with:
+
+/* ════════════════════════════
+   LIGHT MODE
+   White backgrounds, 
+   dark text, green accents
+   ════════════════════════════ */
+:root {
+  --bg-page:       #FFFFFF;
+  --bg-card:       #FFFFFF;
+  --bg-sidebar:    #FFFFFF;
+  --bg-input:      #FFFFFF;
+  --bg-hover:      #F0FDF4;
+  --bg-subtle:     #DCFCE7;
+  --bg-muted:      #F9FAFB;
+
+  --border:        #D1FAE5;
+  --border-strong: #6EE7B7;
+
+  --text-primary:  #052e16;
+  --text-secondary:#166534;
+  --text-muted:    #4ADE80;
+  --text-on-green: #052e16;
+
+  --green:         #16A34A;
+  --green-bright:  #22C55E;
+  --green-light:   #DCFCE7;
+  --green-text:    #166534;
+  
+  --red:           #EF4444;
+  --red-bg:        #FEF2F2;
+  --red-text:      #991B1B;
+  
+  --yellow:        #F59E0B;
+  --yellow-bg:     #FFFBEB;
+  --yellow-text:   #92400E;
+}
+
+/* ════════════════════════════
+   DARK MODE
+   Matte black backgrounds,
+   bright green accents,
+   white/light text
+   ════════════════════════════ */
+.dark {
+  --bg-page:       #0A0A0A;
+  --bg-card:       #111111;
+  --bg-sidebar:    #0D0D0D;
+  --bg-input:      #1A1A1A;
+  --bg-hover:      #1A2E1A;
+  --bg-subtle:     #052e16;
+  --bg-muted:      #161616;
+
+  --border:        #1F2F1F;
+  --border-strong: #166534;
+
+  --text-primary:  #F0FDF4;
+  --text-secondary:#86EFAC;
+  --text-muted:    #4ADE80;
+  --text-on-green: #052e16;
+
+  --green:         #22C55E;
+  --green-bright:  #4ADE80;
+  --green-light:   #052e16;
+  --green-text:    #86EFAC;
+  
+  --red:           #F87171;
+  --red-bg:        #1F0A0A;
+  --red-text:      #FCA5A5;
+  
+  --yellow:        #FCD34D;
+  --yellow-bg:     #1F1A00;
+  --yellow-text:   #FDE68A;
+}
+
+/* BASE BODY */
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* PREVENT INVISIBLE TEXT EVERYWHERE */
+* {
+  /* All text inherits from body 
+     unless explicitly overridden */
+}
+
+/* Cards */
+.sc-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-primary);
+}
+
+/* Inputs */
+input, textarea, select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Sidebar */
+.sc-sidebar {
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+}
+
+/* Tables */
+.sc-table th {
+  background-color: var(--bg-muted);
+  color: var(--text-secondary);
+}
+.sc-table tr:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Status badges */
+.badge-green {
+  background-color: var(--green-light);
+  color: var(--green-text);
+}
+.badge-red {
+  background-color: var(--red-bg);
+  color: var(--red-text);
+}
+.badge-yellow {
+  background-color: var(--yellow-bg);
+  color: var(--yellow-text);
+}
+
+/* CRITICAL: Go through EVERY file 
+and replace inline Tailwind color 
+classes with CSS variable styles */
+
+/* Replace patterns: */
+/* text-[#161d16] dark:text-white
+   → style={{ color: 'var(--text-primary)' }}
+
+   bg-white dark:bg-[#161d16]
+   → style={{ backgroundColor: 'var(--bg-card)' }}
+
+   border-[#E5E7EB] dark:border-gray-700
+   → style={{ borderColor: 'var(--border)' }}
+
+   text-[#60645f] dark:text-gray-400
+   → style={{ color: 'var(--text-secondary)' }}
+
+   bg-[#FAFAFA] dark:bg-[#0B0F0C]
+   → style={{ backgroundColor: 'var(--bg-page)' }}
+*/
+
+Apply this to EVERY file in:
+src/app/
+src/components/
+All pages, all components, 
+all layouts, all modals.
+
+═══════════════════════════════════════════
+PART 2 — LANDING PAGE MOBILE FIX
+Make it clean, readable, not squeezed
+═══════════════════════════════════════════
+
+File: src/app/page.tsx
+
+Apply these responsive rules:
+
+GLOBAL MOBILE RULES for landing page:
+- All sections: px-4 on mobile, 
+  px-6 sm, px-8 md, px-12 lg
+- All headlines: text-[32px] mobile,
+  scale up to text-[64px] desktop
+- All body text: text-[15px] mobile
+- Remove any fixed widths on mobile
+- Stack all two-column layouts 
+  to single column on mobile
+
+NAVBAR:
+height: h-14 mobile, h-16 desktop
+Show on mobile: logo + Get Started button
+Hide on mobile: all nav links
+Add hamburger that opens full-screen 
+  slide-in menu
+
+Full-screen mobile menu:
+- Fixed overlay, full screen
+- Logo at top
+- Each nav link as full-width row 
+  with chevron right
+- Sign In and Get Started buttons 
+  at bottom stacked
+- Close button top right
+- Slides in from right
+
+HERO:
+Single column on mobile
+No dashboard mockup on mobile
+Headline: text-[36px] sm:text-[48px] 
+  md:text-[64px]
+CTAs: flex-col gap-3 on mobile, 
+  flex-row on sm+
+Trust signals: flex-wrap, 
+  horizontal scroll on mobile
+Padding top: pt-20 mobile 
+  (accounts for fixed navbar)
+
+FEATURES GRID:
+grid-cols-1 on mobile
+grid-cols-2 on sm
+grid-cols-3 on lg
+
+HOW IT WORKS:
+Vertical stack on mobile:
+Each step: flex-row gap-4
+Number circle left, text right
+Connecting line: vertical on left side,
+  horizontal on desktop
+
+PROBLEM SECTION:
+Stack two cards vertically on mobile
+Full width each
+
+TESTIMONIALS:
+grid-cols-1 on mobile
+grid-cols-3 on lg
+
+FINAL CTA:
+Buttons stack on mobile
+Full width
+
+FOOTER:
+grid-cols-2 on mobile 
+  (brand spans full width)
+grid-cols-4 on lg
+
+═══════════════════════════════════════════
+PART 3 — AI CHATBOT
+Rule-based, no API, no memory,
+50 question-answer pairs
+═══════════════════════════════════════════
+
+File: src/components/ChatBot.tsx
+File: src/data/chatbot-responses.ts
+
+The chatbot appears as a floating 
+button bottom-right on every page.
+Click opens a chat window.
+No session storage. No database.
+Refresh = fresh conversation.
+
+CHATBOT DATA FILE:
+src/data/chatbot-responses.ts
+
+export const responses: {
+  triggers: string[]
+  answer: string
+}[] = [
+
+  // GREETINGS
+  {
+    triggers: ['hi', 'hello', 'hey', 
+      'hujambo', 'habari'],
+    answer: 'Hello! Welcome to SmartChama. I can help you with contributions, loans, trust scores, invites, and more. What would you like to know?'
+  },
+  {
+    triggers: ['good morning', 
+      'good afternoon', 
+      'good evening'],
+    answer: 'Hello! How can I help you with SmartChama today?'
+  },
+  {
+    triggers: ['thanks', 'thank you', 
+      'asante'],
+    answer: 'You are welcome! Is there anything else I can help you with?'
+  },
+  {
+    triggers: ['bye', 'goodbye', 
+      'kwaheri'],
+    answer: 'Goodbye! Come back anytime if you have questions.'
+  },
+  
+  // WHAT IS SMARTCHAMA
+  {
+    triggers: ['what is smartchama', 
+      'what does smartchama do',
+      'tell me about smartchama',
+      'about smartchama'],
+    answer: 'SmartChama is a digital platform for savings groups in Kenya. It helps chamas track contributions, manage loans, and build verified financial records. Your group manages its own money through M-Pesa, and SmartChama keeps the records clear and honest for everyone.'
+  },
+  {
+    triggers: ['is smartchama a bank',
+      'do you hold money',
+      'is my money safe with you'],
+    answer: 'SmartChama is not a bank. We do not hold your money. When you contribute, the money goes directly to your group admin\'s M-Pesa Till or Paybill number. SmartChama only tracks and records the transactions. Your admin is responsible for the group funds.'
+  },
+  {
+    triggers: ['how much does it cost',
+      'pricing', 'free', 
+      'subscription', 'how to pay'],
+    answer: 'SmartChama has a free plan for groups of up to 20 members. The Growth plan costs KSh 999 per month and supports up to 100 members with advanced features. Enterprise pricing is available for larger organisations. Only the group admin pays the subscription, not individual members.'
+  },
+  
+  // CONTRIBUTIONS
+  {
+    triggers: ['how to contribute',
+      'how to pay', 'make payment',
+      'how do i send money',
+      'contribute'],
+    answer: 'To make a contribution: 1) Go to your dashboard and click "New Contribution". 2) Your phone number and the contribution amount will be pre-filled. 3) Click "Send M-Pesa Request". 4) You will receive an M-Pesa prompt on your phone. 5) Enter your M-Pesa PIN to complete the payment. The money goes to your admin\'s Till/Paybill number, and SmartChama records it automatically.'
+  },
+  {
+    triggers: ['where does money go',
+      'who receives money',
+      'where does my payment go'],
+    answer: 'Your contribution goes directly to your group admin\'s M-Pesa Till Number or Paybill. SmartChama does not receive or hold the money. You can see your admin\'s Till/Paybill number on the contribution screen before you pay, so you always know where your money is going.'
+  },
+  {
+    triggers: ['contribution not showing',
+      'payment not recorded',
+      'i paid but it shows pending'],
+    answer: 'If your payment shows as pending: 1) Wait 2-3 minutes as M-Pesa confirmations can take time. 2) Check that you received an M-Pesa success message on your phone. 3) If you got an M-Pesa confirmation but it still shows pending after 5 minutes, contact your admin with the M-Pesa receipt number. 4) If you never got an M-Pesa prompt, try making the contribution again from your dashboard.'
+  },
+  {
+    triggers: ['monthly contribution',
+      'when to pay', 'due date',
+      'contribution deadline'],
+    answer: 'Your group\'s contribution amount and due date are set by your admin. You can see your next due date on your dashboard. SmartChama will send you a reminder 3 days before the due date. Late payments may attract a penalty as set in your group rules.'
+  },
+  {
+    triggers: ['contribution history',
+      'past contributions',
+      'my payments'],
+    answer: 'You can see all your past contributions on the Contributions page in your dashboard. Each entry shows the date, amount, M-Pesa receipt number, and status. You can also export your contribution history as a PDF statement at any time.'
+  },
+  
+  // LOANS
+  {
+    triggers: ['how to get loan',
+      'request loan', 'apply loan',
+      'how do loans work',
+      'loan request'],
+    answer: 'To request a loan: 1) Go to the Loans page in your dashboard. 2) Click "Request Loan". 3) Enter the amount you need and the reason. 4) Submit the request. Your group admin will review and approve or decline it. You need a minimum trust score (set by your admin) to be eligible. Loans are paid from your group\'s pool and must be repaid with interest as agreed.'
+  },
+  {
+    triggers: ['loan interest',
+      'interest rate', 
+      'how much interest'],
+    answer: 'Your group\'s loan interest rate is set by your admin. The typical rate is 10% per month, but this varies by group. You can see the interest rate on the loan request screen. The total amount you need to repay is calculated automatically before you submit your request.'
+  },
+  {
+    triggers: ['loan repayment',
+      'how to repay', 'pay back loan',
+      'repay my loan'],
+    answer: 'To repay a loan, go to the Loans page and click on your active loan. Click "Make Repayment". You will receive an M-Pesa prompt for the repayment amount. Every repayment is recorded and improves your trust score. You can make partial repayments or pay the full amount at once.'
+  },
+  {
+    triggers: ['loan declined',
+      'loan rejected', 
+      'why was my loan rejected'],
+    answer: 'A loan can be declined if: 1) Your trust score is below the group minimum. 2) The group does not have enough funds. 3) Your admin decided against it. 4) You already have an unpaid loan. Contact your admin for the specific reason. Focus on contributing on time to improve your trust score and future eligibility.'
+  },
+  {
+    triggers: ['maximum loan',
+      'how much can i borrow',
+      'loan limit'],
+    answer: 'Your maximum loan amount is calculated as a multiple of your total savings. For example, if your group allows 3x loans and you have saved KSh 20,000, you can borrow up to KSh 60,000. Your admin sets the maximum multiplier in group settings.'
+  },
+  
+  // TRUST SCORE
+  {
+    triggers: ['trust score', 
+      'what is trust score',
+      'how is trust score calculated',
+      'trust score meaning'],
+    answer: 'Your trust score is a number from 0 to 100 that shows how financially reliable you are in your group. It is calculated from: Contribution consistency (40%) - paying on time every month. Loan repayment (30%) - repaying loans fully and on time. Group tenure (20%) - how long you have been a member. Participation (10%) - your overall engagement. A higher score means bigger loans and, with your permission, can be shared with banks and SACCOs.'
+  },
+  {
+    triggers: ['improve trust score',
+      'how to increase trust score',
+      'low trust score'],
+    answer: 'To improve your trust score: 1) Pay your contribution on time every month. 2) Repay any loans on time and in full. 3) Stay in the group longer. 4) Do not miss any contribution cycles. Consistency is the most important factor. A missed or late payment reduces your score significantly.'
+  },
+  {
+    triggers: ['trust score 0',
+      'why is my score zero',
+      'new member score'],
+    answer: 'New members start at a trust score of 0. This is normal. Your score will build up as you make contributions on time. After 3 consistent monthly payments, you should see your score growing significantly.'
+  },
+  
+  // INVITES AND MEMBERSHIP
+  {
+    triggers: ['how to join',
+      'join a group', 
+      'invite code',
+      'how do i get invited'],
+    answer: 'To join a SmartChama group, you need an invite from the group admin. The admin will send you an email with an invitation link. When you click the link, you will be taken to the signup page where your invite code is already filled in. Create your account and you will be automatically added to the group. You cannot join a group without an invite code.'
+  },
+  {
+    triggers: ['how to invite member',
+      'add member', 
+      'invite someone',
+      'admin invite'],
+    answer: 'As an admin, go to the Members page or Settings page and click "Invite Member". Enter the member\'s email address and optionally their name. They will receive a branded email with an invitation link. You will also see a backup invite code in case their email does not arrive. The invite expires in 48 hours.'
+  },
+  {
+    triggers: ['can i join multiple groups',
+      'multiple chamas',
+      'join two groups'],
+    answer: 'Yes, you can be a member of multiple SmartChama groups. Each group is separate. When you log in, if you belong to more than one group, you will see a screen to choose which group to view. You can switch between groups at any time from the top navigation.'
+  },
+  
+  // ACCOUNT AND SECURITY
+  {
+    triggers: ['forgot password',
+      'reset password',
+      'cannot login',
+      'login problem'],
+    answer: 'If you have forgotten your password, go to the login page and click "Forgot password?". Enter your email address and you will receive a password reset link. Click the link in the email and set a new password. If you do not receive the email, check your spam folder or contact support@smartchama.co.ke'
+  },
+  {
+    triggers: ['change password',
+      'update password',
+      'how to change my password'],
+    answer: 'To change your password, go to Settings and click on the Security tab. Enter your current password and then your new password. Click Update Password. For your security, choose a strong password with at least 8 characters.'
+  },
+  {
+    triggers: ['delete account',
+      'close account',
+      'remove my account'],
+    answer: 'To delete your account, contact support@smartchama.co.ke. Note that your contribution and transaction records may be retained as part of the group\'s financial history even after your account is removed, since they affect other members\' records.'
+  },
+  
+  // M-PESA
+  {
+    triggers: ['mpesa not working',
+      'stk push not coming',
+      'no mpesa prompt',
+      'mpesa failed'],
+    answer: 'If you are not receiving the M-Pesa prompt: 1) Make sure your phone number in your profile matches your registered M-Pesa number. 2) Check that your M-Pesa is active and not suspended. 3) Ensure you have enough M-Pesa balance. 4) Wait 30 seconds and try again. 5) If the problem continues, contact your admin or support@smartchama.co.ke'
+  },
+  {
+    triggers: ['what is paybill',
+      'what is till number',
+      'paybill number'],
+    answer: 'Your group admin uses a Till Number or Paybill as the destination for your contributions. When you make a contribution, the M-Pesa prompt will automatically use your admin\'s registered Till/Paybill. The money goes directly to the admin\'s M-Pesa account. SmartChama records the transaction for everyone to see.'
+  },
+  
+  // SMARTGROW
+  {
+    triggers: ['smartgrow', 
+      'investments',
+      'how to invest',
+      'grow money'],
+    answer: 'SmartGrow lets your group invest idle funds into regulated Kenyan investment products. These include Money Market Funds (9-11% returns), Government Treasury Bills (13-16%), and Fixed Deposits. All products are regulated by CMA Kenya or CBK. Investment decisions require a group vote where the majority wins. Go to the SmartGrow page to see available products and propose an investment.'
+  },
+  {
+    triggers: ['smartgrow returns',
+      'investment returns',
+      'how much can i earn'],
+    answer: 'Returns depend on the investment product. Money Market Funds typically return 9-11% per year. Government Treasury Bills return 13-16%. Returns are calculated proportionally based on each member\'s contribution to the total group savings. These are estimates and not guaranteed.'
+  },
+  
+  // STATEMENTS AND EXPORTS
+  {
+    triggers: ['export statement',
+      'download pdf', 
+      'pdf statement',
+      'download my records'],
+    answer: 'You can export statements as PDF from multiple places: 1) My Savings page - export your full contribution history. 2) Transactions page - export filtered transactions. 3) Analytics page - export group reports. 4) Profile page - download your financial identity report. Look for the Export or Download button on each page.'
+  },
+  
+  // ADMIN QUESTIONS
+  {
+    triggers: ['how to create group',
+      'create chama', 
+      'start a group'],
+    answer: 'To create a group: 1) Create a SmartChama account. 2) On the onboarding screen, choose "Create a new group". 3) Enter your group name, contribution amount, and frequency. 4) Set up your Till/Paybill number for receiving contributions. 5) You are now the admin. Invite members from the Members page or Settings.'
+  },
+  {
+    triggers: ['admin withdrawal',
+      'how to withdraw',
+      'take money from group',
+      'group withdrawal'],
+    answer: 'Admins can record a withdrawal in the Wallet page. However, every withdrawal requires a confirmation notice that is visible to all group members. Members can see all withdrawals in real time on the Transactions page. SmartChama cannot stop a withdrawal but makes it fully transparent so all members can see if money is being taken without consent.'
+  },
+  {
+    triggers: ['how many admins',
+      'can there be two admins',
+      'admin roles'],
+    answer: 'Each SmartChama group has one primary admin (the Chairperson) who created the group. The admin can assign secondary roles like Treasurer and Secretary to other members. However, only the primary admin pays the subscription and has full control. There is only one main admin per group.'
+  },
+  
+  // NOTIFICATIONS
+  {
+    triggers: ['notifications',
+      'alerts', 
+      'how do i get notified',
+      'reminders'],
+    answer: 'SmartChama sends you notifications for: contribution reminders 3 days before due date, payment confirmations, loan approvals, new member joins, withdrawal alerts, and monthly reports. You can manage your notification preferences in Settings under the Notifications tab.'
+  },
+  
+  // FRAUD AND SECURITY
+  {
+    triggers: ['is this safe',
+      'security', 
+      'is my data safe',
+      'fraud'],
+    answer: 'SmartChama uses bank-grade security: 256-bit encryption for all data, secure Supabase database with row-level security, blockchain-anchored transaction records that cannot be altered, and your M-Pesa PIN is never stored by us. All transactions are recorded and visible to group members for transparency.'
+  },
+  {
+    triggers: ['fake account',
+      'scam', 'fake chama',
+      'suspicious activity'],
+    answer: 'SmartChama has fraud protection built in: 1) Trust scores only build from verified M-Pesa receipts, not self-reported data. 2) Groups with suspicious patterns (one person, multiple chamas, same phone numbers) are flagged automatically. 3) All transactions are recorded and cannot be altered. If you suspect fraud, contact support@smartchama.co.ke immediately.'
+  },
+  
+  // SUPPORT
+  {
+    triggers: ['contact support',
+      'help', 'support',
+      'i need help',
+      'customer care'],
+    answer: 'You can reach SmartChama support at: Email: support@smartchama.co.ke | Visit the Support page from the sidebar (click Support above the logout button). We respond within 1 business day. For urgent M-Pesa issues, also check with your group admin.'
+  },
+  {
+    triggers: ['report bug',
+      'something is not working',
+      'error', 'bug',
+      'problem with app'],
+    answer: 'Sorry about that. Please email support@smartchama.co.ke with a description of the problem and what you were trying to do. If you can include a screenshot, that helps us fix it faster. You can also use the feedback form on the Support page.'
+  },
+  
+  // WALLET
+  {
+    triggers: ['wallet', 
+      'group wallet',
+      'what is wallet',
+      'wallet balance'],
+    answer: 'The Wallet page shows your group\'s financial overview: total recorded contributions, funds currently out as loans, invested amounts in SmartGrow, and the emergency reserve. These numbers are calculated from verified M-Pesa transactions. The actual money is held in your admin\'s M-Pesa account.'
+  },
+  
+  // DEFAULT
+  {
+    triggers: ['default'],
+    answer: 'I am not sure about that one. Try asking about contributions, loans, trust scores, invites, M-Pesa, SmartGrow, or account settings. You can also reach us at support@smartchama.co.ke for anything I cannot answer.'
+  }
+]
+
+CHATBOT COMPONENT:
+File: src/components/ChatBot.tsx
+
+'use client'
+import { useState, useRef, 
+  useEffect } from 'react'
+import { responses } from 
+  '@/data/chatbot-responses'
+
+interface Message {
+  id: number
+  from: 'user' | 'bot'
+  text: string
+  time: string
+}
+
+function getResponse(input: string): 
+  string {
+  const lower = input.toLowerCase().trim()
+  
+  for (const r of responses) {
+    if (r.triggers[0] === 'default') 
+      continue
+    if (r.triggers.some(t => 
+      lower.includes(t)
+    )) {
+      return r.answer
+    }
+  }
+  
+  // Return default
+  return responses.find(
+    r => r.triggers[0] === 'default'
+  )?.answer || 
+  'I am not sure about that. ' +
+  'Try asking about contributions, ' +
+  'loans, or trust scores.'
+}
+
+export function ChatBot() {
+  const [open, setOpen] = 
+    useState(false)
+  const [messages, setMessages] = 
+    useState<Message[]>([
+      {
+        id: 0,
+        from: 'bot',
+        text: 'Hello! I am the SmartChama assistant. Ask me anything about contributions, loans, trust scores, or how the platform works.',
+        time: new Date()
+          .toLocaleTimeString(
+            'en-KE', 
+            { hour: '2-digit', 
+              minute: '2-digit' }
+          )
+      }
+    ])
+  const [input, setInput] = 
+    useState('')
+  const [typing, setTyping] = 
+    useState(false)
+  const bottomRef = 
+    useRef<HTMLDivElement>(null)
+  const inputRef = 
+    useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ 
+      behavior: 'smooth' 
+    })
+  }, [messages])
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    }
+  }, [open])
+
+  function handleSend() {
+    const text = input.trim()
+    if (!text) return
+
+    const userMsg: Message = {
+      id: Date.now(),
+      from: 'user',
+      text,
+      time: new Date()
+        .toLocaleTimeString(
+          'en-KE',
+          { hour: '2-digit', 
+            minute: '2-digit' }
+        )
+    }
+
+    setMessages(prev => [...prev, userMsg])
+    setInput('')
+    setTyping(true)
+
+    // Simulate typing delay 
+    // (300-800ms feels natural)
+    const delay = 
+      300 + Math.random() * 500
+
+    setTimeout(() => {
+      const answer = getResponse(text)
+      const botMsg: Message = {
+        id: Date.now() + 1,
+        from: 'bot',
+        text: answer,
+        time: new Date()
+          .toLocaleTimeString(
+            'en-KE',
+            { hour: '2-digit', 
+              minute: '2-digit' }
+          )
+      }
+      setMessages(prev => 
+        [...prev, botMsg]
+      )
+      setTyping(false)
+    }, delay)
+  }
+
+  return (
+    <>
+      {/* Floating button */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="fixed bottom-6 right-6 
+          z-50 w-14 h-14 rounded-full 
+          bg-[#22C55E] text-white 
+          shadow-xl shadow-green-500/30
+          flex items-center justify-center
+          hover:bg-[#16A34A]
+          hover:scale-105
+          active:scale-95
+          transition-all duration-200"
+        aria-label="Open chat">
+        <span className="
+          material-symbols-outlined 
+          text-[28px]">
+          {open ? 'close' : 'chat'}
+        </span>
+      </button>
+
+      {/* Chat window */}
+      {open && (
+        <div
+          className="fixed bottom-24 
+            right-4 sm:right-6 z-50
+            w-[calc(100vw-32px)] 
+            sm:w-[380px] h-[520px]
+            rounded-2xl 
+            flex flex-col
+            shadow-2xl
+            overflow-hidden"
+          style={{
+            backgroundColor: 
+              'var(--bg-card)',
+            border: '1px solid var(--border)'
+          }}>
+
+          {/* Header */}
+          <div
+            className="flex items-center 
+              gap-3 px-4 py-3
+              flex-shrink-0"
+            style={{
+              backgroundColor: 
+                '#22C55E'
+            }}>
+            <div className="w-9 h-9 
+              rounded-full 
+              bg-white/20
+              flex items-center 
+              justify-center">
+              <span className="
+                material-symbols-outlined 
+                text-white text-[20px]">
+                support_agent
+              </span>
+            </div>
+            <div className="flex-1">
+              <p className="text-white 
+                font-semibold text-[15px]">
+                SmartChama Assistant
+              </p>
+              <p className="text-white/70 
+                text-[12px]">
+                Always here to help
+              </p>
+            </div>
+            <button
+              onClick={() => 
+                setOpen(false)}
+              className="text-white/80 
+                hover:text-white">
+              <span className="
+                material-symbols-outlined 
+                text-[22px]">
+                close
+              </span>
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 
+            overflow-y-auto p-4 
+            space-y-3">
+            {messages.map(msg => (
+              <div
+                key={msg.id}
+                className={`flex ${
+                  msg.from === 'user' 
+                    ? 'justify-end' 
+                    : 'justify-start'
+                }`}>
+                {msg.from === 'bot' && (
+                  <div className="
+                    w-7 h-7 rounded-full 
+                    bg-[#22C55E]
+                    flex items-center 
+                    justify-center
+                    mr-2 mt-1 
+                    flex-shrink-0">
+                    <span className="
+                      material-symbols-outlined 
+                      text-white 
+                      text-[14px]">
+                      smart_toy
+                    </span>
+                  </div>
+                )}
+                <div className={`
+                  max-w-[78%] rounded-2xl 
+                  px-4 py-2.5`}
+                  style={{
+                    backgroundColor: 
+                      msg.from === 'user'
+                        ? '#22C55E'
+                        : 'var(--bg-subtle)',
+                    color: 
+                      msg.from === 'user'
+                        ? 'white'
+                        : 'var(--text-primary)',
+                    borderRadius: 
+                      msg.from === 'user'
+                        ? '18px 18px 4px 18px'
+                        : '18px 18px 18px 4px'
+                  }}>
+                  <p className="text-[14px] 
+                    leading-relaxed">
+                    {msg.text}
+                  </p>
+                  <p className={`
+                    text-[10px] mt-1 
+                    ${msg.from === 'user'
+                      ? 'text-white/70'
+                      : ''}`}
+                    style={
+                      msg.from === 'bot' 
+                        ? { color: 
+                            'var(--text-muted)' 
+                          } 
+                        : {}
+                    }>
+                    {msg.time}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {typing && (
+              <div className="flex 
+                justify-start items-center 
+                gap-2">
+                <div className="
+                  w-7 h-7 rounded-full 
+                  bg-[#22C55E]
+                  flex items-center 
+                  justify-center">
+                  <span className="
+                    material-symbols-outlined 
+                    text-white text-[14px]">
+                    smart_toy
+                  </span>
+                </div>
+                <div
+                  className="rounded-2xl 
+                    px-4 py-3"
+                  style={{
+                    backgroundColor: 
+                      'var(--bg-subtle)'
+                  }}>
+                  <div className="flex 
+                    gap-1">
+                    {[0, 1, 2].map(i => (
+                      <div
+                        key={i}
+                        className="w-2 h-2 
+                          rounded-full 
+                          bg-[#22C55E]
+                          animate-bounce"
+                        style={{
+                          animationDelay: 
+                            `${i * 150}ms`
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Suggested questions */}
+          <div
+            className="px-3 py-2 
+              flex gap-2 overflow-x-auto
+              scrollbar-hide flex-shrink-0"
+            style={{
+              borderTop: '1px solid var(--border)'
+            }}>
+            {[
+              'How to contribute?',
+              'What is trust score?',
+              'How to get a loan?',
+              'Where does money go?'
+            ].map(q => (
+              <button
+                key={q}
+                onClick={() => {
+                  setInput(q)
+                  setTimeout(() => {
+                    handleSend()
+                  }, 50)
+                }}
+                className="
+                  flex-shrink-0
+                  px-3 py-1.5 
+                  rounded-full
+                  text-[12px] 
+                  font-medium
+                  whitespace-nowrap
+                  transition-colors"
+                style={{
+                  backgroundColor: 
+                    'var(--bg-subtle)',
+                  color: 
+                    'var(--green-text)',
+                  border: '1px solid var(--border-strong)'
+                }}>
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div
+            className="flex items-center 
+              gap-2 px-3 py-3 
+              flex-shrink-0"
+            style={{
+              borderTop: 
+                '1px solid var(--border)'
+            }}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={e => 
+                setInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') 
+                  handleSend()
+              }}
+              placeholder="Ask anything..."
+              className="flex-1 px-4 py-2.5 
+                rounded-xl text-[14px]
+                focus:outline-none
+                focus:border-[#22C55E]
+                border"
+              style={{
+                backgroundColor: 
+                  'var(--bg-input)',
+                borderColor: 
+                  'var(--border)',
+                color: 
+                  'var(--text-primary)'
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className="w-10 h-10 
+                rounded-xl 
+                bg-[#22C55E] text-white
+                flex items-center 
+                justify-center
+                hover:bg-[#16A34A]
+                disabled:opacity-40
+                transition-colors 
+                flex-shrink-0">
+              <span className="
+                material-symbols-outlined 
+                text-[20px]">
+                send
+              </span>
+            </button>
+          </div>
+
+        </div>
+      )}
+    </>
+  )
+}
+
+Add ChatBot to root layout:
+File: src/app/layout.tsx
+
+import { ChatBot } from 
+  '@/components/ChatBot'
+
+<body>
+  <ThemeProvider>
+    {children}
+    <ChatBot />
+  </ThemeProvider>
+</body>
+
+═══════════════════════════════════════════
+PART 4 — MONEY FLOW + M-PESA TRACKING
+How admin sets Till/Paybill.
+How members see where money goes.
+How SmartChama tracks receipts.
+═══════════════════════════════════════════
+
+NEW DATABASE TABLE:
+Add to Supabase SQL Editor:
+
+CREATE TABLE IF NOT EXISTS 
+  chama_payment_config (
+  id UUID PRIMARY KEY DEFAULT 
+    gen_random_uuid(),
+  chama_id UUID UNIQUE NOT NULL 
+    REFERENCES chamas_v2(id),
+  payment_type TEXT NOT NULL 
+    DEFAULT 'till'
+    CHECK (payment_type IN 
+      ('till', 'paybill', 'phone')),
+  till_number TEXT,
+  paybill_number TEXT,
+  account_number TEXT,
+  phone_number TEXT,
+  account_name TEXT,
+  is_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+During group onboarding (Step 2 
+of onboarding page), add:
+
+"Payment Setup" section:
+Title: "Where will members send money?"
+
+Radio selection:
+○ Till Number (Lipa na M-Pesa)
+○ Paybill Number
+○ Phone Number (M-Pesa Send Money)
+
+If Till selected:
+  Input: "Till Number" (5-6 digits)
+  Input: "Account Name" (as it appears)
+
+If Paybill selected:
+  Input: "Paybill Number"
+  Input: "Account Number"
+  Input: "Account Name"
+
+If Phone selected:
+  Input: "Phone Number" (+254...)
+  Input: "Account Name"
+
+Save to chama_payment_config table.
+
+On New Contribution modal, 
+before member pays, show:
+
+<div className="rounded-xl p-4 mb-4"
+  style={{
+    backgroundColor: 'var(--bg-subtle)',
+    border: '1px solid var(--border-strong)'
+  }}>
+  <p className="text-[12px] uppercase 
+    tracking-wider mb-1"
+    style={{ color: 'var(--text-muted)' }}>
+    Your payment goes to
+  </p>
+  <p className="text-[16px] font-bold"
+    style={{ color: 'var(--text-primary)' }}>
+    {config.account_name}
+  </p>
+  <p className="text-[13px]"
+    style={{ color: 'var(--text-secondary)' }}>
+    {config.payment_type === 'till' 
+      ? `Till Number: ${config.till_number}`
+      : config.payment_type === 'paybill'
+      ? `Paybill: ${config.paybill_number} | 
+         Account: ${config.account_number}`
+      : `Phone: ${config.phone_number}`
+    }
+  </p>
+  <p className="text-[11px] mt-2"
+    style={{ color: 'var(--text-muted)' }}>
+    SmartChama does not hold your money.
+    This goes directly to your admin.
+  </p>
+</div>
+
+M-PESA CALLBACK TRACKING:
+In src/app/api/mpesa/callback/route.ts
+
+When Safaricom confirms payment,
+extract and save the M-Pesa receipt:
+
+const receipt = 
+  callback.MpesaReceiptNumber
+const phone = 
+  callback.PhoneNumber.toString()
+const amount = 
+  callback.Amount
+
+// Record with receipt number
+await supabase
+  .from('contributions_v2')
+  .update({
+    status: 'confirmed',
+    mpesa_receipt: receipt,
+    confirmed_at: new Date()
+      .toISOString()
+  })
+  .eq('mpesa_checkout_request_id',
+    checkoutId)
+
+// The receipt number is the proof.
+// Members can verify it independently
+// by checking their M-Pesa messages.
+
+═══════════════════════════════════════════
+PART 5 — TRUST SCORE ACCURACY 
+AND ANTI-FRAUD SYSTEM
+═══════════════════════════════════════════
+
+NEW DATABASE TABLE:
+
+CREATE TABLE IF NOT EXISTS 
+  fraud_flags (
+  id UUID PRIMARY KEY DEFAULT 
+    gen_random_uuid(),
+  chama_id UUID REFERENCES 
+    chamas_v2(id),
+  profile_id UUID REFERENCES 
+    profiles(id),
+  flag_type TEXT NOT NULL 
+    CHECK (flag_type IN (
+      'fake_chama',
+      'same_phone_multiple_chamas',
+      'suspicious_withdrawal',
+      'rapid_account_creation',
+      'no_real_payments',
+      'admin_self_dealing'
+    )),
+  description TEXT,
+  severity TEXT DEFAULT 'medium'
+    CHECK (severity IN (
+      'low', 'medium', 'high'
+    )),
+  resolved BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS 
+  withdrawal_consents (
+  id UUID PRIMARY KEY DEFAULT 
+    gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES 
+    chamas_v2(id),
+  requested_by UUID NOT NULL REFERENCES 
+    profiles(id),
+  amount NUMERIC(12,2) NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT DEFAULT 'pending'
+    CHECK (status IN (
+      'pending', 'approved', 
+      'rejected', 'executed'
+    )),
+  votes_for INTEGER DEFAULT 0,
+  votes_against INTEGER DEFAULT 0,
+  total_eligible_voters INTEGER,
+  executed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS 
+  withdrawal_votes (
+  id UUID PRIMARY KEY DEFAULT 
+    gen_random_uuid(),
+  consent_id UUID NOT NULL REFERENCES 
+    withdrawal_consents(id),
+  membership_id UUID NOT NULL REFERENCES 
+    chama_memberships(id),
+  vote TEXT NOT NULL 
+    CHECK (vote IN ('approve', 'reject')),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(consent_id, membership_id)
+);
+
+ANTI-FRAUD CHECKS:
+File: src/app/api/fraud/check/route.ts
+
+Run these checks on:
+- New chama creation
+- New member joining
+- Trust score calculation
+
+async function runFraudChecks(
+  profileId: string,
+  chamaId: string
+) {
+  const supabase = getSupabaseAdmin()
+  
+  // Check 1: Same phone in too many 
+  // chamas (>5 is suspicious)
+  const { data: memberships } = 
+    await supabase
+      .from('chama_memberships')
+      .select('chama_id')
+      .eq('profile_id', profileId)
+  
+  if ((memberships?.length || 0) > 5) {
+    await flagFraud(
+      profileId, null,
+      'same_phone_multiple_chamas',
+      `Member belongs to ${
+        memberships?.length
+      } groups which is unusually high`,
+      'medium'
+    )
+  }
+  
+  // Check 2: Chama has fewer than 
+  // 3 members after 30 days 
+  // (possibly fake)
+  const chamaCreated = await supabase
+    .from('chamas_v2')
+    .select('created_at')
+    .eq('id', chamaId)
+    .single()
+  
+  const daysSinceCreation = 
+    (Date.now() - new Date(
+      chamaCreated.data?.created_at
+    ).getTime()) / (1000*60*60*24)
+  
+  const { count: memberCount } = 
+    await supabase
+      .from('chama_memberships')
+      .select('*', { count: 'exact' })
+      .eq('chama_id', chamaId)
+      .eq('status', 'active')
+  
+  if (daysSinceCreation > 30 && 
+      (memberCount || 0) < 3) {
+    await flagFraud(
+      null, chamaId,
+      'fake_chama',
+      'Group has fewer than 3 members ' +
+      'after 30 days',
+      'low'
+    )
+  }
+  
+  // Check 3: No real M-Pesa payments 
+  // but high trust score attempt
+  const { data: contribs } = 
+    await supabase
+      .from('contributions_v2')
+      .select('mpesa_receipt, status')
+      .eq('membership_id', profileId)
+  
+  const confirmedWithReceipt = 
+    contribs?.filter(
+      c => c.status === 'confirmed' && 
+      c.mpesa_receipt
+    ).length || 0
+  
+  // Trust score ONLY counts 
+  // contributions with real 
+  // M-Pesa receipts
+  // This prevents fake self-recorded 
+  // contributions from inflating score
+  return confirmedWithReceipt
+}
+
+TRUST SCORE FORMULA UPDATE:
+Only count contributions that have 
+a real mpesa_receipt value.
+Admin-recorded contributions 
+without receipt get 50% weight only.
+
+In src/app/api/trust-score/
+  calculate/route.ts:
+
+// Only verified M-Pesa receipts 
+// count for full trust score
+const verifiedContributions = 
+  contributions.filter(
+    c => c.status === 'confirmed' && 
+    c.mpesa_receipt !== null
+  )
+
+const adminRecordedContributions =
+  contributions.filter(
+    c => c.status === 'confirmed' &&
+    c.mpesa_receipt === null &&
+    c.recorded_by !== null // admin recorded
+  )
+
+// Verified = full credit
+// Admin recorded without receipt 
+// = half credit (could be cash payment)
+const effectiveMonths = 
+  verifiedContributions.length + 
+  (adminRecordedContributions.length * 0.5)
+
+WITHDRAWAL CONSENT SYSTEM:
+When admin tries to record a withdrawal:
+
+1. Admin submits withdrawal request 
+   with amount and reason
+2. All active members receive 
+   notification immediately
+3. Members have 24 hours to vote 
+   approve/reject
+4. If majority approves (or no one 
+   objects), withdrawal executes
+5. If majority rejects, it is blocked
+6. ALL withdrawal attempts 
+   (approved or rejected) are 
+   permanently logged
+
+File: src/app/api/wallet/
+  withdraw-request/route.ts
+
+export async function POST(
+  request: Request
+) {
+  const supabase = getSupabaseAdmin()
+  const { chama_id, admin_id, 
+    amount, reason } = 
+    await request.json()
+  
+  // Get eligible voter count
+  const { count } = await supabase
+    .from('chama_memberships')
+    .select('*', { count: 'exact' })
+    .eq('chama_id', chama_id)
+    .eq('status', 'active')
+    .neq('profile_id', admin_id)
+  
+  // Create consent request
+  const { data: consent } = 
+    await supabase
+      .from('withdrawal_consents')
+      .insert({
+        chama_id,
+        requested_by: admin_id,
+        amount,
+        reason,
+        total_eligible_voters: count,
+        status: 'pending'
+      })
+      .select()
+      .single()
+  
+  // Notify ALL members immediately
+  const { data: members } = 
+    await supabase
+      .from('chama_memberships')
+      .select('profile_id')
+      .eq('chama_id', chama_id)
+      .eq('status', 'active')
+      .neq('profile_id', admin_id)
+  
+  for (const m of members || []) {
+    await supabase
+      .from('notifications')
+      .insert({
+        profile_id: m.profile_id,
+        chama_id,
+        type: 'withdrawal_request',
+        title: 'Withdrawal Request',
+        message: 
+          `Your admin has requested ` +
+          `to withdraw KSh ${
+            amount.toLocaleString('en-KE')
+          }. Reason: ${reason}. ` +
+          `You have 24 hours to approve ` +
+          `or reject this.`
+      })
+  }
+  
+  return Response.json({ 
+    consent_id: consent.id 
+  })
+}
+
+═══════════════════════════════════════════
+PART 6 — MY SAVINGS — PDF EXPORT
+═══════════════════════════════════════════
+
+File: src/app/dashboard/savings/page.tsx
+
+Add Export PDF button:
+
+async function exportSavingsPDF() {
+  const { data: contributions } = 
+    await supabase
+      .from('contributions_v2')
+      .select('amount, status, 
+        mpesa_receipt, created_at,
+        payment_method')
+      .eq('membership_id', membershipId)
+      .eq('status', 'confirmed')
+      .order('created_at', 
+        { ascending: false })
+  
+  // Build PDF content as HTML 
+  // then print
+  const total = contributions?.reduce(
+    (sum, c) => sum + c.amount, 0
+  ) || 0
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { 
+          font-family: sans-serif; 
+          padding: 40px;
+          color: #052e16;
+        }
+        h1 { color: #16A34A; }
+        table { 
+          width: 100%; 
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        th { 
+          background: #DCFCE7; 
+          padding: 10px;
+          text-align: left;
+          font-size: 12px;
+          text-transform: uppercase;
+        }
+        td { 
+          padding: 10px; 
+          border-bottom: 
+            1px solid #D1FAE5;
+          font-size: 13px;
+        }
+        .total { 
+          font-size: 18px; 
+          font-weight: bold;
+          color: #16A34A;
+          margin-top: 20px;
+        }
+        .footer { 
+          margin-top: 40px; 
+          font-size: 11px; 
+          color: #6B7280; 
+        }
+      </style>
+    </head>
+    <body>
+      <h1>SmartChama</h1>
+      <h2>Financial Statement</h2>
+      <p>Member: ${profile?.full_name}</p>
+      <p>Group: ${chama?.name}</p>
+      <p>Generated: ${new Date()
+        .toLocaleDateString('en-KE', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })}</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Receipt</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${contributions?.map(c => `
+            <tr>
+              <td>${new Date(c.created_at)
+                .toLocaleDateString(
+                  'en-KE'
+                )}</td>
+              <td>KSh ${
+                c.amount.toLocaleString(
+                  'en-KE'
+                )}</td>
+              <td>${c.payment_method || 
+                'M-Pesa'}</td>
+              <td>${c.mpesa_receipt || 
+                'N/A'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      
+      <p class="total">
+        Total Saved: KSh ${
+          total.toLocaleString('en-KE')
+        }
+      </p>
+      
+      <div class="footer">
+        <p>This statement was generated 
+        by SmartChama Technologies Ltd. 
+        All amounts are verified from 
+        M-Pesa transaction records.</p>
+        <p>support@smartchama.co.ke | 
+        Nairobi, Kenya</p>
+      </div>
+    </body>
+    </html>
+  `
+  
+  const printWindow = 
+    window.open('', '_blank')
+  if (printWindow) {
+    printWindow.document.write(html)
+    printWindow.document.close()
+    printWindow.print()
+  }
+}
+
+Add export button to page header:
+<button
+  onClick={exportSavingsPDF}
+  className="flex items-center gap-2
+    px-4 py-2.5 rounded-xl border
+    text-[14px] font-medium
+    hover:bo
+<truncated 33579 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

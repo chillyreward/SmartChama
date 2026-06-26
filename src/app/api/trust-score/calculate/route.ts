@@ -21,10 +21,24 @@ export async function POST(request: Request) {
       return new Response(JSON.stringify({ error: 'Membership not found' }), { status: 404 })
     }
 
+    // Trigger fraud checks
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/fraud/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chama_id: membership.chama_id,
+          profile_id: (membership as any).profile_id || null
+        })
+      });
+    } catch (fErr) {
+      console.error('Trigger fraud check error:', fErr);
+    }
+
     // Fetch confirmed contributions for this membership
     const { data: contributions, error: contErr } = await supabase
       .from('contributions_v2')
-      .select('created_at, status')
+      .select('created_at, status, payment_method, mpesa_receipt')
       .eq('membership_id', membership_id)
       .eq('status', 'confirmed')
       .order('created_at', { ascending: true })
@@ -47,13 +61,27 @@ export async function POST(request: Request) {
     let months_active = (now.getFullYear() - joinedAt.getFullYear()) * 12 + (now.getMonth() - joinedAt.getMonth()) + 1
     if (months_active < 1) months_active = 1
 
-    // confirmed_months = count of distinct months with confirmed contributions
-    const distinctMonths = new Set()
+    // confirmed_months = sum of consistency weights per month (M-Pesa verified = 1.0, Manual/Cash = 0.5)
+    const monthWeights: { [key: string]: number } = {}
+    const distinctMonths = new Set<string>()
+    
     contributions?.forEach(c => {
       const d = new Date(c.created_at)
-      distinctMonths.add(`${d.getFullYear()}-${d.getMonth()}`)
+      const monthStr = `${d.getFullYear()}-${d.getMonth()}`
+      distinctMonths.add(monthStr)
+
+      const isMpesaVerified = c.payment_method === 'mpesa' && !!c.mpesa_receipt
+      const weight = isMpesaVerified ? 1.0 : 0.5
+      
+      if (!monthWeights[monthStr] || weight > monthWeights[monthStr]) {
+        monthWeights[monthStr] = weight
+      }
     })
-    const confirmed_months = distinctMonths.size
+
+    let confirmed_months = 0
+    Object.values(monthWeights).forEach(w => {
+      confirmed_months += w
+    })
 
     // on_time_rate = confirmed_months / months_active (capped at 1)
     const on_time_rate = Math.min(confirmed_months / months_active, 1)

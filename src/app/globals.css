@@ -1,46 +1,142 @@
 @import "tailwindcss";
 
 :root {
-  --bg-page: #FAFAFA;
-  --bg-card: #FFFFFF;
-  --bg-sidebar: #FFFFFF;
-  --bg-input: #FFFFFF;
-  --border: #E5E7EB;
-  --text-main: #161d16;
-  --text-muted: #60645f;
+  --bg-page:       #FFFFFF;
+  --bg-card:       #FFFFFF;
+  --bg-sidebar:    #FFFFFF;
+  --bg-input:      #FFFFFF;
+  --bg-hover:      #F0FDF4;
+  --bg-subtle:     #DCFCE7;
+  --bg-muted:      #F9FAFB;
+
+  --border:        #D1FAE5;
+  --border-strong: #6EE7B7;
+
+  --text-primary:  #052e16;
+  --text-secondary:#166534;
+  --text-muted:    #4ADE80;
+  --text-on-green: #052e16;
+
+  --green:         #16A34A;
+  --green-bright:  #22C55E;
+  --green-light:   #DCFCE7;
+  --green-text:    #166534;
   
-  --brand-green: #22C55E;
-  --brand-hover: #006e2f;
+  --red:           #EF4444;
+  --red-bg:        #FEF2F2;
+  --red-text:      #991B1B;
+  
+  --yellow:        #F59E0B;
+  --yellow-bg:     #FFFBEB;
+  --yellow-text:   #92400E;
 }
 
 .dark {
-  --bg-page: #000000;
-  --bg-card: #0A0A0A;
-  --bg-sidebar: #050505;
-  --bg-input: #111111;
-  --border: #1A1A1A;
-  --text-main: #FFFFFF;
-  --text-muted: #A1A1AA;
+  --bg-page:       #0A0A0A;
+  --bg-card:       #111111;
+  --bg-sidebar:    #0D0D0D;
+  --bg-input:      #1A1A1A;
+  --bg-hover:      #1A2E1A;
+  --bg-subtle:     #052e16;
+  --bg-muted:      #161616;
+
+  --border:        #1F2F1F;
+  --border-strong: #166534;
+
+  --text-primary:  #F0FDF4;
+  --text-secondary:#86EFAC;
+  --text-muted:    #4ADE80;
+  --text-on-green: #052e16;
+
+  --green:         #22C55E;
+  --green-bright:  #4ADE80;
+  --green-light:   #052e16;
+  --green-text:    #86EFAC;
   
-  --brand-green: #22C55E;
-  --brand-hover: #4ae176;
+  --red:           #F87171;
+  --red-bg:        #1F0A0A;
+  --red-text:      #FCA5A5;
+  
+  --yellow:        #FCD34D;
+  --yellow-bg:     #1F1A00;
+  --yellow-text:   #FDE68A;
 }
 
+/* BASE BODY */
 body {
   background-color: var(--bg-page);
-  color: var(--text-main);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Force override Tailwind's hardcoded classes */
+/* PREVENT INVISIBLE TEXT EVERYWHERE */
+* {
+  /* All text inherits from body 
+     unless explicitly overridden */
+}
+
+/* Cards */
+.sc-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-primary);
+}
+
+/* Inputs */
+input, textarea, select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Sidebar */
+.sc-sidebar {
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+}
+
+/* Tables */
+.sc-table th {
+  background-color: var(--bg-muted);
+  color: var(--text-secondary);
+}
+.sc-table tr:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Status badges */
+.badge-green {
+  background-color: var(--green-light);
+  color: var(--green-text);
+}
+.badge-red {
+  background-color: var(--red-bg);
+  color: var(--red-text);
+}
+.badge-yellow {
+  background-color: var(--yellow-bg);
+  color: var(--yellow-text);
+}
+
+/* Force override Tailwind defaults */
 .dark .bg-white,
 .dark .bg-gray-50,
 .dark .bg-\[\#FAFAFA\],
 .dark .bg-\[\#0B0F0C\] {
-  background-color: transparent !important; 
+  background-color: var(--bg-card) !important;
 }
 
-/* Base utility classes for pages, cards, and sidebars */
+.light .bg-white,
+.light .bg-gray-50 {
+  background-color: var(--bg-card) !important;
+}
+
 .page-bg { background-color: var(--bg-page); }
 .card-bg { background-color: var(--bg-card); border-color: var(--border); }
 .sidebar-bg { background-color: var(--bg-sidebar); }
@@ -52,57 +148,12 @@ body {
   75%  { transform: translateY(-1px) rotate(-0.5deg); }
   100% { transform: translateY(0px) rotate(0deg); }
 }
-
-@keyframes trunkSway {
-  0%, 100% { transform: rotate(0deg); transform-origin: top center; }
-  50%      { transform: rotate(-5deg); transform-origin: top center; }
-}
-
 .elephant-walk {
   animation: elephantWalk 0.8s ease-in-out infinite;
 }
-.trunk-sway {
-  animation: trunkSway 1.6s ease-in-out infinite;
-}
 
-/* Ensure inputs are always readable */
-input, textarea, select {
-  background-color: var(--bg-input);
-  color: var(--text-main);
-  border-color: var(--border);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-muted);
-}
-
-@layer base {
-  * {
-    border-color: var(--border);
-  }
-}
-
-@layer utilities {
-  .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
-  }
-  
-  .glass-card {
-    @apply bg-slate-900/50 backdrop-blur-xl border border-slate-800/50;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 html {

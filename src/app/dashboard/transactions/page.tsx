@@ -110,6 +110,28 @@ export default function TransactionsPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (filteredTransactions.length === 0) return;
+    const headers = ["Date", "Member", "Type", "Reference", "Amount", "Status"];
+    const rows = filteredTransactions.map(t => [
+      new Date(t.created_at).toLocaleDateString('en-GB'),
+      t.member_name,
+      t.type,
+      t.ref,
+      t.amount,
+      t.status
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Chama_Transactions_${chamaName.replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     if (!authLoading && member && group) {
       fetchData();
@@ -203,7 +225,9 @@ export default function TransactionsPage() {
               <span className="material-symbols-outlined text-sm">calendar_today</span>
               This Month
             </button>
-            <button className="flex-1 md:flex-initial bg-[#22C55E] hover:bg-[#006e2f] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-2 transition-all shadow-sm font-semibold text-sm">
+            <button 
+              onClick={handleExportCSV}
+              className="flex-1 md:flex-initial bg-[#22C55E] hover:bg-[#006e2f] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-2 transition-all shadow-sm font-semibold text-sm cursor-pointer">
               <span className="material-symbols-outlined text-sm">download</span>
               Export CSV
             </button>

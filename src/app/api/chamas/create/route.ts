@@ -11,7 +11,13 @@ export async function POST(request: Request) {
       phone, 
       chama_name, 
       contribution_amount, 
-      contribution_frequency 
+      contribution_frequency,
+      payment_type,
+      till_number,
+      paybill_number,
+      account_number,
+      phone_number,
+      account_name
     } = await request.json();
 
     if (!user_id || !chama_name || !full_name || !phone) {
@@ -69,10 +75,27 @@ export async function POST(request: Request) {
     
     if (walletError) {
       console.error("Wallet Error:", walletError);
-      // Not returning error here, wallet can be recreated or it might be a silent issue
     }
 
-    // 4. Create the Admin Membership
+    // 4. Create Chama Payment Config
+    const { error: configError } = await supabase
+      .from('chama_payment_config')
+      .insert({
+        chama_id: chamaData.id,
+        payment_type: payment_type || 'till',
+        till_number: till_number || null,
+        paybill_number: paybill_number || null,
+        account_number: account_number || null,
+        phone_number: phone_number || null,
+        account_name: account_name || null,
+        is_verified: false
+      });
+
+    if (configError) {
+      console.error("Payment Config Error:", configError);
+    }
+
+    // 5. Create the Admin Membership
     const { error: membershipError } = await supabase
       .from('chama_memberships')
       .insert({

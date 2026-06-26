@@ -3,10 +3,10 @@ import Image from "next/image";
 
 export default function LandingFooter() {
   return (
-    <footer className="bg-[#0B0F0C] text-white pt-20 pb-8 px-6">
+    <footer className="bg-[#0B0F0C] text-white pt-20 pb-8 px-4 sm:px-6 md:px-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-12 mb-16">
-          <div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          <div className="col-span-2 lg:col-span-1">
             <Link href="/">
               <div className="flex items-center gap-3 mb-4">
                 <Image

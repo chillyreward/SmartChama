@@ -32,7 +32,7 @@ export default function GroupSwitcher() {
     }
 
     fetchMemberships()
-  }, [supabase])
+  }, [])
 
   // Click outside to close
   useEffect(() => {
@@ -58,20 +58,20 @@ export default function GroupSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors"
+        className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-[#1f2a1f] px-3 py-1.5 rounded-lg transition-colors border border-[var(--border)] cursor-pointer"
       >
-        <div className="flex flex-col items-start">
-          <span className="text-sm font-semibold text-[#161d16]">{currentGroup.name}</span>
-          <span className="text-xs text-[#60645f] capitalize">{currentMember?.role}</span>
+        <div className="flex flex-col items-start text-left">
+          <span className="text-sm font-semibold text-[var(--text-main)] truncate max-w-40">{currentGroup.name}</span>
+          <span className="text-xs text-[var(--text-muted)] capitalize">{currentMember?.role}</span>
         </div>
-        <span className="material-symbols-outlined text-[#60645f] text-[20px]">
+        <span className="material-symbols-outlined text-[var(--text-muted)] text-[20px]">
           {isOpen ? 'expand_less' : 'expand_more'}
         </span>
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-[#E5E7EB] rounded-xl shadow-lg overflow-hidden z-50">
-          <div className="p-2 text-xs font-semibold text-[#60645f] uppercase tracking-wider bg-gray-50 border-b border-[#E5E7EB]">
+        <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-[#111111] border border-[var(--border)] rounded-xl shadow-lg overflow-hidden z-50 animate-fade-in">
+          <div className="p-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider bg-gray-50 dark:bg-[#1a1f1b]/50 border-b border-[var(--border)]">
             Your Groups
           </div>
           
@@ -79,41 +79,40 @@ export default function GroupSwitcher() {
             {memberships.map((m) => {
               const chama = m.chamas_v2 as any
               const isCurrent = chama.id === currentGroup.id
-              const isLeadership = ['admin', 'chairlady', 'treasurer', 'secretary'].includes(m.role)
               
               return (
                 <button
                   key={m.id}
                   onClick={() => !isCurrent && handleSwitch(chama.id, m.role)}
-                  className={`w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition-colors ${isCurrent ? 'bg-[#f0fdf4] hover:bg-[#f0fdf4]' : ''}`}
+                  className={`w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors cursor-pointer ${isCurrent ? 'bg-[#f0fdf4] dark:bg-[#1a2a1a]/40 hover:bg-[#f0fdf4] dark:hover:bg-[#1a2a1a]/40' : ''}`}
                 >
                   <div className="flex flex-col">
-                    <span className={`text-sm font-medium ${isCurrent ? 'text-[#006e2f]' : 'text-[#161d16]'}`}>
+                    <span className={`text-sm font-medium ${isCurrent ? 'text-[#22C55E]' : 'text-[var(--text-main)]'}`}>
                       {chama.name}
                     </span>
-                    <span className="text-xs text-[#60645f] capitalize">{m.role}</span>
+                    <span className="text-xs text-[var(--text-muted)] capitalize">{m.role}</span>
                   </div>
                   {isCurrent ? (
                     <span className="material-symbols-outlined text-[#22C55E] text-[18px]">check</span>
                   ) : (
-                    <span className="text-xs font-semibold text-[#006e2f]">Switch</span>
+                    <span className="text-xs font-semibold text-[#22C55E]">Switch</span>
                   )}
                 </button>
               )
             })}
           </div>
           
-          <div className="border-t border-[#E5E7EB] p-2 bg-gray-50 flex flex-col">
+          <div className="border-t border-[var(--border)] p-2 bg-gray-50 dark:bg-[#1a1f1b]/50 flex flex-col gap-1">
             <Link 
               href="/onboarding" 
-              className="px-3 py-2 text-sm text-[#006e2f] hover:bg-[#e6f4ea] rounded-lg transition-colors flex items-center gap-2"
+              className="px-3 py-2 text-sm text-[#22C55E] hover:bg-[#e6f4ea] dark:hover:bg-[#1f2a1f] rounded-lg transition-colors flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               Create New Group
             </Link>
             <Link 
               href="/onboarding" 
-              className="px-3 py-2 text-sm text-[#006e2f] hover:bg-[#e6f4ea] rounded-lg transition-colors flex items-center gap-2"
+              className="px-3 py-2 text-sm text-[#22C55E] hover:bg-[#e6f4ea] dark:hover:bg-[#1f2a1f] rounded-lg transition-colors flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[18px]">group_add</span>
               Join Another Group

@@ -9,7 +9,7 @@ export default function LandingPage() {
       <LandingNav />
 
       {/* --- HERO SECTION --- */}
-      <section className="pt-24 pb-16 px-6 text-center lg:text-left bg-[#FAFAFA] dark:bg-[#0B0F0C] transition-colors duration-300">
+      <section className="pt-20 lg:pt-32 pb-16 px-4 sm:px-6 md:px-8 lg:px-12 text-center lg:text-left bg-[#FAFAFA] dark:bg-[#0B0F0C] transition-colors duration-300">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-[55%_45%] gap-16 items-center">
           
           {/* Left Column */}
@@ -18,7 +18,7 @@ export default function LandingPage() {
               Now serving Kenya
             </div>
             
-            <h1 className="text-[44px] md:text-[72px] font-bold font-geist tracking-tight leading-[1.05] text-[#161d16] dark:text-white mt-4 mb-6">
+            <h1 className="text-[36px] sm:text-[48px] md:text-[64px] lg:text-[72px] font-bold font-geist tracking-tight leading-[1.05] text-[#161d16] dark:text-white mt-4 mb-6">
               Your Chama,{' '}
               <span className="text-[#22C55E]">
                 Upgraded.
@@ -39,7 +39,7 @@ export default function LandingPage() {
             </div>
 
             {/* Trust signals — horizontal scroll on mobile */}
-            <div className="flex gap-6 justify-center lg:justify-start mt-10 overflow-x-auto scrollbar-hide w-full pb-2">
+            <div className="flex flex-wrap sm:flex-nowrap gap-6 justify-center lg:justify-start mt-10 overflow-x-auto scrollbar-hide w-full pb-2">
               {["M-Pesa Connected", "2.4k+ Active Groups", "48M+ KSh Saved"].map(signal => (
                 <div key={signal} className="flex items-center gap-1.5 flex-shrink-0">
                   <span className="material-symbols-outlined text-[16px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -186,10 +186,10 @@ export default function LandingPage() {
       </section>
 
       {/* --- FEATURES SECTION --- */}
-      <section id="features" className="bg-white dark:bg-[#050806] py-24 md:py-32 px-6 scroll-mt-16 transition-colors duration-300">
+      <section id="features" className="bg-white dark:bg-[#050806] py-20 md:py-32 px-4 sm:px-6 md:px-8 lg:px-12 scroll-mt-16 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
+            <h2 className="text-[32px] sm:text-[48px] lg:text-[64px] font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
               Everything your chama needs. Nothing it doesn't.
             </h2>
             <p className="text-lg md:text-xl text-[#4F5A53] dark:text-[#8FA196]">
@@ -233,10 +233,10 @@ export default function LandingPage() {
       </section>
 
       {/* --- HOW IT WORKS --- */}
-      <section id="how-it-works" className="bg-[#FAFAFA] dark:bg-[#0B0F0C] py-24 md:py-32 px-6 overflow-hidden scroll-mt-16 border-t border-[#E5E7EB] dark:border-[#1B2520] transition-colors duration-300">
+      <section id="how-it-works" className="bg-[#FAFAFA] dark:bg-[#0B0F0C] py-20 md:py-32 px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden scroll-mt-16 border-t border-[#E5E7EB] dark:border-[#1B2520] transition-colors duration-300">
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
+            <h2 className="text-[32px] sm:text-[48px] lg:text-[64px] font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
               Up and running in minutes.
             </h2>
             <p className="text-lg md:text-xl text-[#4F5A53] dark:text-[#8FA196]">
@@ -284,10 +284,10 @@ export default function LandingPage() {
       </section>
 
       {/* --- PRICING SECTION --- */}
-      <section id="pricing" className="bg-white dark:bg-[#050806] py-24 md:py-32 px-6 scroll-mt-16 border-y border-[#E5E7EB] dark:border-[#1B2520] transition-colors duration-300">
+      <section id="pricing" className="bg-white dark:bg-[#050806] py-20 md:py-32 px-4 sm:px-6 md:px-8 lg:px-12 scroll-mt-16 border-y border-[#E5E7EB] dark:border-[#1B2520] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
+            <h2 className="text-[32px] sm:text-[48px] lg:text-[64px] font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
               Simple, transparent pricing.
             </h2>
             <p className="text-lg md:text-xl text-[#4F5A53] dark:text-[#8FA196]">
@@ -387,14 +387,14 @@ export default function LandingPage() {
       </section>
 
       {/* --- TRUST INFRASTRUCTURE (Stays dark for high contrast) --- */}
-      <section id="about" className="bg-[#050806] py-24 md:py-32 px-6 relative overflow-hidden border-b border-[#163822]">
+      <section id="about" className="bg-[#050806] py-20 md:py-32 px-4 sm:px-6 md:px-8 lg:px-12 relative overflow-hidden border-b border-[#163822]">
         <div className="absolute inset-0 z-0 opacity-5" 
              style={{ backgroundImage: 'radial-gradient(#22C55E 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 mb-16 items-center">
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-6xl font-bold font-geist text-white leading-[1.1] tracking-tight">
+              <h2 className="text-[32px] sm:text-[48px] lg:text-[64px] font-bold font-geist text-white leading-[1.1] tracking-tight">
                 Beyond Savings.<br/>
                 <span className="text-[#22C55E]">Building Financial Identity.</span>
               </h2>
@@ -442,10 +442,10 @@ export default function LandingPage() {
       </section>
 
       {/* --- TESTIMONIALS --- */}
-      <section className="bg-[#FAFAFA] dark:bg-[#0B0F0C] py-24 md:py-32 px-6 border-b border-[#E5E7EB] dark:border-[#1B2520] transition-colors duration-300">
+      <section className="bg-[#FAFAFA] dark:bg-[#0B0F0C] py-20 md:py-32 px-4 sm:px-6 md:px-8 lg:px-12 border-b border-[#E5E7EB] dark:border-[#1B2520] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
+            <h2 className="text-[32px] sm:text-[48px] lg:text-[64px] font-bold font-geist text-[#161d16] dark:text-white tracking-tight mb-4">
               Real groups. Real results.
             </h2>
             <p className="text-lg md:text-xl text-[#4F5A53] dark:text-[#8FA196]">
@@ -453,7 +453,7 @@ export default function LandingPage() {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {[
               {
                 quote: "Before SmartChama, we argued every month about who had paid. Now everyone sees the records. No more drama, just savings.",
@@ -491,12 +491,12 @@ export default function LandingPage() {
       </section>
 
       {/* --- FINAL CTA --- */}
-      <section className="bg-white dark:bg-[#050806] py-24 md:py-32 px-6 relative overflow-hidden transition-colors duration-300">
+      <section className="bg-white dark:bg-[#050806] py-20 md:py-32 px-4 sm:px-6 md:px-8 lg:px-12 relative overflow-hidden transition-colors duration-300">
         <div className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.01]" 
              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         
         <div className="max-w-4xl mx-auto relative z-10 text-center space-y-8">
-          <h2 className="text-4xl md:text-6xl font-bold font-geist text-[#161d16] dark:text-white tracking-tight leading-tight">
+          <h2 className="text-[32px] sm:text-[48px] lg:text-[64px] font-bold font-geist text-[#161d16] dark:text-white tracking-tight leading-tight">
             Start building your group's financial future today.
           </h2>
           <p className="text-lg md:text-xl text-[#4F5A53] dark:text-[#8FA196] max-w-2xl mx-auto leading-relaxed">

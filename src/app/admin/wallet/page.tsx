@@ -30,21 +30,21 @@ export default function AdminWalletPage() {
     try {
       setLoading(true);
 
-      const { data: wData } = await supabase.from('wallets').select('*').eq('group_id', group.id).single();
+      const { data: wData } = await supabase.from('wallets').select('*').eq('chama_id', group.id).maybeSingle();
       setWallet(wData);
 
       const { data: wReqs } = await supabase
-        .from('withdrawal_requests')
-        .select('*, members(full_name)')
-        .eq('group_id', group.id)
+        .from('withdrawal_consents')
+        .select('*, profiles(full_name)')
+        .eq('chama_id', group.id)
         .order('created_at', { ascending: false });
       setWithdrawals(wReqs || []);
 
       const { data: txs } = await supabase
-        .from('transactions')
-        .select('*, members(full_name)')
-        .eq('group_id', group.id)
-        .in('type', ['deposit', 'withdrawal', 'loan_disbursement', 'repayment', 'contribution', 'penalty', 'interest'])
+        .from('transactions_v2')
+        .select('*, chama_memberships(profiles(full_name))')
+        .eq('chama_id', group.id)
+        .in('type', ['deposit', 'withdrawal', 'loan_disbursement', 'repayment', 'loan_repayment', 'contribution', 'penalty', 'interest'])
         .order('created_at', { ascending: false })
         .limit(20);
       
@@ -64,13 +64,13 @@ export default function AdminWalletPage() {
   const handleDeposit = async () => {
     try {
       const amt = Number(depAmount);
-      await supabase.from('transactions').insert({
-        group_id: group?.id,
+      await supabase.from('transactions_v2').insert({
+        chama_id: group?.id,
         type: 'deposit',
         amount: amt,
         reference: depRef,
-        notes: depNotes,
-        recorded_by: adminMember?.id,
+        description: depNotes || 'Deposit funds',
+        membership_id: adminMember?.id,
         status: 'confirmed',
         created_at: new Date().toISOString()
       });
@@ -97,15 +97,40 @@ export default function AdminWalletPage() {
         return;
       }
       
-      await supabase.from('withdrawal_requests').insert({
-        group_id: group?.id,
-        requested_by: adminMember?.id,
-        amount: amt,
-        reason: withReason,
-        status: 'pending'
-      });
+      const { data: consentData, error: consentErr } = await supabase
+        .from('withdrawal_consents')
+        .insert({
+          chama_id: group?.id,
+          requested_by: adminMember?.profile_id,
+          amount: amt,
+          reason: withReason,
+          status: 'pending',
+          votes_for: 0,
+          votes_against: 0
+        })
+        .select()
+        .single();
 
-      setToastMsg("Withdrawal requested successfully");
+      if (consentErr) throw consentErr;
+
+      // Insert notification for members
+      const { data: memberships } = await supabase
+        .from('chama_memberships')
+        .select('profile_id')
+        .eq('chama_id', group?.id);
+
+      if (memberships) {
+        const notifs = memberships.map(m => ({
+          chama_id: group?.id,
+          profile_id: m.profile_id,
+          type: 'withdrawal_consent_request',
+          message: `A new withdrawal consent request of KSh ${amt.toLocaleString()} has been initiated. Click to vote.`,
+          read: false
+        }));
+        await supabase.from('notifications').insert(notifs);
+      }
+
+      setToastMsg("Withdrawal request submitted for vote");
       setTimeout(() => setToastMsg(""), 3000);
       setShowWithdrawModal(false);
       setWithAmount(""); setWithReason("");
@@ -115,21 +140,27 @@ export default function AdminWalletPage() {
     }
   };
 
-  const handleApproveWithdrawal = async (req: any) => {
+  const handleExecuteWithdrawal = async (req: any) => {
     if (wallet.balance < req.amount) {
-      alert("Insufficient funds to approve this withdrawal");
+      alert("Insufficient funds to execute this withdrawal");
       return;
     }
-    if (confirm(`Approve withdrawal of KSh ${formatCurrency(req.amount)} requested by ${req.members?.full_name}?`)) {
+    if (confirm(`Execute withdrawal of KSh ${formatCurrency(req.amount)}?`)) {
       try {
-        await supabase.from('withdrawal_requests').update({ status: 'approved' }).eq('id', req.id);
+        const { error: wdErr } = await supabase
+          .from('withdrawal_consents')
+          .update({ status: 'executed', executed_at: new Date().toISOString() })
+          .eq('id', req.id);
+
+        if (wdErr) throw wdErr;
         
         await supabase.from('wallets').update({
           balance: Number(wallet.balance) - Number(req.amount)
         }).eq('id', wallet.id);
 
-        await supabase.from('transactions').insert({
-          group_id: group?.id,
+        await supabase.from('transactions_v2').insert({
+          chama_id: group.id,
+          membership_id: adminMember.id,
           type: 'withdrawal',
           amount: -Number(req.amount),
           status: 'confirmed',
@@ -137,23 +168,28 @@ export default function AdminWalletPage() {
           created_at: new Date().toISOString()
         });
 
-        setToastMsg("Withdrawal approved");
+        setToastMsg("Withdrawal executed successfully!");
         setTimeout(() => setToastMsg(""), 3000);
         fetchData();
-      } catch (err) {
-        alert("Error approving withdrawal");
+      } catch (err: any) {
+        alert("Error executing withdrawal: " + err.message);
       }
     }
   };
 
-  const handleRejectWithdrawal = async (req: any) => {
-    try {
-      await supabase.from('withdrawal_requests').update({ status: 'rejected' }).eq('id', req.id);
-      setToastMsg("Withdrawal rejected");
-      setTimeout(() => setToastMsg(""), 3000);
-      fetchData();
-    } catch (err) {
-      alert("Error rejecting withdrawal");
+  const handleCancelConsent = async (req: any) => {
+    if (confirm("Cancel this consent request?")) {
+      try {
+        await supabase
+          .from('withdrawal_consents')
+          .update({ status: 'rejected' })
+          .eq('id', req.id);
+        setToastMsg("Request cancelled");
+        setTimeout(() => setToastMsg(""), 3000);
+        fetchData();
+      } catch (err) {
+        alert("Error cancelling request");
+      }
     }
   };
 
@@ -186,7 +222,7 @@ export default function AdminWalletPage() {
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Wallet</span>
           </p>
-          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Total Recorded</h1>
+          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Recorded Contributions (Tracked Pool)</h1>
           <p className="text-[14px] text-[var(--text-muted)] mt-1">Manage liquid funds, deposits, and withdrawals</p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
@@ -210,7 +246,7 @@ export default function AdminWalletPage() {
       {/* HERO WALLET CARD */}
       <div className="w-full bg-[#0B0F0C] rounded-2xl p-6 md:p-8 mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8 shadow-sm">
         <div className="flex-1">
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">AVAILABLE BALANCE</div>
+          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">RECORDED CONTRIBUTIONS (TRACKED POOL)</div>
           <div className="text-[36px] md:text-[52px] font-geist font-bold text-white mt-2 leading-none">
             KSh {formatCurrency(wallet?.balance || 0)}
           </div>
@@ -236,7 +272,7 @@ export default function AdminWalletPage() {
         {/* WITHDRAWAL REQUESTS */}
         <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
           <div className="p-6 border-b border-[var(--border)] shrink-0">
-            <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Withdrawal Requests</h3>
+            <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Withdrawal Consent Board</h3>
           </div>
           <div className="overflow-y-auto flex-1 p-0">
             {/* Desktop Table View */}
@@ -245,45 +281,54 @@ export default function AdminWalletPage() {
                 <tr>
                   <th className="px-6 py-3">REQUESTED BY</th>
                   <th className="px-6 py-3">AMOUNT</th>
+                  <th className="px-6 py-3">VOTES</th>
                   <th className="px-6 py-3">STATUS</th>
                   <th className="px-6 py-3 text-right">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
                 {withdrawals.length === 0 ? (
-                  <tr><td colSpan={4} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No withdrawal requests found.</td></tr>
+                  <tr><td colSpan={5} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No withdrawal requests found.</td></tr>
                 ) : (
-                  withdrawals.map(req => (
-                    <tr key={req.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-semibold text-[var(--text-main)]">{req.members?.full_name}</div>
-                        <div className="text-xs text-[var(--text-muted)] mt-0.5 max-w-[150px] truncate">{req.reason}</div>
-                      </td>
-                      <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)]">
-                        KSh {formatCurrency(Number(req.amount))}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
-                          req.status === 'approved' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
-                          req.status === 'pending' ? 'bg-orange-55 dark:bg-orange-950/20 text-orange-800 dark:text-orange-300' : 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab]'
-                        }`}>
-                          {req.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        {req.status === 'pending' && (
-                          <div className="flex justify-end gap-2">
-                            <button onClick={() => handleRejectWithdrawal(req)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 transition-colors">
-                              <span className="material-symbols-outlined text-[18px]">close</span>
+                  withdrawals.map(req => {
+                    const totalVoters = req.total_eligible_voters || 3;
+                    const threshold = Math.floor(totalVoters / 2) + 1;
+                    return (
+                      <tr key={req.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-semibold text-[var(--text-main)]">{req.profiles?.full_name || 'Admin'}</div>
+                          <div className="text-xs text-[var(--text-muted)] mt-0.5 max-w-[150px] truncate">{req.reason}</div>
+                        </td>
+                        <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)]">
+                          KSh {formatCurrency(Number(req.amount))}
+                        </td>
+                        <td className="px-6 py-4 text-xs font-semibold text-[var(--text-main)]">
+                          {req.votes_for} / {threshold} Yes
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
+                            req.status === 'executed' ? 'bg-transparent text-[var(--brand-green)]' :
+                            req.status === 'approved' ? 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300' :
+                            req.status === 'pending' ? 'bg-orange-55 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300' : 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab]'
+                          }`}>
+                            {req.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          {req.status === 'pending' && (
+                            <button onClick={() => handleCancelConsent(req)} className="px-3 py-1 bg-transparent hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-500 rounded text-xs font-semibold">
+                              Cancel
                             </button>
-                            <button onClick={() => handleApproveWithdrawal(req)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#edf6ea] dark:hover:bg-[#1a2a1a] text-[var(--brand-green)] transition-colors">
-                              <span className="material-symbols-outlined text-[18px]">check</span>
+                          )}
+                          {req.status === 'approved' && (
+                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[#22C55E] hover:bg-[#006e2f] text-white rounded text-xs font-bold shadow-sm">
+                              Execute WD
                             </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -293,37 +338,45 @@ export default function AdminWalletPage() {
               {withdrawals.length === 0 ? (
                 <div className="text-center py-8 text-[var(--text-muted)] text-sm">No withdrawal requests found.</div>
               ) : (
-                withdrawals.map(req => (
-                  <div key={req.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-sm font-semibold text-[var(--text-main)]">{req.members?.full_name}</div>
-                        <div className="text-xs text-[var(--text-muted)] mt-0.5">{req.reason}</div>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
-                        req.status === 'approved' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
-                        req.status === 'pending' ? 'bg-orange-55 dark:bg-orange-950/20 text-orange-800 dark:text-orange-300' : 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab]'
-                      }`}>
-                        {req.status}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="font-mono font-bold text-[var(--text-main)]">
-                        KSh {formatCurrency(Number(req.amount))}
-                      </div>
-                      {req.status === 'pending' && (
-                        <div className="flex gap-2">
-                          <button onClick={() => handleRejectWithdrawal(req)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 transition-colors border border-red-200 dark:border-red-900/50">
-                            <span className="material-symbols-outlined text-[18px]">close</span>
-                          </button>
-                          <button onClick={() => handleApproveWithdrawal(req)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#edf6ea] dark:hover:bg-[#1a2a1a] text-[var(--brand-green)] transition-colors border border-green-200 dark:border-green-900/50">
-                            <span className="material-symbols-outlined text-[18px]">check</span>
-                          </button>
+                withdrawals.map(req => {
+                  const totalVoters = req.total_eligible_voters || 3;
+                  const threshold = Math.floor(totalVoters / 2) + 1;
+                  return (
+                    <div key={req.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="text-sm font-semibold text-[var(--text-main)]">{req.profiles?.full_name || 'Admin'}</div>
+                          <div className="text-xs text-[var(--text-muted)] mt-0.5">{req.reason}</div>
                         </div>
-                      )}
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
+                          req.status === 'executed' ? 'bg-transparent text-[var(--brand-green)]' :
+                          req.status === 'approved' ? 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300' :
+                          req.status === 'pending' ? 'bg-orange-55 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300' : 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab]'
+                        }`}>
+                          {req.status}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="font-mono font-bold text-[var(--text-main)]">
+                          KSh {formatCurrency(Number(req.amount))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-[var(--text-muted)] mr-2">{req.votes_for} / {threshold} Yes</span>
+                          {req.status === 'pending' && (
+                            <button onClick={() => handleCancelConsent(req)} className="px-3 py-1 bg-transparent hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-500 rounded text-xs font-semibold">
+                              Cancel
+                            </button>
+                          )}
+                          {req.status === 'approved' && (
+                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[#22C55E] hover:bg-[#006e2f] text-white rounded text-xs font-bold shadow-sm">
+                              Execute WD
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -359,8 +412,8 @@ export default function AdminWalletPage() {
                           <div className="text-sm font-semibold text-[var(--text-main)] capitalize">
                             {log.type.replace('_', ' ')}
                           </div>
-                          {log.members?.full_name && (
-                            <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a] mt-0.5">{log.members.full_name}</div>
+                          {log.chama_memberships?.profiles?.full_name && (
+                            <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a] mt-0.5">{log.chama_memberships.profiles.full_name}</div>
                           )}
                         </td>
                         <td className={`px-6 py-4 text-right font-mono font-bold ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
@@ -390,10 +443,10 @@ export default function AdminWalletPage() {
                           <span className="text-[10px] text-[var(--text-muted)]">
                             {new Date(log.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                           </span>
-                          {log.members?.full_name && (
+                          {log.chama_memberships?.profiles?.full_name && (
                             <>
                               <span className="text-[10px] text-gray-300">•</span>
-                              <span className="text-[10px] text-[#9CA3AF] dark:text-[#5a6e5a]">{log.members.full_name}</span>
+                              <span className="text-[10px] text-[#9CA3AF] dark:text-[#5a6e5a]">{log.chama_memberships.profiles.full_name}</span>
                             </>
                           )}
                         </div>

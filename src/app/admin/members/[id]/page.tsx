@@ -26,25 +26,32 @@ export default function AdminMemberDetailPage() {
       setLoading(true);
       
       const { data: mData } = await supabase
-        .from('members')
-        .select('*')
+        .from('chama_memberships')
+        .select(`
+          *,
+          profile:profiles (
+            full_name,
+            phone_number,
+            email
+          )
+        `)
         .eq('id', id)
         .single();
       
       setMember(mData);
 
       const { data: cData } = await supabase
-        .from('contributions')
+        .from('contributions_v2')
         .select('*')
-        .eq('member_id', id)
+        .eq('membership_id', id)
         .order('created_at', { ascending: false });
       
       setContributions(cData || []);
 
       const { data: lData } = await supabase
-        .from('loans')
+        .from('loans_v2')
         .select('*')
-        .eq('member_id', id)
+        .eq('membership_id', id)
         .order('created_at', { ascending: false });
 
       setLoans(lData || []);
@@ -97,7 +104,8 @@ export default function AdminMemberDetailPage() {
     'member': 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
   };
 
-  return (    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
+  return (
+    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[#161d16] dark:bg-[#E8F0E4] text-white dark:text-[#161d16] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
           <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
@@ -125,18 +133,18 @@ export default function AdminMemberDetailPage() {
       {/* PROFILE CARD */}
       <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 shadow-sm hover:shadow-md transition-all duration-200">
         <div className="flex items-center gap-6 w-full md:w-auto">
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center rounded-full text-2xl md:text-[32px] font-bold shadow-sm border border-[#22C55E]/20 shrink-0">
-            {getInitials(member.full_name)}
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-transparent text-[var(--brand-green)] flex items-center justify-center rounded-full text-2xl md:text-[32px] font-bold shadow-sm border border-[#22C55E]/20 shrink-0">
+            {getInitials(member.profile?.full_name)}
           </div>
           <div>
-            <h2 className="text-[20px] md:text-2xl font-bold font-geist text-[var(--text-main)] tracking-tight">{member.full_name}</h2>
+            <h2 className="text-[20px] md:text-2xl font-bold font-geist text-[var(--text-main)] tracking-tight">{member.profile?.full_name || 'Unnamed Member'}</h2>
             <div className="flex flex-wrap items-center gap-3 mt-1 md:mt-2">
               <span className={`px-2.5 py-0.5 rounded text-xs font-bold capitalize ${roleColors[member.role] || roleColors['member']}`}>
                 {member.role || 'Member'}
               </span>
               <span className="text-sm text-[var(--text-muted)] flex items-center gap-1 font-semibold">
                 <span className="material-symbols-outlined text-[16px]">phone</span>
-                {member.phone_number || 'No phone'}
+                {member.profile?.phone_number || 'No phone'}
               </span>
             </div>
             <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a] mt-1 md:mt-2">
@@ -167,7 +175,7 @@ export default function AdminMemberDetailPage() {
         <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
           <div className="p-4 md:p-6 border-b border-[var(--border)] flex justify-between items-center shrink-0">
             <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Contributions</h3>
-            <span className="bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] text-xs px-2.5 py-0.5 rounded font-bold">
+            <span className="bg-transparent text-[var(--brand-green)] text-xs px-2.5 py-0.5 rounded font-bold">
               {contributions.length} Records
             </span>
           </div>
@@ -196,7 +204,7 @@ export default function AdminMemberDetailPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
-                          c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                          c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)]' :
                           c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                         }`}>
                           {c.status}
@@ -226,7 +234,7 @@ export default function AdminMemberDetailPage() {
                   </div>
                   <div>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
-                      c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                      c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)]' :
                       c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                     }`}>
                       {c.status}
@@ -285,7 +293,7 @@ export default function AdminMemberDetailPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
-                          l.status === 'repaid' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                          l.status === 'repaid' ? 'bg-transparent text-[var(--brand-green)]' :
                           l.status === 'active' ? 'bg-blue-55 dark:bg-blue-950/20 text-blue-800 dark:text-blue-300' : 
                           l.status === 'overdue' ? 'bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-400' : 'bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300'
                         }`}>
@@ -316,7 +324,7 @@ export default function AdminMemberDetailPage() {
                   </div>
                   <div>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
-                      l.status === 'repaid' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
+                      l.status === 'repaid' ? 'bg-transparent text-[var(--brand-green)]' :
                       l.status === 'active' ? 'bg-blue-55 dark:bg-blue-950/20 text-blue-800 dark:text-blue-300' : 
                       l.status === 'overdue' ? 'bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-400' : 'bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300'
                     }`}>

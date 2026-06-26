@@ -21,6 +21,20 @@ export default function DashboardLayout({
   const router = useRouter();
   const { session, member, group, isLoading } = useAuth();
   const [showContributionModal, setShowContributionModal] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebar-collapsed');
+    if (saved === 'true') {
+      setIsCollapsed(true);
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    const nextVal = !isCollapsed;
+    setIsCollapsed(nextVal);
+    localStorage.setItem('sidebar-collapsed', String(nextVal));
+  };
 
   useEffect(() => {
     if (!isLoading) {
@@ -71,11 +85,11 @@ export default function DashboardLayout({
     <div className="flex h-screen page-bg font-inter overflow-hidden text-[var(--text-main)]">
       
       {/* SIDEBAR */}
-      <aside className="hidden md:flex w-64 fixed left-0 top-0 h-screen sidebar-bg border-r border-[var(--border)] flex-col z-20 overflow-y-auto">
+      <aside className={`hidden md:flex ${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 sidebar-bg border-r border-[var(--border)] flex-col z-20 shrink-0 overflow-hidden`}>
         
         {/* Top Branding */}
         <Link href="/" className="block">
-          <div className="flex items-center gap-3 px-6 py-5 border-b border-[var(--border)]">
+          <div className={`flex items-center gap-3 py-5 border-b border-[var(--border)] ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
             <Image
               src="/logo.png"
               alt="SmartChama"
@@ -84,24 +98,35 @@ export default function DashboardLayout({
               className="h-10 w-10 object-contain flex-shrink-0"
               priority
             />
-            <span className="text-[20px] font-bold tracking-tight text-[var(--text-main)]">
-              SmartChama
-            </span>
+            {!isCollapsed && (
+              <span className="text-[20px] font-bold tracking-tight text-[var(--text-main)] truncate transition-all duration-300">
+                SmartChama
+              </span>
+            )}
           </div>
         </Link>
 
         {/* Action button */}
-        <div className="px-4 py-3">
-          <button 
-            onClick={() => setShowContributionModal(true)}
-            className="w-full bg-[#22C55E] text-white rounded px-4 py-3 flex items-center justify-center gap-2 hover:bg-[#006e2f] transition-colors font-medium">
-            <span className="material-symbols-outlined text-sm">add</span>
-            <span className="text-body-sm font-geist">New Contribution</span>
-          </button>
+        <div className={`py-3 ${isCollapsed ? 'px-0 flex justify-center' : 'px-4'}`}>
+          {isCollapsed ? (
+            <button 
+              onClick={() => setShowContributionModal(true)}
+              title="New Contribution"
+              className="w-10 h-10 bg-[#22C55E] text-white rounded-full flex items-center justify-center hover:bg-[#006e2f] transition-all cursor-pointer shadow-sm">
+              <span className="material-symbols-outlined text-md">add</span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => setShowContributionModal(true)}
+              className="w-full bg-[#22C55E] text-white rounded px-4 py-3 flex items-center justify-center gap-2 hover:bg-[#006e2f] transition-colors font-medium cursor-pointer">
+              <span className="material-symbols-outlined text-sm">add</span>
+              <span className="text-body-sm font-geist">New Contribution</span>
+            </button>
+          )}
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 flex flex-col gap-1 px-4 overflow-y-auto pt-2">
+        <nav className="flex-1 flex flex-col gap-1 px-3 overflow-y-auto pt-2">
           {navItems.map(item => {
             const isActive = item.href === '/dashboard' 
               ? pathname === '/dashboard' 
@@ -111,36 +136,63 @@ export default function DashboardLayout({
               <Link 
                 key={item.label} 
                 href={item.href} 
-                className={`flex items-center gap-3 px-4 py-3 rounded transition-colors ${
+                title={isCollapsed ? item.label : undefined}
+                className={`flex items-center gap-3 py-3 rounded transition-all ${isCollapsed ? 'justify-center px-0' : 'px-4'} ${
                   isActive 
-                    ? "bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border-l-2 border-[#22C55E] font-bold rounded-r" 
+                    ? "bg-transparent text-[var(--brand-green)] border-l-2 border-[#22C55E] font-bold rounded-r" 
                     : "text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:hover:text-[#4ae176] hover:bg-[#f5f5f5] dark:hover:bg-[#1f2a1f]"
                 }`}
               >
-                <span className="material-symbols-outlined" style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                <span className="material-symbols-outlined shrink-0" style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
                   {item.icon}
                 </span>
-                <span className="text-body-sm">{item.label}</span>
+                {!isCollapsed && (
+                  <span className="text-body-sm truncate transition-all duration-300">{item.label}</span>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Bottom support and logout */}
-        <div className="border-t border-[var(--border)] pt-4 pb-4 px-4 flex flex-col gap-1">
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:hover:text-[#4ae176] hover:bg-[#f5f5f5] dark:hover:bg-[#1f2a1f] transition-colors rounded">
-            <span className="material-symbols-outlined">help</span>
-            <span className="text-body-sm">Support</span>
+        {/* Bottom support, collapse toggle and logout */}
+        <div className="border-t border-[var(--border)] pt-4 pb-4 px-3 flex flex-col gap-1">
+          <Link 
+            href="/dashboard/support" 
+            title={isCollapsed ? "Support" : undefined}
+            className={`flex items-center gap-3 py-3 text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:hover:text-[#4ae176] hover:bg-[#f5f5f5] dark:hover:bg-[#1f2a1f] transition-all rounded ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}
+          >
+            <span className="material-symbols-outlined shrink-0">help</span>
+            {!isCollapsed && (
+              <span className="text-body-sm truncate">Support</span>
+            )}
           </Link>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:hover:text-[#4ae176] hover:bg-[#f5f5f5] dark:hover:bg-[#1f2a1f] transition-colors rounded text-left">
-            <span className="material-symbols-outlined">logout</span>
-            <span className="text-body-sm">Logout</span>
+          <button 
+            onClick={toggleSidebar} 
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            className={`w-full flex items-center gap-3 py-3 text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:hover:text-[#4ae176] hover:bg-[#f5f5f5] dark:hover:bg-[#1f2a1f] transition-all rounded text-left cursor-pointer ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}
+          >
+            <span className="material-symbols-outlined shrink-0">
+              {isCollapsed ? "keyboard_double_arrow_right" : "keyboard_double_arrow_left"}
+            </span>
+            {!isCollapsed && (
+              <span className="text-body-sm truncate">Collapse</span>
+            )}
+          </button>
+          <button 
+            onClick={handleLogout} 
+            title={isCollapsed ? "Logout" : undefined}
+            className={`w-full flex items-center gap-3 py-3 text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:hover:text-[#4ae176] hover:bg-[#f5f5f5] dark:hover:bg-[#1f2a1f] transition-all rounded text-left cursor-pointer ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}
+          >
+            <span className="material-symbols-outlined shrink-0">logout</span>
+            {!isCollapsed && (
+              <span className="text-body-sm truncate">Logout</span>
+            )}
           </button>
         </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden md:ml-64 text-[var(--text-main)]">
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden text-[var(--text-main)]">
         
         {/* MOBILE HEADER */}
         <MobileHeader />
@@ -159,10 +211,10 @@ export default function DashboardLayout({
             <Link href="/dashboard/notifications" className="text-[var(--text-muted)] hover:text-[#006e2f] dark:hover:text-[#4ae176] transition-colors flex items-center">
               <span className="material-symbols-outlined">notifications</span>
             </Link>
-            <button className="text-[var(--text-muted)] hover:text-[#006e2f] dark:hover:text-[#4ae176] transition-colors flex items-center">
+            <Link href="/dashboard/support" className="text-[var(--text-muted)] hover:text-[#006e2f] dark:hover:text-[#4ae176] transition-colors flex items-center">
               <span className="material-symbols-outlined">help</span>
-            </button>
-            <Link href="/dashboard/profile" className="w-10 h-10 rounded-full bg-[#006e2f] dark:bg-[#22C55E] text-white flex items-center justify-center font-bold text-sm cursor-pointer shadow-sm">
+            </Link>
+            <Link href="/dashboard/settings" className="w-10 h-10 rounded-full bg-[#006e2f] dark:bg-[#22C55E] text-white flex items-center justify-center font-bold text-sm cursor-pointer shadow-sm">
               {getInitials(member?.full_name)}
             </Link>
           </div>

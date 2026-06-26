@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export function NewContributionModal({ 
@@ -22,6 +22,30 @@ export function NewContributionModal({
   const [step, setStep] = useState<'form' | 'sending' | 'waiting' | 'success' | 'failed'>('form')
   const [receiptNumber, setReceiptNumber] = useState('')
   const [error, setError] = useState('')
+  const [paymentConfig, setPaymentConfig] = useState<any>(null)
+  const [loadingConfig, setLoadingConfig] = useState(true)
+
+  useEffect(() => {
+    async function fetchConfig() {
+      try {
+        const { data, error } = await supabase
+          .from('chama_payment_config')
+          .select('*')
+          .eq('chama_id', chamaId)
+          .maybeSingle()
+        if (data) {
+          setPaymentConfig(data)
+        }
+      } catch (err) {
+        console.error('Error fetching chama payment config:', err)
+      } finally {
+        setLoadingConfig(false)
+      }
+    }
+    if (chamaId) {
+      fetchConfig()
+    }
+  }, [chamaId])
 
   async function handleSubmit() {
     setError('')
@@ -148,6 +172,35 @@ export function NewContributionModal({
                 You will receive an M-Pesa prompt on your phone. Enter your PIN to complete the payment.
               </p>
             </div>
+
+            {/* Direct Admin Custody Warning */}
+            {paymentConfig && (
+              <div className="rounded-xl p-4 mb-5 border border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/10 text-[13px] flex gap-3">
+                <span className="material-symbols-outlined text-[20px] text-amber-600 dark:text-amber-500 flex-shrink-0">warning</span>
+                <div>
+                  <p className="font-semibold text-amber-800 dark:text-amber-400 text-left">Direct Admin Custody Warning</p>
+                  <p className="mt-1 text-amber-700 dark:text-amber-500 leading-normal text-left">
+                    Your funds will go directly to the group administrator's account ({paymentConfig.account_name || 'Admin Pool'}) via{' '}
+                    {paymentConfig.payment_type === 'till' && `Till No: ${paymentConfig.till_number}`}
+                    {paymentConfig.payment_type === 'paybill' && `Paybill: ${paymentConfig.paybill_number} (Acct: ${paymentConfig.account_number})`}
+                    {paymentConfig.payment_type === 'phone' && `M-Pesa: ${paymentConfig.phone_number}`}
+                    . SmartChama does not hold or escrow these funds.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {!loadingConfig && !paymentConfig && (
+              <div className="rounded-xl p-4 mb-5 border border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-950/10 text-[13px] flex gap-3">
+                <span className="material-symbols-outlined text-[20px] text-amber-600 dark:text-amber-500 flex-shrink-0">warning</span>
+                <div>
+                  <p className="font-semibold text-amber-800 dark:text-amber-400 text-left">Direct Custody Warning</p>
+                  <p className="mt-1 text-amber-700 dark:text-amber-500 leading-normal text-left">
+                    Funds go directly to the group administrator's custody. SmartChama does not hold or escrow these funds.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Phone field */}
             <div className="mb-4">

@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminLoansPage() {
-  const { member: adminMember, group } = useAuth();
+  const { member: adminMember, group, refreshMemberData } = useAuth();
   const [loading, setLoading] = useState(true);
   const [loans, setLoans] = useState<any[]>([]);
   const [wallet, setWallet] = useState<any>(null);
@@ -25,6 +25,52 @@ export default function AdminLoansPage() {
   const [repaymentAmount, setRepaymentAmount] = useState("");
   const [repaymentRef, setRepaymentRef] = useState("");
   const [repaymentDate, setRepaymentDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // Loan settings states
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [interestRate, setInterestRate] = useState("10");
+  const [maxMultiplier, setMaxMultiplier] = useState("3");
+  const [minTrustScore, setMinTrustScore] = useState("40");
+  const [maxRepaymentMonths, setMaxRepaymentMonths] = useState("3");
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  useEffect(() => {
+    if (group) {
+      setInterestRate(group.loan_interest_rate?.toString() || "10");
+      setMaxMultiplier(group.max_loan_multiplier?.toString() || "3");
+      setMinTrustScore(group.min_trust_score_for_loan?.toString() || "40");
+      setMaxRepaymentMonths(group.max_repayment_months?.toString() || "3");
+    }
+  }, [group]);
+
+  const handleSaveSettings = async () => {
+    if (!group) return;
+    setSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from('chamas_v2')
+        .update({
+          loan_interest_rate: parseFloat(interestRate) || 10,
+          max_loan_multiplier: parseFloat(maxMultiplier) || 3.0,
+          min_trust_score_for_loan: parseInt(minTrustScore) || 40,
+          max_repayment_months: parseInt(maxRepaymentMonths) || 3
+        })
+        .eq('id', group.id);
+
+      if (error) throw error;
+      setToastMsg("Loan settings updated!");
+      setTimeout(() => setToastMsg(""), 3000);
+      setShowSettingsModal(false);
+      
+      if (refreshMemberData) {
+        await refreshMemberData();
+      }
+    } catch (err: any) {
+      alert("Error saving settings: " + err.message);
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
 
@@ -230,19 +276,30 @@ export default function AdminLoansPage() {
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-        <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
-            <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span>Loans</span>
-          </p>
-          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Loans Management</h1>
-          <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Review requests, approve disbursements, and track repayments</p>
-        </div>
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-5 shadow-sm text-center md:text-right w-full md:w-auto md:min-w-[180px]">
-          <div className="text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-1">AVAILABLE RECORDED</div>
-          <div className="text-2xl font-bold font-mono text-[var(--brand-green)]">
-            KSh {formatCurrency(wallet?.balance || 0)}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+          <div>
+            <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+              <span>Admin Dashboard</span>
+              <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+              <span>Loans</span>
+            </p>
+            <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Loans Management</h1>
+            <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Review requests, approve disbursements, and track repayments</p>
+          </div>
+          <div className="flex flex-row gap-3 items-center">
+            <button
+              onClick={() => setShowSettingsModal(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-[var(--border)] rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all bg-transparent"
+            >
+              <span className="material-symbols-outlined text-[18px]">settings</span>
+              Loan Rules
+            </button>
+            <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 shadow-sm text-center md:text-right min-w-[180px]">
+              <div className="text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-1">AVAILABLE RECORDED</div>
+              <div className="text-2xl font-bold font-mono text-[var(--brand-green)]">
+                KSh {formatCurrency(wallet?.balance || 0)}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -527,6 +584,72 @@ export default function AdminLoansPage() {
             <div className="flex gap-3 mt-8">
               <button onClick={() => setShowDeclineModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
               <button onClick={handleDecline} disabled={!declineReason} className="flex-1 bg-error disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-red-700">Decline</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LOAN SETTINGS MODAL */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
+            <h2 className="text-xl font-geist font-bold text-[var(--text-main)] mb-2">Loan Rules Settings</h2>
+            <p className="text-xs text-[var(--text-muted)] mb-6">Configure lending rules for {group?.name || 'Group'}</p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Interest Rate (% per month)</label>
+                <input 
+                  type="number" 
+                  value={interestRate} 
+                  onChange={e => setInterestRate(e.target.value)} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Max Loan Multiplier (x of savings)</label>
+                <input 
+                  type="number" 
+                  step="0.1"
+                  value={maxMultiplier} 
+                  onChange={e => setMaxMultiplier(e.target.value)} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Min Trust Score to Borrow (0-100)</label>
+                <input 
+                  type="number" 
+                  value={minTrustScore} 
+                  onChange={e => setMinTrustScore(e.target.value)} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Max Repayment Period (months)</label>
+                <input 
+                  type="number" 
+                  value={maxRepaymentMonths} 
+                  onChange={e => setMaxRepaymentMonths(e.target.value)} 
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button 
+                onClick={() => setShowSettingsModal(false)} 
+                className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveSettings} 
+                disabled={savingSettings}
+                className="flex-1 bg-[#22C55E] disabled:opacity-50 text-white rounded py-2 text-sm font-medium hover:bg-[#006e2f]"
+              >
+                {savingSettings ? "Saving..." : "Save Rules"}
+              </button>
             </div>
           </div>
         </div>

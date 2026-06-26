@@ -36,7 +36,7 @@ export function ThemeToggle() {
     >
       <span 
         className="material-symbols-outlined text-[18px]"
-        style={{ color: theme === 'dark' ? 'var(--brand-green)' : 'var(--text-muted)' }}
+        style={{ color: theme === 'dark' ? 'var(--green)' : 'var(--text-muted)' }}
       >
         {theme === 'dark' ? 'dark_mode' : 'light_mode'}
       </span>

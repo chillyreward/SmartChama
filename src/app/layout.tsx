@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import LoadingScreen from "@/components/LoadingScreen";
+import { ChatBot } from "@/components/ChatBot";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -121,6 +122,7 @@ export default function RootLayout({
           <AuthProvider>
             <ThemeProvider>
               {children}
+              <ChatBot />
             </ThemeProvider>
           </AuthProvider>
         </LanguageProvider>

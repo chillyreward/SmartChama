@@ -19,7 +19,13 @@ export default function OnboardingClient() {
   const [chamaForm, setChamaForm] = useState({ 
     name: '', 
     contribution_amount: '', 
-    contribution_frequency: 'monthly' 
+    contribution_frequency: 'monthly',
+    payment_type: 'till',
+    till_number: '',
+    paybill_number: '',
+    account_number: '',
+    phone_number: '',
+    account_name: ''
   });
 
   useEffect(() => {
@@ -147,7 +153,13 @@ export default function OnboardingClient() {
           phone: profileForm.phone,
           chama_name: chamaForm.name,
           contribution_amount: chamaForm.contribution_amount,
-          contribution_frequency: chamaForm.contribution_frequency
+          contribution_frequency: chamaForm.contribution_frequency,
+          payment_type: chamaForm.payment_type,
+          till_number: chamaForm.till_number,
+          paybill_number: chamaForm.paybill_number,
+          account_number: chamaForm.account_number,
+          phone_number: chamaForm.phone_number,
+          account_name: chamaForm.account_name
         })
       });
 
@@ -358,6 +370,125 @@ export default function OnboardingClient() {
                       <option value="weekly">Weekly</option>
                       <option value="monthly">Monthly</option>
                     </select>
+                  </div>
+
+                  {/* PAYMENT SETUP */}
+                  <div className="border-t border-[#E5E7EB] dark:border-[#2d3d2d] pt-5 mt-5">
+                    <label className="block text-[13px] font-bold text-[#161d16] dark:text-[#E8F0E4] mb-3 text-left">
+                      Where will members send money?
+                    </label>
+
+                    <div className="flex flex-col gap-3 mb-4 text-left">
+                      {[
+                        { value: 'till', label: 'Till Number (Lipa na M-Pesa)' },
+                        { value: 'paybill', label: 'Paybill Number' },
+                        { value: 'phone', label: 'Phone Number (Send Money)' }
+                      ].map(option => (
+                        <label key={option.value} className="flex items-center gap-3 cursor-pointer text-body-sm text-[#161d16] dark:text-[#E8F0E4]">
+                          <input 
+                            type="radio" 
+                            name="payment_type"
+                            value={option.value}
+                            checked={chamaForm.payment_type === option.value}
+                            onChange={(e) => setChamaForm({...chamaForm, payment_type: e.target.value})}
+                            className="text-[#22C55E] focus:ring-[#22C55E]"
+                          />
+                          <span>{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {chamaForm.payment_type === 'till' && (
+                      <div className="space-y-4 text-left">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Till Number (5-6 digits)</label>
+                          <input 
+                            type="text" 
+                            required
+                            value={chamaForm.till_number}
+                            onChange={(e) => setChamaForm({...chamaForm, till_number: e.target.value})}
+                            placeholder="e.g. 543210"
+                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Name</label>
+                          <input 
+                            type="text" 
+                            required
+                            value={chamaForm.account_name}
+                            onChange={(e) => setChamaForm({...chamaForm, account_name: e.target.value})}
+                            placeholder="e.g. VISION 2030 CHAMA"
+                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {chamaForm.payment_type === 'paybill' && (
+                      <div className="space-y-4 text-left">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Paybill Number</label>
+                          <input 
+                            type="text" 
+                            required
+                            value={chamaForm.paybill_number}
+                            onChange={(e) => setChamaForm({...chamaForm, paybill_number: e.target.value})}
+                            placeholder="e.g. 247247"
+                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Number</label>
+                          <input 
+                            type="text" 
+                            required
+                            value={chamaForm.account_number}
+                            onChange={(e) => setChamaForm({...chamaForm, account_number: e.target.value})}
+                            placeholder="e.g. CHAMA2030"
+                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Name</label>
+                          <input 
+                            type="text" 
+                            required
+                            value={chamaForm.account_name}
+                            onChange={(e) => setChamaForm({...chamaForm, account_name: e.target.value})}
+                            placeholder="e.g. VISION 2030 CHAMA"
+                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {chamaForm.payment_type === 'phone' && (
+                      <div className="space-y-4 text-left">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Phone Number</label>
+                          <input 
+                            type="tel" 
+                            required
+                            value={chamaForm.phone_number}
+                            onChange={(e) => setChamaForm({...chamaForm, phone_number: e.target.value})}
+                            placeholder="e.g. +254712345678"
+                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Name</label>
+                          <input 
+                            type="text" 
+                            required
+                            value={chamaForm.account_name}
+                            onChange={(e) => setChamaForm({...chamaForm, account_name: e.target.value})}
+                            placeholder="e.g. Grace Wanjiku"
+                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <button 

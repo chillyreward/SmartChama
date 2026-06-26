@@ -16,30 +16,21 @@ export default function SettingsPage() {
   const [toastMsg, setToastMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const [activeTab, setActiveTab] = useState<'Group Settings' | 'Notifications' | 'Appearance' | 'Security' | 'Connected Apps'>('Group Settings')
+  const [activeTab, setActiveTab] = useState<'Profile Details' | 'Notifications' | 'Appearance' | 'Security'>('Profile Details')
   const tabs = [
-    { name: 'Group Settings', icon: 'tune' },
+    { name: 'Profile Details', icon: 'person' },
     { name: 'Notifications', icon: 'notifications' },
     { name: 'Appearance', icon: 'palette' },
-    { name: 'Security', icon: 'shield' },
-    { name: 'Connected Apps', icon: 'grid_view' }
+    { name: 'Security', icon: 'shield' }
   ] as const
 
-  // Admin check
-  const isAdmin = member?.role === 'admin' || member?.role === 'chairlady'
-
-  // --- Group Settings States ---
-  const [chamaName, setChamaName] = useState('')
-  const [county, setCounty] = useState('Nairobi')
-  const [contributionAmount, setContributionAmount] = useState(500)
-  const [contributionFrequency, setContributionFrequency] = useState<'weekly' | 'monthly'>('monthly')
-  const [contributionDueDay, setContributionDueDay] = useState(1)
-  const [gracePeriodDays, setGracePeriodDays] = useState(5)
-  const [latePenaltyAmount, setLatePenaltyAmount] = useState(100)
-  const [maxLoanMultiplier, setMaxLoanMultiplier] = useState(2)
-  const [loanInterestRate, setLoanInterestRate] = useState(10)
-  const [maxRepaymentMonths, setMaxRepaymentMonths] = useState(3)
-  const [minTrustScoreForLoan, setMinTrustScoreForLoan] = useState(60)
+  // --- Profile States ---
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [nationalId, setNationalId] = useState('')
+  const [county, setCounty] = useState('')
+  const [occupation, setOccupation] = useState('')
 
   // --- Notifications Preferences States ---
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({
@@ -63,33 +54,28 @@ export default function SettingsPage() {
     try {
       setLoading(true)
       
-      // Load group settings if available
-      if (group) {
-        setChamaName(group.name || '')
-        setCounty(group.county || 'Nairobi')
-        setContributionAmount(Number(group.contribution_amount || 0))
-        setContributionFrequency(group.contribution_frequency || 'monthly')
-        setContributionDueDay(Number(group.contribution_due_day || 1))
-        setGracePeriodDays(Number(group.grace_period_days || 0))
-        setLatePenaltyAmount(Number(group.late_penalty_amount || 0))
-        setMaxLoanMultiplier(Number(group.max_loan_multiplier || 2))
-        setLoanInterestRate(Number(group.loan_interest_rate || 0))
-        setMaxRepaymentMonths(Number(group.max_repayment_months || 3))
-        setMinTrustScoreForLoan(Number(group.min_trust_score_for_loan || 60))
-      }
-
-      // Load notification prefs from profile
-      const { data: profile } = await supabase
+      // Load user profile details
+      const { data: profile, error } = await supabase
         .from('profiles')
-        .select('notification_prefs')
+        .select('*')
         .eq('id', session.user.id)
         .single()
 
-      if (profile?.notification_prefs) {
-        setNotifPrefs({
-          ...notifPrefs,
-          ...profile.notification_prefs
-        })
+      if (error) throw error
+
+      if (profile) {
+        setFullName(profile.full_name || '')
+        setEmail(profile.email || '')
+        setPhoneNumber(profile.phone_number || '')
+        setNationalId(profile.national_id || '')
+        setCounty(profile.county || '')
+        setOccupation(profile.occupation || '')
+        if (profile.notification_prefs) {
+          setNotifPrefs({
+            ...notifPrefs,
+            ...profile.notification_prefs
+          })
+        }
       }
 
     } catch (err) {
@@ -103,12 +89,12 @@ export default function SettingsPage() {
     if (!authLoading) {
       loadSettingsData()
     }
-  }, [authLoading, group])
+  }, [authLoading])
 
-  // Save Group Settings (Admin Only)
-  const handleSaveGroupSettings = async (e: React.FormEvent) => {
+  // Save Profile Settings
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isAdmin || !group?.id) return
+    if (!session?.user?.id) return
 
     try {
       setSaving(true)
@@ -116,30 +102,24 @@ export default function SettingsPage() {
       setToastMsg('')
 
       const { error } = await supabase
-        .from('chamas_v2')
+        .from('profiles')
         .update({
-          name: chamaName,
+          full_name: fullName,
+          email,
+          national_id: nationalId,
           county,
-          contribution_amount: Number(contributionAmount),
-          contribution_frequency: contributionFrequency,
-          contribution_due_day: Number(contributionDueDay),
-          grace_period_days: Number(gracePeriodDays),
-          late_penalty_amount: Number(latePenaltyAmount),
-          max_loan_multiplier: Number(maxLoanMultiplier),
-          loan_interest_rate: Number(loanInterestRate),
-          max_repayment_months: Number(maxRepaymentMonths),
-          min_trust_score_for_loan: Number(minTrustScoreForLoan),
+          occupation,
           updated_at: new Date().toISOString()
         })
-        .eq('id', group.id)
+        .eq('id', session.user.id)
 
       if (error) throw error
 
-      setToastMsg('Group settings updated successfully.')
+      setToastMsg('Profile updated successfully.')
       setTimeout(() => setToastMsg(''), 3000)
       await refreshMemberData()
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to update group settings.')
+      setErrorMsg(err.message || 'Failed to update profile.')
     } finally {
       setSaving(false)
     }
@@ -186,7 +166,7 @@ export default function SettingsPage() {
 
       if (error) throw error
 
-      setToastMsg('Password updated.')
+      setToastMsg('Password updated successfully.')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
@@ -246,15 +226,15 @@ export default function SettingsPage() {
         </p>
         
         <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-          Settings
+          Member Settings
         </h1>
         <p className="text-[14px] text-[var(--text-muted)] mt-1">
-          Adjust group properties, manage communication settings, and maintain account security.
+          Manage your personal details, adjust notification rules, and configure security settings.
         </p>
       </div>
 
       {toastMsg && (
-        <div className="bg-transparent text-[var(--brand-green)]/30 border border-[#bccbb9] dark:border-[#2d3d2d] text-[var(--brand-green)] p-4 rounded-xl text-[14px] font-medium mb-6">
+        <div className="bg-transparent text-[var(--brand-green)] border border-[#bccbb9] dark:border-[#2d3d2d] p-4 rounded-xl text-[14px] font-medium mb-6">
           {toastMsg}
         </div>
       )}
@@ -292,39 +272,64 @@ export default function SettingsPage() {
         {/* Right: Tab Contents */}
         <div className="flex-1 card-bg border border-[var(--border)] p-6 rounded-2xl shadow-sm">
           
-          {/* GROUP SETTINGS TAB */}
-          {activeTab === 'Group Settings' && (
+          {/* PROFILE DETAILS TAB */}
+          {activeTab === 'Profile Details' && (
             <div>
-              <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-4 mb-6">
+              <div className="border-b border-gray-100 dark:border-gray-800 pb-4 mb-6">
                 <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white font-geist">
-                  Chama Group Settings
+                  Profile Details
                 </h3>
-                {!isAdmin && (
-                  <span className="bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-900/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold px-3 py-1 rounded-full uppercase">
-                    Read-only
-                  </span>
-                )}
               </div>
 
-              {!isAdmin && (
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/35 text-amber-700 dark:text-amber-400 p-4 rounded-xl text-[13px] font-medium mb-6">
-                  Only group administrators can modify group-wide parameters.
-                </div>
-              )}
-
-              <form onSubmit={handleSaveGroupSettings} className="space-y-6">
+              <form onSubmit={handleSaveProfile} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   
                   <div>
                     <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Group Name
+                      Full Name
                     </label>
                     <input
                       type="text"
-                      disabled={!isAdmin}
-                      value={chamaName}
-                      onChange={(e) => setChamaName(e.target.value)}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                      Phone Number (Primary ID)
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value={phoneNumber}
+                      className="w-full bg-gray-50 dark:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-gray-400 focus:outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                      National ID
+                    </label>
+                    <input
+                      type="text"
+                      value={nationalId}
+                      onChange={(e) => setNationalId(e.target.value)}
+                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
                     />
                   </div>
 
@@ -333,11 +338,11 @@ export default function SettingsPage() {
                       County
                     </label>
                     <select
-                      disabled={!isAdmin}
                       value={county}
                       onChange={(e) => setCounty(e.target.value)}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
+                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
                     >
+                      <option value="">Select County</option>
                       {countiesList.map(c => (
                         <option key={c} value={c}>{c}</option>
                       ))}
@@ -346,159 +351,28 @@ export default function SettingsPage() {
 
                   <div>
                     <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Contribution Amount (KSh)
+                      Occupation
                     </label>
                     <input
-                      type="number"
-                      disabled={!isAdmin}
-                      value={contributionAmount}
-                      onChange={(e) => setContributionAmount(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
+                      type="text"
+                      value={occupation}
+                      onChange={(e) => setOccupation(e.target.value)}
+                      placeholder="e.g. Entrepreneur, Farmer"
+                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Contribution Frequency
-                    </label>
-                    <div className="flex gap-4 pt-1.5">
-                      <label className="flex items-center gap-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] cursor-pointer">
-                        <input
-                          type="radio"
-                          disabled={!isAdmin}
-                          checked={contributionFrequency === 'weekly'}
-                          onChange={() => setContributionFrequency('weekly')}
-                          className="accent-[#22C55E] cursor-pointer"
-                        />
-                        Weekly
-                      </label>
-                      <label className="flex items-center gap-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] cursor-pointer">
-                        <input
-                          type="radio"
-                          disabled={!isAdmin}
-                          checked={contributionFrequency === 'monthly'}
-                          onChange={() => setContributionFrequency('monthly')}
-                          className="accent-[#22C55E] cursor-pointer"
-                        />
-                        Monthly
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Due Day of the Month (1-28)
-                    </label>
-                    <select
-                      disabled={!isAdmin}
-                      value={contributionDueDay}
-                      onChange={(e) => setContributionDueDay(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
-                    >
-                      {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
-                        <option key={d} value={d}>Day {d}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Grace Period (Days)
-                    </label>
-                    <input
-                      type="number"
-                      disabled={!isAdmin}
-                      value={gracePeriodDays}
-                      onChange={(e) => setGracePeriodDays(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Late Penalty Amount (KSh)
-                    </label>
-                    <input
-                      type="number"
-                      disabled={!isAdmin}
-                      value={latePenaltyAmount}
-                      onChange={(e) => setLatePenaltyAmount(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Max Loan Multiplier (Savings Based)
-                    </label>
-                    <select
-                      disabled={!isAdmin}
-                      value={maxLoanMultiplier}
-                      onChange={(e) => setMaxLoanMultiplier(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
-                    >
-                      <option value="1">1x Member Savings</option>
-                      <option value="2">2x Member Savings</option>
-                      <option value="3">3x Member Savings</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Loan Interest Rate (%)
-                    </label>
-                    <input
-                      type="number"
-                      disabled={!isAdmin}
-                      value={loanInterestRate}
-                      onChange={(e) => setLoanInterestRate(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Max Repayment Duration (Months)
-                    </label>
-                    <select
-                      disabled={!isAdmin}
-                      value={maxRepaymentMonths}
-                      onChange={(e) => setMaxRepaymentMonths(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1a1f1b] disabled:bg-gray-50 dark:disabled:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden disabled:text-gray-400"
-                    >
-                      {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                        <option key={m} value={m}>{m} Month{m > 1 ? 's' : ''}</option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
-                <div className="pt-2">
-                  <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-3">
-                    Minimum Trust Score for Loan Approval ({minTrustScoreForLoan})
-                  </label>
-                  <input
-                    type="range"
-                    disabled={!isAdmin}
-                    min="0"
-                    max="100"
-                    value={minTrustScoreForLoan}
-                    onChange={(e) => setMinTrustScoreForLoan(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#22C55E] disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  />
+                <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
+                  >
+                    {saving ? 'Saving...' : 'Save Profile'}
+                  </button>
                 </div>
-
-                {isAdmin && (
-                  <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm"
-                    >
-                      {saving ? 'Updating...' : 'Save Group Settings'}
-                    </button>
-                  </div>
-                )}
               </form>
             </div>
           )}
@@ -707,7 +581,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="bg-[#22C55E] text-white px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm"
+                    className="bg-[#22C55E] text-white px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
                   >
                     Change Password
                   </button>
@@ -753,86 +627,11 @@ export default function SettingsPage() {
                   <div className="flex justify-end pt-2">
                     <button
                       onClick={handleSignOutAll}
-                      className="bg-white dark:bg-[#1a1f1b] border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-red-50 dark:hover:bg-red-950/10 transition-colors"
+                      className="bg-white dark:bg-[#1a1f1b] border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-red-50 dark:hover:bg-red-950/10 transition-colors cursor-pointer"
                     >
                       Sign Out All Devices
                     </button>
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* CONNECTED APPS TAB */}
-          {activeTab === 'Connected Apps' && (
-            <div className="space-y-6">
-              <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mb-4 font-geist">
-                Integrations and Services
-              </h3>
-
-              {/* M-Pesa */}
-              <div className="flex justify-between items-start border-b border-gray-100 dark:border-gray-800 pb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-[#161d16] dark:text-white flex items-center gap-1.5">
-                    Safaricom M-Pesa Webhook Ingestion
-                    {group?.paybill_number ? (
-                      <span className="bg-green-100 dark:bg-green-950/20 text-[#166534] dark:text-[#4ae176] text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                        Connected
-                      </span>
-                    ) : (
-                      <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                        Not Connected
-                      </span>
-                    )}
-                  </h4>
-                  <p className="text-[12px] text-[#60645f] dark:text-gray-400 mt-0.5 leading-relaxed max-w-md">
-                    Connects directly to your chama paybill or till number to auto-reconcile member savings contributions.
-                  </p>
-                  {group?.paybill_number && (
-                    <div className="mt-3 flex items-center gap-2 bg-gray-50 dark:bg-[#1f2620]/30 border border-[#E5E7EB] dark:border-gray-800 px-3 py-1.5 rounded-lg w-fit text-[13px] font-mono">
-                      <span>Paybill: {group.paybill_number}</span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(group.paybill_number)
-                          setToastMsg('Paybill number copied!')
-                          setTimeout(() => setToastMsg(''), 3000)
-                        }}
-                        className="text-[var(--brand-green)] hover:underline material-symbols-outlined text-[16px] leading-none"
-                      >
-                        content_copy
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Africa's Talking */}
-              <div className="flex justify-between items-start border-b border-gray-100 dark:border-gray-800 pb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-[#161d16] dark:text-white flex items-center gap-1.5">
-                    Africa's Talking SMS Core
-                    <span className="bg-green-100 dark:bg-green-950/20 text-[#166534] dark:text-[#4ae176] text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                      Connected
-                    </span>
-                  </h4>
-                  <p className="text-[12px] text-[#60645f] dark:text-gray-400 mt-0.5 leading-relaxed max-w-md">
-                    Active backend SMS delivery service. Sends contribution receipts, loan status changes, and OTP validation keys.
-                  </p>
-                </div>
-              </div>
-
-              {/* Google */}
-              <div className="flex justify-between items-start pb-2">
-                <div>
-                  <h4 className="text-[14px] font-bold text-[#161d16] dark:text-white flex items-center gap-1.5">
-                    Google OAuth Identity
-                    <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
-                      Not Connected
-                    </span>
-                  </h4>
-                  <p className="text-[12px] text-[#60645f] dark:text-gray-400 mt-0.5 leading-relaxed max-w-md">
-                    Link your account to log in with a single click using your Google email address.
-                  </p>
                 </div>
               </div>
             </div>

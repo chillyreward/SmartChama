@@ -3,65 +3,205 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
+import { InviteModal } from "@/components/InviteModal";
 
 export default function AdminSettingsPage() {
-  const { member: adminMember, group } = useAuth();
+  const { session, member: adminMember, group, refreshMemberData } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
+  const [activeTab, setActiveTab] = useState<'Chama Rules' | 'Payment Configurations' | 'Member Invites'>('Chama Rules');
 
-  const [formData, setFormData] = useState({
-    name: "",
-    contribution_amount: 0,
-    late_penalty: 0,
-    cycle_start: "",
-    currency: "KSh"
-  });
+  const tabs = [
+    { name: 'Chama Rules', icon: 'tune' },
+    { name: 'Payment Configurations', icon: 'payments' },
+    { name: 'Member Invites', icon: 'person_add' }
+  ] as const;
+
+  // --- Chama Rules States ---
+  const [chamaName, setChamaName] = useState("");
+  const [county, setCounty] = useState("Nairobi");
+  const [contributionAmount, setContributionAmount] = useState(500);
+  const [contributionFrequency, setContributionFrequency] = useState<'weekly' | 'monthly'>('monthly');
+  const [contributionDueDay, setContributionDueDay] = useState(1);
+  const [gracePeriodDays, setGracePeriodDays] = useState(3);
+  const [latePenaltyAmount, setLatePenaltyAmount] = useState(100);
+  const [maxLoanMultiplier, setMaxLoanMultiplier] = useState(2);
+  const [loanInterestRate, setLoanInterestRate] = useState(10);
+  const [maxRepaymentMonths, setMaxRepaymentMonths] = useState(3);
+  const [minTrustScoreForLoan, setMinTrustScoreForLoan] = useState(60);
+
+  // --- Payment Configuration States ---
+  const [paymentType, setPaymentType] = useState<'till' | 'paybill' | 'phone'>('till');
+  const [tillNumber, setTillNumber] = useState("");
+  const [paybillNumber, setPaybillNumber] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [accountName, setAccountName] = useState("");
+
+  // --- Member Invites States ---
+  const [invites, setInvites] = useState<any[]>([]);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
+  const countiesList = [
+    "Baringo", "Bomet", "Bungoma", "Busia", "Elgeyo Marakwet", "Embu", "Garissa", "Homa Bay", "Isiolo", "Kajiado",
+    "Kakamega", "Kericho", "Kiambu", "Kilifi", "Kirinyaga", "Kisii", "Kisumu", "Kitui", "Kwale", "Laikipia",
+    "Lamu", "Machakos", "Makueni", "Mandera", "Marsabit", "Meru", "Migori", "Mombasa", "Murang'a", "Nairobi",
+    "Nakuru", "Nandi", "Narok", "Nyamira", "Nyandarua", "Nyeri", "Samburu", "Siaya", "Taita Taveta", "Tana River",
+    "Tharaka Nithi", "Trans Nzoia", "Turkana", "Uasin Gishu", "Vihiga", "Wajir", "West Pokot"
+  ];
+
+  const loadData = async () => {
+    if (!group) return;
+    try {
+      setLoading(true);
+
+      // 1. Load chama properties
+      setChamaName(group.name || "");
+      setCounty(group.county || "Nairobi");
+      setContributionAmount(Number(group.contribution_amount || 0));
+      setContributionFrequency(group.contribution_frequency || 'monthly');
+      setContributionDueDay(Number(group.contribution_due_day || 1));
+      setGracePeriodDays(Number(group.grace_period_days || 3));
+      setLatePenaltyAmount(Number(group.late_penalty_amount || 0));
+      setMaxLoanMultiplier(Number(group.max_loan_multiplier || 2));
+      setLoanInterestRate(Number(group.loan_interest_rate || 10));
+      setMaxRepaymentMonths(Number(group.max_repayment_months || 3));
+      setMinTrustScoreForLoan(Number(group.min_trust_score_for_loan || 60));
+
+      // 2. Load payment config
+      const { data: payConfig } = await supabase
+        .from('chama_payment_config')
+        .select('*')
+        .eq('chama_id', group.id)
+        .maybeSingle();
+
+      if (payConfig) {
+        setPaymentType(payConfig.payment_type || 'till');
+        setTillNumber(payConfig.till_number || "");
+        setPaybillNumber(payConfig.paybill_number || "");
+        setAccountNumber(payConfig.account_number || "");
+        setPhoneNumber(payConfig.phone_number || "");
+        setAccountName(payConfig.account_name || "");
+      }
+
+      // 3. Load invites
+      await fetchInvites();
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchInvites = async () => {
+    if (!group?.id) return;
+    const { data } = await supabase
+      .from('invite_tokens')
+      .select('*')
+      .eq('chama_id', group.id)
+      .order('created_at', { ascending: false });
+    setInvites(data || []);
+  };
 
   useEffect(() => {
     if (group) {
-      setFormData({
-        name: group.name || "",
-        contribution_amount: group.contribution_amount || 0,
-        late_penalty: group.late_penalty || 0,
-        cycle_start: group.cycle_start_date ? group.cycle_start_date.split('T')[0] : "",
-        currency: group.currency || "KSh"
-      });
-      setLoading(false);
+      loadData();
     }
   }, [group]);
 
-  const handleSave = async () => {
+  const handleSaveRules = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!group?.id) return;
+
     try {
-      const { error } = await supabase.from('groups').update({
-        name: formData.name,
-        contribution_amount: formData.contribution_amount,
-        late_penalty: formData.late_penalty,
-        cycle_start_date: formData.cycle_start ? new Date(formData.cycle_start).toISOString() : null,
-        currency: formData.currency
-      }).eq('id', group?.id);
+      setSaving(true);
+      const { error } = await supabase
+        .from('chamas_v2')
+        .update({
+          name: chamaName,
+          county,
+          contribution_amount: Number(contributionAmount),
+          contribution_frequency: contributionFrequency,
+          contribution_due_day: Number(contributionDueDay),
+          grace_period_days: Number(gracePeriodDays),
+          late_penalty_amount: Number(latePenaltyAmount),
+          max_loan_multiplier: Number(maxLoanMultiplier),
+          loan_interest_rate: Number(loanInterestRate),
+          max_repayment_months: Number(maxRepaymentMonths),
+          min_trust_score_for_loan: Number(minTrustScoreForLoan),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', group.id);
 
       if (error) throw error;
 
-      await supabase.from('transactions').insert({
-        group_id: group?.id,
-        recorded_by: adminMember?.id,
-        type: 'settings_update',
-        amount: 0,
-        notes: `Updated group settings: Name, Contribution, Penalty`,
-        status: 'confirmed'
-      });
+      setToastMsg("Chama rules updated successfully!");
+      setTimeout(() => setToastMsg(""), 3000);
+      await refreshMemberData();
+    } catch (err) {
+      console.error(err);
+      alert("Error saving chama rules");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-      setToastMsg("Settings saved successfully!");
+  const handleSavePaymentConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!group?.id) return;
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('chama_payment_config')
+        .upsert({
+          chama_id: group.id,
+          payment_type: paymentType,
+          till_number: paymentType === 'till' ? tillNumber : null,
+          paybill_number: paymentType === 'paybill' ? paybillNumber : null,
+          account_number: paymentType === 'paybill' ? accountNumber : null,
+          phone_number: paymentType === 'phone' ? phoneNumber : null,
+          account_name: accountName,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'chama_id' });
+
+      if (error) throw error;
+
+      setToastMsg("Payment configuration saved successfully!");
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err) {
-      alert("Error saving settings");
+      console.error(err);
+      alert("Error saving payment configuration");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRevokeInvite = async (token: string) => {
+    if (!confirm("Are you sure you want to revoke this invitation code?")) return;
+    try {
+      const { error } = await supabase
+        .from('invite_tokens')
+        .delete()
+        .eq('token', token);
+
+      if (error) throw error;
+
+      setToastMsg("Invite revoked successfully!");
+      setTimeout(() => setToastMsg(""), 3000);
+      await fetchInvites();
+    } catch (err) {
+      console.error(err);
+      alert("Error revoking invite");
     }
   };
 
   if (loading) {
     return (
       <div className="p-8">
-        <div className="h-96 bg-white border border-[#E5E7EB] rounded-lg animate-pulse shadow-sm"></div>
+        <div className="h-96 bg-white dark:bg-[#111111] border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
       </div>
     );
   }
@@ -69,137 +209,380 @@ export default function AdminSettingsPage() {
   return (
     <div className="p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in animate-bounce-subtle">
+        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in">
           <span className="material-symbols-outlined text-[20px]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
 
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
-        <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
-            <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span>Settings</span>
-          </p>
-          <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-            Group Settings
-          </h1>
-          <p className="text-[14px] text-[var(--text-muted)] mt-1">Configure core chama parameters and rules</p>
-        </div>
-        <div>
-          <button 
-            onClick={handleSave}
-            className="bg-[#22C55E] hover:bg-[#1ea94e] text-white px-6 py-2.5 rounded-lg text-body-sm font-semibold transition-colors shadow-sm"
-          >
-            Save Changes
-          </button>
-        </div>
+      <div className="mb-8">
+        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <span>Admin Dashboard</span>
+          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span>Settings</span>
+        </p>
+        <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+          Chama Settings
+        </h1>
+        <p className="text-[14px] text-[var(--text-muted)] mt-1">Configure chama financial parameters, payment paths, and invitations.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <div className="lg:col-span-2 space-y-6">
-          {/* GENERAL INFO */}
-          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">General Information</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Group Name</label>
-                <input 
-                  type="text" 
-                  value={formData.name} 
-                  onChange={e => setFormData({...formData, name: e.target.value})} 
-                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Currency</label>
-                <select 
-                  value={formData.currency} 
-                  onChange={e => setFormData({...formData, currency: e.target.value})} 
-                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all"
-                >
-                  <option value="KSh">KES - Kenyan Shilling</option>
-                  <option value="USD">USD - US Dollar</option>
-                  <option value="UGX">UGX - Ugandan Shilling</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* FINANCIAL RULES */}
-          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Financial Rules</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Standard Contribution Amount ({formData.currency})</label>
-                <input 
-                  type="number" 
-                  value={formData.contribution_amount} 
-                  onChange={e => setFormData({...formData, contribution_amount: Number(e.target.value)})} 
-                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
-                />
-                <p className="text-xs text-[var(--text-muted)] mt-1">Expected amount per member per cycle.</p>
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Late Payment Penalty ({formData.currency})</label>
-                <input 
-                  type="number" 
-                  value={formData.late_penalty} 
-                  onChange={e => setFormData({...formData, late_penalty: Number(e.target.value)})} 
-                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
-                />
-                <p className="text-xs text-[var(--text-muted)] mt-1">Applied automatically when a payment misses the deadline.</p>
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">Cycle Start Date</label>
-                <input 
-                  type="date" 
-                  value={formData.cycle_start} 
-                  onChange={e => setFormData({...formData, cycle_start: e.target.value})} 
-                  className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] outline-none focus:border-[#22C55E] rounded-lg px-4 py-2.5 max-w-md transition-all" 
-                />
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="space-y-6">
-          {/* LOAN SETTINGS */}
-          <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <h2 className="text-lg font-bold text-[var(--text-main)] font-geist mb-2">Loan Policies</h2>
-            <p className="text-xs text-[var(--text-muted)] mb-4">Manage interest rates, guarantor requirements, and maximum borrowing limits.</p>
-            <button className="w-full bg-transparent border border-[var(--border)] text-[var(--text-main)] py-2.5 rounded-lg text-body-sm font-bold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all">
-              Configure Loan Policies
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Left Tabs */}
+        <div className="w-full md:w-64 shrink-0 space-y-1">
+          {tabs.map(t => (
+            <button
+              key={t.name}
+              onClick={() => {
+                setActiveTab(t.name);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-semibold transition-colors text-left ${
+                activeTab === t.name
+                  ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]'
+                  : 'text-[#3d4a3d] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1f2a1f]'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[20px]">{t.icon}</span>
+              {t.name}
             </button>
-          </div>
-
-          {/* DANGER ZONE */}
-          <div className="card-bg border border-red-200 dark:border-red-900/30 border-t-2 border-t-red-600 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-red-600"></div>
-            <h2 className="text-lg font-bold text-red-600 dark:text-red-400 font-geist mb-2 flex items-center gap-2">
-              <span className="material-symbols-outlined">warning</span>
-              Danger Zone
-            </h2>
-            <p className="text-xs text-[var(--text-muted)] mb-4">Irreversible actions that affect the entire group data.</p>
-            
-            <div className="space-y-3">
-              <button className="w-full bg-white dark:bg-[#1a1c1a] border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 py-2.5 rounded-lg text-body-sm font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all text-left px-4 flex justify-between items-center">
-                Archive Group
-                <span className="material-symbols-outlined text-[16px]">inventory_2</span>
-              </button>
-              <button className="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg text-body-sm font-bold transition-all text-left px-4 flex justify-between items-center">
-                Delete Group
-                <span className="material-symbols-outlined text-[16px]">delete_forever</span>
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
 
+        {/* Tab Content */}
+        <div className="flex-1 card-bg border border-[var(--border)] p-6 rounded-2xl shadow-sm">
+          {/* CHAMA RULES TAB */}
+          {activeTab === 'Chama Rules' && (
+            <form onSubmit={handleSaveRules} className="space-y-6">
+              <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">Chama Group Rules</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Group Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={chamaName}
+                    onChange={e => setChamaName(e.target.value)}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">County</label>
+                  <select
+                    value={county}
+                    onChange={e => setCounty(e.target.value)}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  >
+                    {countiesList.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Standard Contribution Amount (KSh)</label>
+                  <input
+                    type="number"
+                    required
+                    value={contributionAmount}
+                    onChange={e => setContributionAmount(Number(e.target.value))}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Contribution Frequency</label>
+                  <div className="flex gap-4 pt-1.5">
+                    <label className="flex items-center gap-2 text-[14px] text-[var(--text-main)] cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={contributionFrequency === 'weekly'}
+                        onChange={() => setContributionFrequency('weekly')}
+                        className="accent-[#22C55E]"
+                      />
+                      Weekly
+                    </label>
+                    <label className="flex items-center gap-2 text-[14px] text-[var(--text-main)] cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={contributionFrequency === 'monthly'}
+                        onChange={() => setContributionFrequency('monthly')}
+                        className="accent-[#22C55E]"
+                      />
+                      Monthly
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Due Day (1-28)</label>
+                  <select
+                    value={contributionDueDay}
+                    onChange={e => setContributionDueDay(Number(e.target.value))}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  >
+                    {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
+                      <option key={d} value={d}>Day {d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Grace Period (Days)</label>
+                  <input
+                    type="number"
+                    value={gracePeriodDays}
+                    onChange={e => setGracePeriodDays(Number(e.target.value))}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Late Penalty Amount (KSh)</label>
+                  <input
+                    type="number"
+                    value={latePenaltyAmount}
+                    onChange={e => setLatePenaltyAmount(Number(e.target.value))}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Max Loan Multiplier</label>
+                  <select
+                    value={maxLoanMultiplier}
+                    onChange={e => setMaxLoanMultiplier(Number(e.target.value))}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  >
+                    <option value="1">1x Member Savings</option>
+                    <option value="2">2x Member Savings</option>
+                    <option value="3">3x Member Savings</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Loan Interest Rate (%)</label>
+                  <input
+                    type="number"
+                    value={loanInterestRate}
+                    onChange={e => setLoanInterestRate(Number(e.target.value))}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Max Repayment (Months)</label>
+                  <select
+                    value={maxRepaymentMonths}
+                    onChange={e => setMaxRepaymentMonths(Number(e.target.value))}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                      <option key={m} value={m}>{m} Month{m > 1 ? 's' : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-3">
+                  Minimum Trust Score for Loan Approval ({minTrustScoreForLoan})
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={minTrustScoreForLoan}
+                  onChange={e => setMinTrustScoreForLoan(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
+                />
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
+                >
+                  {saving ? 'Saving...' : 'Save Chama Rules'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* PAYMENT CONFIGURATIONS TAB */}
+          {activeTab === 'Payment Configurations' && (
+            <form onSubmit={handleSavePaymentConfig} className="space-y-6">
+              <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">Payment Configurations</h2>
+              <p className="text-xs text-[var(--text-muted)] mb-4">Set up the M-Pesa account details where members' savings contributions will be sent. These credentials will be shown to members in the deposit warning card.</p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Payment Method Type</label>
+                  <select
+                    value={paymentType}
+                    onChange={e => setPaymentType(e.target.value as any)}
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  >
+                    <option value="till">Lipa Na M-Pesa Till Number</option>
+                    <option value="paybill">M-Pesa Paybill</option>
+                    <option value="phone">Custodian Mobile Number</option>
+                  </select>
+                </div>
+
+                {paymentType === 'till' && (
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Till Number</label>
+                    <input
+                      type="text"
+                      required
+                      value={tillNumber}
+                      onChange={e => setTillNumber(e.target.value)}
+                      placeholder="e.g. 5432109"
+                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    />
+                  </div>
+                )}
+
+                {paymentType === 'paybill' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Paybill Business Number</label>
+                      <input
+                        type="text"
+                        required
+                        value={paybillNumber}
+                        onChange={e => setPaybillNumber(e.target.value)}
+                        placeholder="e.g. 247247"
+                        className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Account Reference / Number</label>
+                      <input
+                        type="text"
+                        required
+                        value={accountNumber}
+                        onChange={e => setAccountNumber(e.target.value)}
+                        placeholder="e.g. CHAMA001"
+                        className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {paymentType === 'phone' && (
+                  <div>
+                    <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Custodian Phone Number</label>
+                    <input
+                      type="text"
+                      required
+                      value={phoneNumber}
+                      onChange={e => setPhoneNumber(e.target.value)}
+                      placeholder="e.g. 0712345678"
+                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Account / Recipient Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={accountName}
+                    onChange={e => setAccountName(e.target.value)}
+                    placeholder="e.g. SmartChama Group Custody Account"
+                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                  />
+                  <p className="text-[11px] text-[var(--text-muted)] mt-1">This verifies to members that they are depositing to the correct group custody wallet.</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
+                >
+                  {saving ? 'Saving...' : 'Save Payment Config'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* MEMBER INVITES TAB */}
+          {activeTab === 'Member Invites' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-800">
+                <h2 className="text-xl font-bold text-[var(--text-main)] font-geist">Chama Invitations</h2>
+                <button
+                  onClick={() => setShowInviteModal(true)}
+                  className="bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-md">person_add</span>
+                  Invite Member
+                </button>
+              </div>
+
+              <div>
+                <h3 className="text-[14px] font-bold text-[var(--text-main)] mb-4">Pending Invites</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-[var(--border)] text-left text-xs uppercase tracking-wider text-[var(--text-muted)]">
+                        <th className="py-3 px-4 font-bold">Invite Code</th>
+                        <th className="py-3 px-4 font-bold">Expires At</th>
+                        <th className="py-3 px-4 font-bold">Max Uses</th>
+                        <th className="py-3 px-4 font-bold text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border)]">
+                      {invites.map((invite) => {
+                        const isExpired = new Date(invite.expires_at) < new Date();
+                        return (
+                          <tr key={invite.token} className="text-sm text-[var(--text-main)]">
+                            <td className="py-3 px-4 font-mono font-bold text-[var(--brand-green)]">{invite.token}</td>
+                            <td className="py-3 px-4 text-[var(--text-muted)]">{new Date(invite.expires_at).toLocaleString()}</td>
+                            <td className="py-3 px-4">{invite.max_uses}</td>
+                            <td className="py-3 px-4 text-right">
+                              <button
+                                onClick={() => handleRevokeInvite(invite.token)}
+                                className="text-red-500 hover:text-red-700 text-xs font-semibold cursor-pointer"
+                              >
+                                Revoke
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {invites.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-sm text-[var(--text-muted)]">No active invite tokens found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {showInviteModal && (
+        <InviteModal
+          onClose={() => {
+            setShowInviteModal(false);
+            fetchInvites();
+          }}
+          chamaId={group.id}
+          chamaName={group.name}
+          adminId={session?.user?.id || ""}
+        />
+      )}
     </div>
   );
 }

@@ -64,20 +64,27 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
+        // Get active chama ID from cookie or sessionStorage
+        const activeChamaId = sessionStorage.getItem('active_chama_id') || 
+                              document.cookie.split('; ').find(row => row.startsWith('active_chama_id='))?.split('=')[1];
+        
+        if (!activeChamaId) return;
+
         const { data: mem } = await supabase
-          .from('members')
-          .select('*, chamas(*)')
-          .eq('user_id', session.user.id)
+          .from('chama_memberships')
+          .select('*, chamas_v2(*), profile:profiles(*)')
+          .eq('profile_id', session.user.id)
+          .eq('chama_id', activeChamaId)
           .single();
         
-        if (!mem || !mem.chama_id) return;
+        if (!mem) return;
         setMember(mem);
-        setChama(mem.chamas);
+        setChama(mem.chamas_v2);
 
         const { data: wal } = await supabase
           .from('wallets')
           .select('*')
-          .eq('chama_id', mem.chama_id)
+          .eq('chama_id', activeChamaId)
           .single();
         
         setWallet(wal || { balance: 0, invested: 0 });
@@ -111,7 +118,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
               name, provider, expected_return_min, expected_return_max
             )
           `)
-          .eq('chama_id', mem.chama_id)
+          .eq('chama_id', activeChamaId)
           .order('created_at', { ascending: false });
 
         setInvestments(invs || []);
@@ -123,7 +130,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
       }
     }
     loadData();
-  }, [supabase]);
+  }, []);
 
   const handleInvest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,10 +146,9 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
         chama_id: chama.id,
         product_id: selectedProduct.id,
         amount: amount,
-        start_date: new Date().toISOString(),
+        start_date: new Date().toISOString().split('T')[0], // DATE field format YYYY-MM-DD
         status: 'active',
         expected_return: selectedProduct.expected_return_min,
-        created_by: member.id,
         created_at: new Date().toISOString()
       });
 
@@ -152,31 +158,34 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
       const newBalance = (wallet?.balance || 0) - amount;
       const newInvested = (wallet?.invested || 0) + amount;
       
-      // If wallet exists update, otherwise insert (assuming it exists for the flow)
       if (wallet?.id) {
         await supabase.from('wallets').update({ balance: newBalance, invested: newInvested }).eq('id', wallet.id);
       }
 
-      // Insert transaction
-      await supabase.from('transactions').insert({
+      // Insert transaction into transactions_v2
+      const { data: { session } } = await supabase.auth.getSession();
+      await supabase.from('transactions_v2').insert({
         chama_id: chama.id,
+        membership_id: member.id,
         type: 'smartgrow_investment',
         amount: -amount,
         description: `SmartGrow: ${selectedProduct.name} with ${selectedProduct.provider}`,
         status: 'confirmed',
-        created_by: member.id,
+        created_by: session?.user?.id || null,
         created_at: new Date().toISOString()
       });
 
       // Send SMS via our API (fire and forget)
-      fetch('/api/sms/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          phone: member.phone,
-          message: `SmartChama: Your group has invested KSh ${amount} in ${selectedProduct.name} (${selectedProduct.provider}). Track in your SmartGrow dashboard.`
-        })
-      }).catch(console.error);
+      if (member.profile?.phone_number) {
+        fetch('/api/sms/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: member.profile.phone_number,
+            message: `SmartChama: Your group has invested KSh ${amount} in ${selectedProduct.name} (${selectedProduct.provider}). Track in your SmartGrow dashboard.`
+          })
+        }).catch(console.error);
+      }
 
       // Refresh Data Locally
       setInvestments([
@@ -228,7 +237,6 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
   };
 
   const totalInvested = investments.reduce((sum, inv) => sum + Number(inv.amount), 0);
-  // simplified actual returns logic since this is a new platform
   const totalReturns = investments.reduce((sum, inv) => sum + Number(inv.actual_return || 0), 0);
   const activeCount = investments.filter(i => i.status === 'active').length;
 
@@ -262,7 +270,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           <p className="text-[14px] md:text-[16px] text-gray-400 leading-relaxed mb-6">
             SmartChama partners with regulated Kenyan investment providers to help your group put idle funds to work. All products are licensed by the Capital Markets Authority or Central Bank of Kenya.
           </p>
-          <button className="bg-[#22C55E] text-white px-6 py-3 rounded-lg text-headline-sm font-semibold flex items-center gap-2 hover:bg-[#1ea94e] transition-colors">
+          <button className="bg-[#22C55E] text-white px-6 py-3 rounded-lg text-headline-sm font-semibold flex items-center gap-2 hover:bg-[#1ea94e] transition-colors cursor-pointer">
             <span className="material-symbols-outlined">trending_up</span>
             Get Started
           </button>
@@ -350,7 +358,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                       canInvest ? (
                         <button 
                           onClick={() => setSelectedProduct(product)}
-                          className="w-full bg-[#22C55E] text-white rounded-lg py-2.5 text-body-sm font-bold hover:bg-[#1ea94e] transition-colors"
+                          className="w-full bg-[#22C55E] text-white rounded-lg py-2.5 text-body-sm font-bold hover:bg-[#1ea94e] transition-colors cursor-pointer"
                         >
                           Invest Now
                         </button>
@@ -480,7 +488,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
               <div className="bg-transparent text-[var(--brand-green)] border border-[#22C55E] dark:border-[#22C55E]/30 rounded-xl p-4 flex items-start gap-3 mb-6">
                 <span className="material-symbols-outlined text-[var(--brand-green)] mt-0.5">info</span>
                 <p className="text-body-sm text-[var(--text-main)]">
-                  This investment will be made from your total recorded. All members will be notified. This action requires confirmation from the group admin.
+                  This investment will be made from your total recorded pool. All members will be notified.
                 </p>
               </div>
 
@@ -503,7 +511,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                     />
                   </div>
                   <p className="text-body-sm text-[var(--text-muted)] mt-1 flex justify-between">
-                    <span>Available recorded: KSh {formatCurrency(wallet?.balance || 0)}</span>
+                    <span>Available tracked pool: KSh {formatCurrency(wallet?.balance || 0)}</span>
                     <span className="text-[#22C55E] cursor-pointer hover:underline font-bold" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</span>
                   </p>
                 </div>
@@ -514,7 +522,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                     required
                     value={investDuration}
                     onChange={e => setInvestDuration(e.target.value)}
-                    className="w-full border border-[var(--border)] bg-transparent rounded-lg px-4 py-3 text-[var(--text-main)] focus:outline-none focus:border-[#22C55E]"
+                    className="w-full border border-[var(--border)] bg-transparent rounded-lg px-4 py-3 text-[var(--text-main)] focus:outline-none focus:border-[#22C55E] dark:bg-[#111111]"
                   >
                     <option value="" disabled>Select duration</option>
                     {selectedProduct.type === 'money_market' && <option value="ongoing">Ongoing (withdraw anytime)</option>}
@@ -555,7 +563,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                   <button 
                     type="submit" 
                     disabled={investing}
-                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-white bg-[#22C55E] hover:bg-[#1ea94e] flex items-center gap-2"
+                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-white bg-[#22C55E] hover:bg-[#1ea94e] flex items-center gap-2 cursor-pointer"
                   >
                     {investing ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : null}
                     {investing ? 'Confirming...' : 'Confirm Investment'}

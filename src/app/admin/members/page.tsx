@@ -9,7 +9,7 @@ import { InviteModal } from "@/components/InviteModal";
 
 export default function AdminMembersPage() {
   const router = useRouter();
-  const { member: adminMember, group } = useAuth();
+  const { session, member: adminMember, group } = useAuth();
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<any[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<any[]>([]);
@@ -24,9 +24,6 @@ export default function AdminMembersPage() {
 
   // Modals
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [invitePhone, setInvitePhone] = useState("");
-
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [newRole, setNewRole] = useState("member");
@@ -40,17 +37,30 @@ export default function AdminMembersPage() {
     if (!adminMember || !group) return;
     try {
       setLoading(true);
-      const { data } = await supabase
-        .from('members')
+      const { data, error } = await supabase
+        .from('chama_memberships')
         .select(`
           *,
-          contributions(amount, status),
-          loans(amount, status)
+          profile:profiles (
+            full_name,
+            phone_number,
+            email
+          ),
+          contributions:contributions_v2 (
+            amount, 
+            status
+          ),
+          loans:loans_v2 (
+            amount, 
+            status
+          )
         `)
-        .eq('group_id', group.id)
+        .eq('chama_id', group.id)
         .order('created_at', { ascending: true })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
       
+      if (error) throw error;
+
       const enhanced = data?.map(m => {
         const totalSaved = m.contributions
           ?.filter((c: any) => c.status === 'confirmed')
@@ -81,35 +91,25 @@ export default function AdminMembersPage() {
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(m => m.full_name?.toLowerCase().includes(q) || m.phone_number?.includes(q));
+      result = result.filter(m => 
+        m.profile?.full_name?.toLowerCase().includes(q) || 
+        m.profile?.phone_number?.includes(q)
+      );
     }
 
     setFilteredMembers(result);
   }, [filter, searchQuery, members]);
 
-  const handleInvite = async () => {
-    try {
-      await supabase.from('invitations').insert({
-        group_id: group?.id,
-        invited_by: adminMember?.id,
-        email: inviteEmail,
-        phone: invitePhone,
-        status: 'pending'
-      });
-      setToastMsg("Invitation sent successfully!");
-      setTimeout(() => setToastMsg(""), 3000);
-      setShowInviteModal(false);
-      setInviteEmail("");
-      setInvitePhone("");
-    } catch (err: any) {
-      alert("Error inviting member: " + err.message);
-    }
-  };
-
   const handleUpdateRole = async () => {
     if (!selectedMember) return;
     try {
-      await supabase.from('members').update({ role: newRole }).eq('id', selectedMember.id);
+      const { error } = await supabase
+        .from('chama_memberships')
+        .update({ role: newRole })
+        .eq('id', selectedMember.id);
+
+      if (error) throw error;
+
       setToastMsg("Role updated!");
       setTimeout(() => setToastMsg(""), 3000);
       setShowRoleModal(false);
@@ -122,7 +122,13 @@ export default function AdminMembersPage() {
   const handleFlag = async () => {
     if (!selectedMember) return;
     try {
-      await supabase.from('members').update({ status: 'flagged', flag_reason: flagReason }).eq('id', selectedMember.id);
+      const { error } = await supabase
+        .from('chama_memberships')
+        .update({ status: 'flagged', flag_reason: flagReason })
+        .eq('id', selectedMember.id);
+
+      if (error) throw error;
+
       setToastMsg("Member flagged");
       setTimeout(() => setToastMsg(""), 3000);
       setShowFlagModal(false);
@@ -135,26 +141,39 @@ export default function AdminMembersPage() {
 
   const handleSendReminder = async (m: any) => {
     try {
-      await supabase.from('notifications').insert({
-        group_id: group?.id,
-        member_id: m.id,
-        type: 'reminder',
-        message: 'Please review your pending actions in the dashboard.',
-        read: false
-      });
-      setToastMsg(`Reminder sent to ${m.full_name}`);
+      const { error } = await supabase
+        .from('notifications')
+        .insert({
+          chama_id: group?.id,
+          profile_id: m.profile_id,
+          type: 'reminder',
+          title: 'Contribution Reminder',
+          message: 'Please review your pending actions in the dashboard.',
+          read: false
+        });
+
+      if (error) throw error;
+
+      setToastMsg(`Reminder sent to ${m.profile?.full_name}`);
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err) {
+      console.error(err);
       alert("Error sending reminder");
     }
   };
 
   const handleRemove = async (m: any) => {
-    if (confirm(`Are you sure you want to remove ${m.full_name}? This will set their status to inactive.`)) {
+    if (confirm(`Are you sure you want to remove ${m.profile?.full_name}? This will set their status to inactive.`)) {
       try {
-        await supabase.from('members').update({ status: 'inactive' }).eq('id', m.id);
+        const { error } = await supabase
+          .from('chama_memberships')
+          .update({ status: 'inactive' })
+          .eq('id', m.id);
+
+        if (error) throw error;
+
         fetchData();
-        setToastMsg(`${m.full_name} removed`);
+        setToastMsg(`${m.profile?.full_name} removed`);
         setTimeout(() => setToastMsg(""), 3000);
       } catch (err) {
         alert("Error removing member");
@@ -169,14 +188,14 @@ export default function AdminMembersPage() {
 
   const roleColors: Record<string, string> = {
     'admin': 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab] border-red-150 dark:border-red-900/30',
-    'chairlady': 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border-[#edf6ea] dark:border-[#1a2a1a]',
+    'chairlady': 'bg-transparent text-[var(--brand-green)] border-[#edf6ea] dark:border-[#1a2a1a]',
     'treasurer': 'bg-blue-50 dark:bg-blue-950/20 text-blue-750 dark:text-blue-300 border-blue-150 dark:border-blue-900/30',
     'secretary': 'bg-yellow-50 dark:bg-yellow-950/20 text-yellow-755 dark:text-yellow-300 border-yellow-150 dark:border-yellow-900/30',
     'member': 'bg-gray-50 dark:bg-gray-800 text-[var(--text-muted)] border-gray-200 dark:border-gray-700'
   };
 
   const statusColors: Record<string, string> = {
-    'active': 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border border-[#22C55E]',
+    'active': 'bg-transparent text-[var(--brand-green)] border border-[#22C55E]',
     'flagged': 'bg-red-50 dark:bg-red-950/20 text-red-750 dark:text-red-400 border border-red-200 dark:border-red-900/30',
     'pending': 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 border border-amber-250 dark:border-amber-900/30',
     'inactive': 'bg-gray-100 dark:bg-gray-800 text-gray-500 border border-gray-200'
@@ -228,7 +247,7 @@ export default function AdminMembersPage() {
           <div className="w-full md:w-auto">
             <button
               onClick={() => setShowInviteModal(true)}
-              className="w-full md:w-auto bg-[#22C55E] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-2 hover:bg-[#006e2f] transition-all font-semibold text-sm shadow-sm"
+              className="w-full md:w-auto bg-[#22C55E] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-2 hover:bg-[#006e2f] transition-all font-semibold text-sm shadow-sm cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm font-bold">person_add</span>
               Invite Member
@@ -282,7 +301,7 @@ export default function AdminMembersPage() {
             <button 
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-md transition-all ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)]' : 'hover:text-[#161d16] dark:hover:text-[#E8F0E4]'}`}
+              className={`px-4 py-1.5 rounded-md transition-all cursor-pointer ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)] font-bold' : 'hover:text-[#161d16] dark:hover:text-[#E8F0E4]'}`}
             >
               {f}
             </button>
@@ -313,14 +332,14 @@ export default function AdminMembersPage() {
                   <tr key={m.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-                          {getInitials(m.full_name)}
+                        <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[#22C55E]/10">
+                          {getInitials(m.profile?.full_name)}
                         </div>
                         <div>
                           <div className="font-semibold text-[var(--text-main)] text-sm whitespace-nowrap">
-                            {m.full_name || 'Unnamed Member'}
+                            {m.profile?.full_name || 'Unnamed Member'}
                           </div>
-                          <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a]">{m.email}</div>
+                          <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a]">{m.profile?.email || '—'}</div>
                         </div>
                       </div>
                     </td>
@@ -330,7 +349,7 @@ export default function AdminMembersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-body-sm text-[var(--text-muted)] whitespace-nowrap">
-                      {m.phone_number || '—'}
+                      {m.profile?.phone_number || '—'}
                     </td>
                     <td className="px-6 py-4 text-body-sm text-[var(--text-muted)] whitespace-nowrap">
                       {new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -393,14 +412,14 @@ export default function AdminMembersPage() {
               <div key={m.id} className="p-4 flex flex-col gap-2 hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-                      {getInitials(m.full_name)}
+                    <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[#22C55E]/10">
+                      {getInitials(m.profile?.full_name)}
                     </div>
                     <div>
                       <div className="font-semibold text-[var(--text-main)] text-sm">
-                        {m.full_name || 'Unnamed Member'}
+                        {m.profile?.full_name || 'Unnamed Member'}
                       </div>
-                      <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a]">{m.email}</div>
+                      <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a]">{m.profile?.email || '—'}</div>
                     </div>
                   </div>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold border capitalize ${roleColors[m.role] || roleColors['member']}`}>
@@ -411,7 +430,7 @@ export default function AdminMembersPage() {
                 <div className="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-dashed border-[#f5f5f5] dark:border-[#2d3d2d] my-1">
                   <div>
                     <span className="text-[var(--text-muted)] block">Phone:</span>
-                    <span className="font-medium text-[var(--text-main)]">{m.phone_number || '—'}</span>
+                    <span className="font-medium text-[var(--text-main)]">{m.profile?.phone_number || '—'}</span>
                   </div>
                   <div>
                     <span className="text-[var(--text-muted)] block">Total Saved:</span>
@@ -471,14 +490,14 @@ export default function AdminMembersPage() {
           onClose={() => setShowInviteModal(false)}
           chamaId={group?.id || ""}
           chamaName={group?.name || ""}
-          adminId={adminMember?.user_id || adminMember?.profile_id || adminMember?.id || ""}
+          adminId={session?.user?.id || ""}
         />
       )}
 
       {showRoleModal && selectedMember && (
         <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
           <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Edit Role for {selectedMember.full_name}</h2>
+            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Edit Role for {selectedMember.profile?.full_name}</h2>
             <select 
               value={newRole} 
               onChange={e => setNewRole(e.target.value)} 
@@ -504,7 +523,7 @@ export default function AdminMembersPage() {
             <h2 className="text-headline-sm font-geist font-bold text-error mb-2 flex items-center gap-2">
               <span className="material-symbols-outlined">flag</span> Flag Member
             </h2>
-            <p className="text-body-sm text-[var(--text-muted)] mb-6">Why are you flagging {selectedMember.full_name}?</p>
+            <p className="text-body-sm text-[var(--text-muted)] mb-6">Why are you flagging {selectedMember.profile?.full_name}?</p>
             
             <textarea 
               rows={3} 
@@ -524,4 +543,3 @@ export default function AdminMembersPage() {
     </div>
   );
 }
-
