@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import MobileHeader from "@/components/MobileHeader";
 import { MobileAdminTabBar } from "@/components/MobileAdminTabBar";
 
@@ -219,7 +218,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               />
             </div>
 
-            <ThemeToggle />
+
 
             <Link href="/dashboard/notifications" className="relative cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1f2a1f] p-2 rounded-full transition-colors flex items-center">
               <span className="material-symbols-outlined text-secondary dark:text-[#8FA88F]">notifications</span>

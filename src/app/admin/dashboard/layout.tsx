@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from '@/components/AuthProvider';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { 
   LayoutDashboard, Users, Building2, TrendingUp, 
   Settings, LogOut, Crown, User, Menu, X
@@ -156,7 +155,6 @@ export default function AdminDashboardLayout({
             )}
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <Link href="/dashboard/notifications" className="text-[var(--text-muted)] hover:text-[#006e2f] dark:hover:text-[#4ae176] transition-colors flex items-center">
               <span className="material-symbols-outlined text-[20px]">notifications</span>
             </Link>
@@ -175,7 +173,6 @@ export default function AdminDashboardLayout({
             <span className="font-bold text-[var(--text-main)] text-headline-sm font-geist">Admin Portal</span>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             <button onClick={() => setMobileMenuOpen(true)} className="p-2 text-[var(--text-muted)] hover:text-[#006e2f]">
               <Menu className="w-6 h-6" />
             </button>

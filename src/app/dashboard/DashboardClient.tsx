@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/components/AuthProvider';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function MemberDashboard() {
   const router = useRouter();
@@ -196,7 +195,6 @@ export default function MemberDashboard() {
         </div>
         
         <div className="hidden md:flex items-center gap-3">
-          <ThemeToggle />
           <Link href="/dashboard/notifications" className="w-10 h-10 rounded-lg bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center hover:bg-[#22C55E]/10 transition-colors">
             <span className="material-symbols-outlined text-[20px]">notifications</span>
           </Link>

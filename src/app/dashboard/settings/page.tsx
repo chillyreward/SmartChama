@@ -4,23 +4,20 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { useTheme } from '@/components/ThemeProvider'
 
 export default function SettingsPage() {
   const { session, member, group, isLoading: authLoading, refreshMemberData } = useAuth()
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const [activeTab, setActiveTab] = useState<'Profile Details' | 'Notifications' | 'Appearance' | 'Security'>('Profile Details')
+  const [activeTab, setActiveTab] = useState<'Profile Details' | 'Notifications' | 'Security'>('Profile Details')
   const tabs = [
     { name: 'Profile Details', icon: 'person' },
     { name: 'Notifications', icon: 'notifications' },
-    { name: 'Appearance', icon: 'palette' },
     { name: 'Security', icon: 'shield' }
   ] as const
 
@@ -419,99 +416,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* APPEARANCE TAB */}
-          {activeTab === 'Appearance' && (
-            <div>
-              <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mb-6 font-geist">
-                Appearance Settings
-              </h3>
-              <p className="text-[13px] text-[#60645f] dark:text-gray-400 mb-6">
-                Customize the visual style of your SmartChama dashboard. Choose between a light theme, dark theme, or match your system settings.
-              </p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  {
-                    value: 'light',
-                    label: 'Light Mode',
-                    icon: 'light_mode',
-                    desc: 'Clean white & green interface',
-                    bgClass: 'bg-white border-gray-200 text-gray-850',
-                    previewBg: 'bg-gray-50 border-gray-150',
-                    previewCard: 'bg-white border-gray-200'
-                  },
-                  {
-                    value: 'dark',
-                    label: 'Dark Mode',
-                    icon: 'dark_mode',
-                    desc: 'Sleek black & green OLED theme',
-                    bgClass: 'bg-slate-950 border-slate-800 text-slate-100',
-                    previewBg: 'bg-black border-slate-900',
-                    previewCard: 'bg-[#0E1410] border-[#1B2520]'
-                  },
-                  {
-                    value: 'system',
-                    label: 'System Default',
-                    icon: 'desktop_windows',
-                    desc: 'Sync theme with your device settings',
-                    bgClass: 'bg-gray-100 border-gray-300 text-gray-850',
-                    previewBg: 'bg-gray-50 dark:bg-black',
-                    previewCard: 'bg-white dark:bg-[#0E1410]'
-                  }
-                ].map(opt => {
-                  const isSelected = theme === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => setTheme(opt.value as any)}
-                      className={`flex flex-col text-left p-4 rounded-xl border transition-all relative cursor-pointer outline-none focus:ring-2 focus:ring-[#006e2f] ${
-                        isSelected
-                          ? 'border-[#006e2f] dark:border-[#22C55E] ring-1 ring-[#006e2f] dark:ring-[#22C55E]'
-                          : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                      }`}
-                    >
-                      {/* Selection indicator */}
-                      {isSelected && (
-                        <span className="absolute top-3 right-3 material-symbols-outlined text-[#006e2f] dark:text-[#22C55E] text-[18px]">
-                          check_circle
-                        </span>
-                      )}
 
-                      {/* Icon & Label */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="material-symbols-outlined text-secondary text-[20px]">
-                          {opt.icon}
-                        </span>
-                        <span className="text-[14px] font-bold text-on-surface">
-                          {opt.label}
-                        </span>
-                      </div>
-                      
-                      {/* Description */}
-                      <span className="text-[11px] text-[#60645f] dark:text-gray-400 mb-4 block leading-tight">
-                        {opt.desc}
-                      </span>
-
-                      {/* Visual Preview */}
-                      <div className={`mt-auto w-full h-16 rounded-lg p-2 border flex flex-col justify-between ${opt.previewBg}`}>
-                        <div className="flex justify-between items-center">
-                          <div className="w-10 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700"></div>
-                          <div className="w-3 h-3 rounded-full bg-[#006e2f] dark:bg-[#22C55E]"></div>
-                        </div>
-                        <div className={`w-full h-8 rounded border p-1 flex items-center gap-1.5 ${opt.previewCard}`}>
-                          <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-600"></div>
-                          <div className="flex-1 space-y-1">
-                            <div className="w-2/3 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></div>
-                            <div className="w-1/2 h-0.5 rounded-full bg-gray-200 dark:bg-gray-800"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* SECURITY TAB */}
           {activeTab === 'Security' && (

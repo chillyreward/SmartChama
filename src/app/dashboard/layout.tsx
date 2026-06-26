@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { NewContributionModal } from '@/components/NewContributionModal';
 import GroupSwitcher from '@/components/GroupSwitcher';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import MobileHeader from '@/components/MobileHeader';
 import { MobileTabBar } from '@/components/MobileTabBar';
 
@@ -207,7 +206,6 @@ export default function DashboardLayout({
             <GroupSwitcher />
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <Link href="/dashboard/notifications" className="text-[var(--text-muted)] hover:text-[#006e2f] dark:hover:text-[#4ae176] transition-colors flex items-center">
               <span className="material-symbols-outlined">notifications</span>
             </Link>

@@ -4,22 +4,15 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
-import { useTheme } from '@/components/ThemeProvider';
 import { supabase } from '@/lib/supabase';
 
 export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean }) {
   const router = useRouter();
   const { member, group } = useAuth();
-  const { resolvedTheme, setTheme } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const isDark = resolvedTheme === 'dark';
   const chamaName = group?.name || 'SmartChama Group';
   const fullName = member?.full_name || '';
-
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark');
-  };
 
   const getInitials = (name: string) => {
     if (!name) return '??';
@@ -94,19 +87,8 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
         </div>
       </div>
 
-      {/* Right: notification bell + theme toggle + avatar */}
+      {/* Right: notification bell + avatar */}
       <div className="flex items-center gap-2">
-        {/* Theme toggle — icon only */}
-        <button
-          onClick={toggleTheme}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[#edf6ea] dark:hover:bg-[#1a2a1a] transition-colors"
-          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          <span className="material-symbols-outlined text-[20px]">
-            {isDark ? 'light_mode' : 'dark_mode'}
-          </span>
-        </button>
-
         {/* Notification bell with badge */}
         <button
           onClick={() => router.push(isAdmin ? '/admin/announcements' : '/dashboard/notifications')}

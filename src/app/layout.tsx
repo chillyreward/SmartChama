@@ -78,14 +78,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              var theme = localStorage.getItem('smartchama-theme');
-              var isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
-              if (isDark) {
-                document.documentElement.classList.add('dark');
-              } else {
-                document.documentElement.classList.remove('dark');
-              }
-              
+              document.documentElement.classList.add('dark');
               var isFirst = !sessionStorage.getItem('sc-initial-load');
               if (!isFirst) {
                 document.documentElement.classList.add('sc-splash-hidden');
@@ -99,13 +92,7 @@ export default function RootLayout({
         />
         <meta 
           name="theme-color" 
-          content="#22C55E" 
-          media="(prefers-color-scheme: light)" 
-        />
-        <meta 
-          name="theme-color" 
           content="#0B0F0C" 
-          media="(prefers-color-scheme: dark)" 
         />
         <meta 
           name="msapplication-TileColor" 
@@ -116,7 +103,7 @@ export default function RootLayout({
           content="/web-app-manifest-512x512.png" 
         />
       </head>
-      <body className={`${inter.variable} ${geist.variable} font-inter antialiased bg-[#FAFAFA]`}>
+      <body className={`${inter.variable} ${geist.variable} font-inter antialiased bg-[#0A0A0A] text-[#F0FDF4]`}>
         <LoadingScreen />
         <LanguageProvider>
           <AuthProvider>

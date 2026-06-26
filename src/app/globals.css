@@ -1,37 +1,38 @@
 @import "tailwindcss";
 
 :root {
-  --bg-page:       #FFFFFF;
-  --bg-card:       #FFFFFF;
-  --bg-sidebar:    #FFFFFF;
-  --bg-input:      #FFFFFF;
-  --bg-hover:      #F0FDF4;
-  --bg-subtle:     #DCFCE7;
-  --bg-muted:      #F9FAFB;
+  --bg-page:       #0A0A0A;
+  --bg-card:       #111111;
+  --bg-sidebar:    #0D0D0D;
+  --bg-input:      #1A1A1A;
+  --bg-hover:      #1A2E1A;
+  --bg-subtle:     #052e16;
+  --bg-muted:      #161616;
 
-  --border:        #D1FAE5;
-  --border-strong: #6EE7B7;
+  --border:        #1F2F1F;
+  --border-strong: #166534;
 
-  --text-primary:  #052e16;
-  --text-secondary:#166534;
+  --text-primary:  #F0FDF4;
+  --text-secondary:#86EFAC;
   --text-muted:    #4ADE80;
   --text-on-green: #052e16;
 
-  --green:         #16A34A;
-  --green-bright:  #22C55E;
-  --green-light:   #DCFCE7;
-  --green-text:    #166534;
+  --green:         #22C55E;
+  --green-bright:  #4ADE80;
+  --green-light:   #052e16;
+  --green-text:    #86EFAC;
   
-  --red:           #EF4444;
-  --red-bg:        #FEF2F2;
-  --red-text:      #991B1B;
+  --red:           #F87171;
+  --red-bg:        #1F0A0A;
+  --red-text:      #FCA5A5;
   
-  --yellow:        #F59E0B;
-  --yellow-bg:     #FFFBEB;
-  --yellow-text:   #92400E;
+  --yellow:        #FCD34D;
+  --yellow-bg:     #1F1A00;
+  --yellow-text:   #FDE68A;
 }
 
 .dark {
+  /* Retain for compatibility with next-themes selectors */
   --bg-page:       #0A0A0A;
   --bg-card:       #111111;
   --bg-sidebar:    #0D0D0D;

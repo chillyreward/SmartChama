@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function LandingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -50,7 +49,6 @@ export default function LandingNav() {
           <Link href="/login" className="text-[15px] font-medium text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:text-[#8FA88F] dark:hover:text-[#4ae176] transition-colors mr-1">
             Sign In
           </Link>
-          <ThemeToggle showLabel={true} />
           <Link href="/signup" className="bg-[#22C55E] text-white text-[15px] font-semibold px-5 py-2.5 rounded hover:bg-[#006e2f] transition-colors ml-1">
             Get Started
           </Link>
@@ -58,7 +56,6 @@ export default function LandingNav() {
 
         {/* Mobile right — shown only on mobile */}
         <div className="flex md:hidden items-center gap-2">
-          <ThemeToggle />
           <Link href="/signup" className="bg-[#22C55E] text-white px-4 py-2 rounded-lg text-[14px] font-semibold">
             Get Started
           </Link>
