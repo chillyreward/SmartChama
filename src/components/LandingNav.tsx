@@ -13,16 +13,16 @@ export default function LandingNav() {
         
         {/* Logo */}
         <Link href="/">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Image
               src="/logo.png"
               alt="SmartChama"
-              width={44}
-              height={44}
-              className="h-11 w-11 object-contain"
+              width={38}
+              height={38}
+              className="h-9 w-9 object-contain"
               priority
             />
-            <span className="text-[22px] font-bold tracking-tight text-[var(--text-main)]">
+            <span className="text-[18px] sm:text-[22px] font-bold tracking-tight text-[var(--text-main)] max-[400px]:hidden">
               SmartChama
             </span>
           </div>
@@ -55,13 +55,16 @@ export default function LandingNav() {
         </div>
 
         {/* Mobile right — shown only on mobile */}
-        <div className="flex md:hidden items-center gap-2">
-          <Link href="/signup" className="bg-[#22C55E] text-white px-4 py-2 rounded-lg text-[14px] font-semibold">
+        <div className="flex md:hidden items-center gap-3">
+          <Link href="/login" className="text-[14px] font-semibold text-[#8FA88F] hover:text-[#4ae176] transition-colors py-2 px-1">
+            Sign In
+          </Link>
+          <Link href="/signup" className="bg-[#22C55E] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold hover:bg-[#1ea94e] transition-colors max-[360px]:hidden">
             Get Started
           </Link>
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="w-9 h-9 flex items-center justify-center text-[var(--text-main)]"
+            className="w-9 h-9 flex items-center justify-center text-[var(--text-main)] hover:bg-emerald-950/20 rounded-lg transition-colors cursor-pointer"
             aria-label="Open menu"
           >
             <span className="material-symbols-outlined text-[24px]">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { useAuth } from '@/components/AuthProvider';
 
 const SEED_PRODUCTS = [
   {
@@ -43,6 +44,7 @@ const SEED_PRODUCTS = [
 ];
 
 export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRoute?: boolean }) {
+  const { member: authMember, group: authGroup, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [member, setMember] = useState<any>(null);
   const [chama, setChama] = useState<any>(null);
@@ -59,27 +61,18 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
   const formatCurrency = (val: number) => val.toLocaleString('en-KE', { maximumFractionDigits: 0 });
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!authMember || !authGroup) {
+      setLoading(false);
+      return;
+    }
+
+    setMember(authMember);
+    setChama(authGroup);
+
     async function loadData() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        // Get active chama ID from cookie or sessionStorage
-        const activeChamaId = sessionStorage.getItem('active_chama_id') || 
-                              document.cookie.split('; ').find(row => row.startsWith('active_chama_id='))?.split('=')[1];
-        
-        if (!activeChamaId) return;
-
-        const { data: mem } = await supabase
-          .from('chama_memberships')
-          .select('*, chamas_v2(*), profile:profiles(*)')
-          .eq('profile_id', session.user.id)
-          .eq('chama_id', activeChamaId)
-          .single();
-        
-        if (!mem) return;
-        setMember(mem);
-        setChama(mem.chamas_v2);
+        const activeChamaId = authGroup.id;
 
         const { data: wal } = await supabase
           .from('wallets')
@@ -130,7 +123,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
       }
     }
     loadData();
-  }, []);
+  }, [authMember, authGroup, authLoading]);
 
   const handleInvest = async (e: React.FormEvent) => {
     e.preventDefault();
