@@ -270,7 +270,12 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           <p className="text-[14px] md:text-[16px] text-gray-400 leading-relaxed mb-6">
             SmartChama partners with regulated Kenyan investment providers to help your group put idle funds to work. All products are licensed by the Capital Markets Authority or Central Bank of Kenya.
           </p>
-          <button className="bg-[#22C55E] text-white px-6 py-3 rounded-lg text-headline-sm font-semibold flex items-center gap-2 hover:bg-[#1ea94e] transition-colors cursor-pointer">
+          <button 
+            onClick={() => {
+              document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="bg-[#22C55E] text-white px-6 py-3 rounded-lg text-headline-sm font-semibold flex items-center gap-2 hover:bg-[#1ea94e] transition-colors cursor-pointer"
+          >
             <span className="material-symbols-outlined">trending_up</span>
             Get Started
           </button>
@@ -308,7 +313,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
       </div>
 
       {/* AVAILABLE PRODUCTS */}
-      <div className="mb-12">
+      <div id="products-section" className="mb-12">
         <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)]">Where to grow your funds</h2>
         <p className="text-body-sm text-[var(--text-muted)] mt-1 mb-6">All investment products are regulated and licensed in Kenya.</p>
 

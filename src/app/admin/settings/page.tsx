@@ -4,18 +4,20 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { InviteModal } from "@/components/InviteModal";
+import { MembersSettingsTab } from "@/components/settings/MembersSettingsTab";
 
 export default function AdminSettingsPage() {
   const { session, member: adminMember, group, refreshMemberData } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<'Chama Rules' | 'Payment Configurations' | 'Member Invites'>('Chama Rules');
+  const [activeTab, setActiveTab] = useState<'Chama Rules' | 'members' | 'Payment Configurations' | 'Member Invites'>('Chama Rules');
 
   const tabs = [
-    { name: 'Chama Rules', icon: 'tune' },
-    { name: 'Payment Configurations', icon: 'payments' },
-    { name: 'Member Invites', icon: 'person_add' }
+    { id: 'Chama Rules', name: 'Chama Rules', icon: 'tune' },
+    { id: 'members', name: 'Members', icon: 'group' },
+    { id: 'Payment Configurations', name: 'Payment Configurations', icon: 'payments' },
+    { id: 'Member Invites', name: 'Member Invites', icon: 'person_add' }
   ] as const;
 
   // --- Chama Rules States ---
@@ -233,13 +235,13 @@ export default function AdminSettingsPage() {
         <div className="w-full md:w-64 shrink-0 space-y-1">
           {tabs.map(t => (
             <button
-              key={t.name}
+              key={t.id}
               onClick={() => {
-                setActiveTab(t.name);
+                setActiveTab(t.id);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-semibold transition-colors text-left ${
-                activeTab === t.name
-                  ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]'
+                activeTab === t.id
+                  ? 'bg-transparent text-[var(--brand-green)]'
                   : 'text-[#3d4a3d] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1f2a1f]'
               }`}
             >
@@ -410,6 +412,14 @@ export default function AdminSettingsPage() {
                 </button>
               </div>
             </form>
+          )}
+
+          {activeTab === 'members' && (
+            <MembersSettingsTab
+              chamaId={group?.id || ''}
+              adminId={session?.user?.id || ''}
+              chamaName={group?.name || ''}
+            />
           )}
 
           {/* PAYMENT CONFIGURATIONS TAB */}
