@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { InviteModal } from "@/components/InviteModal";
 
 export default function AdminMembersPage() {
   const router = useRouter();
@@ -466,38 +467,12 @@ export default function AdminMembersPage() {
 
       {/* MODALS */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-2">Invite Member</h2>
-            <p className="text-body-sm text-[var(--text-muted)] mb-6">Send an invitation link via email or SMS.</p>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Email Address</label>
-                <input 
-                  type="email" 
-                  value={inviteEmail} 
-                  onChange={e => setInviteEmail(e.target.value)} 
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
-                />
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Phone Number</label>
-                <input 
-                  type="tel" 
-                  value={invitePhone} 
-                  onChange={e => setInvitePhone(e.target.value)} 
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowInviteModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
-              <button onClick={handleInvite} className="flex-[2] bg-[#22C55E] text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Send Invite</button>
-            </div>
-          </div>
-        </div>
+        <InviteModal
+          onClose={() => setShowInviteModal(false)}
+          chamaId={group?.id || ""}
+          chamaName={group?.name || ""}
+          adminId={adminMember?.user_id || adminMember?.profile_id || adminMember?.id || ""}
+        />
       )}
 
       {showRoleModal && selectedMember && (
