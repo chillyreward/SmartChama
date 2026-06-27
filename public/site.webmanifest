@@ -3,11 +3,29 @@
   "short_name": "SmartChama",
   "description": "Digital savings and loan management for African savings groups",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FAFAFA",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#000000",
   "theme_color": "#22C55E",
   "orientation": "portrait-primary",
+  "lang": "en-KE",
   "categories": ["finance", "utilities"],
+  "iarc_rating_id": "",
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SmartChama Dashboard"
+    }
+  ],
   "icons": [
     {
       "src": "/favicon-96x96.png",
@@ -26,6 +44,44 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "description": "Go to your dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Contributions",
+      "short_name": "Contribute",
+      "description": "Make a contribution",
+      "url": "/dashboard/contributions",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Loans",
+      "short_name": "Loans",
+      "description": "View your loans",
+      "url": "/dashboard/loans",
+      "icons": [
+        {
+          "src": "/web-app-manifest-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

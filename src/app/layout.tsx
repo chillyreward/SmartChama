@@ -7,6 +7,8 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import LoadingScreen from "@/components/LoadingScreen";
 import { ChatBot } from "@/components/ChatBot";
+import { InstallPrompt } from "@/components/InstallPrompt";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -16,42 +18,36 @@ export const metadata: Metadata = {
     default: 'SmartChama',
     template: '%s | SmartChama'
   },
-  description: 'Digital savings and loan management for African savings groups',
+  description: 'Digital savings and loan management for African savings groups.',
+  manifest: '/site.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'SmartChama',
+    startupImage: [
+      '/web-app-manifest-512x512.png'
+    ]
+  },
+  formatDetection: {
+    telephone: false
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'SmartChama',
+    title: 'SmartChama',
+    description: 'Digital savings and loan management for African savings groups.'
+  },
   icons: {
     icon: [
-      { 
-        url: '/favicon-16x16.png',
-        sizes: '16x16',
-        type: 'image/png'
-      },
-      { 
-        url: '/favicon-32x32.png',
-        sizes: '32x32',
-        type: 'image/png'
-      },
-      { 
-        url: '/icon-192x192.png',
-        sizes: '192x192',
-        type: 'image/png'
-      },
-      { 
-        url: '/icon-512x512.png',
-        sizes: '512x512',
-        type: 'image/png'
-      }
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
     ],
     apple: [
-      {
-        url: '/apple-touch-icon.png',
-        sizes: '180x180',
-        type: 'image/png'
-      }
-    ],
-    shortcut: '/favicon-32x32.png'
-  },
-  manifest: '/manifest.json'
+      { url: '/apple-touch-icon.png', sizes: '180x180' }
+    ]
+  }
 }
-
 
 // Client side unhandled rejection logic
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -75,6 +71,56 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+        
+        {/* Theme color changes with light/dark mode */}
+        <meta 
+          name="theme-color" 
+          content="#22C55E"
+          media="(prefers-color-scheme: light)"
+        />
+        <meta 
+          name="theme-color" 
+          content="#000000"
+          media="(prefers-color-scheme: dark)"
+        />
+
+        {/* Apple PWA specific */}
+        <meta 
+          name="apple-mobile-web-app-capable" 
+          content="yes" 
+        />
+        <meta 
+          name="apple-mobile-web-app-status-bar-style" 
+          content="black-translucent" 
+        />
+        <meta 
+          name="apple-mobile-web-app-title" 
+          content="SmartChama" 
+        />
+
+        {/* Viewport for mobile */}
+        <meta 
+          name="viewport" 
+          content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" 
+        />
+
+        {/* Microsoft tiles */}
+        <meta 
+          name="msapplication-TileColor" 
+          content="#22C55E" 
+        />
+        <meta 
+          name="msapplication-tap-highlight" 
+          content="no" 
+        />
+
+        {/* Prevent phone number detection */}
+        <meta 
+          name="format-detection" 
+          content="telephone=no" 
+        />
+
+        {/* Theme detection and splash screen control script */}
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
@@ -86,22 +132,6 @@ export default function RootLayout({
             })();
           `
         }} />
-        <meta 
-          name="viewport" 
-          content="width=device-width, initial-scale=1, viewport-fit=cover" 
-        />
-        <meta 
-          name="theme-color" 
-          content="#0B0F0C" 
-        />
-        <meta 
-          name="msapplication-TileColor" 
-          content="#22C55E" 
-        />
-        <meta 
-          name="msapplication-TileImage" 
-          content="/web-app-manifest-512x512.png" 
-        />
       </head>
       <body className={`${inter.variable} ${geist.variable} font-inter antialiased bg-[#0A0A0A] text-[#F0FDF4]`}>
         <LoadingScreen />
@@ -110,6 +140,8 @@ export default function RootLayout({
             <ThemeProvider>
               {children}
               <ChatBot />
+              <InstallPrompt />
+              <OfflineBanner />
             </ThemeProvider>
           </AuthProvider>
         </LanguageProvider>
