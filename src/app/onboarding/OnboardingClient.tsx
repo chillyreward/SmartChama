@@ -5,9 +5,11 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function OnboardingClient() {
   const router = useRouter();
+  const { refreshMemberData } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -172,6 +174,7 @@ export default function OnboardingClient() {
       }
 
       document.cookie = `active_chama_id=${data.chama_id}; path=/; max-age=${60 * 60 * 24 * 30}`;
+      await refreshMemberData();
       router.push('/admin/dashboard');
     } catch (err) {
       setError('An unexpected error occurred.');
