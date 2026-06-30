@@ -1,6 +1,5 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -34,56 +33,35 @@ export default function AdminDashboardPage() {
 
   const formatCurrency = (val: number) => val.toLocaleString('en-KE', { maximumFractionDigits: 0 });
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (authLoading) return;
+    
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+    
+    const adminRoles = ['admin', 'chairlady', 'treasurer', 'secretary'];
+    
+    if (!admin || !chama || !adminRoles.includes(admin.role)) {
+      router.push('/dashboard');
+      return;
+    }
+
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     async function loadAdminDashboardData() {
-      if (authLoading) return;
-      
-      if (!session) {
-        router.push('/login');
-        return;
-      }
-      
-      const adminRoles = ['admin', 'chairlady', 'treasurer', 'secretary'];
-      
-      if (!admin || !chama || !adminRoles.includes(admin.role)) {
-        router.push('/dashboard');
-        return;
-      }
-      
       try {
         await Promise.all([
-          loadGroupMetrics(chama.id),
-          loadPendingActions(chama.id),
-          loadRecentTransactions(chama.id),
-          loadGroupSavingsTrend(chama.id),
-          loadTopContributors(chama.id)
+          loadGroupMetrics(chama!.id),
+          loadPendingActions(chama!.id),
+          loadRecentTransactions(chama!.id),
+          loadGroupSavingsTrend(chama!.id),
+          loadTopContributors(chama!.id)
         ]);
-
-        const channel = supabase
-          .channel('admin_dashboard')
-          .on(
-            'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'contributions_v2', filter: `chama_id=eq.${chama.id}` },
-            (payload) => {
-              loadGroupMetrics(chama.id);
-              loadTopContributors(chama.id);
-              showToast('New contribution received!');
-            }
-          )
-          .on(
-            'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'loans_v2', filter: `chama_id=eq.${chama.id}` },
-            (payload) => {
-              loadPendingActions(chama.id);
-              showToast('New loan request submitted!');
-            }
-          )
-          .subscribe();
-
-        return () => {
-          supabase.removeChannel(channel);
-        };
-
       } catch (err) {
         console.error('Error:', err);
         setError('Failed to load data. Please refresh the page.');
@@ -93,6 +71,31 @@ export default function AdminDashboardPage() {
     }
     
     loadAdminDashboardData();
+
+    const channel = supabase
+      .channel('admin_dashboard')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'contributions_v2', filter: `chama_id=eq.${chama.id}` },
+        (payload) => {
+          loadGroupMetrics(chama.id).catch(e => console.error(e));
+          loadTopContributors(chama.id).catch(e => console.error(e));
+          showToast('New contribution received!');
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'loans_v2', filter: `chama_id=eq.${chama.id}` },
+        (payload) => {
+          loadPendingActions(chama.id).catch(e => console.error(e));
+          showToast('New loan request submitted!');
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [authLoading, session, admin, chama, router]);
 
   const showToast = (msg: string) => {
@@ -128,66 +131,43 @@ export default function AdminDashboardPage() {
   }
 
   async function loadGroupMetrics(chamaId: string) {
-    const { data: contribs, error: contribsErr } = await supabase
-      .from('contributions_v2')
-      .select('amount')
-      .eq('chama_id', chamaId)
-      .eq('status', 'confirmed');
-      
-    if (contribsErr) throw contribsErr;
-    
-    const totalSavings = contribs?.reduce((sum, c) => sum + c.amount, 0) || 0;
-    
-    const { count: memberCount, error: countErr } = await supabase
-      .from('chama_memberships')
-      .select('*', { count: 'exact' })
-      .eq('chama_id', chamaId)
-      .eq('status', 'active');
-      
-    if (countErr) throw countErr;
-    
-    const { count: activeLoanCount, error: loanErr } = await supabase
-      .from('loans_v2')
-      .select('*', { count: 'exact' })
-      .eq('chama_id', chamaId)
-      .in('status', ['active', 'overdue']);
-      
-    if (loanErr) throw loanErr;
-    
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    
-    const { data: thisMonth, error: monthErr } = await supabase
-      .from('contributions_v2')
-      .select('membership_id, amount, status')
-      .eq('chama_id', chamaId)
-      .gte('created_at', firstDay);
-      
-    if (monthErr) throw monthErr;
-    
+
+    const [contribsRes, membersCountRes, loansCountRes, thisMonthRes, membersRes] = await Promise.all([
+      supabase.from('contributions_v2').select('amount').eq('chama_id', chamaId).eq('status', 'confirmed'),
+      supabase.from('chama_memberships').select('*', { count: 'exact' }).eq('chama_id', chamaId).eq('status', 'active'),
+      supabase.from('loans_v2').select('*', { count: 'exact' }).eq('chama_id', chamaId).in('status', ['active', 'overdue']),
+      supabase.from('contributions_v2').select('membership_id, amount, status').eq('chama_id', chamaId).gte('created_at', firstDay),
+      supabase.from('chama_memberships').select('trust_score').eq('chama_id', chamaId)
+    ]);
+
+    if (contribsRes.error) throw contribsRes.error;
+    if (membersCountRes.error) throw membersCountRes.error;
+    if (loansCountRes.error) throw loansCountRes.error;
+    if (thisMonthRes.error) throw thisMonthRes.error;
+    if (membersRes.error) throw membersRes.error;
+
+    const totalSavings = contribsRes.data?.reduce((sum, c) => sum + c.amount, 0) || 0;
+    const memberCount = membersCountRes.count || 0;
+    const activeLoanCount = loansCountRes.count || 0;
+
     const paidCount = new Set(
-      thisMonth?.filter(c => c.status === 'confirmed').map(c => c.membership_id)
+      thisMonthRes.data?.filter(c => c.status === 'confirmed').map(c => c.membership_id)
     ).size;
     
-    const collectionRate = (memberCount && memberCount > 0)
+    const collectionRate = (memberCount > 0)
       ? Math.round((paidCount / memberCount) * 100)
       : 0;
-    
-    const { data: members, error: memsErr } = await supabase
-      .from('chama_memberships')
-      .select('trust_score')
-      .eq('chama_id', chamaId);
-      
-    if (memsErr) throw memsErr;
-    
-    const avgTrust = (members && members.length > 0)
-      ? Math.round(members.reduce((sum, m) => sum + (m.trust_score || 0), 0) / members.length)
+
+    const avgTrust = (membersRes.data && membersRes.data.length > 0)
+      ? Math.round(membersRes.data.reduce((sum, m) => sum + (m.trust_score || 0), 0) / membersRes.data.length)
       : 0;
     
     setMetrics({
       totalSavings,
-      memberCount: memberCount || 0,
-      activeLoanCount: activeLoanCount || 0,
+      memberCount,
+      activeLoanCount,
       collectionRate,
       avgTrust
     });

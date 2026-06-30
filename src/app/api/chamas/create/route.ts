@@ -67,20 +67,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: chamaError.message }, { status: 500 });
     }
 
-    // 3. Create the Wallet
-    const { error: walletError } = await supabase.from('wallets').insert({
-      chama_id: chamaData.id,
-      balance: 0
-    });
-    
-    if (walletError) {
-      console.error("Wallet Error:", walletError);
-    }
-
-    // 4. Create Chama Payment Config
-    const { error: configError } = await supabase
-      .from('chama_payment_config')
-      .insert({
+    // Run setup insertions in PARALLEL
+    const [walletRes, configRes, membershipRes, activityRes] = await Promise.all([
+      supabase.from('wallets').insert({
+        chama_id: chamaData.id,
+        balance: 0
+      }),
+      supabase.from('chama_payment_config').insert({
         chama_id: chamaData.id,
         payment_type: payment_type || 'till',
         till_number: till_number || null,
@@ -89,26 +82,24 @@ export async function POST(request: Request) {
         phone_number: phone_number || null,
         account_name: account_name || null,
         is_verified: false
-      });
-
-    if (configError) {
-      console.error("Payment Config Error:", configError);
-    }
-
-    // 5. Create the Admin Membership
-    const { error: membershipError } = await supabase
-      .from('chama_memberships')
-      .insert({
+      }),
+      supabase.from('chama_memberships').insert({
         profile_id: user_id,
         chama_id: chamaData.id,
-        role: 'admin',
+        role: 'chairlady',
         trust_score: 100,
         status: 'active'
-      });
+      }),
+      supabase.from('group_activity').insert({
+        chama_id: chamaData.id,
+        event_type: 'group_created',
+        description: 'Group created'
+      })
+    ]);
 
-    if (membershipError) {
-      console.error("Membership Error:", membershipError);
-      return NextResponse.json({ error: `Error creating membership: ${membershipError.message}` }, { status: 500 });
+    if (membershipRes.error) {
+      console.error("Membership Error:", membershipRes.error);
+      return NextResponse.json({ error: `Error creating membership: ${membershipRes.error.message}` }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, chama_id: chamaData.id });

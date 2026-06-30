@@ -1,117 +1,105 @@
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
-  const supabase = getSupabaseAdmin()
-  const body = await request.json()
+  const supabase = getSupabaseAdmin();
+  const body = await request.json();
 
-  const callback = body.Body?.stkCallback
-  const resultCode = callback?.ResultCode
-  const checkoutId = callback?.CheckoutRequestID
+  const callback = body.Body?.stkCallback;
+  const resultCode = callback?.ResultCode;
+  const checkoutRequestId = callback?.CheckoutRequestID;
 
-  // Always return 200 to Safaricom first, regardless of result.
-  // If you return an error, Safaricom will retry indefinitely.
-  const respond = (data: object) =>
-    new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    })
+  const respondOk = () =>
+    new Response(
+      JSON.stringify({
+        ResultCode: 0,
+        ResultDesc: 'Accepted'
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+
+  if (!checkoutRequestId) {
+    console.error('Callback missing CheckoutRequestID');
+    return respondOk();
+  }
+
+  const { data: contribution } = await supabase
+    .from('contributions_v2')
+    .select(`
+      id, membership_id, chama_id, amount, status
+    `)
+    .eq('mpesa_checkout_request_id', checkoutRequestId)
+    .single();
+
+  if (!contribution) {
+    console.error('No matching contribution for checkout ID:', checkoutRequestId);
+    return respondOk();
+  }
+
+  // Idempotency at callback level
+  if (contribution.status === 'confirmed') {
+    return respondOk();
+  }
 
   if (resultCode !== 0) {
-    // Payment was cancelled or failed
     await supabase
       .from('contributions_v2')
       .update({ status: 'failed' })
-      .eq('mpesa_checkout_request_id', checkoutId)
-    return respond({ ResultCode: 0, ResultDesc: 'Accepted' })
+      .eq('id', contribution.id);
+    return respondOk();
   }
 
-  // Payment succeeded
-  const items = callback.CallbackMetadata?.Item || []
-  const get = (name: string) => items.find((i: any) => i.Name === name)?.Value
+  const items = callback.CallbackMetadata?.Item || [];
+  const get = (name: string) => items.find((i: any) => i.Name === name)?.Value;
 
-  const amount = get('Amount')
-  const receipt = get('MpesaReceiptNumber')
-  const phone = get('PhoneNumber')?.toString()
+  const receipt = get('MpesaReceiptNumber');
 
-  // Update contribution record
-  const { data: contribution } = await supabase
+  await supabase
     .from('contributions_v2')
     .update({
       status: 'confirmed',
       mpesa_receipt: receipt,
       confirmed_at: new Date().toISOString()
     })
-    .eq('mpesa_checkout_request_id', checkoutId)
-    .select(`
-      id, amount, membership_id, chama_id
-    `)
-    .single()
+    .eq('id', contribution.id);
 
-  if (!contribution) {
-    return respond({ ResultCode: 0, ResultDesc: 'Accepted' })
-  }
-
-  // Update wallet balance
-  await supabase.rpc('increment_wallet_balance', {
+  // Use the SAFE locked function
+  await supabase.rpc('increment_wallet_balance_safe', {
     p_chama_id: contribution.chama_id,
     p_amount: contribution.amount
-  })
+  });
 
-  // Record in transactions ledger
-  await supabase
-    .from('transactions_v2')
-    .insert({
-      chama_id: contribution.chama_id,
+  await supabase.from('transactions_v2').insert({
+    chama_id: contribution.chama_id,
+    membership_id: contribution.membership_id,
+    type: 'contribution',
+    amount: contribution.amount,
+    reference: receipt,
+    status: 'confirmed'
+  });
+
+  // Record double-entry transaction
+  await supabase.rpc('record_ledger_transaction', {
+    p_chama_id: contribution.chama_id,
+    p_debit_account_type: 'external_cash',
+    p_credit_account_type: 'chama_pool',
+    p_membership_id: null,
+    p_amount: contribution.amount,
+    p_description: `Contribution - ${receipt}`
+  });
+
+  // Write to outbox instead of calling external APIs directly
+  await supabase.from('outbox').insert({
+    event_type: 'contribution_confirmed',
+    payload: {
       membership_id: contribution.membership_id,
-      type: 'contribution',
-      amount: contribution.amount,
-      reference: receipt,
-      status: 'confirmed'
-    })
-
-  // Trigger trust score recalculation
-  await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/trust-score/calculate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      membership_id: contribution.membership_id
-    })
-  })
-
-  // Get member profile for SMS
-  const { data: membership } = await supabase
-    .from('chama_memberships')
-    .select(`
-      profiles ( full_name, phone_number ),
-      chamas_v2 ( name )
-    `)
-    .eq('id', contribution.membership_id)
-    .single()
-
-  // Send SMS confirmation
-  if (membership?.profiles) {
-    const memberPhone = (membership.profiles as any).phone_number
-    const memberName = (membership.profiles as any).full_name
-    const chamaName = (membership.chamas_v2 as any).name
-
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sms/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        phone: memberPhone,
-        message: `SmartChama: Your KSh ${amount?.toLocaleString('en-KE')} contribution to ${chamaName} is confirmed. Receipt: ${receipt}.`
-      })
-    })
-  }
-
-  // Add to group activity feed
-  await supabase
-    .from('group_activity')
-    .insert({
       chama_id: contribution.chama_id,
-      event_type: 'contribution_received',
-      description: `A contribution of KSh ${amount?.toLocaleString('en-KE')} was received.`
-    })
+      amount: contribution.amount,
+      receipt: receipt
+    }
+  });
 
-  return respond({ ResultCode: 0, ResultDesc: 'Accepted' })
+  return respondOk();
 }

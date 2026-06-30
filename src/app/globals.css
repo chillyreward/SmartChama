@@ -1,69 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --bg-page:       #0A0A0A;
-  --bg-card:       #111111;
-  --bg-sidebar:    #0D0D0D;
-  --bg-input:      #1A1A1A;
-  --bg-hover:      #1A2E1A;
-  --bg-subtle:     #052e16;
-  --bg-muted:      #161616;
-
-  --border:        #1F2F1F;
-  --border-strong: #166534;
-
-  --text-primary:  #F0FDF4;
-  --text-secondary:#86EFAC;
-  --text-muted:    #4ADE80;
-  --text-on-green: #052e16;
-
-  --green:         #22C55E;
-  --green-bright:  #4ADE80;
-  --green-light:   #052e16;
-  --green-text:    #86EFAC;
-  
-  --red:           #F87171;
-  --red-bg:        #1F0A0A;
-  --red-text:      #FCA5A5;
-  
-  --yellow:        #FCD34D;
-  --yellow-bg:     #1F1A00;
-  --yellow-text:   #FDE68A;
+  color-scheme: light;
+  --bg-page: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-input: #FFFFFF;
+  --bg-hover: #F0FDF4;
+  --bg-subtle: #DCFCE7;
+  --bg-muted: #F9FAFB;
+  --border: #D1FAE5;
+  --border-strong: #6EE7B7;
+  --text-primary: #052e16;
+  --text-secondary: #166534;
+  --text-muted: #4ADE80;
+  --green: #16A34A;
+  --green-bright: #22C55E;
 }
 
 .dark {
-  /* Retain for compatibility with next-themes selectors */
-  --bg-page:       #0A0A0A;
-  --bg-card:       #111111;
-  --bg-sidebar:    #0D0D0D;
-  --bg-input:      #1A1A1A;
-  --bg-hover:      #1A2E1A;
-  --bg-subtle:     #052e16;
-  --bg-muted:      #161616;
-
-  --border:        #1F2F1F;
+  color-scheme: dark;
+  --bg-page: #0A0A0A;
+  --bg-card: #111111;
+  --bg-sidebar: #0D0D0D;
+  --bg-input: #1A1A1A;
+  --bg-hover: #1A2E1A;
+  --bg-subtle: #052e16;
+  --bg-muted: #161616;
+  --border: #1F2F1F;
   --border-strong: #166534;
-
-  --text-primary:  #F0FDF4;
-  --text-secondary:#86EFAC;
-  --text-muted:    #4ADE80;
-  --text-on-green: #052e16;
-
-  --green:         #22C55E;
-  --green-bright:  #4ADE80;
-  --green-light:   #052e16;
-  --green-text:    #86EFAC;
-  
-  --red:           #F87171;
-  --red-bg:        #1F0A0A;
-  --red-text:      #FCA5A5;
-  
-  --yellow:        #FCD34D;
-  --yellow-bg:     #1F1A00;
-  --yellow-text:   #FDE68A;
+  --text-primary: #F0FDF4;
+  --text-secondary: #86EFAC;
+  --text-muted: #4ADE80;
+  --green: #22C55E;
+  --green-bright: #4ADE80;
 }
 
-/* BASE BODY */
 body {
   background-color: var(--bg-page);
   color: var(--text-primary);
@@ -214,4 +186,41 @@ html {
 
 .animate-slide-up {
   animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Force override hardcoded utility colors and border styles to match dynamic theme variables */
+.text-\[\#161d16\],
+.dark .text-\[\#161d16\] {
+  color: var(--text-primary) !important;
+}
+
+.border-\[\#E5E7EB\],
+.dark .border-\[\#E5E7EB\],
+.border-gray-100,
+.dark .border-gray-800 {
+  border-color: var(--border) !important;
+}
+
+.bg-white,
+.dark .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+.dark\:bg-\[\#161d16\],
+.dark .bg-\[\#161d16\],
+.dark .bg-\[\#1a1f1b\],
+.dark .bg-\[\#1a2218\] {
+  background-color: var(--bg-card) !important;
+}
+
+.dark\:border-\[\#2d3d2d\],
+.dark .border-gray-700 {
+  border-color: var(--border) !important;
+}
+
+.dark\:text-white,
+.dark .text-white,
+.dark .text-\[\#e8f0e4\],
+.dark .text-\[\#E8F0E4\] {
+  color: var(--text-primary) !important;
 }

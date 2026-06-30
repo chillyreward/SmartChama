@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(req: Request) {
   try {
+    const supabase = getSupabaseAdmin();
     const textBody = await req.text();
     const params = new URLSearchParams(textBody);
     
@@ -16,26 +12,40 @@ export async function POST(req: Request) {
     
     let response = '';
 
-    let phone = phoneNumber;
+    // Standardize phone format (e.g. +254XXXXXXXXX)
+    let phone = phoneNumber.replace(/\s/g, '');
     if (!phone.startsWith('+')) {
-      phone = '+' + phone.replace(/^0/, '254');
+      if (phone.startsWith('0')) {
+        phone = '+254' + phone.slice(1);
+      } else {
+        phone = '+254' + phone;
+      }
     }
 
-    const { data: member } = await supabase
-      .from('members')
-      .select('*, chamas(name)')
-      .eq('phone', phone)
+    // Fast Materialized View indexed lookup
+    const { data: summary } = await supabase
+      .from('ussd_member_summary')
+      .select('*')
+      .eq('phone_number', phone)
       .single();
 
-    if (!member) {
-      response = `END Phone number not registered to any SmartChama group.`;
+    if (!summary) {
+      response = `END Phone number not registered to any active SmartChama group.`;
       return new NextResponse(response, { headers: { 'Content-Type': 'text/plain' } });
     }
 
+    // Fetch profile_id to support admin actions and name parsing
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .eq('phone_number', phone)
+      .single();
+
+    const firstName = profile?.full_name?.split(' ')[0] || 'Member';
     const parts = text.split('*');
 
     if (text === '') {
-      response = `CON Welcome to SmartChama, ${member.full_name.split(' ')[0]}
+      response = `CON Welcome to SmartChama, ${firstName}
 1. Check Balance
 2. Make Contribution
 3. Request Loan
@@ -45,7 +55,7 @@ export async function POST(req: Request) {
       const { data: wallet } = await supabase
         .from('wallets')
         .select('balance')
-        .eq('chama_id', member.chama_id)
+        .eq('chama_id', summary.chama_id)
         .single();
         
       const balance = wallet?.balance || 0;
@@ -56,7 +66,20 @@ export async function POST(req: Request) {
         response = `CON Enter contribution amount (KSh):`;
       } else {
         const amount = parts[1];
-        response = `END Check your phone for the M-Pesa prompt to pay KSh ${amount} to ${member.chamas?.name}.`;
+        response = `END Check your phone for the M-Pesa prompt to pay KSh ${amount} to ${summary.chama_name}.`;
+        
+        // Trigger STK push asynchronously
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        fetch(`${appUrl}/api/mpesa/stk-push`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: phone,
+            amount: Number(amount),
+            membership_id: summary.membership_id,
+            chama_id: summary.chama_id
+          })
+        }).catch(err => console.error('USSD STK Trigger error:', err));
       }
     }
     else if (parts[0] === '3') {
@@ -68,29 +91,43 @@ export async function POST(req: Request) {
         const amount = parts[1];
         const duration = parts[2];
         
-        await supabase.from('loans').insert({
-          chama_id: member.chama_id,
-          member_id: member.id,
+        await supabase.from('loans_v2').insert({
+          chama_id: summary.chama_id,
+          membership_id: summary.membership_id,
           amount: Number(amount),
-          duration_months: Number(duration),
+          interest_rate: 1.0, // Default interest rate
+          repayment_months: Number(duration),
           status: 'pending',
-          created_at: new Date().toISOString(),
-          due_date: new Date(Date.now() + Number(duration) * 30 * 24 * 60 * 60 * 1000).toISOString()
+          due_date: new Date(Date.now() + Number(duration) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
         });
         
         response = `END Loan request for KSh ${amount} over ${duration} months submitted for approval.`;
       }
     }
     else if (parts[0] === '4') {
+      // Check admin status
+      const { data: membership } = await supabase
+        .from('chama_memberships')
+        .select('role')
+        .eq('id', summary.membership_id)
+        .single();
+
       const adminRoles = ['admin', 'chairlady', 'treasurer', 'secretary'];
-      if (!adminRoles.includes(member.role)) {
+      if (!membership || !adminRoles.includes(membership.role)) {
         response = `END You do not have permission to approve loans.`;
       } else {
         if (parts.length === 1) {
           const { data: pendingLoans } = await supabase
-            .from('loans')
-            .select('id, amount, members(full_name)')
-            .eq('chama_id', member.chama_id)
+            .from('loans_v2')
+            .select(`
+              id, amount, 
+              chama_memberships (
+                profiles (
+                  full_name
+                )
+              )
+            `)
+            .eq('chama_id', summary.chama_id)
             .eq('status', 'pending')
             .limit(3);
             
@@ -99,12 +136,43 @@ export async function POST(req: Request) {
           } else {
             let textRes = `CON Pending Loans:\n`;
             pendingLoans.forEach((l: any, index: number) => {
-               textRes += `${index + 1}. ${l.members?.full_name} (KSh ${l.amount})\n`;
+               const borrowerName = l.chama_memberships?.profiles?.full_name || 'Member';
+               textRes += `${index + 1}. ${borrowerName} (KSh ${l.amount})\n`;
             });
             response = textRes;
           }
         } else {
-          response = `END Loan approved successfully.`;
+          const loanIndex = Number(parts[1]) - 1;
+          const { data: pendingLoans } = await supabase
+            .from('loans_v2')
+            .select('id, amount')
+            .eq('chama_id', summary.chama_id)
+            .eq('status', 'pending')
+            .limit(3);
+            
+          if (pendingLoans && pendingLoans[loanIndex]) {
+            const loanToApprove = pendingLoans[loanIndex];
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+            // Invoke safe approval transaction endpoint
+            const approveRes = await fetch(`${appUrl}/api/loans/approve`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                loanId: loanToApprove.id,
+                adminId: profile?.id
+              })
+            });
+
+            if (approveRes.ok) {
+              response = `END Loan approved successfully.`;
+            } else {
+              const errData = await approveRes.json();
+              response = `END Approval failed: ${errData.error || 'Check balance'}`;
+            }
+          } else {
+            response = `END Invalid loan selection.`;
+          }
         }
       }
     }

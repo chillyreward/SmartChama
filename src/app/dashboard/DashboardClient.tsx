@@ -1,6 +1,5 @@
 'use client';
-
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -28,44 +27,59 @@ export default function MemberDashboard() {
 
   const formatCurrency = (val: number) => val.toLocaleString('en-KE', { maximumFractionDigits: 0 });
 
-  useEffect(() => {
-    async function loadDashboardData() {
-      if (authLoading) return;
-      
-      if (!session) {
-        router.push('/login');
-        return;
-      }
+  const hasFetched = useRef(false);
 
-      if (!member || !chama) {
-        router.push('/onboarding');
-        return;
-      }
-      
-      loadSavingsData(member.id).catch(err => console.error(err)).finally(() => setLoadingSavings(false));
-      loadLoanData(member.id).catch(err => console.error(err)).finally(() => setLoadingLoans(false));
-      loadRecentTransactions(chama.id).catch(err => console.error(err)).finally(() => setLoadingTransactions(false));
-      loadGroupHealth(chama.id).catch(err => console.error(err)).finally(() => setLoadingHealth(false));
+  async function loadDashboardData() {
+    if (!member || !chama) return;
+    try {
+      await Promise.all([
+        loadSavingsData(member.id),
+        loadLoanData(member.id),
+        loadRecentTransactions(chama.id),
+        loadGroupHealth(chama.id)
+      ]);
+    } catch (e) {
+      console.error(e);
+      setError('Failed to load dashboard data');
+    } finally {
+      setLoadingSavings(false);
+      setLoadingLoans(false);
+      setLoadingTransactions(false);
+      setLoadingHealth(false);
     }
+  }
+
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+
+    if (!member || !chama) {
+      router.push('/onboarding');
+      return;
+    }
+
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     
     loadDashboardData();
 
-    // Setup real-time ONLY AFTER initial load
-    let channel: any = null;
-    const timer = setTimeout(() => {
-      if (chama) {
-        channel = supabase.channel('dashboard_updates')
-          .on('postgres_changes', { event: '*', schema: 'public' }, () => {
-             loadDashboardData();
-          }).subscribe();
-      }
-    }, 2000); // delay connection
+    const channel = supabase.channel(`dashboard-${member.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'contributions_v2',
+        filter: `membership_id=eq.${member.id}`
+      }, () => {
+        loadSavingsData(member.id).catch(err => console.error(err));
+      })
+      .subscribe();
 
     return () => {
-      clearTimeout(timer);
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
+      supabase.removeChannel(channel);
     };
   }, [authLoading, session, member, chama, router, supabase]);
 

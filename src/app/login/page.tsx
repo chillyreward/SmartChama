@@ -41,7 +41,7 @@ export default function LoginPage() {
       .from('chama_memberships')
       .select(`
         role, status,
-        chamas_v2 ( id, name )
+        chamas_v2!inner(id, name)
       `)
       .eq('profile_id', data.user.id)
       .eq('status', 'active')

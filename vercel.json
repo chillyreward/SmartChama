@@ -61,5 +61,19 @@
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/outbox/process",
+      "schedule": "*/1 * * * *"
+    },
+    {
+      "path": "/api/smartgrow/close-expired",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/ussd/refresh-view",
+      "schedule": "*/5 * * * *"
+    }
   ]
 }

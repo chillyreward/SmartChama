@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     // Fetch membership details
     const { data: membership, error: memErr } = await supabase
       .from('chama_memberships')
-      .select('joined_at, chama_id')
+      .select('joined_at, chama_id, profile_id')
       .eq('id', membership_id)
       .single()
 

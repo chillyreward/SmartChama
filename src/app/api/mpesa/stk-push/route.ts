@@ -1,124 +1,140 @@
-import { NextResponse } from 'next/server';
-import { initiateSTKPush } from '@/lib/mpesa';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { getComplianceConfig } from '@/lib/compliance';
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const phone = body.phone || body.phoneNumber;
-    const amount = body.amount;
-    const chama_id = body.chama_id;
-    const account_ref = body.account_ref || body.accountReference || 'SmartChama';
-    const membership_id = body.membership_id;
+export async function POST(request: Request) {
+  const supabase = getSupabaseAdmin();
+  const { phone, amount, membership_id, chama_id } = await request.json();
 
-    console.log('STK Push Request:', { phone, amount, account_ref, chama_id, membership_id });
-
-    // Validate inputs
-    if (!phone || !amount) {
-      return NextResponse.json(
-        { success: false, error: 'Phone number and amount are required' },
-        { status: 400 }
-      );
-    }
-
-    const supabaseAdmin = getSupabaseAdmin();
-
-    // Validate phone number format
-    const cleanPhone = phone.replace(/\s/g, '').replace('+', '');
-    if (!/^254\d{9}$/.test(cleanPhone)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid phone number format. Use 254XXXXXXXXX' },
-        { status: 400 }
-      );
-    }
-
-    // Rate Limiting Check (30 seconds deduplication)
-    const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
-    const { data: recentTx } = await supabaseAdmin
-      .from('transactions')
-      .select('id')
-      .eq('phone', cleanPhone)
-      .gte('created_at', thirtySecondsAgo)
-      .limit(1);
-
-    if (recentTx && recentTx.length > 0) {
-      return NextResponse.json(
-        { success: false, error: 'Please wait 30 seconds before requesting another STK Push.' },
-        { status: 429 }
-      );
-    }
-
-    if (chama_id) {
-      const { data: rules } = await supabaseAdmin
-        .from('chama_rules')
-        .select('*')
-        .eq('chama_id', chama_id)
-        .single();
-        
-      if (rules) {
-        if (amount < rules.min_contribution) {
-          return NextResponse.json({ 
-            success: false, 
-            error: `Minimum contribution is KSh ${rules.min_contribution}` 
-          }, { status: 400 });
-        }
-      }
-    }
-
-    // Validate amount
-    if (amount < 1) {
-      return NextResponse.json(
-        { success: false, error: 'Amount must be at least 1 KES' },
-        { status: 400 }
-      );
-    }
-
-    // Initiate STK Push
-    const result = await initiateSTKPush(
-      cleanPhone,
-      amount,
-      account_ref,
-      body.transactionDesc || 'Chama Contribution'
+  // Validate compliance transaction limit first
+  const limit = await getComplianceConfig('max_single_transaction');
+  if (limit && amount > limit.amount) {
+    return Response.json(
+      { error: `Maximum transaction is KSh ${limit.amount}` },
+      { status: 400 }
     );
+  }
 
-    console.log('STK Push Result:', result);
+  // Idempotency check
+  const month = new Date().toISOString().slice(0, 7);
+  const idemKey = `stk-${membership_id}-${chama_id}-${month}-${amount}`;
 
-    if (result.success) {
-      return NextResponse.json({
-        success: true,
-        message: 'STK Push sent successfully',
-        checkoutRequestID: result.checkoutRequestID,
-        merchantRequestID: result.merchantRequestID,
-      });
-    } else {
-      // Extract meaningful error message
-      let errorMessage = 'Failed to send STK Push';
-      
-      // Type assertion for error case
-      const errorResult = result as { success: false; error?: any; details?: any };
-      
-      if (errorResult.error) {
-        if (typeof errorResult.error === 'string') {
-          errorMessage = errorResult.error;
-        } else if (typeof errorResult.error === 'object') {
-          errorMessage = errorResult.error.errorMessage || 
-                        errorResult.error.message || 
-                        JSON.stringify(errorResult.error);
-        }
-      }
-      
-      console.error('STK Push Failed:', errorResult.error);
-      
-      return NextResponse.json(
-        { success: false, error: errorMessage, details: errorResult.details },
-        { status: 500 }
-      );
-    }
-  } catch (error: any) {
-    console.error('STK Push API Error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+  const { data: existingKey } = await supabase
+    .from('idempotency_keys')
+    .select('result')
+    .eq('key', idemKey)
+    .single();
+
+  if (existingKey) {
+    // Return the cached result instead of sending a duplicate STK push
+    return Response.json(existingKey.result);
+  }
+
+  // Create pending contribution FIRST
+  const { data: pendingContribution, error: insertError } = await supabase
+    .from('contributions_v2')
+    .insert({
+      membership_id,
+      chama_id,
+      amount,
+      status: 'pending',
+      payment_method: 'mpesa'
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    return Response.json(
+      { error: 'Could not initiate contribution.' },
       { status: 500 }
     );
   }
+
+  // Get M-Pesa access token
+  const auth = Buffer.from(
+    `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
+  ).toString('base64');
+
+  // Determine Safaricom Endpoint based on credentials (sandbox vs production)
+  const isSandbox = (process.env.MPESA_BUSINESS_SHORT_CODE === '174379');
+  const safaricomBaseUrl = isSandbox ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke';
+
+  const tokenRes = await fetch(
+    `${safaricomBaseUrl}/oauth/v1/generate?grant_type=client_credentials`,
+    { headers: { 'Authorization': `Basic ${auth}` } }
+  );
+  const { access_token } = await tokenRes.json();
+
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[^0-9]/g, '')
+    .slice(0, 14);
+
+  const password = Buffer.from(
+    `${process.env.MPESA_BUSINESS_SHORT_CODE}${process.env.MPESA_PASSKEY}${timestamp}`
+  ).toString('base64');
+
+  const formattedPhone = phone.replace(/^\+/, '').replace(/\s/g, '');
+
+  const stkRes = await fetch(
+    `${safaricomBaseUrl}/mpesa/stkpush/v1/processrequest`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        BusinessShortCode: process.env.MPESA_BUSINESS_SHORT_CODE,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: 'CustomerPayBillOnline',
+        Amount: amount,
+        PartyA: formattedPhone,
+        PartyB: process.env.MPESA_BUSINESS_SHORT_CODE,
+        PhoneNumber: formattedPhone,
+        CallBackURL: process.env.MPESA_CALLBACK_URL,
+        AccountReference: 'SmartChama',
+        TransactionDesc: 'Chama Contribution'
+      })
+    }
+  );
+
+  const stkData = await stkRes.json();
+
+  if (!stkData.CheckoutRequestID) {
+    await supabase
+      .from('contributions_v2')
+      .update({ status: 'failed' })
+      .eq('id', pendingContribution.id);
+
+    return Response.json(
+      { error: 'Could not send payment request. Please try again.' },
+      { status: 500 }
+    );
+  }
+
+  // Save CheckoutRequestID for callback lookup
+  await supabase
+    .from('contributions_v2')
+    .update({
+      mpesa_checkout_request_id: stkData.CheckoutRequestID,
+      mpesa_merchant_request_id: stkData.MerchantRequestID
+    })
+    .eq('id', pendingContribution.id);
+
+  const resultPayload = {
+    success: true,
+    contributionId: pendingContribution.id,
+    checkoutRequestId: stkData.CheckoutRequestID
+  };
+
+  // Save the idempotency key using upsert
+  await supabase
+    .from('idempotency_keys')
+    .upsert({
+      key: idemKey,
+      result: resultPayload
+    }, { onConflict: 'key' });
+
+  return Response.json(resultPayload);
 }
