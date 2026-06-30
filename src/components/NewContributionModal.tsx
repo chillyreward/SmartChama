@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export function NewContributionModal({ 
@@ -24,6 +24,14 @@ export function NewContributionModal({
   const [error, setError] = useState('')
   const [paymentConfig, setPaymentConfig] = useState<any>(null)
   const [loadingConfig, setLoadingConfig] = useState(true)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Clean up polling interval when modal unmounts
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchConfig() {
@@ -105,7 +113,7 @@ export function NewContributionModal({
       let attempts = 0
       const maxAttempts = 30
       
-      const pollInterval = setInterval(async () => {
+      pollRef.current = setInterval(async () => {
         attempts++
         
         const { data: contribution } = await supabase
@@ -115,19 +123,22 @@ export function NewContributionModal({
           .single()
         
         if (contribution?.status === 'confirmed') {
-          clearInterval(pollInterval)
+          clearInterval(pollRef.current!)
+          pollRef.current = null
           setReceiptNumber(contribution.mpesa_receipt)
           setStep('success')
         }
         
         if (contribution?.status === 'failed') {
-          clearInterval(pollInterval)
+          clearInterval(pollRef.current!)
+          pollRef.current = null
           setError('Payment was cancelled or failed. Please try again.')
           setStep('form')
         }
         
         if (attempts >= maxAttempts) {
-          clearInterval(pollInterval)
+          clearInterval(pollRef.current!)
+          pollRef.current = null
           setStep('form')
           setError('Payment timed out. If you completed the payment, it will be recorded shortly. If not, please try again.')
         }

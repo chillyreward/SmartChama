@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 
 export default function LoadingScreen({ 
@@ -9,6 +9,8 @@ export default function LoadingScreen({
 }) {
   const [progress, setProgress] = useState(0)
   const [visible, setVisible] = useState(true)
+  const t1Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const t2Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     // Skip if already loaded in this session
@@ -41,16 +43,20 @@ export default function LoadingScreen({
         clearInterval(timer)
         setProgress(100)
         sessionStorage.setItem('sc-initial-load', 'done')
-        setTimeout(() => {
+        t1Ref.current = setTimeout(() => {
           setVisible(false)
-          setTimeout(() => {
+          t2Ref.current = setTimeout(() => {
             if (onComplete) onComplete()
           }, 300)
         }, 400)
       }
     }, interval)
 
-    return () => clearInterval(timer)
+    return () => {
+      clearInterval(timer)
+      if (t1Ref.current) clearTimeout(t1Ref.current)
+      if (t2Ref.current) clearTimeout(t2Ref.current)
+    }
   }, [onComplete])
 
   if (!visible) return null

@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
 export default function SignupPage() {
@@ -167,12 +166,11 @@ export default function SignupPage() {
         className="hidden lg:flex flex-col justify-between w-1/2 p-12"
         style={{ backgroundColor: '#000000' }}>
         <div className="flex items-center gap-3">
-          <Image
-            src="/favicon.svg"
-            alt="SmartChama"
-            width={40} height={40}
-            className="h-10 w-10 object-contain brightness-0 invert"
-          />
+          <div className="w-10 h-10 rounded-xl bg-[#22C55E] flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-white text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              groups
+            </span>
+          </div>
           <span className="text-white text-[22px] font-bold">
             SmartChama
           </span>
@@ -209,12 +207,11 @@ export default function SignupPage() {
 
           {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-2 justify-center mb-10">
-            <Image
-              src="/favicon.svg"
-              alt="SmartChama"
-              width={36} height={36}
-              className="h-9 w-9 object-contain"
-            />
+            <div className="w-9 h-9 rounded-xl bg-[#22C55E] flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                groups
+              </span>
+            </div>
             <span
               className="text-[20px] font-bold"
               style={{ color: 'var(--text-primary)' }}>

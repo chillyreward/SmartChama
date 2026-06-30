@@ -12,8 +12,11 @@ export default function SelectGroupClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadMemberships() {
       const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
       if (!session) {
         router.push('/login');
         return;
@@ -30,6 +33,7 @@ export default function SelectGroupClient() {
         .eq('profile_id', session.user.id)
         .eq('status', 'active');
 
+      if (cancelled) return;
       if (data) {
         setMemberships(data);
       }
@@ -37,6 +41,7 @@ export default function SelectGroupClient() {
     }
 
     loadMemberships();
+    return () => { cancelled = true; };
   }, [router, supabase]);
 
   const handleSelect = (chamaId: string, role: string) => {

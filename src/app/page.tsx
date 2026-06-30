@@ -30,7 +30,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start w-full max-w-xs sm:max-w-none">
-              <Link href="/signup" className="bg-[#22C55E] text-white py-4 px-7 rounded-xl text-[16px] font-semibold shadow-lg shadow-green-500/20 text-center">
+              <Link href="/admin/signup" className="bg-[#22C55E] text-white py-4 px-7 rounded-xl text-[16px] font-semibold shadow-lg shadow-green-500/20 text-center">
                 Create Your Group Free
               </Link>
               <Link href="#how-it-works" className="bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-[#2d3d2d] text-[#161d16] dark:text-white py-4 px-7 rounded-xl text-[16px] font-semibold text-center">

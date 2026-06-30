@@ -185,7 +185,7 @@ export default function AdminLoginPage() {
 
             <div className="mt-6 pt-6 border-t border-slate-800">
               <p className="text-center text-slate-500 text-sm">
-                Don't have an admin account? <Link href="/signup" className="text-amber-400 hover:text-amber-300 font-bold">Create Chama</Link>
+                Don't have an admin account? <Link href="/admin/signup" className="text-amber-400 hover:text-amber-300 font-bold">Create Chama</Link>
               </p>
               <p className="text-center text-slate-500 text-sm mt-2">
                 Member login? <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-bold">Click here</Link>

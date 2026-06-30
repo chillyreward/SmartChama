@@ -15,9 +15,11 @@ export default function GroupSwitcher() {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let cancelled = false
+
     async function fetchMemberships() {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      if (cancelled || !session) return
 
       const { data } = await supabase
         .from('chama_memberships')
@@ -28,10 +30,11 @@ export default function GroupSwitcher() {
         .eq('profile_id', session.user.id)
         .eq('status', 'active')
 
-      if (data) setMemberships(data)
+      if (!cancelled && data) setMemberships(data)
     }
 
     fetchMemberships()
+    return () => { cancelled = true }
   }, [])
 
   // Click outside to close
