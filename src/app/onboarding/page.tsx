@@ -192,100 +192,63 @@ export default function OnboardingPage() {
     setStep(0)
   }
 
-  // ═══ STEP 2A: CREATE GROUP ═══
   async function handleCreateGroup() {
     setError('')
-    
-    // Log current state values for 
-    // debugging — remove after fix 
-    // is confirmed
-    console.log('Creating group with:', {
-      groupName,
-      contributionAmount,
-      frequency,
-      meetingDay
-    })
-
-    // Validate with explicit checks 
-    // and very specific errors
-    if (!groupName.trim()) {
-      setError('Please enter a group name.')
-      return
-    }
-    if (!contributionAmount || 
-        isNaN(Number(contributionAmount)) ||
-        Number(contributionAmount) < 1) {
-      setError('Please enter a valid contribution amount.')
-      return
-    }
-    if (!frequency) {
-      setError('Please select contribution frequency.')
-      return
-    }
-
     setLoading(true)
 
-    // STEP 1: Create the chama first
-    const { data: newChama, 
-      error: chamaError } = 
-      await supabase
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      // CREATE CHAMA
+      const { data: newChama, error: chamaError } = await supabase
         .from('chamas_v2')
         .insert({
           name: groupName.trim(),
-          description: 
-            groupDescription.trim() 
-            || null,
-          contribution_amount: 
-            Number(contributionAmount),
-          contribution_frequency: 
-            frequency,
-          meeting_day: 
-            Number(meetingDay),
+          description: groupDescription.trim() || null,
+          contribution_amount: Number(contributionAmount),
+          contribution_frequency: frequency,
+          meeting_day: Number(meetingDay),
           status: 'active',
-          created_by: session.user.id
+          created_by: user.id
         })
         .select('id, name')
         .single()
 
-    if (chamaError || !newChama) {
-      console.error(
-        'Chama creation error:', 
-        chamaError
-      )
-      setError('Could not create group. ' + (chamaError?.message || 'Please try again.'))
-      setLoading(false)
-      return
-    }
+      if (chamaError || !newChama?.id) {
+        console.error('Chama error:', chamaError)
+        setError(`Could not create group: ${chamaError?.message || 'Unknown error'}`)
+        setLoading(false)
+        return
+      }
 
-    // Confirm we have a valid chama ID
-    if (!newChama.id) {
-      setError('Group was created but ID is missing. Please contact support.')
-      setLoading(false)
-      return
-    }
-
-    // STEP 2: Create membership, 
-    // wallet and activity log in 
-    // parallel — all use the 
-    // confirmed chama ID
-    const [
-      membershipResult,
-      walletResult
-    ] = await Promise.all([
-      supabase
+      // CREATE MEMBERSHIP
+      const { data: newMembership, error: membershipError } = await supabase
         .from('chama_memberships')
         .insert({
-          profile_id: session.user.id,
+          profile_id: user.id,
           chama_id: newChama.id,
           role: 'chairlady',
           trust_score: 100,
           status: 'active',
-          joined_at: 
-            new Date().toISOString()
+          joined_at: new Date().toISOString()
         })
         .select('id')
-        .single(),
-      supabase
+        .single()
+
+      if (membershipError || !newMembership?.id) {
+        console.error('Membership error:', membershipError)
+        setError('Group created but could not set you as admin. Please try logging in again.')
+        setLoading(false)
+        return
+      }
+
+      // CREATE WALLET
+      const { error: walletError } = await supabase
         .from('wallets')
         .insert({
           chama_id: newChama.id,
@@ -293,111 +256,122 @@ export default function OnboardingPage() {
           savings_pool: 0,
           loans_disbursed: 0
         })
-    ])
 
-    if (membershipResult.error) {
-      console.error(
-        'Membership error:', 
-        membershipResult.error
-      )
-      setError('Group created but could not add you as admin. Please contact support.')
-      setLoading(false)
-      return
-    }
+      if (walletError) {
+        console.error('Wallet error:', walletError)
+      }
 
-    // STEP 3: Save active chama to 
-    // sessionStorage BEFORE routing
-    sessionStorage.setItem(
-      'active_chama_id', 
-      newChama.id
-    )
-
-    // Also save to localStorage as 
-    // backup in case sessionStorage 
-    // is cleared between pages
-    localStorage.setItem(
-      'sc_last_chama_id',
-      newChama.id
-    )
-
-    console.log(
-      'Group created successfully:', 
-      newChama.id
-    )
-
-    // Navigate to admin dashboard
-    router.push('/admin/dashboard')
-  }
-
-  // ═══ STEP 2B: JOIN WITH CODE ═══
-  async function handleJoinGroup() {
-    setError('')
-    
-    if (!inviteCode.trim() || 
-        inviteCode.trim().length < 4) {
-      setError('Please enter your invite code.')
-      return
-    }
-
-    setLoading(true)
-
-    const { data: invite } = 
-      await supabase
-        .from('invite_tokens')
-        .select('*, chamas_v2(id, name)')
-        .eq('token', 
-          inviteCode.trim().toUpperCase())
-        .eq('status', 'pending')
-        .gt('expires_at', 
-          new Date().toISOString())
+      // VERIFY everything was saved correctly before navigating
+      const { data: verification } = await supabase
+        .from('chama_memberships')
+        .select('id, role, chama_id')
+        .eq('profile_id', user.id)
+        .eq('chama_id', newChama.id)
+        .eq('status', 'active')
         .single()
 
-    if (!invite) {
-      setError('Invalid or expired invite code. Please ask your admin for a new one.')
-      setLoading(false)
-      return
-    }
+      if (!verification) {
+        setError('Setup did not complete correctly. Please try again.')
+        setLoading(false)
+        return
+      }
 
-    const { error: membershipError } = 
-      await supabase
+      // Save to storage as a hint
+      sessionStorage.setItem('active_chama_id', newChama.id)
+      localStorage.setItem('sc_last_chama_id', newChama.id)
+
+      router.push('/admin/dashboard')
+
+    } catch (err) {
+      console.error('Create group error:', err)
+      setError('Something went wrong. Please try again.')
+      setLoading(false)
+    }
+  }
+
+  async function handleJoinGroup() {
+    setError('')
+    setLoading(true)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const { data: invite } = await supabase
+        .from('invite_tokens')
+        .select(`
+          id, chama_id, status,
+          expires_at,
+          chamas_v2 ( id, name )
+        `)
+        .eq('token', inviteCode.trim().toUpperCase())
+        .eq('status', 'pending')
+        .gt('expires_at', new Date().toISOString())
+        .single()
+
+      if (!invite) {
+        setError('Invalid or expired invite code. Ask your admin for a new one.')
+        setLoading(false)
+        return
+      }
+
+      // Check not already a member
+      const { data: existing } = await supabase
+        .from('chama_memberships')
+        .select('id')
+        .eq('profile_id', user.id)
+        .eq('chama_id', invite.chama_id)
+        .single()
+
+      if (existing) {
+        sessionStorage.setItem('active_chama_id', invite.chama_id)
+        localStorage.setItem('sc_last_chama_id', invite.chama_id)
+        router.push('/dashboard')
+        return
+      }
+
+      const { data: newMembership, error: membershipError } = await supabase
         .from('chama_memberships')
         .insert({
-          profile_id: session.user.id,
+          profile_id: user.id,
           chama_id: invite.chama_id,
           role: 'member',
           trust_score: 0,
           status: 'active',
-          joined_at: 
-            new Date().toISOString()
+          joined_at: new Date().toISOString()
         })
+        .select('id')
+        .single()
 
-    if (membershipError) {
-      setError('Could not join group. Please try again.')
+      if (membershipError || !newMembership?.id) {
+        setError('Could not join group. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      await supabase
+        .from('invite_tokens')
+        .update({
+          status: 'used',
+          used_at: new Date().toISOString(),
+          used_by: user.id
+        })
+        .eq('id', invite.id)
+
+      sessionStorage.setItem('active_chama_id', invite.chama_id)
+      localStorage.setItem('sc_last_chama_id', invite.chama_id)
+
+      router.push('/dashboard')
+
+    } catch (err) {
+      console.error('Join group error:', err)
+      setError('Something went wrong. Please try again.')
       setLoading(false)
-      return
     }
-
-    await supabase
-      .from('invite_tokens')
-      .update({
-        status: 'used',
-        used_at: 
-          new Date().toISOString(),
-        used_by: session.user.id
-      })
-      .eq('token', 
-        inviteCode.trim().toUpperCase())
-
-    sessionStorage.setItem(
-      'active_chama_id', 
-      invite.chama_id
-    )
-    localStorage.setItem(
-      'sc_last_chama_id',
-      invite.chama_id
-    )
-
-    router.push('/dashboard')
   }
 
   // ═══ THE UI ═══

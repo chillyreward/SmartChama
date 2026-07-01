@@ -6,23 +6,35 @@ import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/components/AuthProvider';
 
-export default function MemberDashboard() {
+export default function MemberDashboard({
+  member: initialMember,
+  chama: initialChama,
+  metrics: initialMetrics,
+  initialTransactions
+}: {
+  member?: any;
+  chama?: any;
+  metrics?: any;
+  initialTransactions?: any[];
+} = {}) {
   const router = useRouter();
-  const { session, member, group: chama, isLoading: authLoading } = useAuth();
+  const { session, member: authMember, group: authChama, isLoading: authLoading } = useAuth();
 
-  const [loadingSavings, setLoadingSavings] = useState(true);
-  const [loadingLoans, setLoadingLoans] = useState(true);
-  const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const member = initialMember || authMember;
+  const chama = initialChama || authChama;
+
+  const [loadingSavings, setLoadingSavings] = useState(!initialMetrics);
+  const [loadingLoans, setLoadingLoans] = useState(!initialMetrics);
+  const [loadingTransactions, setLoadingTransactions] = useState(!initialTransactions);
   const [loadingHealth, setLoadingHealth] = useState(true);
   const [error, setError] = useState('');
   
-  
-  const [totalSavings, setTotalSavings] = useState(0);
-  const [activeLoans, setActiveLoans] = useState(0);
-  const [loanData, setLoanData] = useState<any[]>([]);
-  const [repaymentRate, setRepaymentRate] = useState<number | null>(null);
+  const [totalSavings, setTotalSavings] = useState(initialMetrics ? initialMetrics.totalSaved : 0);
+  const [activeLoans, setActiveLoans] = useState(initialMetrics ? initialMetrics.activeLoans : 0);
+  const [loanData, setLoanData] = useState<any[]>(initialMetrics ? initialMetrics.loans : []);
+  const [repaymentRate, setRepaymentRate] = useState<number | null>(initialMetrics ? initialMetrics.repaymentRate : null);
   const [chartData, setChartData] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>(initialTransactions || []);
   const [groupHealth, setGroupHealth] = useState<any>(null);
 
   const formatCurrency = (val: number) => val.toLocaleString('en-KE', { maximumFractionDigits: 0 });
@@ -50,6 +62,40 @@ export default function MemberDashboard() {
   }
 
   useEffect(() => {
+    if (initialMetrics?.contributions) {
+      const twelveMonthsAgo = new Date();
+      twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+      
+      const monthly: Record<string, number> = {};
+      initialMetrics.contributions.forEach((c: any) => {
+        const cDate = new Date(c.created_at);
+        if (cDate >= twelveMonthsAgo) {
+          const month = cDate.toLocaleString('en-KE', { month: 'short', year: '2-digit' });
+          monthly[month] = (monthly[month] || 0) + c.amount;
+        }
+      });
+      
+      const chartDataFormatted = Object.entries(monthly).map(([month, amount]) => ({ month, amount }));
+      setChartData(chartDataFormatted);
+    }
+  }, [initialMetrics]);
+
+  useEffect(() => {
+    if (initialMetrics) {
+      setTotalSavings(initialMetrics.totalSaved);
+      setActiveLoans(initialMetrics.activeLoans);
+      setLoanData(initialMetrics.loans);
+      setRepaymentRate(initialMetrics.repaymentRate);
+    }
+  }, [initialMetrics]);
+
+  useEffect(() => {
+    if (initialTransactions) {
+      setTransactions(initialTransactions);
+    }
+  }, [initialTransactions]);
+
+  useEffect(() => {
     if (authLoading) return;
     
     if (!session) {
@@ -58,7 +104,15 @@ export default function MemberDashboard() {
     }
 
     if (!member || !chama) {
+      if (initialMember && initialChama) return;
       router.push('/onboarding');
+      return;
+    }
+
+    loadGroupHealth(chama.id).catch(err => console.error(err));
+
+    if (initialMember && initialChama) {
+      setLoadingHealth(false);
       return;
     }
 
@@ -81,7 +135,7 @@ export default function MemberDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authLoading, session, member, chama, router, supabase]);
+  }, [authLoading, session, member, chama, router, supabase, initialMember, initialChama]);
 
   async function loadSavingsData(membershipId: string) {
     const { data, error } = await supabase

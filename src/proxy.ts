@@ -58,13 +58,23 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith('/favicon')
   )
 
-  if (!session && !isPublic) {
+  const isProtected =
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/onboarding') ||
+    pathname.startsWith('/select-group')
+
+  const isAuthPage =
+    pathname === '/login' ||
+    pathname === '/signup'
+
+  if (!session && isProtected) {
     const loginUrl = new URL('/login', req.url)
-    loginUrl.searchParams.set('redirectTo', pathname)
+    loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  if (session && (pathname === '/login' || pathname === '/signup')) {
+  if (session && isAuthPage) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 

@@ -5,19 +5,32 @@ import { useRouter } from 'next/navigation';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/components/AuthProvider';
 
-export default function AdminDashboardPage() {
+export default function AdminDashboardPage({
+  member: initialAdmin,
+  chama: initialChama,
+  metrics: initialMetrics,
+  initialTransactions
+}: {
+  member?: any;
+  chama?: any;
+  metrics?: any;
+  initialTransactions?: any[];
+} = {}) {
   const router = useRouter();
-  const { session, member: admin, group: chama, isLoading: authLoading } = useAuth();
+  const { session, member: authAdmin, group: authChama, isLoading: authLoading } = useAuth();
 
-  const [loading, setLoading] = useState(true);
+  const admin = initialAdmin || authAdmin;
+  const chama = initialChama || authChama;
+
+  const [loading, setLoading] = useState(!initialMetrics);
   const [error, setError] = useState('');
 
   const [metrics, setMetrics] = useState({
-    totalSavings: 0,
-    memberCount: 0,
-    activeLoanCount: 0,
-    collectionRate: 0,
-    avgTrust: 0
+    totalSavings: initialMetrics ? initialMetrics.totalSavings : 0,
+    memberCount: initialMetrics ? initialMetrics.memberCount : 0,
+    activeLoanCount: initialMetrics ? initialMetrics.activeLoanCount : 0,
+    collectionRate: initialMetrics ? initialMetrics.collectionRate : 0,
+    avgTrust: initialMetrics ? initialMetrics.avgTrust : 0
   });
 
   const [pendingActions, setPendingActions] = useState({
@@ -26,7 +39,7 @@ export default function AdminDashboardPage() {
     late: [] as any[]
   });
 
-  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>(initialTransactions || []);
   const [chartData, setChartData] = useState<any[]>([]);
   const [topContributors, setTopContributors] = useState<any[]>([]);
   const [toastMessage, setToastMessage] = useState('');
@@ -34,6 +47,64 @@ export default function AdminDashboardPage() {
   const formatCurrency = (val: number) => val.toLocaleString('en-KE', { maximumFractionDigits: 0 });
 
   const hasFetched = useRef(false);
+
+  useEffect(() => {
+    if (initialMetrics) {
+      setMetrics({
+        totalSavings: initialMetrics.totalSavings,
+        memberCount: initialMetrics.memberCount,
+        activeLoanCount: initialMetrics.activeLoanCount,
+        collectionRate: initialMetrics.collectionRate,
+        avgTrust: initialMetrics.avgTrust
+      });
+      
+      if (initialMetrics.contributions) {
+        const contribByMember: Record<string, { name: string; amount: number; count: number }> = {};
+        initialMetrics.contributions.forEach((c: any) => {
+          const mInfo = initialMetrics.members.find((m: any) => m.id === c.membership_id);
+          const name = mInfo?.profiles?.full_name || 'Member';
+          if (!contribByMember[c.membership_id]) {
+            contribByMember[c.membership_id] = { name, amount: 0, count: 0 };
+          }
+          contribByMember[c.membership_id].amount += c.amount;
+          contribByMember[c.membership_id].count += 1;
+        });
+        
+        const formattedTop = Object.values(contribByMember)
+          .sort((a, b) => b.amount - a.amount)
+          .slice(0, 5);
+        setTopContributors(formattedTop);
+
+        const twelveMonthsAgo = new Date();
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+        
+        const monthly: Record<string, number> = {};
+        initialMetrics.contributions.forEach((c: any) => {
+          const cDate = new Date(c.created_at);
+          if (cDate >= twelveMonthsAgo) {
+            const month = cDate.toLocaleString('en-KE', { month: 'short', year: '2-digit' });
+            monthly[month] = (monthly[month] || 0) + c.amount;
+          }
+        });
+        
+        const chartDataFormatted = Object.entries(monthly).map(([month, amount]) => ({ month, amount }));
+        setChartData(chartDataFormatted);
+      }
+
+      if (initialMetrics.loans) {
+        const pending = initialMetrics.loans.filter((l: any) => l.status === 'pending');
+        const overdue = initialMetrics.loans.filter((l: any) => l.status === 'overdue');
+        const late = initialMetrics.loans.filter((l: any) => l.status === 'late');
+        setPendingActions({ loans: pending, overdue, late });
+      }
+    }
+  }, [initialMetrics]);
+
+  useEffect(() => {
+    if (initialTransactions) {
+      setRecentTransactions(initialTransactions);
+    }
+  }, [initialTransactions]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -46,8 +117,39 @@ export default function AdminDashboardPage() {
     const adminRoles = ['admin', 'chairlady', 'treasurer', 'secretary'];
     
     if (!admin || !chama || !adminRoles.includes(admin.role)) {
-      router.push('/dashboard');
-      return;
+      if (initialAdmin && initialChama && admin && adminRoles.includes(admin.role)) {
+        // Ok
+      } else {
+        router.push('/dashboard');
+        return;
+      }
+    }
+
+    if (initialAdmin && initialChama) {
+      const channel = supabase
+        .channel('admin_dashboard')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'contributions_v2', filter: `chama_id=eq.${chama.id}` },
+          (payload) => {
+            loadGroupMetrics(chama.id).catch(e => console.error(e));
+            loadTopContributors(chama.id).catch(e => console.error(e));
+            showToast('New contribution received!');
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'loans_v2', filter: `chama_id=eq.${chama.id}` },
+          (payload) => {
+            loadPendingActions(chama.id).catch(e => console.error(e));
+            showToast('New loan request submitted!');
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
 
     if (hasFetched.current) return;
@@ -96,7 +198,7 @@ export default function AdminDashboardPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authLoading, session, admin, chama, router]);
+  }, [authLoading, session, admin, chama, router, initialAdmin, initialChama]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
