@@ -36,9 +36,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchMemberData = async (userId: string) => {
     try {
-      // 1. Find the active chama from cookies
+      // 1. Find the active chama from sessionStorage, localStorage or cookies
       let activeChamaId: string | null = null;
-      if (typeof document !== 'undefined') {
+      if (typeof window !== 'undefined') {
+        activeChamaId = sessionStorage.getItem('active_chama_id') || localStorage.getItem('sc_last_chama_id');
+      }
+      if (!activeChamaId && typeof document !== 'undefined') {
         const match = document.cookie.match(new RegExp('(^| )active_chama_id=([^;]+)'));
         if (match) activeChamaId = match[2];
       }
@@ -88,6 +91,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!currentMembership) {
         currentMembership = memberships[0];
         activeChamaId = currentMembership.chama_id;
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('active_chama_id', activeChamaId);
+          localStorage.setItem('sc_last_chama_id', activeChamaId);
+        }
+        if (typeof document !== 'undefined') {
+          document.cookie = `active_chama_id=${activeChamaId}; path=/; max-age=${60 * 60 * 24 * 30}`;
+        }
+      } else {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('active_chama_id', activeChamaId);
+          localStorage.setItem('sc_last_chama_id', activeChamaId);
+        }
         if (typeof document !== 'undefined') {
           document.cookie = `active_chama_id=${activeChamaId}; path=/; max-age=${60 * 60 * 24 * 30}`;
         }
@@ -179,7 +194,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     async function syncState() {
       if (session?.user && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
         let activeChamaId: string | null = null;
-        if (typeof document !== 'undefined') {
+        if (typeof window !== 'undefined') {
+          activeChamaId = sessionStorage.getItem('active_chama_id') || localStorage.getItem('sc_last_chama_id');
+        }
+        if (!activeChamaId && typeof document !== 'undefined') {
           const match = document.cookie.match(new RegExp('(^| )active_chama_id=([^;]+)'));
           if (match) activeChamaId = match[2];
         }

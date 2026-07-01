@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ThemeToggle } from './ThemeToggle';
 
 export default function LandingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,6 +47,7 @@ export default function LandingNav() {
         
         {/* Desktop right buttons — hidden mobile */}
         <div className="hidden md:flex items-center gap-3">
+          <ThemeToggle />
           <Link href="/login" className="text-[15px] font-medium text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:text-[#8FA88F] dark:hover:text-[#4ae176] transition-colors mr-1">
             Sign In
           </Link>
@@ -56,6 +58,7 @@ export default function LandingNav() {
 
         {/* Mobile right — shown only on mobile */}
         <div className="flex md:hidden items-center gap-3">
+          <ThemeToggle />
           <Link href="/login" className="text-[14px] font-semibold text-[#8FA88F] hover:text-[#4ae176] transition-colors py-2 px-1">
             Sign In
           </Link>

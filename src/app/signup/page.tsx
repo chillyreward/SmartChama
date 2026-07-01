@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function SignupPage() {
   const supabase = getSupabaseBrowser()
@@ -138,6 +139,8 @@ export default function SignupPage() {
 
       // Store active chama
       sessionStorage.setItem('active_chama_id', invite.chama_id)
+      localStorage.setItem('sc_last_chama_id', invite.chama_id)
+      document.cookie = `active_chama_id=${invite.chama_id}; path=/; max-age=${60 * 60 * 24 * 30}`
 
       setSuccess(`Welcome to ${invite.chama_name}! Redirecting...`)
 
@@ -157,90 +160,68 @@ export default function SignupPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex"
+    <div 
+      className="min-h-screen flex flex-col justify-between"
       style={{ backgroundColor: 'var(--bg-page)' }}>
 
-      {/* Left dark panel */}
-      <div
-        className="hidden lg:flex flex-col justify-between w-1/2 p-12"
-        style={{ backgroundColor: '#000000' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#22C55E] flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined text-white text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              groups
-            </span>
-          </div>
-          <span className="text-white text-[22px] font-bold">
+      {/* Top bar */}
+      <div 
+        className="flex items-center justify-between px-6 h-14"
+        style={{ borderBottom: '1px solid var(--border)' }}>
+        <Link href="/" className="flex items-center gap-2">
+          <Image 
+            src="/favicon.svg"
+            alt="SmartChama"
+            width={28} height={28}
+            className="h-7 w-7 object-contain"
+          />
+          <span 
+            className="font-bold text-[17px]"
+            style={{ color: 'var(--text-primary)' }}>
             SmartChama
           </span>
-        </div>
-        <div>
-          <p className="text-white text-[38px] font-bold leading-[1.1] max-w-sm mb-10">
-            Join thousands of Kenyan chamas building their financial future.
-          </p>
-          <div className="space-y-4">
-            {[
-              ['savings', 'Track contributions'],
-              ['account_balance', 'Manage loans'],
-              ['verified', 'Build financial identity'],
-            ].map(([icon, text]) => (
-              <div key={text} className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[20px] text-[#22C55E]">
-                  {icon}
-                </span>
-                <span className="text-gray-400 text-[14px]">
-                  {text}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <p className="text-gray-600 text-[13px]">
-          SmartChama Technologies Ltd. Nairobi, Kenya.
-        </p>
+        </Link>
+        <ThemeToggle />
       </div>
 
-      {/* Right form panel */}
+      {/* Main card */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm">
-
-          {/* Mobile logo */}
-          <div className="flex lg:hidden items-center gap-2 justify-center mb-10">
-            <div className="w-9 h-9 rounded-xl bg-[#22C55E] flex items-center justify-center flex-shrink-0">
-              <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                groups
-              </span>
-            </div>
-            <span
-              className="text-[20px] font-bold"
-              style={{ color: 'var(--text-primary)' }}>
-              SmartChama
-            </span>
-          </div>
+        <div 
+          className="w-full max-w-md rounded-2xl p-8 transition-colors duration-300"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border)'
+          }}>
 
           <h1
-            className="text-[30px] font-bold text-center mb-2"
+            className="text-[28px] font-bold text-center mb-2 font-geist"
             style={{ color: 'var(--text-primary)' }}>
-            Create your account
+            Create account
           </h1>
           <p
-            className="text-[15px] text-center mb-8"
+            className="text-[14px] text-center mb-8"
             style={{ color: 'var(--text-secondary)' }}>
             Free to start. No bank account required.
           </p>
 
           {error && (
-            <div className="rounded-xl p-4 mb-5 bg-red-50 border border-red-200 text-[14px] text-red-700">
+            <div 
+              className="rounded-xl p-4 mb-5 text-[14px]"
+              style={{
+                backgroundColor: '#FEF2F2',
+                border: '1px solid #FECACA',
+                color: '#991B1B'
+              }}>
               {error}
             </div>
           )}
 
           {success && (
-            <div className="rounded-xl p-4 mb-5 border text-[14px]"
+            <div 
+              className="rounded-xl p-4 mb-5 text-[14px]"
               style={{
                 backgroundColor: '#F0FDF4',
-                borderColor: '#BBF7D0',
+                border: '1px solid #BBF7D0',
                 color: '#15803D'
               }}>
               {success}
@@ -248,8 +229,6 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSignup} className="space-y-4">
-
-            {/* Full name */}
             <div>
               <label
                 className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
@@ -262,7 +241,7 @@ export default function SignupPage() {
                 onChange={e => setFullName(e.target.value)}
                 placeholder="Grace Wanjiku"
                 required
-                className="w-full px-4 py-3.5 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
                 style={{
                   backgroundColor: 'var(--bg-input)',
                   borderColor: 'var(--border)',
@@ -271,7 +250,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label
                 className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
@@ -284,7 +262,7 @@ export default function SignupPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="grace@example.com"
                 required
-                className="w-full px-4 py-3.5 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
                 style={{
                   backgroundColor: 'var(--bg-input)',
                   borderColor: 'var(--border)',
@@ -293,7 +271,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label
                 className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
@@ -307,7 +284,7 @@ export default function SignupPage() {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Min. 8 characters"
                   required
-                  className="w-full px-4 py-3.5 pr-12 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                  className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
                   style={{
                     backgroundColor: 'var(--bg-input)',
                     borderColor: 'var(--border)',
@@ -317,13 +294,14 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center"
                   style={{ color: 'var(--text-muted)' }}>
                   <span className="material-symbols-outlined text-[20px]">
                     {showPassword ? 'visibility_off' : 'visibility'}
                   </span>
                 </button>
               </div>
+
               {password && (
                 <div className="mt-2">
                   <div className="flex gap-1 mb-1">
@@ -344,14 +322,13 @@ export default function SignupPage() {
               )}
             </div>
 
-            {/* Invite Code */}
             <div>
               <label
                 className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
                 style={{ color: 'var(--text-secondary)' }}>
                 Invite Code
-                <span className="ml-1 normal-case font-normal" style={{ color: 'var(--text-muted)' }}>
-                  (from your chama admin)
+                <span className="ml-1 normal-case font-normal animate-pulse" style={{ color: 'var(--text-muted)' }}>
+                  (optional)
                 </span>
               </label>
               <input
@@ -359,14 +336,14 @@ export default function SignupPage() {
                 value={inviteCode}
                 onChange={e => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
                 placeholder="e.g. SC4829"
-                className="w-full px-4 py-3.5 rounded-xl border text-[16px] font-mono font-bold tracking-widest text-center uppercase focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                className="w-full px-4 py-3 rounded-xl border text-[16px] font-mono font-bold tracking-widest text-center uppercase focus:outline-none focus:border-[#22C55E]"
                 style={{
                   backgroundColor: 'var(--bg-input)',
                   borderColor: inviteCode ? '#22C55E' : 'var(--border)',
                   color: 'var(--text-primary)'
                 }}
               />
-              <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[12px] mt-1.5" style={{ color: 'var(--text-muted)' }}>
                 Leave blank if you are creating a new group
               </p>
             </div>
@@ -374,10 +351,9 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#22C55E] text-white py-4 rounded-xl mt-2 text-[16px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full bg-[#22C55E] text-white py-4 rounded-xl mt-4 text-[16px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
-
           </form>
 
           <p className="text-[12px] text-center mt-4" style={{ color: 'var(--text-muted)' }}>
@@ -402,8 +378,14 @@ export default function SignupPage() {
               Sign in
             </Link>
           </p>
-
         </div>
+      </div>
+
+      {/* Footer copyright */}
+      <div 
+        className="text-center py-6 text-[12px]"
+        style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border)' }}>
+        SmartChama Technologies Ltd. Nairobi, Kenya.
       </div>
     </div>
   )

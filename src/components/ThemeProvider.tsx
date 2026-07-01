@@ -7,7 +7,7 @@ export { useTheme } from 'next-themes';
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="dark" forcedTheme="dark" {...props}>
+    <NextThemesProvider attribute="class" defaultTheme="dark" enableSystem {...props}>
       {children}
     </NextThemesProvider>
   );
