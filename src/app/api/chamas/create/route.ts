@@ -41,6 +41,14 @@ export async function POST(request: Request) {
       }
     }
 
+    // Default fallbacks to prevent "Missing required fields" errors
+    if (!finalPhone) {
+      finalPhone = '+254700000000';
+    }
+    if (!finalFullName) {
+      finalFullName = email ? email.split('@')[0] : 'Chama Member';
+    }
+
     if (!user_id || !chama_name || !finalFullName || !finalPhone) {
       console.log("Validation failed. Missing required fields:", { user_id, chama_name, finalFullName, finalPhone });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

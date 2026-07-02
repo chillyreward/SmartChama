@@ -53,7 +53,7 @@ export default function OnboardingClient() {
         .eq('id', session.user.id)
         .single();
       
-      if (profile) {
+      if (profile && profile.full_name && profile.phone_number) {
         setProfileForm(prev => ({ 
           ...prev, 
           full_name: profile.full_name || prev.full_name,
