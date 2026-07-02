@@ -4,6 +4,8 @@ import { supabase as clientSupabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
+    const body = await request.json();
+    console.log("Create Chama API Payload:", body);
     const { 
       user_id, 
       email, 
@@ -18,16 +20,34 @@ export async function POST(request: Request) {
       account_number,
       phone_number,
       account_name
-    } = await request.json();
+    } = body;
 
-    if (!user_id || !chama_name || !full_name || !phone) {
+    const supabase = getSupabaseAdmin(); // Admin bypasses RLS
+
+    let finalPhone = phone;
+    let finalFullName = full_name;
+
+    // Fallback: If full_name or phone is missing, fetch them from the profiles table
+    if (user_id && (!finalPhone || !finalFullName)) {
+      const { data: dbProfile } = await supabase
+        .from('profiles')
+        .select('full_name, phone_number')
+        .eq('id', user_id)
+        .single();
+
+      if (dbProfile) {
+        if (!finalPhone) finalPhone = dbProfile.phone_number;
+        if (!finalFullName) finalFullName = dbProfile.full_name;
+      }
+    }
+
+    if (!user_id || !chama_name || !finalFullName || !finalPhone) {
+      console.log("Validation failed. Missing required fields:", { user_id, chama_name, finalFullName, finalPhone });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const supabase = getSupabaseAdmin(); // Admin bypasses RLS for these creations
-
     // 1. Upsert Profile
-    let formattedPhone = phone.replace(/\s/g, '');
+    let formattedPhone = finalPhone.replace(/\s/g, '');
     if (formattedPhone.startsWith('0')) {
       formattedPhone = '+254' + formattedPhone.slice(1);
     }
@@ -39,7 +59,7 @@ export async function POST(request: Request) {
       .from('profiles')
       .upsert({
         id: user_id,
-        full_name,
+        full_name: finalFullName,
         phone_number: formattedPhone,
         email
       });
