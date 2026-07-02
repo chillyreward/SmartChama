@@ -65,15 +65,15 @@
   "crons": [
     {
       "path": "/api/outbox/process",
-      "schedule": "*/1 * * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/smartgrow/close-expired",
-      "schedule": "0 * * * *"
+      "schedule": "30 0 * * *"
     },
     {
       "path": "/api/ussd/refresh-view",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }
