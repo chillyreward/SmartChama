@@ -1,173 +1,364 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
-export default function SignupPage() {
+function SignupForm() {
   const supabase = getSupabaseBrowser()
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  // Pre-fill token from URL if admin sent an invite link
-  const tokenFromUrl = searchParams.get('token') || ''
-  
+  // Determine role from URL param
+  // /signup?role=admin → admin flow
+  // /signup?role=member → member flow
+  const urlRole = searchParams.get('role') || 'member'
+  const isAdminSignup = urlRole === 'admin'
+
+  const [step, setStep] = useState<1 | 2>(1)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  // Step 1 fields (both paths)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [phone, setPhone] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [inviteCode, setInviteCode] = useState(tokenFromUrl)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+
+  // Step 2 — Admin: group details
+  const [groupName, setGroupName] = useState('')
+  const [contributionAmount, setContributionAmount] = useState('')
+  const [frequency, setFrequency] = useState('monthly')
+
+  // Step 2 — Member: group code
+  const [groupCode, setGroupCode] = useState(searchParams.get('code') || '')
+  
+  // Success state — shows group code for admin after creation
+  const [createdGroupCode, setCreatedGroupCode] = useState('')
+  const [success, setSuccess] = useState(false)
 
   // Password strength
-  function getStrength(p: string) {
-    if (p.length === 0) return 0
-    if (p.length < 6) return 1
-    if (p.length < 10) return 2
-    return 3
-  }
-  const strength = getStrength(password)
-  const strengthLabel = ['', 'Weak', 'Good', 'Strong'][strength]
-  const strengthColor = ['', '#EF4444', '#F59E0B', '#22C55E'][strength]
+  const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
+  const strengthColors = ['', '#EF4444', '#F59E0B', '#22C55E']
+  const strengthLabels = ['', 'Weak', 'Good', 'Strong']
 
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+  async function handleStep1() {
     setError('')
-
+    if (!fullName.trim()) {
+      setError('Please enter your name.')
+      return
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setError('Please enter a valid email.')
+      return
+    }
     if (password.length < 8) {
       setError('Password must be at least 8 characters.')
-      setLoading(false)
+      return
+    }
+    setStep(2)
+  }
+
+  async function handleAdminSignup() {
+    setError('')
+    if (!groupName.trim()) {
+      setError('Please enter a group name.')
+      return
+    }
+    if (!contributionAmount || Number(contributionAmount) < 1) {
+      setError('Please enter a contribution amount.')
       return
     }
 
-    // If invite code provided, validate it first before creating account
-    let invite: any = null
-    if (inviteCode.trim()) {
-      const { data: inviteData } = await supabase
-        .from('invite_tokens')
-        .select('*')
-        .eq('token', inviteCode.trim().toUpperCase())
-        .eq('is_active', true)
-        .gt('expires_at', new Date().toISOString())
-        .single()
+    setLoading(true)
 
-      if (!inviteData) {
-        setError(
-          'This invite code is invalid or has expired. Ask your admin to send a new invite.'
-        )
-        setLoading(false)
-        return
-      }
-
-      const { data: chamaData } = await supabase
-        .from('chamas_v2')
-        .select('id, name')
-        .eq('id', inviteData.chama_id)
-        .single()
-
-      if (!chamaData) {
-        setError('Invited chama group not found.')
-        setLoading(false)
-        return
-      }
-
-      invite = { ...inviteData, chama_name: chamaData.name }
-    }
-
-    // Create Supabase auth account
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        data: { 
-          full_name: fullName.trim() 
+    try {
+      // 1. Create auth account
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { 
+            full_name: fullName.trim()
+          },
+          emailRedirectTo: undefined
         }
-      }
-    })
-
-    if (authError) {
-      setError(
-        authError.message.includes('already registered')
-          ? 'An account with this email already exists. Try signing in.'
-          : authError.message
-      )
-      setLoading(false)
-      return
-    }
-
-    // Create profile row
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: authData.user!.id,
-        full_name: fullName.trim(),
-        email: email.trim()
       })
 
-    if (profileError) {
-      setError(
-        'Account created but setup failed. Please contact support@smartchama.co.ke'
-      )
+      if (authError || !authData.user) {
+        if (authError?.message.includes('already registered')) {
+          setError('An account with this email already exists. Please sign in instead.')
+        } else {
+          setError(authError?.message || 'Could not create account.')
+        }
+        setLoading(false)
+        return
+      }
+
+      const userId = authData.user.id
+
+      // Format phone
+      let formattedPhone = phone.replace(/\s/g, '')
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '+254' + formattedPhone.slice(1)
+      }
+      if (!formattedPhone.startsWith('+254') && phone.trim()) {
+        formattedPhone = '+254' + formattedPhone
+      }
+
+      // 2. Create profile
+      await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          full_name: fullName.trim(),
+          email: email.trim(),
+          phone_number: formattedPhone || null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' })
+
+      // 3. Create chama (trigger auto-generates code)
+      const { data: newChama, error: chamaError } = await supabase
+        .from('chamas_v2')
+        .insert({
+          name: groupName.trim(),
+          contribution_amount: Number(contributionAmount),
+          contribution_frequency: frequency,
+          status: 'active',
+          created_by: userId
+        })
+        .select('id, name, group_code')
+        .single()
+
+      if (chamaError || !newChama) {
+        console.error(chamaError)
+        setError('Could not create group. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      // 4. Create membership
+      const { error: membershipError } = await supabase
+        .from('chama_memberships')
+        .insert({
+          profile_id: userId,
+          chama_id: newChama.id,
+          role: 'chairlady',
+          trust_score: 100,
+          status: 'active',
+          joined_at: new Date().toISOString()
+        })
+
+      if (membershipError) {
+        console.error(membershipError)
+        setError('Account created but group setup failed. Please contact support.')
+        setLoading(false)
+        return
+      }
+
+      // 5. Create wallet
+      await supabase
+        .from('wallets')
+        .insert({
+          chama_id: newChama.id,
+          balance: 0,
+          savings_pool: 0,
+          loans_disbursed: 0
+        })
+
+      // 6. Sign in immediately
+      await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password
+      })
+
+      // Save to storage
+      try {
+        sessionStorage.setItem('active_chama_id', newChama.id)
+        localStorage.setItem('sc_last_chama_id', newChama.id)
+      } catch(e) {}
+
+      // Show success with the group code
+      setCreatedGroupCode(newChama.group_code)
+      setSuccess(true)
       setLoading(false)
+
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || 'Something went wrong.')
+      setLoading(false)
+    }
+  }
+
+  async function handleMemberSignup() {
+    setError('')
+    
+    const code = groupCode.trim().toUpperCase()
+    
+    if (code.length < 4) {
+      setError('Please enter your group code.')
       return
     }
 
-    // If invite code was valid, link them to the chama immediately
-    if (invite) {
+    setLoading(true)
+
+    try {
+      // 1. Verify group code exists
+      const { data: chama, error: chamaError } = await supabase
+        .from('chamas_v2')
+        .select('id, name, group_code, status')
+        .eq('group_code', code)
+        .eq('status', 'active')
+        .single()
+
+      if (chamaError || !chama) {
+        setError('Group code not found. Check with your admin and try again.')
+        setLoading(false)
+        return
+      }
+
+      // 2. Create auth account
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { 
+            full_name: fullName.trim() 
+          },
+          emailRedirectTo: undefined
+        }
+      })
+
+      if (authError || !authData.user) {
+        if (authError?.message.includes('already registered')) {
+          setError('An account with this email already exists. Please sign in instead.')
+        } else {
+          setError(authError?.message || 'Could not create account.')
+        }
+        setLoading(false)
+        return
+      }
+
+      const userId = authData.user.id
+
+      // Format phone
+      let formattedPhone = phone.replace(/\s/g, '')
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '+254' + formattedPhone.slice(1)
+      }
+      if (!formattedPhone.startsWith('+254') && phone.trim()) {
+        formattedPhone = '+254' + formattedPhone
+      }
+
+      // 3. Create profile
       await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          full_name: fullName.trim(),
+          email: email.trim(),
+          phone_number: formattedPhone || null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' })
+
+      // 4. Create membership
+      const { error: membershipError } = await supabase
         .from('chama_memberships')
         .insert({
-          profile_id: authData.user!.id,
-          chama_id: invite.chama_id,
+          profile_id: userId,
+          chama_id: chama.id,
           role: 'member',
           trust_score: 0,
-          status: 'active'
+          status: 'active',
+          joined_at: new Date().toISOString()
         })
 
-      // Mark invite as used
-      await supabase
-        .from('invite_tokens')
-        .update({
-          is_active: false,
-          current_uses: (invite.current_uses || 0) + 1
-        })
-        .eq('token', inviteCode.trim().toUpperCase())
+      if (membershipError) {
+        console.error(membershipError)
+        setError('Could not join group. Please try again.')
+        setLoading(false)
+        return
+      }
 
-      // Store active chama
-      sessionStorage.setItem('active_chama_id', invite.chama_id)
-      localStorage.setItem('sc_last_chama_id', invite.chama_id)
-      document.cookie = `active_chama_id=${invite.chama_id}; path=/; max-age=${60 * 60 * 24 * 30}`
+      // 5. Sign in immediately
+      await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password
+      })
 
-      setSuccess(`Welcome to ${invite.chama_name}! Redirecting...`)
+      try {
+        sessionStorage.setItem('active_chama_id', chama.id)
+        localStorage.setItem('sc_last_chama_id', chama.id)
+      } catch(e) {}
 
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 1500)
+      router.push('/dashboard')
 
-    } else {
-      // No invite code — go to onboarding to create or join a chama
-      setSuccess('Account created! Setting up your profile...')
-      setTimeout(() => {
-        router.push('/onboarding')
-      }, 1500)
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || 'Something went wrong.')
+      setLoading(false)
     }
+  }
 
-    setLoading(false)
+  // SUCCESS SCREEN FOR ADMIN — shows the group code prominently
+  if (success && createdGroupCode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+        <div className="w-full max-w-md text-center">
+          
+          <div className="w-20 h-20 rounded-full bg-[#F0FDF4] dark:bg-[#0E2E1B] flex items-center justify-center mx-auto mb-6">
+            <span className="material-symbols-outlined text-[40px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              check_circle
+            </span>
+          </div>
+
+          <h1 className="text-[28px] font-bold mb-2">
+            Group Created!
+          </h1>
+          <p className="text-[15px] mb-8 text-[#4F5A53] dark:text-[#8FA196]">
+            Share this code with your members so they can join <strong className="text-[#161d16] dark:text-white">{groupName}</strong>
+          </p>
+
+          {/* GROUP CODE DISPLAY */}
+          <div className="rounded-2xl p-8 mb-6 bg-white dark:bg-[#0E1410] border-2 border-[#22C55E]">
+            <p className="text-[12px] font-semibold uppercase tracking-widest mb-3 text-[#4F5A53] dark:text-[#8FA196]">
+              Your Group Code
+            </p>
+            <p className="text-[52px] font-bold tracking-[0.2em] text-[#22C55E] font-mono mb-3">
+              {createdGroupCode}
+            </p>
+            <p className="text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
+              This code never expires. Save it and share it with your members.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(createdGroupCode)
+              alert('Group code copied to clipboard!')
+            }}
+            className="w-full py-3 rounded-xl border-2 border-[#22C55E] text-[#22C55E] font-semibold mb-3 hover:bg-[#22C55E] hover:text-white transition-all bg-transparent">
+            Copy Group Code
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/dashboard')}
+            className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0">
+            Go to Admin Dashboard
+          </button>
+
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div 
-      className="min-h-screen flex flex-col justify-between"
-      style={{ backgroundColor: 'var(--bg-page)' }}>
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
 
       {/* Top bar */}
-      <div 
-        className="flex items-center justify-between px-6 h-14"
-        style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className="flex items-center justify-between px-6 h-14 border-b border-[#E5E7EB] dark:border-[#1B2520]">
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/favicon.svg"
@@ -175,218 +366,318 @@ export default function SignupPage() {
             width={28} height={28}
             className="h-7 w-7 object-contain"
           />
-          <span 
-            className="font-bold text-[17px]"
-            style={{ color: 'var(--text-primary)' }}>
+          <span className="font-bold text-[17px]">
             SmartChama
           </span>
         </Link>
-        <ThemeToggle />
+        <Link href="/login" className="text-[14px] font-medium text-[#22C55E]">
+          Sign In
+        </Link>
       </div>
 
-      {/* Main card */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div 
-          className="w-full max-w-md rounded-2xl p-8 transition-colors duration-300"
+      {/* Role selector tabs */}
+      <div className="flex border-b border-[#E5E7EB] dark:border-[#1B2520]">
+        <Link
+          href="/signup?role=admin"
+          className="flex-1 py-3 text-center text-[14px] font-semibold transition-all"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border)'
+            backgroundColor: isAdminSignup ? 'rgba(34, 197, 94, 0.05)' : 'transparent',
+            color: isAdminSignup ? '#22C55E' : '#8FA196',
+            borderBottom: isAdminSignup ? '2px solid #22C55E' : '2px solid transparent'
           }}>
+          Create a Group (Admin)
+        </Link>
+        <Link
+          href="/signup?role=member"
+          className="flex-1 py-3 text-center text-[14px] font-semibold transition-all"
+          style={{
+            backgroundColor: !isAdminSignup ? 'rgba(34, 197, 94, 0.05)' : 'transparent',
+            color: !isAdminSignup ? '#22C55E' : '#8FA196',
+            borderBottom: !isAdminSignup ? '2px solid #22C55E' : '2px solid transparent'
+          }}>
+          Join a Group (Member)
+        </Link>
+      </div>
 
-          <h1
-            className="text-[28px] font-bold text-center mb-2 font-geist"
-            style={{ color: 'var(--text-primary)' }}>
-            Create account
+      <div className="flex items-start justify-center p-6 pt-10">
+        <div className="w-full max-w-md">
+
+          {/* Step indicator */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold bg-[#22C55E] text-white">
+              {step === 1 ? '1' : '✓'}
+            </div>
+            <div className="flex-1 h-0.5 bg-[#E5E7EB] dark:bg-[#1B2520]" style={{ backgroundColor: step === 2 ? '#22C55E' : undefined }} />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold"
+              style={{
+                backgroundColor: step === 2 ? '#22C55E' : 'var(--border)',
+                color: step === 2 ? 'white' : '#8FA196'
+              }}>
+              2
+            </div>
+          </div>
+
+          <h1 className="text-[26px] font-bold mb-1">
+            {step === 1 
+              ? 'Create your account'
+              : isAdminSignup 
+                ? 'Set up your group'
+                : 'Enter your group code'}
           </h1>
-          <p
-            className="text-[14px] text-center mb-8"
-            style={{ color: 'var(--text-secondary)' }}>
-            Free to start. No bank account required.
+          <p className="text-[14px] mb-6 text-[#4F5A53] dark:text-[#8FA196]">
+            {step === 1 
+              ? isAdminSignup 
+                ? 'You will be creating a new chama as the admin.'
+                : 'You will be joining a group with your admin\'s code.'
+              : isAdminSignup
+                ? 'Members will use your group code to join.'
+                : 'Get the code from your group admin.'}
           </p>
 
           {error && (
-            <div 
-              className="rounded-xl p-4 mb-5 text-[14px]"
-              style={{
-                backgroundColor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                color: '#991B1B'
-              }}>
+            <div className="rounded-xl p-4 mb-5 text-[14px] bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B]">
               {error}
             </div>
           )}
 
-          {success && (
-            <div 
-              className="rounded-xl p-4 mb-5 text-[14px]"
-              style={{
-                backgroundColor: '#F0FDF4',
-                border: '1px solid #BBF7D0',
-                color: '#15803D'
-              }}>
-              {success}
+          {/* ═══ STEP 1 — Account Info ═══ */}
+          {step === 1 && (
+            <div className="space-y-4">
+              
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={e => setFullName(e.target.value)}
+                  placeholder="Grace Wanjiku"
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Phone Number <span className="ml-1 normal-case font-normal">(optional)</span>
+                </label>
+                <div className="flex">
+                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] bg-[#FAFAFA] dark:bg-[#0B0F0C] border-[#E5E7EB] dark:border-[#1B2520] text-[#4F5A53] dark:text-[#8FA196]">
+                    +254
+                  </div>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="712 345 678"
+                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Minimum 8 characters"
+                    autoComplete="new-password"
+                    className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-[#8FA196] cursor-pointer">
+                    <span className="material-symbols-outlined text-[20px]">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
+                {password && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex gap-1 flex-1">
+                      {[1,2,3].map(i => (
+                        <div 
+                          key={i}
+                          className="h-1 flex-1 rounded-full transition-colors"
+                          style={{
+                            backgroundColor: strength >= i ? strengthColors[strength] : '#E5E7EB'
+                          }} 
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[12px] font-medium" style={{ color: strengthColors[strength] }}>
+                      {strengthLabels[strength]}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={handleStep1}
+                className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold mt-2 hover:bg-[#16A34A] transition-colors border-0">
+                Continue
+              </button>
+
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label
-                className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                style={{ color: 'var(--text-secondary)' }}>
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={e => setFullName(e.target.value)}
-                placeholder="Grace Wanjiku"
-                required
-                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
-                style={{
-                  backgroundColor: 'var(--bg-input)',
-                  borderColor: 'var(--border)',
-                  color: 'var(--text-primary)'
-                }}
-              />
-            </div>
-
-            <div>
-              <label
-                className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                style={{ color: 'var(--text-secondary)' }}>
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="grace@example.com"
-                required
-                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
-                style={{
-                  backgroundColor: 'var(--bg-input)',
-                  borderColor: 'var(--border)',
-                  color: 'var(--text-primary)'
-                }}
-              />
-            </div>
-
-            <div>
-              <label
-                className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                style={{ color: 'var(--text-secondary)' }}>
-                Password
-              </label>
-              <div className="relative">
+          {/* ═══ STEP 2 ADMIN ═══ */}
+          {step === 2 && isAdminSignup && (
+            <div className="space-y-4">
+              
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Group Name
+                </label>
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
-                  required
-                  className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
-                  style={{
-                    backgroundColor: 'var(--bg-input)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)'
-                  }}
+                  type="text"
+                  value={groupName}
+                  onChange={e => setGroupName(e.target.value)}
+                  placeholder="Nairobi Women Investment Group"
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Monthly Contribution (KSh)
+                </label>
+                <div className="flex">
+                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] bg-[#FAFAFA] dark:bg-[#0B0F0C] border-[#E5E7EB] dark:border-[#1B2520] text-[#4F5A53] dark:text-[#8FA196]">
+                    KSh
+                  </div>
+                  <input
+                    type="number"
+                    value={contributionAmount}
+                    onChange={e => setContributionAmount(e.target.value)}
+                    placeholder="5000"
+                    min="1"
+                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Contribution Frequency
+                </label>
+                <select
+                  value={frequency}
+                  onChange={e => setFrequency(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E] appearance-none">
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center"
-                  style={{ color: 'var(--text-muted)' }}>
-                  <span className="material-symbols-outlined text-[20px]">
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
+                  onClick={() => setStep(1)}
+                  className="px-6 py-3 rounded-xl border text-[15px] font-medium bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white">
+                  Back
+                </button>
+                <button
+                  onClick={handleAdminSignup}
+                  disabled={loading || !groupName.trim() || !contributionAmount}
+                  className="flex-1 py-3 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] disabled:opacity-50 transition-colors border-0">
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Creating...
+                    </span>
+                  ) : 'Create Group'}
                 </button>
               </div>
 
-              {password && (
-                <div className="mt-2">
-                  <div className="flex gap-1 mb-1">
-                    {[1, 2, 3].map(i => (
-                      <div
-                        key={i}
-                        className="flex-1 h-1 rounded-full transition-colors"
-                        style={{
-                          backgroundColor: strength >= i ? strengthColor : 'var(--border)'
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-[12px]" style={{ color: strengthColor }}>
-                    {strengthLabel}
-                  </p>
-                </div>
-              )}
             </div>
+          )}
 
-            <div>
-              <label
-                className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                style={{ color: 'var(--text-secondary)' }}>
-                Invite Code
-                <span className="ml-1 normal-case font-normal animate-pulse" style={{ color: 'var(--text-muted)' }}>
-                  (optional)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={inviteCode}
-                onChange={e => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
-                placeholder="e.g. SC4829"
-                className="w-full px-4 py-3 rounded-xl border text-[16px] font-mono font-bold tracking-widest text-center uppercase focus:outline-none focus:border-[#22C55E]"
-                style={{
-                  backgroundColor: 'var(--bg-input)',
-                  borderColor: inviteCode ? '#22C55E' : 'var(--border)',
-                  color: 'var(--text-primary)'
-                }}
-              />
-              <p className="text-[12px] mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                Leave blank if you are creating a new group
-              </p>
+          {/* ═══ STEP 2 MEMBER ═══ */}
+          {step === 2 && !isAdminSignup && (
+            <div className="space-y-4">
+              
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-2 text-[#4F5A53] dark:text-[#8FA196]">
+                  Group Code
+                </label>
+                <input
+                  type="text"
+                  value={groupCode}
+                  onChange={e => setGroupCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                  placeholder="ABC123"
+                  maxLength={6}
+                  autoFocus
+                  className="w-full px-6 py-5 rounded-xl border text-[36px] font-bold font-mono tracking-[0.4em] text-center uppercase focus:outline-none focus:border-[#22C55E] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#22C55E]"
+                />
+                <p className="text-[12px] text-center mt-2 text-[#8FA196]">
+                  Get this 6-character code from your group admin
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setStep(1)}
+                  className="px-6 py-3 rounded-xl border text-[15px] font-medium bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white">
+                  Back
+                </button>
+                <button
+                  onClick={handleMemberSignup}
+                  disabled={loading || groupCode.length < 4}
+                  className="flex-1 py-3 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] disabled:opacity-50 transition-colors border-0">
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Joining...
+                    </span>
+                  ) : 'Join Group'}
+                </button>
+              </div>
+
             </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#22C55E] text-white py-4 rounded-xl mt-4 text-[16px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <p className="text-[12px] text-center mt-4" style={{ color: 'var(--text-muted)' }}>
-            By creating an account you agree to our{' '}
-            <Link href="/terms" className="hover:underline" style={{ color: '#22C55E' }}>
-              Terms
-            </Link>
-            {' '}and{' '}
-            <Link href="/privacy" className="hover:underline" style={{ color: '#22C55E' }}>
-              Privacy Policy
-            </Link>
-          </p>
-
-          <p
-            className="text-center text-[14px] mt-6"
-            style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-center text-[13px] mt-6 text-[#4F5A53] dark:text-[#8FA196]">
             Already have an account?{' '}
-            <Link
-              href="/login"
-              className="font-semibold hover:underline"
-              style={{ color: '#22C55E' }}>
-              Sign in
+            <Link href="/login" className="font-semibold text-[#22C55E] hover:underline">
+              Sign In
             </Link>
           </p>
+
         </div>
       </div>
-
-      {/* Footer copyright */}
-      <div 
-        className="text-center py-6 text-[12px]"
-        style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border)' }}>
-        SmartChama Technologies Ltd. Nairobi, Kenya.
-      </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] dark:bg-[#0B0F0C]">
+        <div className="w-10 h-10 rounded-full border-4 border-[#22C55E]/20 border-t-[#22C55E] animate-spin" />
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   )
 }

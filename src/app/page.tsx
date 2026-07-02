@@ -29,14 +29,56 @@ export default function LandingPage() {
               Track contributions, manage loans, and build financial identity together.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start w-full max-w-xs sm:max-w-none">
-              <Link href="/admin/signup" className="bg-[#22C55E] text-white py-4 px-7 rounded-xl text-[16px] font-semibold shadow-lg shadow-green-500/20 text-center">
-                Create Your Group Free
+            {/* Two clear auth paths */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8">
+
+              {/* Admin path */}
+              <Link
+                href="/signup?role=admin"
+                className="group flex items-center gap-3 px-7 py-4 rounded-2xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-all duration-200 shadow-lg shadow-green-500/25">
+                <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  admin_panel_settings
+                </span>
+                <div className="text-left">
+                  <div className="text-[15px] font-bold">
+                    Create a Group
+                  </div>
+                  <div className="text-[12px] text-white/75">
+                    I am starting a new chama
+                  </div>
+                </div>
               </Link>
-              <Link href="#how-it-works" className="bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-[#2d3d2d] text-[#161d16] dark:text-white py-4 px-7 rounded-xl text-[16px] font-semibold text-center">
-                See How It Works
+
+              {/* Member path */}
+              <Link
+                href="/signup?role=member"
+                className="group flex items-center gap-3 px-7 py-4 rounded-2xl border-2 border-[#22C55E] text-[16px] font-semibold transition-all duration-200"
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  color: 'var(--text-primary)'
+                }}>
+                <span className="material-symbols-outlined text-[22px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  group
+                </span>
+                <div className="text-left">
+                  <div className="text-[15px] font-bold">
+                    Join a Group
+                  </div>
+                  <div className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                    I have a group code
+                  </div>
+                </div>
               </Link>
+
             </div>
+
+            {/* Sign in link below */}
+            <p className="text-center lg:text-left mt-6 text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+              Already have an account?{' '}
+              <Link href="/login" className="font-semibold text-[#22C55E] hover:underline">
+                Sign In
+              </Link>
+            </p>
 
             {/* Trust signals — horizontal scroll on mobile */}
             <div className="flex flex-wrap sm:flex-nowrap gap-6 justify-center lg:justify-start mt-10 overflow-x-auto scrollbar-hide w-full pb-2">

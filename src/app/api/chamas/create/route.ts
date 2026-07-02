@@ -4,6 +4,11 @@ import { supabase as clientSupabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("Server is missing Supabase credentials in env!");
+      return NextResponse.json({ error: 'Server configuration error: Missing Supabase credentials' }, { status: 500 });
+    }
+
     const body = await request.json();
     console.log("Create Chama API Payload:", body);
     const { 
