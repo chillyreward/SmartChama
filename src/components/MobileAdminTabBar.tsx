@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { signOut } from '@/lib/auth-helpers';
 
 const adminTabs = [
   {
@@ -38,11 +39,7 @@ export function MobileAdminTabBar() {
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    sessionStorage.removeItem('active_chama_id');
-    router.push('/login');
-  };
+  const handleSignOut = signOut;
 
   return (
     <>

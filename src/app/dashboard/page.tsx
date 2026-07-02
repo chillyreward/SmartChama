@@ -1,214 +1,148 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import MemberDashboard from './DashboardClient'
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const supabase = getSupabaseBrowser()
   const router = useRouter()
-  const hasFetched = useRef(false)
+  const initialized = useRef(false)
   
-  const [loading, setLoading] = useState(true)
-  const [chamaId, setChamaId] = useState<string | null>(null)
-  const [profile, setProfile] = useState<any>(null)
-  const [chama, setChama] = useState<any>(null)
-  const [metrics, setMetrics] = useState<any>(null)
-  const [transactions, setTransactions] = useState<any[]>([])
+  const [state, setState] = useState<{
+    loading: boolean
+    error: string | null
+    membership: any
+    chama: any
+    metrics: any
+    transactions: any[]
+    contributions: any[]
+  }>({
+    loading: true,
+    error: null,
+    membership: null,
+    chama: null,
+    metrics: null,
+    transactions: [],
+    contributions: []
+  })
 
-  useEffect(() => {
-    if (hasFetched.current) return
-    hasFetched.current = true
-    loadDashboard()
-  }, [])
-
-  async function loadDashboard() {
+  const load = useCallback(async () => {
     try {
-      // STEP 1: Get the current user
+      // Get authenticated user
       const { data: { user }, error: authError } = await supabase.auth.getUser()
 
       if (authError || !user) {
-        router.push('/login')
+        router.replace('/login')
         return
       }
 
-      // STEP 2: Get their active membership directly from DB
-      const { data: memberships, error: membershipError } = await supabase
-        .from('chama_memberships')
-        .select(`
-          id,
-          role,
-          trust_score,
-          contribution_streak,
-          status,
-          chamas_v2 (
-            id,
-            name,
-            contribution_amount,
-            contribution_frequency,
-            status
-          ),
-          profiles (
-            id,
-            full_name,
-            phone_number,
-            email
-          )
-        `)
-        .eq('profile_id', user.id)
-        .eq('status', 'active')
-        .order('joined_at', { ascending: true })
+      // Use RPC function
+      const { data: dashData, error: rpcError } = await supabase.rpc(
+        'get_user_dashboard_data',
+        { p_user_id: user.id }
+      )
 
-      if (membershipError) {
-        console.error('Membership query error:', membershipError)
-        setLoading(false)
+      if (rpcError) {
+        console.error('Dashboard RPC error:', rpcError)
+        setState(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Could not load dashboard data.'
+        }))
         return
       }
 
-      // STEP 3: If no active membership, user genuinely needs onboarding
-      if (!memberships || memberships.length === 0) {
-        router.push('/onboarding')
+      // If no membership found, go to onboarding
+      if (!dashData?.found) {
+        console.log('No membership found:', dashData?.error)
+        router.replace('/onboarding')
         return
       }
 
-      // STEP 4: Determine which chama to show. Check sessionStorage as a HINT only, not as a routing decision.
-      let activeMembership = memberships[0]
-      
-      const hintId = sessionStorage.getItem('active_chama_id') ||
-                     localStorage.getItem('sc_last_chama_id')
+      const { membership, chama, metrics } = dashData
 
-      if (hintId && memberships.length > 1) {
-        const hinted = memberships.find(
-          m => (m.chamas_v2 as any)?.id === hintId
-        )
-        if (hinted) {
-          activeMembership = hinted
-        }
+      // Save chama ID for convenience
+      if (chama?.id) {
+        try {
+          sessionStorage.setItem('active_chama_id', chama.id)
+          localStorage.setItem('sc_last_chama_id', chama.id)
+        } catch(e) {}
       }
 
-      const resolvedChamaId = (activeMembership.chamas_v2 as any)?.id
-
-      if (!resolvedChamaId) {
-        console.error('Could not resolve chama ID')
-        router.push('/onboarding')
-        return
-      }
-
-      // STEP 5: Save for convenience (not for routing decisions)
-      sessionStorage.setItem('active_chama_id', resolvedChamaId)
-      localStorage.setItem('sc_last_chama_id', resolvedChamaId)
-
-      setChamaId(resolvedChamaId)
-      setProfile(activeMembership)
-      setChama(activeMembership.chamas_v2)
-
-      // STEP 6: Load all other data in parallel now that we have a confirmed chama ID
-      const [
-        contributionsResult,
-        loansResult,
-        transactionsResult,
-        walletResult
-      ] = await Promise.all([
-        supabase
-          .from('contributions_v2')
-          .select('amount, created_at, status')
-          .eq('membership_id', activeMembership.id)
-          .eq('status', 'confirmed')
-          .order('created_at', { ascending: false }),
-
-        supabase
-          .from('loans_v2')
-          .select('id, status, amount, created_at')
-          .eq('membership_id', activeMembership.id),
-
+      // Load secondary data in parallel
+      const [txResult, contribResult] = await Promise.all([
         supabase
           .from('transactions_v2')
-          .select(`
-            id, type, amount, 
-            created_at, reference,
-            chama_memberships (
-              profiles ( full_name )
-            )
-          `)
-          .eq('chama_id', resolvedChamaId)
+          .select('*')
+          .eq('chama_id', chama.id)
           .order('created_at', { ascending: false })
           .limit(10),
-
+        
         supabase
-          .from('wallets')
-          .select('balance, savings_pool, loans_disbursed')
-          .eq('chama_id', resolvedChamaId)
-          .single()
+          .from('contributions_v2')
+          .select('*')
+          .eq('membership_id', membership.membership_id)
+          .eq('status', 'confirmed')
+          .order('created_at', { ascending: false })
+          .limit(12)
       ])
 
-      const totalSaved = contributionsResult.data?.reduce(
-        (sum, c) => sum + c.amount, 
-        0
-      ) || 0
+      // Map RPC names to props required by DashboardClient (e.g. membership_id -> id)
+      const mappedMember = {
+        id: membership.membership_id,
+        role: membership.role,
+        trust_score: membership.trust_score,
+        full_name: membership.full_name,
+        email: membership.email,
+        phone: membership.phone,
+        chama_id: membership.chama_id
+      }
 
-      const repaidLoans = loansResult.data?.filter(
-        l => l.status === 'repaid'
-      ).length || 0
-      const totalLoans = loansResult.data?.length || 0
-      const activeLoans = loansResult.data?.filter(
-        l => ['active', 'overdue'].includes(l.status)
-      ).length || 0
+      const formattedMetrics = {
+        totalSaved: metrics.total_saved || 0,
+        activeLoans: 0, // Will be fetched inside Client components or defaults
+        repaymentRate: null,
+        trustScore: membership.trust_score || 0,
+        walletBalance: metrics.wallet_balance || 0,
+        contributions: contribResult.data || [],
+        loans: [],
+        wallet: { balance: metrics.wallet_balance || 0 }
+      }
 
-      setMetrics({
-        totalSaved,
-        activeLoans,
-        repaymentRate: totalLoans > 0
-          ? Math.round((repaidLoans / totalLoans) * 100)
-          : null,
-        trustScore: activeMembership.trust_score || 0,
-        walletBalance: walletResult.data?.balance || 0,
-        contributions: contributionsResult.data || [],
-        loans: loansResult.data || [],
-        wallet: walletResult.data || null
+      setState({
+        loading: false,
+        error: null,
+        membership: mappedMember,
+        chama,
+        metrics: formattedMetrics,
+        transactions: txResult.data || [],
+        contributions: contribResult.data || []
       })
 
-      setTransactions(transactionsResult.data || [])
-      setLoading(false)
-
-      // Connect real-time AFTER everything has loaded
-      const channel = supabase
-        .channel(`dash-${activeMembership.id}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'contributions_v2',
-          filter: `membership_id=eq.${activeMembership.id}`
-        }, async () => {
-          // Refresh only contributions metric, not the whole page
-          const { data: fresh } = await supabase
-            .from('contributions_v2')
-            .select('amount')
-            .eq('membership_id', activeMembership.id)
-            .eq('status', 'confirmed')
-
-          const newTotal = fresh?.reduce(
-            (s, c) => s + c.amount, 
-            0
-          ) || 0
-
-          setMetrics((prev: any) => ({
-            ...prev,
-            totalSaved: newTotal
-          }))
-        })
-        .subscribe()
-
     } catch (err) {
-      console.error('Dashboard load error:', err)
-      setLoading(false)
+      console.error('Dashboard load caught:', err)
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: 'Unexpected error. Please refresh.'
+      }))
     }
-  }
+  }, [supabase, router])
 
-  if (loading || !chamaId || !profile || !chama || !metrics) {
+  useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
+    load()
+  }, [load])
+
+  const { loading, error, membership, chama, metrics, transactions } = state
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-[#22C55E]/20 border-t-[#22C55E] animate-spin" />
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-full border-4 border-[#22C55E]/20 border-t-[#22C55E] animate-spin mx-auto mb-4" />
           <p style={{ color: 'var(--text-secondary)' }}>
             Loading your dashboard...
           </p>
@@ -217,9 +151,29 @@ export default function DashboardPage() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
+        <div className="text-center max-w-sm p-6">
+          <p className="text-[18px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            Something went wrong
+          </p>
+          <p className="text-[14px] mb-4" style={{ color: 'var(--text-secondary)' }}>
+            {error}
+          </p>
+          <button
+            onClick={load}
+            className="bg-[#22C55E] text-white px-6 py-2.5 rounded-xl font-medium">
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <MemberDashboard 
-      member={profile} 
+      member={membership} 
       chama={chama} 
       metrics={metrics} 
       initialTransactions={transactions} 

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { signOut } from '@/lib/auth-helpers'
 
 export default function SettingsPage() {
   const { session, member, group, isLoading: authLoading, refreshMemberData } = useAuth()
@@ -175,16 +176,7 @@ export default function SettingsPage() {
     }
   }
 
-  // Sign Out All Devices
-  const handleSignOutAll = async () => {
-    try {
-      await supabase.auth.signOut({ scope: 'global' })
-      sessionStorage.removeItem('active_chama_id')
-      router.push('/login')
-    } catch (err) {
-      console.error('Error signing out all devices:', err)
-    }
-  }
+  const handleSignOutAll = signOut;
 
   const countiesList = [
     "Baringo", "Bomet", "Bungoma", "Busia", "Elgeyo Marakwet", "Embu", "Garissa", "Homa Bay", "Isiolo", "Kajiado",

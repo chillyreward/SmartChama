@@ -7,6 +7,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import MobileHeader from "@/components/MobileHeader";
 import { MobileAdminTabBar } from "@/components/MobileAdminTabBar";
+import { signOut } from "@/lib/auth-helpers";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { session, member, group, isLoading } = useAuth();
@@ -181,11 +182,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {!isCollapsed && "Collapse"}
           </button>
           <button 
-            onClick={async () => {
-              await supabase.auth.signOut();
-              sessionStorage.removeItem('active_chama_id');
-              router.push('/login');
-            }}
+            onClick={signOut}
             title={isCollapsed ? "Logout" : undefined}
             className={`w-full flex items-center gap-3 py-2.5 rounded-lg transition-colors text-error hover:bg-red-50 dark:hover:bg-red-950/20 text-body-sm font-medium text-left cursor-pointer ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
           >

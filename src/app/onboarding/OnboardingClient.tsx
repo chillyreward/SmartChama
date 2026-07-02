@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
+import { signOut } from '@/lib/auth-helpers';
 
 export default function OnboardingClient() {
   const router = useRouter();
@@ -182,10 +183,7 @@ export default function OnboardingClient() {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
+  const handleLogout = signOut;
 
   if (loading) {
     return (

@@ -208,6 +208,91 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Demo accounts section */}
+          <div className="mt-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div 
+                className="flex-1 h-px"
+                style={{ backgroundColor: 'var(--border)' }} 
+              />
+              <span 
+                className="text-[12px] font-medium uppercase tracking-wider"
+                style={{ color: 'var(--text-muted)' }}>
+                Try a demo account
+              </span>
+              <div 
+                className="flex-1 h-px"
+                style={{ backgroundColor: 'var(--border)' }} 
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {/* Admin demo button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('demo.admin@smartchama.co.ke')
+                  setPassword('DemoAdmin2024!')
+                }}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all hover:border-[#22C55E]"
+                style={{
+                  borderColor: 'var(--border)',
+                  backgroundColor: 'var(--bg-card)'
+                }}>
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'var(--bg-subtle)' }}>
+                  <span className="material-symbols-outlined text-[16px] text-[#22C55E]"
+                    style={{ fontVariationSettings: "'FILL' 1" }}>
+                    admin_panel_settings
+                  </span>
+                </div>
+                <div className="text-center">
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    Admin Demo
+                  </p>
+                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                    Grace Wanjiku
+                  </p>
+                </div>
+              </button>
+
+              {/* Member demo button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('demo.member@smartchama.co.ke')
+                  setPassword('DemoMember2024!')
+                }}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all hover:border-[#22C55E]"
+                style={{
+                  borderColor: 'var(--border)',
+                  backgroundColor: 'var(--bg-card)'
+                }}>
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'var(--bg-subtle)' }}>
+                  <span className="material-symbols-outlined text-[16px] text-[#22C55E]"
+                    style={{ fontVariationSettings: "'FILL' 1" }}>
+                    person
+                  </span>
+                </div>
+                <div className="text-center">
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    Member Demo
+                  </p>
+                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                    David Omondi
+                  </p>
+                </div>
+              </button>
+            </div>
+            
+            <p className="text-[11px] text-center mt-3" style={{ color: 'var(--text-muted)' }}>
+              Click a button above to auto-fill the credentials, then click Sign In
+            </p>
+          </div>
+
           <p
             className="text-center text-[14px] mt-6"
             style={{ color: 'var(--text-secondary)' }}>

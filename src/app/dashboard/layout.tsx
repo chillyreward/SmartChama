@@ -10,6 +10,7 @@ import { NewContributionModal } from '@/components/NewContributionModal';
 import GroupSwitcher from '@/components/GroupSwitcher';
 import MobileHeader from '@/components/MobileHeader';
 import { MobileTabBar } from '@/components/MobileTabBar';
+import { signOut } from '@/lib/auth-helpers';
 
 export default function DashboardLayout({
   children,
@@ -45,11 +46,7 @@ export default function DashboardLayout({
     }
   }, [isLoading, session, member, group, router]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    sessionStorage.removeItem('active_chama_id');
-    router.push('/login');
-  };
+  const handleLogout = signOut;
 
   if (isLoading || !session || !member || !group) {
     return (
