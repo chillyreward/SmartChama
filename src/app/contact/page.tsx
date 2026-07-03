@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import LandingNav from "@/components/LandingNav";
@@ -17,8 +17,8 @@ export default function ContactPage() {
       a: "Yes. SmartChama is built around M-Pesa. When a member makes a contribution, they receive an M-Pesa STK push directly on their phone. They enter their PIN and the payment is confirmed automatically. The contribution appears in the group ledger within seconds. No manual recording is required."
     },
     {
-      q: "What is a trust score?",
-      a: "Your trust score is a number between 0 and 100 that reflects your financial reliability within your savings group. It is calculated from four factors: how consistently you contribute, how reliably you repay loans, how long you have been in the group, and your overall participation rate. A higher score can help you access larger loans from your group and, with your permission, demonstrate your creditworthiness to formal lenders."
+      q: "What is a CREDIT SCORE?",
+      a: "Your CREDIT SCORE is a number between 0 and 100 that reflects your financial reliability within your savings group. It is calculated from four factors: how consistently you contribute, how reliably you repay loans, how long you have been in the group, and your overall participation rate. A higher score can help you access larger loans from your group and, with your permission, demonstrate your creditworthiness to formal lenders."
     },
     {
       q: "Can I use SmartChama on a feature phone?",
@@ -30,15 +30,15 @@ export default function ContactPage() {
     },
     {
       q: "What happens if someone does not pay?",
-      a: "SmartChama sends automated payment reminders via SMS three days before the contribution due date, on the due date, and three days after. If a member is still unpaid after the grace period, they are marked as late in the system. Admins can apply penalties according to the group rules. The member's trust score is also affected by late or missed payments."
+      a: "SmartChama sends automated payment reminders via SMS three days before the contribution due date, on the due date, and three days after. If a member is still unpaid after the grace period, they are marked as late in the system. Admins can apply penalties according to the group rules. The member's CREDIT SCORE is also affected by late or missed payments."
     },
     {
       q: "How does the loan system work?",
-      a: "A member requests a loan through their dashboard. They specify the amount, purpose, and repayment period. Group admins receive a notification and can approve or decline the request. The member's trust score and savings history are shown to admins to help them make the decision. Once approved, the loan is recorded in the system and repayments are tracked automatically."
+      a: "A member requests a loan through their dashboard. They specify the amount, purpose, and repayment period. Group admins receive a notification and can approve or decline the request. The member's CREDIT SCORE and savings history are shown to admins to help them make the decision. Once approved, the loan is recorded in the system and repayments are tracked automatically."
     },
     {
       q: "Can we share our financial record with a bank or SACCO?",
-      a: "Yes, but only if you choose to. SmartChama has a consent-based lender visibility feature. When you turn it on, vetted financial institutions can view your contribution history and trust score. You can turn this off at any time. No data is shared without your explicit permission."
+      a: "Yes, but only if you choose to. SmartChama has a consent-based lender visibility feature. When you turn it on, vetted financial institutions can view your contribution history and CREDIT SCORE. You can turn this off at any time. No data is shared without your explicit permission."
     },
     {
       q: "What does SmartChama cost?",

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
@@ -238,7 +238,7 @@ Group: ${group?.name || 'SmartChama Savings'}
 Member Since: ${joinDateStr}
 
 Total Contributed: KSh ${totalContributed.toLocaleString()}
-Trust Score: ${member?.trust_score ?? 60}/100
+CREDIT SCORE: ${member?.trust_score ?? 60}/100
 Repayment Rate: ${repaymentRate}%
 Contribution Streak: ${member?.contribution_streak ?? 0} months
 
@@ -262,7 +262,7 @@ This record is verified by SmartChama Technologies Ltd.
     "Tharaka Nithi", "Trans Nzoia", "Turkana", "Uasin Gishu", "Vihiga", "Wajir", "West Pokot"
   ]
 
-  // Trust score gauge arc settings
+  // CREDIT SCORE gauge arc settings
   const score = member?.trust_score ?? 60
   const radius = 50
   const circumference = 2 * Math.PI * radius
@@ -353,7 +353,7 @@ This record is verified by SmartChama Technologies Ltd.
             </button>
           </div>
 
-          {/* Trust Score Gauge Card */}
+          {/* CREDIT SCORE Gauge Card */}
           <div className="card-bg border border-[var(--border)] p-6 rounded-2xl shadow-sm text-center">
             <h4 className="text-[14px] font-bold text-[#161d16] dark:text-white mb-4 font-geist">Reputation Standing</h4>
             <div className="relative w-32 h-32 mx-auto">
@@ -515,7 +515,7 @@ This record is verified by SmartChama Technologies Ltd.
                     <div className="text-[16px] font-bold text-[#161d16] dark:text-white mt-1">{repaymentRate}%</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] p-4 rounded-xl">
-                    <span className="text-[11px] text-[#60645f] dark:text-gray-400 uppercase font-semibold">Trust Score</span>
+                    <span className="text-[11px] text-[#60645f] dark:text-gray-400 uppercase font-semibold">Credit Score</span>
                     <div className="text-[16px] font-bold text-[#161d16] dark:text-white mt-1">{score}/100</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] p-4 rounded-xl">
@@ -542,7 +542,7 @@ This record is verified by SmartChama Technologies Ltd.
                       )}
                     </h3>
                     <p className="text-[13px] text-[#60645f] dark:text-gray-400 mt-1 max-w-md">
-                      Let third-party micro-lenders view your payment history and trust score to offer tailored business loans.
+                      Let third-party micro-lenders view your payment history and CREDIT SCORE to offer tailored business loans.
                     </p>
                   </div>
                   <div

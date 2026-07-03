@@ -6,7 +6,7 @@ export const responses: {
   // GREETINGS
   {
     triggers: ['hi', 'hello', 'hey', 'hujambo', 'habari'],
-    answer: 'Hello! Welcome to SmartChama. I can help you with contributions, loans, trust scores, invites, and more. What would you like to know?'
+    answer: 'Hello! Welcome to SmartChama. I can help you with contributions, loans, credit scores, invites, and more. What would you like to know?'
   },
   {
     triggers: ['good morning', 'good afternoon', 'good evening'],
@@ -60,7 +60,7 @@ export const responses: {
   // LOANS
   {
     triggers: ['how to get loan', 'request loan', 'apply loan', 'how do loans work', 'loan request'],
-    answer: 'To request a loan: 1) Go to the Loans page in your dashboard. 2) Click "Request Loan". 3) Enter the amount you need and the reason. 4) Submit the request. Your group admin will review and approve or decline it. You need a minimum trust score (set by your admin) to be eligible. Loans are paid from your group\'s pool and must be repaid with interest as agreed.'
+    answer: 'To request a loan: 1) Go to the Loans page in your dashboard. 2) Click "Request Loan". 3) Enter the amount you need and the reason. 4) Submit the request. Your group admin will review and approve or decline it. You need a minimum credit score (set by your admin) to be eligible. Loans are paid from your group\'s pool and must be repaid with interest as agreed.'
   },
   {
     triggers: ['loan interest', 'interest rate', 'how much interest'],
@@ -68,35 +68,35 @@ export const responses: {
   },
   {
     triggers: ['loan repayment', 'how to repay', 'pay back loan', 'repay my loan'],
-    answer: 'To repay a loan, go to the Loans page and click on your active loan. Click "Make Repayment". You will receive an M-Pesa prompt for the repayment amount. Every repayment is recorded and improves your trust score. You can make partial repayments or pay the full amount at once.'
+    answer: 'To repay a loan, go to the Loans page and click on your active loan. Click "Make Repayment". You will receive an M-Pesa prompt for the repayment amount. Every repayment is recorded and improves your credit score. You can make partial repayments or pay the full amount at once.'
   },
   {
     triggers: ['loan declined', 'loan rejected', 'why was my loan rejected'],
-    answer: 'A loan can be declined if: 1) Your trust score is below the group minimum. 2) The group does not have enough funds. 3) Your admin decided against it. 4) You already have an unpaid loan. Contact your admin for the specific reason. Focus on contributing on time to improve your trust score and future eligibility.'
+    answer: 'A loan can be declined if: 1) Your credit score is below the group minimum. 2) The group does not have enough funds. 3) Your admin decided against it. 4) You already have an unpaid loan. Contact your admin for the specific reason. Focus on contributing on time to improve your credit score and future eligibility.'
   },
   {
     triggers: ['maximum loan', 'how much can i borrow', 'loan limit'],
     answer: 'Your maximum loan amount is calculated as a multiple of your total savings. For example, if your group allows 3x loans and you have saved KSh 20,000, you can borrow up to KSh 60,000. Your admin sets the maximum multiplier in group settings.'
   },
   
-  // TRUST SCORE
+  // credit score
   {
-    triggers: ['trust score', 'what is trust score', 'how is trust score calculated', 'trust score meaning'],
-    answer: 'Your trust score is a number from 0 to 100 that shows how financially reliable you are in your group. It is calculated from: Contribution consistency (40%) - paying on time every month. Loan repayment (30%) - repaying loans fully and on time. Group tenure (20%) - how long you have been a member. Participation (10%) - your overall engagement. A higher score means bigger loans and, with your permission, can be shared with banks and SACCOs.'
+    triggers: ['Credit Score', 'what is credit score', 'how is credit score calculated', 'credit score meaning'],
+    answer: 'Your credit score is a number from 0 to 100 that shows how financially reliable you are in your group. It is calculated from: Contribution consistency (40%) - paying on time every month. Loan repayment (30%) - repaying loans fully and on time. Group tenure (20%) - how long you have been a member. Participation (10%) - your overall engagement. A higher score means bigger loans and, with your permission, can be shared with banks and SACCOs.'
   },
   {
-    triggers: ['improve trust score', 'how to increase trust score', 'low trust score'],
-    answer: 'To improve your trust score: 1) Pay your contribution on time every month. 2) Repay any loans on time and in full. 3) Stay in the group longer. 4) Do not miss any contribution cycles. Consistency is the most important factor. A missed or late payment reduces your score significantly.'
+    triggers: ['improve credit score', 'how to increase credit score', 'low credit score'],
+    answer: 'To improve your credit score: 1) Pay your contribution on time every month. 2) Repay any loans on time and in full. 3) Stay in the group longer. 4) Do not miss any contribution cycles. Consistency is the most important factor. A missed or late payment reduces your score significantly.'
   },
   {
-    triggers: ['trust score 0', 'why is my score zero', 'new member score'],
-    answer: 'New members start at a trust score of 0. This is normal. Your score will build up as you make contributions on time. After 3 consistent monthly payments, you should see your score growing significantly.'
+    triggers: ['credit score 0', 'why is my score zero', 'new member score'],
+    answer: 'New members start at a credit score of 0. This is normal. Your score will build up as you make contributions on time. After 3 consistent monthly payments, you should see your score growing significantly.'
   },
   
   // INVITES AND MEMBERSHIP
   {
     triggers: ['how to join', 'join a group', 'invite code', 'how do i get invited'],
-    answer: 'To join a SmartChama group, you need an invite from the group admin. The admin will send you an email with an invitation link. When you click the link, you will be taken to the signup page where your invite code is already filled in. Create your account and you will be automatically added to the group. You cannot join a group without an invite code.'
+    answer: 'To join a SmartChama group, you need an invite from the group admin. The admin will send you an SMS with an invitation code via Twilio. Use the code when signing up at SmartChama. You cannot join a group without an invite code.'
   },
   {
     triggers: ['how to invite member', 'add member', 'invite someone', 'admin invite'],
@@ -174,7 +174,7 @@ export const responses: {
   },
   {
     triggers: ['fake account', 'scam', 'fake chama', 'suspicious activity'],
-    answer: 'SmartChama has fraud protection built in: 1) Trust scores only build from verified M-Pesa receipts, not self-reported data. 2) Groups with suspicious patterns (one person, multiple chamas, same phone numbers) are flagged automatically. 3) All transactions are recorded and cannot be altered. If you suspect fraud, contact support@smartchama.co.ke immediately.'
+    answer: 'SmartChama has fraud protection built in: 1) Credit Scores only build from verified M-Pesa receipts, not self-reported data. 2) Groups with suspicious patterns (one person, multiple chamas, same phone numbers) are flagged automatically. 3) All transactions are recorded and cannot be altered. If you suspect fraud, contact support@smartchama.co.ke immediately.'
   },
   
   // SUPPORT
@@ -196,6 +196,6 @@ export const responses: {
   // DEFAULT
   {
     triggers: ['default'],
-    answer: 'I am not sure about that one. Try asking about contributions, loans, trust scores, invites, M-Pesa, SmartGrow, or account settings. You can also reach us at support@smartchama.co.ke for anything I cannot answer.'
+    answer: 'I am not sure about that one. Try asking about contributions, loans, credit scores, invites, M-Pesa, SmartGrow, or account settings. You can also reach us at support@smartchama.co.ke for anything I cannot answer.'
   }
 ]

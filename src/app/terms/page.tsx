@@ -31,7 +31,7 @@ export default function TermsPage() {
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Digital contribution tracking via M-Pesa integration</li>
             <li>Internal loan management and repayment tracking</li>
-            <li>Trust score calculation based on financial behaviour</li>
+            <li>Credit Score calculation based on financial behaviour</li>
             <li>Group wallet management</li>
             <li>Transaction recording and reporting</li>
             <li>SMS and in-app notifications</li>
@@ -106,23 +106,23 @@ export default function TermsPage() {
             SmartChama is not a lender. We do not provide, guarantee, or underwrite any loan. We provide tools to record and track loan agreements that are made between group members.
           </p>
           <p>
-            Members who take loans from their group and fail to repay them may have their trust score reduced. Persistent non-repayment may result in the member being flagged or removed from the group by the administrator.
+            Members who take loans from their group and fail to repay them may have their Credit Score reduced. Persistent non-repayment may result in the member being flagged or removed from the group by the administrator.
           </p>
         </>
       )
     },
     {
-      title: "7. Trust Scores and Financial Identity",
+      title: "7. Credit Scores and Financial Identity",
       content: (
         <>
           <p>
-            SmartChama calculates a trust score for each member based on their contribution consistency, loan repayment behaviour, group tenure, and participation rate. This score is an indication of financial reliability within the group context.
+            SmartChama calculates a Credit Score for each member based on their contribution consistency, loan repayment behaviour, group tenure, and participation rate. This score is an indication of financial reliability within the group context.
           </p>
           <p>
-            Trust scores are not a credit rating and are not regulated by the Central Bank of Kenya or any financial authority. They are an internal metric provided for informational purposes.
+            Credit Scores are not a credit rating and are not regulated by the Central Bank of Kenya or any financial authority. They are an internal metric provided for informational purposes.
           </p>
           <p>
-            Members may choose to share their trust score and contribution history with third-party financial institutions through SmartChama's consent-based lender visibility feature. SmartChama does not guarantee that any lender will extend credit based on this information.
+            Members may choose to share their Credit Score and contribution history with third-party financial institutions through SmartChama's consent-based lender visibility feature. SmartChama does not guarantee that any lender will extend credit based on this information.
           </p>
         </>
       )

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -577,7 +577,7 @@ export default function AdminLoansPage() {
               rows={3} 
               value={declineReason} 
               onChange={e => setDeclineReason(e.target.value)} 
-              placeholder="e.g. Trust score too low..."
+              placeholder="e.g. CREDIT SCORE too low..."
               className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-error resize-none"
             />
 
@@ -617,7 +617,7 @@ export default function AdminLoansPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Min Trust Score to Borrow (0-100)</label>
+                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1">Min CREDIT SCORE to Borrow (0-100)</label>
                 <input 
                   type="number" 
                   value={minTrustScore} 

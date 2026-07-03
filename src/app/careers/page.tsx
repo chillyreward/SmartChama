@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
@@ -39,7 +39,7 @@ export default function CareersPage() {
       title: "Mobile Engineer (React Native)",
       location: "Nairobi, Kenya",
       type: "Full-time",
-      descIntro: "We are building a mobile application for SmartChama. Members need to access their group, make contributions, and check their trust score from their phone. You will own this product.",
+      descIntro: "We are building a mobile application for SmartChama. Members need to access their group, make contributions, and check their CREDIT SCORE from their phone. You will own this product.",
       respTitle: "Responsibilities:",
       responsibilities: [
         "Build and maintain the SmartChama mobile app using React Native",

@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Contribution amounts and dates</li>
             <li>Loan requests and repayment records</li>
-            <li>Trust score and its components</li>
+            <li>Credit Score and its components</li>
             <li>Login times and device information</li>
             <li>SMS delivery records</li>
           </ul>
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Provide and operate the SmartChama platform</li>
             <li>Record and verify your contributions</li>
-            <li>Calculate your trust score</li>
+            <li>Calculate your Credit Score</li>
             <li>Send you payment reminders and confirmations via SMS</li>
             <li>Allow your group administrator to manage your membership</li>
             <li>Generate financial identity reports at your request</li>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
           <p className="font-bold text-[#161d16] mb-2">Your group administrator can see:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Your contribution history and status</li>
-            <li>Your trust score</li>
+            <li>Your Credit Score</li>
             <li>Your loan history within the group</li>
             <li>Your contact details</li>
           </ul>

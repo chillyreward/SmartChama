@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 3. Recalculate trust score
+    // 3. Recalculate CREDIT SCORE
     try {
       await fetch(`${appUrl}/api/trust-score/calculate`, {
         method: 'POST',
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({ membership_id: loan.chama_memberships?.membership_id })
       });
     } catch (e) {
-      console.error('Trust score calculation error:', e);
+      console.error('CREDIT SCORE calculation error:', e);
     }
 
     return NextResponse.json({ success: true, message: 'Loan approved successfully' });

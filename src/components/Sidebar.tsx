@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,7 +8,7 @@ import { signOut } from '@/lib/auth-helpers';
 import { 
   LayoutDashboard, Users, Landmark, Wallet, 
   Receipt, Award, TrendingUp, LineChart, Settings, 
-  Megaphone, Shield, LogOut, Coins
+  Megaphone, Shield, LogOut, Coins, ShieldAlert
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -26,7 +26,8 @@ export function Sidebar({ variant }: SidebarProps) {
     { name: "Loans", href: "/admin/loans", icon: Landmark },
     { name: "Wallet", href: "/admin/wallet", icon: Wallet },
     { name: "Transactions", href: "/admin/transactions", icon: Receipt },
-    { name: "Trust Scores", href: "/admin/trust-scores", icon: Award },
+    { name: "Credit Scores", href: "/admin/trust-scores", icon: Award },
+    { name: "Fraud Detection", href: "/admin/fraud", icon: ShieldAlert },
     { name: "SmartGrow", href: "/admin/smartgrow", icon: TrendingUp },
     { name: "Analytics", href: "/admin/analytics", icon: LineChart },
     { name: "Group Settings", href: "/admin/settings", icon: Settings },

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -338,7 +338,7 @@ export default function MembersPage() {
                 <th className="px-6 py-4">PHONE</th>
                 <th className="px-6 py-4">JOINED</th>
                 <th className="px-6 py-4">TOTAL SAVED</th>
-                <th className="px-6 py-4">TRUST SCORE</th>
+                <th className="px-6 py-4">Credit Score</th>
                 <th className="px-6 py-4">STATUS</th>
                 <th className="px-6 py-4">ACTIONS</th>
               </tr>
@@ -486,7 +486,7 @@ export default function MembersPage() {
                 <div className="text-sm font-bold text-[var(--text-main)] font-mono">KSh {formatCurrency(selectedMember.totalSaved)}</div>
               </div>
               <div>
-                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Trust Score</div>
+                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Credit Score</div>
                 <div className="text-sm font-semibold text-[var(--text-main)]">
                   {currentMember && (['admin', 'chairlady', 'treasurer', 'secretary'].includes(currentMember.role) || currentMember.id === selectedMember.id) 
                     ? `${selectedMember.trust}/100` 

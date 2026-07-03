@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
@@ -33,8 +33,8 @@ export default function BlogPage() {
     {
       category: "FINANCIAL IDENTITY",
       date: "February 2025",
-      title: "What is a trust score and why does it matter?",
-      preview: "Your SmartChama trust score is a number between 0 and 100 that represents your financial reliability within your group. But it is more than just a number. It is the beginning of a financial identity...",
+      title: "What is a CREDIT SCORE and why does it matter?",
+      preview: "Your SmartChama CREDIT SCORE is a number between 0 and 100 that represents your financial reliability within your group. But it is more than just a number. It is the beginning of a financial identity...",
       link: "#"
     },
     {

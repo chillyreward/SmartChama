@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -501,7 +501,7 @@ export default function LoansPage() {
                             return (
                               <>
                                 {trust >= 80 && <span className="material-symbols-outlined text-[#22C55E] text-sm">verified</span>}
-                                <span className="font-mono text-xs font-semibold text-[var(--text-main)]">Trust Score: {trust}</span>
+                                <span className="font-mono text-xs font-semibold text-[var(--text-main)]">CREDIT SCORE: {trust}</span>
                                 {trust >= 80 ? (
                                    <span className="bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176] text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ml-2">Eligible</span>
                                 ) : (
@@ -513,7 +513,7 @@ export default function LoansPage() {
                             const status = getTrustStatusLabel(trust);
                             return (
                               <span className="text-xs font-medium px-2 py-1 rounded card-bg border border-[var(--border)]" style={{ color: status.color }}>
-                                Trust Score: {status.label}
+                                CREDIT SCORE: {status.label}
                               </span>
                             );
                           }

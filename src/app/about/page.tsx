@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
@@ -146,7 +146,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-2">AI trust scoring</h3>
                 <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                  Our algorithm analyses contribution consistency, loan repayment behaviour, group tenure, and participation rate to generate a trust score for every member. This score is the beginning of a financial identity.
+                  Our algorithm analyses contribution consistency, loan repayment behaviour, group tenure, and participation rate to generate a CREDIT SCORE for every member. This score is the beginning of a financial identity.
                 </p>
               </div>
             </div>

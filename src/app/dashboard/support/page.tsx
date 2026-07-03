@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -33,7 +33,7 @@ export default function SupportPage() {
   };
 
   const faqs = [
-    { q: "How is my Chama trust score calculated?", a: "Your trust score is a weighted index calculated from your timely contributions (100% weight for M-Pesa automated receipts, 50% weight for manual cash confirmations) and loan repayment history." },
+    { q: "How is my Chama CREDIT SCORE calculated?", a: "Your CREDIT SCORE is a weighted index calculated from your timely contributions (100% weight for M-Pesa automated receipts, 50% weight for manual cash confirmations) and loan repayment history." },
     { q: "Can I belong to multiple Chamas on SmartChama?", a: "Yes, SmartChama supports multi-chama membership. You can switch between active groups using the Group Switcher in the top portal navigation." },
     { q: "What is the Withdrawal Consent system?", a: "To prevent admin self-dealing, any withdrawal request initiated by a chama admin must be voted on and approved by a majority of active members before the funds can be released." },
     { q: "How do I deposit funds into my Chama?", a: "Click on 'New Contribution' from your dashboard sidebar or navigate to the Wallet page, enter the amount, and initiate an M-Pesa STK push contribution." }
@@ -144,7 +144,7 @@ export default function SupportPage() {
                     <option value="general">General Inquiry</option>
                     <option value="payment">Deposits & M-Pesa</option>
                     <option value="loans">Loan Requests</option>
-                    <option value="trust">Trust Score</option>
+                    <option value="trust">Credit Score</option>
                     <option value="bug">Report a Bug</option>
                   </select>
                 </div>

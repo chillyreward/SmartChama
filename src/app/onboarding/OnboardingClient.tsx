@@ -114,24 +114,27 @@ export default function OnboardingClient() {
       phone = '+254' + phone;
     }
 
-    // Save profile record
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        full_name: profileForm.full_name,
-        phone_number: phone,
-        email: user.email
-      });
+    // Save profile via server API (bypasses RLS)
+    const res = await fetch('/api/profile/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.id,
+        full_name: profileForm.full_name.trim(),
+        phone_number: phone || null,
+        email: user.email || ''
+      })
+    })
 
-    if (profileError) {
-      if (profileError.code === '23505') {
-        setError('This phone number is already registered.');
-      } else {
-        setError('Failed to save profile. Please try again.');
-      }
-      setSaving(false);
-      return;
+    const result = await res.json()
+
+    if (!res.ok) {
+      console.error('Profile save failed:', result)
+      setError(result.error?.includes('phone') 
+        ? 'This phone number is already registered.' 
+        : `Failed to save profile: ${result.error || 'Please try again.'}`)
+      setSaving(false)
+      return
     }
 
     setStep(2);
@@ -175,8 +178,9 @@ export default function OnboardingClient() {
       }
 
       document.cookie = `active_chama_id=${data.chama_id}; path=/; max-age=${60 * 60 * 24 * 30}`;
-      await refreshMemberData();
-      router.push('/admin/dashboard');
+      sessionStorage.setItem('active_chama_id', data.chama_id);
+      // Hard redirect so AuthProvider reloads with fresh membership
+      window.location.href = '/admin/dashboard';
     } catch (err) {
       setError('An unexpected error occurred.');
       setSaving(false);

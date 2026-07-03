@@ -1,42 +1,48 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import twilio from 'twilio'
 
 export async function POST(request: Request) {
   const supabase = getSupabaseAdmin()
-  const { 
-    email, 
-    name, 
-    chama_id, 
-    invited_by 
-  } = await request.json()
 
-  if (!email || !chama_id) {
+  const { phone, name, chama_id, invited_by, channel = 'sms' } = await request.json()
+
+  if (!phone || !chama_id) {
     return Response.json(
-      { error: 'Email and chama_id are required.' },
+      { error: 'Phone number and chama_id are required.' },
       { status: 400 }
     )
   }
 
-  // Get chama details for the email
+  // Normalize Kenyan phone number
+  let formattedPhone = phone.replace(/\s/g, '')
+  if (formattedPhone.startsWith('0')) {
+    formattedPhone = '+254' + formattedPhone.slice(1)
+  }
+  if (!formattedPhone.startsWith('+')) {
+    formattedPhone = '+254' + formattedPhone
+  }
+
+  // Get chama details
   const { data: chama } = await supabase
     .from('chamas_v2')
     .select('name')
     .eq('id', chama_id)
     .single()
 
-  // Get inviting admin's name
+  // Get admin name
   const { data: admin } = await supabase
     .from('profiles')
     .select('full_name')
     .eq('id', invited_by)
     .single()
 
-  // Generate a simple invite code that is also stored as token
+  // Generate invite code
   const inviteCode = Math.random()
     .toString(36)
     .substring(2, 8)
     .toUpperCase()
 
-  // Save invite record using actual database columns
+  // Save invite token
   const { error: tokenError } = await supabase
     .from('invite_tokens')
     .insert({
@@ -50,42 +56,74 @@ export async function POST(request: Request) {
 
   if (tokenError) {
     console.error('Save invite token failed:', tokenError)
-    return Response.json(
-      { error: 'Could not save invite.' },
-      { status: 500 }
-    )
+    return Response.json({ error: 'Could not save invite.' }, { status: 500 })
   }
 
-  // Send invite email via Supabase Admin (uses configured SMTP or Supabase's built-in email)
-  const signupUrl = `${process.env.NEXT_PUBLIC_APP_URL}/signup?token=${inviteCode}&email=${encodeURIComponent(email)}`
+  const signupUrl = `${process.env.NEXT_PUBLIC_APP_URL}/signup?token=${inviteCode}`
+  const adminName = admin?.full_name || 'Your admin'
+  const chamaName = chama?.name || 'a savings group'
 
-  // Use Supabase's built-in invite email system
-  const { error: emailError } = await supabase.auth.admin.inviteUserByEmail(email, {
-    data: {
-      full_name: name || '',
-      chama_name: chama?.name || '',
-      inviter_name: admin?.full_name || 'Your admin',
-      invite_code: inviteCode,
-      chama_id
-    },
-    redirectTo: signupUrl
-  })
+  const accountSid = process.env.TWILIO_ACCOUNT_SID
+  const authToken = process.env.TWILIO_AUTH_TOKEN
+  const fromNumber = process.env.TWILIO_PHONE_NUMBER
+  const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID
+  const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886'
 
-  if (emailError) {
-    // If Supabase invite fails, the token is still saved.
-    // Admin can share the code manually as fallback.
-    console.error('Email send failed:', emailError)
+  if (!accountSid || !authToken ||
+      accountSid === 'your_twilio_account_sid') {
+    console.log(`[DEV] Invite to ${formattedPhone}: code=${inviteCode}`)
     return Response.json({
       success: true,
       code: inviteCode,
-      email_sent: false,
-      note: 'Invite saved but email delivery failed. Share the code manually.'
+      sms_sent: false,
+      note: 'Twilio not configured. Share the invite code manually.'
     })
   }
 
-  return Response.json({ 
-    success: true, 
-    code: inviteCode,
-    email_sent: true
-  })
+  const smsMessage = `${adminName} has invited you to join ${chamaName} on SmartChama!\n\nYour invite code: ${inviteCode}\n\nSign up: ${signupUrl}\n\nCode expires in 48 hours.`
+
+  const whatsappMessage = `👋 *${adminName}* has invited you to join *${chamaName}* on SmartChama!\n\n🔑 Your invite code: *${inviteCode}*\n\n📲 Sign up here: ${signupUrl}\n\n⏰ Code expires in 48 hours.`
+
+  try {
+    const client = twilio(accountSid, authToken)
+
+    if (channel === 'whatsapp') {
+      const msg = await client.messages.create({
+        body: whatsappMessage,
+        from: `whatsapp:${whatsappNumber.replace('whatsapp:', '')}`,
+        to: `whatsapp:${formattedPhone}`,
+      })
+      console.log('WhatsApp invite sent. SID:', msg.sid)
+      return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'whatsapp', phone: formattedPhone })
+
+    } else {
+      // For Kenya (+254), use Alphanumeric Sender ID or Messaging Service
+      // Alphanumeric works in Kenya without needing a local number
+      const msgParams: any = {
+        body: smsMessage,
+        to: formattedPhone,
+      }
+
+      if (messagingServiceSid) {
+        // Preferred: Messaging Service handles routing automatically
+        msgParams.messagingServiceSid = messagingServiceSid
+      } else {
+        // Fallback: Alphanumeric sender (works for Kenya)
+        msgParams.from = 'SmartChama'
+      }
+
+      const msg = await client.messages.create(msgParams)
+      console.log('SMS invite sent. SID:', msg.sid)
+      return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'sms', phone: formattedPhone })
+    }
+
+  } catch (twilioError: any) {
+    console.error('Twilio failed:', twilioError.message, '| Code:', twilioError.code)
+    return Response.json({
+      success: true,
+      code: inviteCode,
+      sms_sent: false,
+      note: `Message failed (${twilioError.code || twilioError.message}). Share the code manually.`
+    })
+  }
 }

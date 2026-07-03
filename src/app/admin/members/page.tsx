@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -321,7 +321,7 @@ export default function AdminMembersPage() {
                 <th className="px-6 py-4">PHONE</th>
                 <th className="px-6 py-4">JOINED</th>
                 <th className="px-6 py-4">TOTAL SAVED</th>
-                <th className="px-6 py-4">TRUST SCORE</th>
+                <th className="px-6 py-4">Credit Score</th>
                 <th className="px-6 py-4">STATUS</th>
                 <th className="px-6 py-4 text-right">ACTIONS</th>
               </tr>
@@ -437,7 +437,7 @@ export default function AdminMembersPage() {
                     <span className="font-mono font-bold text-[var(--text-main)]">KSh {formatCurrency(m.totalSaved || 0)}</span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] block">Trust Score:</span>
+                    <span className="text-[var(--text-muted)] block">CREDIT SCORE:</span>
                     <div className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-[14px] text-[#22C55E]">verified</span>
                       <span className="font-bold text-[var(--text-main)]">{m.trust_score || 0}</span>

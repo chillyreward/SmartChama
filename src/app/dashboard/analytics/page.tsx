@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -338,7 +338,7 @@ export default function AnalyticsPage() {
 
         {/* Card 4 */}
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">GROUP TRUST SCORE</div>
+          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">GROUP Credit Score</div>
           <div className="text-[20px] md:text-3xl font-bold text-[var(--brand-green)] font-geist mb-2">{stats.groupTrustScore}/100</div>
           <div className="text-[11px] md:text-[12px] text-[var(--brand-green)] font-semibold flex items-center gap-0.5">
             <span className="material-symbols-outlined text-[14px]">trending_up</span>

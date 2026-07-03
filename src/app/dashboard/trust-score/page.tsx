@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -85,11 +85,11 @@ export default function TrustScorePage() {
         <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
           <span>Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <span>Trust Score</span>
+          <span>Credit Score</span>
         </p>
         
         <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-          Your Trust Score
+          Your CREDIT SCORE
         </h1>
         <p className="text-[14px] text-[var(--text-muted)] mt-1">
           Your financial reputation score is verified on-chain to unlock flexible lending terms.
@@ -161,7 +161,7 @@ export default function TrustScorePage() {
 
       {/* Score breakdown cards */}
       <h3 className="text-[16px] font-bold text-[var(--text-main)] mb-4 font-geist">
-        Trust Score Breakdown
+        CREDIT SCORE Breakdown
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
         <div className="card-bg border border-[var(--border)] p-3 md:p-4 rounded-2xl shadow-xs">

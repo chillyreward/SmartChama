@@ -136,7 +136,7 @@ export default function LandingPage() {
               </div>
 
               <div className="bg-[#FAFAFA] dark:bg-black/45 border border-[#E5E7EB] dark:border-[#1B2520] p-4 rounded-xl flex justify-between items-center transition-colors">
-                <div className="text-xs font-bold text-[#161d16] dark:text-[#ECFDF5]">Group Trust Score</div>
+                <div className="text-xs font-bold text-[#161d16] dark:text-[#ECFDF5]">Group Credit Score</div>
                 <div className="bg-[#006e2f] dark:bg-[#22C55E] text-white dark:text-black px-3 py-1 rounded text-xs font-bold">
                   82 — Good Standing
                 </div>
@@ -208,7 +208,7 @@ export default function LandingPage() {
                   { icon: "wallet", text: "Digital, tamper-proof ledger backed up securely in the cloud." },
                   { icon: "notifications_active", text: "Automated reminders and instant M-Pesa payment tracking." },
                   { icon: "handshake", text: "Transparent loan requests, approvals, and repayment tracking." },
-                  { icon: "trending_up", text: "Every contribution builds a verifiable group and individual Trust Score." }
+                  { icon: "trending_up", text: "Every contribution builds a verifiable group and individual Credit Score." }
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-4">
                     <span className="material-symbols-outlined text-[#22C55E] mt-1 text-lg">{item.icon}</span>
@@ -243,7 +243,7 @@ export default function LandingPage() {
             {[
               { idx: "01", icon: 'payments', title: 'Contributions', desc: 'Track every member payment automatically via M-Pesa.' },
               { idx: "02", icon: 'real_estate_agent', title: 'Internal Loans', desc: 'Request, approve, and track group loans digitally.' },
-              { idx: "03", icon: 'verified', title: 'Trust Score', desc: 'Build a verifiable financial reputation from contribution history.' },
+              { idx: "03", icon: 'verified', title: 'Credit Score', desc: 'Build a verifiable financial reputation from contribution history.' },
               { idx: "04", icon: 'account_balance', title: 'Group Wallet', desc: 'One secure, transparent wallet for all group funds.' },
               { idx: "05", icon: 'moving', title: 'SmartGrow', desc: 'Grow idle funds through vetted investment options.', badge: 'Coming Soon' },
               { idx: "06", icon: 'monitoring', title: 'Analytics', desc: 'Visual insights into group health, trends, and performance.' }
@@ -411,7 +411,7 @@ export default function LandingPage() {
                 {[
                   "Everything in Pro",
                   "SmartGrow investments",
-                  "Trust Score APIs",
+                  "Credit Score APIs",
                   "Priority support"
                 ].map((feat, idx) => (
                   <li key={idx} className="flex items-start gap-3">

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       if (!updateLoanError) {
         processedLoans.push(loan.id);
         
-        // 2. Deduct 20 points from borrower's trust score
+        // 2. Deduct 20 points from borrower's CREDIT SCORE
         const { data: profile } = await supabase
           .from('profiles')
           .select('trust_score')

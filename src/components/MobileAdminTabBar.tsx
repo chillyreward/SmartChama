@@ -117,7 +117,8 @@ export function MobileAdminTabBar() {
               {[
                 { href: '/admin/wallet', icon: 'account_balance_wallet', label: 'Wallet' },
                 { href: '/admin/transactions', icon: 'receipt_long', label: 'History' },
-                { href: '/admin/trust-scores', icon: 'verified', label: 'Trust' },
+                { href: '/admin/trust-scores', icon: 'verified', label: 'Credit' },
+                { href: '/admin/fraud', icon: 'gpp_bad', label: 'Fraud AI' },
                 { href: '/admin/smartgrow', icon: 'trending_up', label: 'SmartGrow' },
                 { href: '/admin/analytics', icon: 'insights', label: 'Analytics' },
                 { href: '/admin/announcements', icon: 'notifications', label: 'Alerts' },

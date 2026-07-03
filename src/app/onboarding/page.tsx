@@ -167,22 +167,22 @@ export default function OnboardingPage() {
         formattedPhone
     }
 
-    const { error: upsertError } = 
-      await supabase
-        .from('profiles')
-        .upsert({
-          id: session.user.id,
-          full_name: fullName.trim(),
-          phone_number: formattedPhone,
-          county: county,
-          national_id: nationalId.trim(),
-          email: session.user.email,
-          updated_at: 
-            new Date().toISOString()
-        }, { onConflict: 'id' })
+    const res = await fetch('/api/profile/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: session.user.id,
+        full_name: fullName.trim(),
+        phone_number: formattedPhone,
+        email: session.user.email || '',
+        county,
+        national_id: nationalId.trim()
+      })
+    })
 
-    if (upsertError) {
-      setError('Could not save profile. Please try again.')
+    if (!res.ok) {
+      const data = await res.json()
+      setError(data.error || 'Could not save profile. Please try again.')
       setLoading(false)
       return
     }
@@ -198,89 +198,44 @@ export default function OnboardingPage() {
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
 
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      // CREATE CHAMA
-      const { data: newChama, error: chamaError } = await supabase
-        .from('chamas_v2')
-        .insert({
-          name: groupName.trim(),
-          description: groupDescription.trim() || null,
-          contribution_amount: Number(contributionAmount),
+      const res = await fetch('/api/chamas/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || user.email,
+          phone: '',
+          chama_name: groupName.trim(),
+          contribution_amount: contributionAmount,
           contribution_frequency: frequency,
-          meeting_day: Number(meetingDay),
-          status: 'active',
-          created_by: user.id
+          payment_type: 'till',
+          till_number: '',
+          paybill_number: '',
+          account_number: '',
+          phone_number: '',
+          account_name: ''
         })
-        .select('id, name')
-        .single()
+      })
 
-      if (chamaError || !newChama?.id) {
-        console.error('Chama error:', chamaError)
-        setError(`Could not create group: ${chamaError?.message || 'Unknown error'}`)
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Could not create group. Please try again.')
         setLoading(false)
         return
       }
 
-      // CREATE MEMBERSHIP
-      const { data: newMembership, error: membershipError } = await supabase
-        .from('chama_memberships')
-        .insert({
-          profile_id: user.id,
-          chama_id: newChama.id,
-          role: 'chairlady',
-          trust_score: 100,
-          status: 'active',
-          joined_at: new Date().toISOString()
-        })
-        .select('id')
-        .single()
-
-      if (membershipError || !newMembership?.id) {
-        console.error('Membership error:', membershipError)
-        setError('Group created but could not set you as admin. Please try logging in again.')
-        setLoading(false)
-        return
+      const chamaId = data.chama_id || data.chamaId
+      if (chamaId) {
+        document.cookie = `active_chama_id=${chamaId}; path=/; max-age=${60 * 60 * 24 * 30}`
+        sessionStorage.setItem('active_chama_id', chamaId)
+        localStorage.setItem('sc_last_chama_id', chamaId)
       }
 
-      // CREATE WALLET
-      const { error: walletError } = await supabase
-        .from('wallets')
-        .insert({
-          chama_id: newChama.id,
-          balance: 0,
-          savings_pool: 0,
-          loans_disbursed: 0
-        })
-
-      if (walletError) {
-        console.error('Wallet error:', walletError)
-      }
-
-      // VERIFY everything was saved correctly before navigating
-      const { data: verification } = await supabase
-        .from('chama_memberships')
-        .select('id, role, chama_id')
-        .eq('profile_id', user.id)
-        .eq('chama_id', newChama.id)
-        .eq('status', 'active')
-        .single()
-
-      if (!verification) {
-        setError('Setup did not complete correctly. Please try again.')
-        setLoading(false)
-        return
-      }
-
-      // Save to storage as a hint
-      sessionStorage.setItem('active_chama_id', newChama.id)
-      localStorage.setItem('sc_last_chama_id', newChama.id)
-
-      router.push('/admin/dashboard')
+      window.location.href = '/admin/dashboard'
 
     } catch (err) {
       console.error('Create group error:', err)
@@ -295,22 +250,14 @@ export default function OnboardingPage() {
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        router.push('/login')
-        return
-      }
+      if (!user) { router.push('/login'); return }
 
       const { data: invite } = await supabase
         .from('invite_tokens')
-        .select(`
-          id, chama_id, status,
-          expires_at,
-          chamas_v2 ( id, name )
-        `)
+        .select('id, chama_id, expires_at')
         .eq('token', inviteCode.trim().toUpperCase())
-        .eq('status', 'pending')
         .gt('expires_at', new Date().toISOString())
+        .limit(1)
         .single()
 
       if (!invite) {
@@ -319,53 +266,30 @@ export default function OnboardingPage() {
         return
       }
 
-      // Check not already a member
-      const { data: existing } = await supabase
-        .from('chama_memberships')
-        .select('id')
-        .eq('profile_id', user.id)
-        .eq('chama_id', invite.chama_id)
-        .single()
-
-      if (existing) {
-        sessionStorage.setItem('active_chama_id', invite.chama_id)
-        localStorage.setItem('sc_last_chama_id', invite.chama_id)
-        router.push('/dashboard')
-        return
-      }
-
-      const { data: newMembership, error: membershipError } = await supabase
-        .from('chama_memberships')
-        .insert({
-          profile_id: user.id,
-          chama_id: invite.chama_id,
+      const res = await fetch('/api/admin/create-group', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          fullName: user.user_metadata?.full_name || user.email,
+          email: user.email || '',
+          chamaName: '',
+          chamaId: invite.chama_id,
           role: 'member',
-          trust_score: 0,
-          status: 'active',
-          joined_at: new Date().toISOString()
+          inviteId: invite.id
         })
-        .select('id')
-        .single()
+      })
 
-      if (membershipError || !newMembership?.id) {
+      if (!res.ok) {
         setError('Could not join group. Please try again.')
         setLoading(false)
         return
       }
 
-      await supabase
-        .from('invite_tokens')
-        .update({
-          status: 'used',
-          used_at: new Date().toISOString(),
-          used_by: user.id
-        })
-        .eq('id', invite.id)
-
+      document.cookie = `active_chama_id=${invite.chama_id}; path=/; max-age=${60 * 60 * 24 * 30}`
       sessionStorage.setItem('active_chama_id', invite.chama_id)
       localStorage.setItem('sc_last_chama_id', invite.chama_id)
-
-      router.push('/dashboard')
+      window.location.href = '/dashboard'
 
     } catch (err) {
       console.error('Join group error:', err)

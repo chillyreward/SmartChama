@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
@@ -16,7 +16,7 @@ export function MembersSettingsTab({
   const [invites, setInvites] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showInviteForm, setShowInviteForm] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
+  const [invitePhone, setInvitePhone] = useState('')
   const [inviteName, setInviteName] = useState('')
   const [sending, setSending] = useState(false)
   const [inviteResult, setInviteResult] = useState<any>(null)
@@ -58,8 +58,9 @@ export function MembersSettingsTab({
   }
 
   async function handleSendInvite() {
-    if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
-      setInviteError('Please enter a valid email address.')
+    const digits = invitePhone.replace(/\D/g, '')
+    if (digits.length < 9) {
+      setInviteError('Please enter a valid phone number.')
       return
     }
 
@@ -67,45 +68,38 @@ export function MembersSettingsTab({
     setInviteError('')
 
     try {
-      const response = await fetch(
-        '/api/invites/send',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            email: inviteEmail.trim(),
-            name: inviteName.trim() || null,
-            chama_id: chamaId,
-            invited_by: adminId
-          })
-        }
-      )
+      const response = await fetch('/api/invites/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: invitePhone.trim(),
+          name: inviteName.trim() || null,
+          chama_id: chamaId,
+          invited_by: adminId
+        })
+      })
 
       const data = await response.json()
 
       if (!response.ok) {
-        setInviteError(
-          data.error || 'Could not send invite. Please try again.'
-        )
+        setInviteError(data.error || 'Could not send invite. Please try again.')
         setSending(false)
         return
       }
 
       setInviteResult(data)
-      setInviteEmail('')
+      setInvitePhone('')
       setInviteName('')
       setShowInviteForm(false)
       setToast(
-        data.email_sent
-          ? `Invite sent to ${inviteEmail}`
+        data.sms_sent
+          ? `SMS invite sent to ${invitePhone}`
           : `Invite created. Share code: ${data.code}`
       )
       setTimeout(() => setToast(''), 4000)
-      loadData() // Refresh the list
+      loadData()
 
-    } catch (err) {
+    } catch {
       setInviteError('Network error. Please try again.')
     }
 
@@ -119,8 +113,8 @@ export function MembersSettingsTab({
       .update({ status: 'expired' })
       .eq('id', invite.id)
 
-    // Pre-fill the invite form
-    setInviteEmail(invite.invited_email || '')
+    // Pre-fill the invite form with phone if available
+    setInvitePhone(invite.invited_phone || '')
     setInviteName(invite.invited_name || '')
     setShowInviteForm(true)
   }
@@ -254,31 +248,36 @@ export function MembersSettingsTab({
                 />
               </div>
 
-              {/* Email field */}
+              {/* Phone field */}
               <div>
                 <label
                   className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                  style={{
-                    color: 'var(--text-secondary)'
-                  }}>
-                  Email Address
+                  style={{ color: 'var(--text-secondary)' }}>
+                  Phone Number
                 </label>
-                <input
-                  type="email"
-                  value={inviteEmail}
-                  onChange={e => setInviteEmail(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleSendInvite()
-                  }}
-                  placeholder="grace@example.com"
-                  className="w-full px-4 py-2.5 rounded-xl border text-[14px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
-                  style={{
-                    backgroundColor: 'var(--bg-input)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)'
-                  }}
-                  autoFocus
-                />
+                <div className="flex">
+                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[13px] font-medium"
+                    style={{ backgroundColor: 'transparent', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                    +254
+                  </div>
+                  <input
+                    type="tel"
+                    value={invitePhone}
+                    onChange={e => setInvitePhone(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleSendInvite() }}
+                    placeholder="712 345 678"
+                    className="flex-1 px-4 py-2.5 rounded-r-xl border text-[14px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                    style={{
+                      backgroundColor: 'var(--bg-input)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-primary)'
+                    }}
+                    autoFocus
+                  />
+                </div>
+                <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                  SMS invite sent via Twilio
+                </p>
               </div>
             </div>
 
@@ -298,7 +297,7 @@ export function MembersSettingsTab({
               <button
                 onClick={() => {
                   setShowInviteForm(false)
-                  setInviteEmail('')
+                  setInvitePhone('')
                   setInviteName('')
                   setInviteError('')
                 }}
@@ -312,7 +311,7 @@ export function MembersSettingsTab({
               </button>
               <button
                 onClick={handleSendInvite}
-                disabled={sending || !inviteEmail.trim()}
+                disabled={sending || !invitePhone.trim()}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[14px] font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 {sending ? (
                   <>
@@ -321,10 +320,8 @@ export function MembersSettingsTab({
                   </>
                 ) : (
                   <>
-                    <span className="material-symbols-outlined text-[18px]">
-                      send
-                    </span>
-                    Send Invite Email
+                    <span className="material-symbols-outlined text-[18px]">sms</span>
+                    Send SMS Invite
                   </>
                 )}
               </button>
@@ -350,12 +347,12 @@ export function MembersSettingsTab({
               </span>
               <div className="flex-1">
                 <p className="text-[14px] font-semibold text-[#166534] mb-1">
-                  {inviteResult.email_sent ? 'Invite email sent' : 'Invite created'}
+                  {inviteResult.sms_sent ? 'SMS invite sent!' : 'Invite created'}
                 </p>
                 <p className="text-[13px] text-[#15803D]">
-                  {inviteResult.email_sent
-                    ? 'If they do not receive it, share this backup code:'
-                    : 'Email delivery failed. Share this code manually:'}
+                  {inviteResult.sms_sent
+                    ? 'SMS delivered via Twilio. Share this code as backup:'
+                    : inviteResult.note || 'Share this invite code manually:'}
                 </p>
                 <div className="mt-3 flex items-center gap-3">
                   <span className="text-[28px] font-bold tracking-widest text-[#16A34A] font-mono">
@@ -473,7 +470,7 @@ export function MembersSettingsTab({
                   {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
                 </span>
 
-                {/* Trust score */}
+                {/* Credit Score */}
                 <span
                   className="text-[13px] font-semibold"
                   style={{

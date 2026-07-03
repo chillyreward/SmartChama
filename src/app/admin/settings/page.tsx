@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -390,7 +390,7 @@ export default function AdminSettingsPage() {
 
               <div className="pt-2">
                 <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-3">
-                  Minimum Trust Score for Loan Approval ({minTrustScoreForLoan})
+                  Minimum CREDIT SCORE for Loan Approval ({minTrustScoreForLoan})
                 </label>
                 <input
                   type="range"

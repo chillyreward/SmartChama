@@ -155,7 +155,7 @@ export default function AdminMemberDetailPage() {
 
         <div className="flex gap-4 w-full md:w-auto">
           <div className="flex-1 bg-[#FAFAFA] dark:bg-[#0f1410] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[130px] shadow-sm">
-            <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">TRUST SCORE</div>
+            <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">CREDIT SCORE</div>
             <div className={`text-[20px] md:text-[28px] font-geist font-bold mt-1 ${member.trust_score >= 80 ? 'text-[var(--brand-green)]' : member.trust_score >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
               {member.trust_score || 0}
             </div>

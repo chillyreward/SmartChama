@@ -63,26 +63,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       ] = await Promise.all([membershipsPromise, groupPromise]);
 
       if (memberError || !memberships || memberships.length === 0) {
-        console.error("Error fetching member:", memberError);
-        
-        const isAuthError = memberError && (
-          memberError.status === 401 ||
-          memberError.message?.includes('JWT') ||
-          memberError.message?.includes('token') ||
-          memberError.message?.includes('unauthorized') ||
-          memberError.code === 'PGRST301'
-        );
+
+        // Retry once after 1s — RLS may not be ready on first page load after redirect
+        if (!memberError) {
+          await new Promise(r => setTimeout(r, 1000));
+          const { data: retryMemberships } = await supabase
+            .from("chama_memberships")
+            .select("*, profiles(*)")
+            .eq("profile_id", userId)
+            .eq("status", "active");
+
+          if (retryMemberships && retryMemberships.length > 0) {
+            const m = retryMemberships[0];
+            const cid = m.chama_id;
+            if (typeof document !== 'undefined') {
+              document.cookie = `active_chama_id=${cid}; path=/; max-age=${60 * 60 * 24 * 30}`;
+            }
+            const { data: g } = await supabase
+              .from("chamas_v2").select("*").eq("id", cid).single();
+            setMember({ ...m, user_id: m.profile_id, full_name: m.profiles?.full_name });
+            setGroup(g);
+            return;
+          }
+        }
+
+        // Only sign out on real auth errors
+        const isAuthError = memberError &&
+          typeof memberError === 'object' &&
+          'status' in memberError &&
+          (memberError.status === 401 || memberError.code === 'PGRST301');
 
         if (isAuthError) {
-          supabase.auth.signOut().catch(err => console.error("SignOut error:", err));
-          setMember(null);
-          setGroup(null);
+          supabase.auth.signOut().catch(() => {});
           setSession(null);
           setUser(null);
-        } else {
-          setMember(null);
-          setGroup(null);
         }
+
+        setMember(null);
+        setGroup(null);
         return;
       }
       

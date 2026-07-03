@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -310,7 +310,7 @@ export default function MemberDashboard({
 
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex justify-between items-start mb-4">
-            <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">TRUST SCORE</div>
+            <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">Credit Score</div>
             <span className={`material-symbols-outlined ${trustColor}`}>verified</span>
           </div>
           <div className={`text-[22px] md:text-[32px] font-geist font-bold leading-tight ${trustColor}`}>{member?.trust_score || 0}/100</div>

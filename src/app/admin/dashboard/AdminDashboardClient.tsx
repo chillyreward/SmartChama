@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -428,7 +428,7 @@ export default function AdminDashboardPage({
         </div>
 
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between col-span-2 md:col-span-2 lg:col-span-1">
-          <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">GROUP TRUST SCORE</div>
+          <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">GROUP Credit Score</div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#22C55E] text-[24px] md:text-[28px]">verified</span>
             <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">{metrics.avgTrust || 0}</div>

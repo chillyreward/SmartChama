@@ -1,4 +1,4 @@
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
+﻿import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET() {
   const supabase = getSupabaseAdmin();
@@ -16,7 +16,7 @@ export async function GET() {
       if (event.event_type === 'contribution_confirmed') {
         const { membership_id, chama_id, amount, receipt } = event.payload;
 
-        // 1. Calculate Trust Score
+        // 1. Calculate CREDIT SCORE
         await fetch(
           `${process.env.NEXT_PUBLIC_APP_URL}/api/trust-score/calculate`,
           {
