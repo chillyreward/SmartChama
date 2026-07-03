@@ -4,9 +4,7 @@ import type { NextRequest } from 'next/server'
 
 export async function proxy(req: NextRequest) {
   let res = NextResponse.next({
-    request: {
-      headers: req.headers,
-    },
+    request: { headers: req.headers },
   })
 
   const supabase = createServerClient(
@@ -15,19 +13,12 @@ export async function proxy(req: NextRequest) {
     {
       cookies: {
         getAll() {
-          return req.cookies.getAll().map((cookie) => ({
-            name: cookie.name,
-            value: cookie.value,
-          }))
+          return req.cookies.getAll().map(({ name, value }) => ({ name, value }))
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             req.cookies.set(name, value)
-            res = NextResponse.next({
-              request: {
-                headers: req.headers,
-              },
-            })
+            res = NextResponse.next({ request: { headers: req.headers } })
             res.cookies.set(name, value, options)
           })
         },
@@ -35,62 +26,61 @@ export async function proxy(req: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
+  // Use getUser() — authenticates via Supabase Auth server (secure)
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = req.nextUrl
 
-  const publicPaths = [
-    '/', '/login', '/signup',
-    '/about', '/contact', '/terms',
-    '/privacy', '/cookies', '/security',
-    '/careers', '/blog',
-    '/auth/callback',
-    '/api/mpesa/callback',
-    '/api/ussd',
-    '/api/auth/send-otp',
-    '/api/auth/verify-otp'
-  ]
-
-  const isPublic = publicPaths.some(p => pathname === p) ||
+  // Skip middleware for public routes and all API routes
+  const isPublic =
+    pathname === '/' ||
+    pathname === '/login' ||
+    pathname === '/signup' ||
+    pathname === '/admin/login' ||
+    pathname === '/admin/signup' ||
+    pathname === '/onboarding' ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
-    pathname === '/admin/login' ||
-    pathname === '/admin/signup'
+    pathname.startsWith('/about') ||
+    pathname.startsWith('/contact') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/careers') ||
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/cookies') ||
+    pathname.startsWith('/security')
 
-  const isProtected =
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/select-group')
+  if (isPublic) return res
 
-  const isAuthPage =
-    pathname === '/login' ||
-    pathname === '/signup'
-
-  if (!session && isProtected) {
-    const loginUrl = new URL('/login', req.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  // Protected member routes — redirect to login if no session
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/select-group')) {
+    if (!user) {
+      const loginUrl = new URL('/login', req.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+    return res
   }
 
-  if (session && isAuthPage) {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
-  }
-
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login' && pathname !== '/admin/signup') {
-    if (!session) {
+  // Admin routes — require session + admin role
+  if (pathname.startsWith('/admin')) {
+    if (!user) {
       return NextResponse.redirect(new URL('/login', req.url))
     }
 
     const { data: memberships } = await supabase
       .from('chama_memberships')
       .select('role')
-      .eq('profile_id', session.user.id)
+      .eq('profile_id', user.id)
       .in('role', ['admin', 'chairlady', 'treasurer', 'secretary'])
       .eq('status', 'active')
       .limit(1)
 
     if (!memberships || memberships.length === 0) {
-      return NextResponse.redirect(new URL('/onboarding', req.url))
+      // Has account but no chama yet — send to admin dashboard to create one
+      return NextResponse.redirect(new URL('/admin/dashboard', req.url))
     }
   }
 

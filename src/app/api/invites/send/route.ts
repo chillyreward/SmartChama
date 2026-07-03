@@ -124,35 +124,41 @@ export async function POST(request: Request) {
       return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'whatsapp', phone: formattedPhone })
 
     } else {
-      // SMS via Twilio Messaging Service (handles Kenya +254 routing automatically)
-      const msgParams: any = {
-        body: smsMessage,
-        to: formattedPhone,
-        messagingServiceSid: messagingServiceSid || 'MG1c0ae3dc8f92a7965591e868cb3f4c9e'
+      // SMS via Africa's Talking — Kenya all-networks
+      const atApiKey = process.env.AFRICASTALKING_API_KEY
+      const atUsername = process.env.AFRICASTALKING_USERNAME
+      const senderId = process.env.AFRICASTALKING_SENDER_ID || 'SmartChama'
+
+      if (!atApiKey || !atUsername) {
+        return Response.json({ success: true, code: inviteCode, sms_sent: false, note: 'SMS not configured. Share the code manually.' })
       }
 
-      const msg = await client.messages.create(msgParams)
-      console.log('SMS SID:', msg.sid, '| Status:', msg.status, '| Error:', msg.errorCode)
+      const params = new URLSearchParams({ username: atUsername, to: formattedPhone, message: smsMessage })
+      if (atUsername !== 'sandbox') params.append('from', senderId)
 
-      if (msg.errorCode) {
-        return Response.json({
-          success: true,
-          code: inviteCode,
-          sms_sent: false,
-          note: `SMS failed (${msg.errorCode}): ${msg.errorMessage}. Share the code manually.`
-        })
-      }
+      const atRes = await fetch('https://api.africastalking.com/version1/messaging', {
+        method: 'POST',
+        headers: { 'apiKey': atApiKey, 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+        body: params,
+      })
 
-      return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'sms', phone: formattedPhone })
+      const atData = await atRes.json()
+      console.log('AT SMS:', JSON.stringify(atData))
+
+      const recipient = atData.SMSMessageData?.Recipients?.[0]
+      const delivered = recipient?.status === 'Success'
+
+      return Response.json({
+        success: true, code: inviteCode, sms_sent: delivered, channel: 'sms', phone: formattedPhone,
+        note: delivered ? undefined : `SMS failed (${recipient?.status || 'unknown'}). Share the code manually.`
+      })
     }
 
-  } catch (twilioError: any) {
-    console.error('Twilio failed:', twilioError.message, '| Code:', twilioError.code)
+  } catch (err: any) {
+    console.error('Invite send error:', err.message)
     return Response.json({
-      success: true,
-      code: inviteCode,
-      sms_sent: false,
-      note: `Message failed (${twilioError.code || twilioError.message}). Share the code manually.`
+      success: true, code: inviteCode, sms_sent: false,
+      note: `Message failed: ${err.message}. Share the code manually.`
     })
   }
 }
