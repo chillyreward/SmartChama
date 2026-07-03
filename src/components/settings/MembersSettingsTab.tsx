@@ -18,6 +18,7 @@ export function MembersSettingsTab({
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [invitePhone, setInvitePhone] = useState('')
   const [inviteName, setInviteName] = useState('')
+  const [inviteChannel, setInviteChannel] = useState<'sms' | 'whatsapp'>('sms')
   const [sending, setSending] = useState(false)
   const [inviteResult, setInviteResult] = useState<any>(null)
   const [inviteError, setInviteError] = useState('')
@@ -75,7 +76,8 @@ export function MembersSettingsTab({
           phone: invitePhone.trim(),
           name: inviteName.trim() || null,
           chama_id: chamaId,
-          invited_by: adminId
+          invited_by: adminId,
+          channel: inviteChannel
         })
       })
 
@@ -93,7 +95,7 @@ export function MembersSettingsTab({
       setShowInviteForm(false)
       setToast(
         data.sms_sent
-          ? `SMS invite sent to ${invitePhone}`
+          ? `${inviteChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'} invite sent to ${invitePhone}`
           : `Invite created. Share code: ${data.code}`
       )
       setTimeout(() => setToast(''), 4000)

@@ -88,12 +88,39 @@ export async function POST(request: Request) {
     const client = twilio(accountSid, authToken)
 
     if (channel === 'whatsapp') {
-      const msg = await client.messages.create({
-        body: whatsappMessage,
+      const templateSid = process.env.TWILIO_WHATSAPP_TEMPLATE_SID
+
+      const msgParams: any = {
         from: `whatsapp:${whatsappNumber.replace('whatsapp:', '')}`,
         to: `whatsapp:${formattedPhone}`,
-      })
-      console.log('WhatsApp invite sent. SID:', msg.sid)
+      }
+
+      if (templateSid) {
+        // Use approved template (required for business-initiated messages)
+        msgParams.contentSid = templateSid
+        msgParams.contentVariables = JSON.stringify({
+          "1": adminName,
+          "2": chamaName,
+          "3": inviteCode,
+          "4": signupUrl
+        })
+      } else {
+        // Fallback to free-form (only works within 24h session window)
+        msgParams.body = whatsappMessage
+      }
+
+      const msg = await client.messages.create(msgParams)
+      console.log('WhatsApp SID:', msg.sid, '| Status:', msg.status, '| Error:', msg.errorCode, msg.errorMessage)
+
+      if (msg.errorCode) {
+        return Response.json({
+          success: true,
+          code: inviteCode,
+          sms_sent: false,
+          note: `WhatsApp failed (${msg.errorCode}): ${msg.errorMessage}. Share the code manually.`
+        })
+      }
+
       return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'whatsapp', phone: formattedPhone })
 
     } else {

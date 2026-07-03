@@ -32,34 +32,37 @@ export default function MembersPage() {
       setLoading(true);
       setError("");
 
+      // Fetch all active members with profiles
       const { data: membersData, error: membersErr } = await supabase
-        .from('members')
-        .select('*')
-        .eq('group_id', currentMember.group_id);
+        .from('chama_memberships')
+        .select('id, profile_id, role, trust_score, status, joined_at, flag_reason, profiles(full_name, phone_number, email)')
+        .eq('chama_id', group.id)
+        .eq('status', 'active');
 
       if (membersErr) throw membersErr;
 
+      // Fetch confirmed contributions for this chama
       const { data: contributionsData } = await supabase
-        .from('contributions')
-        .select('member_id, amount')
-        .eq('group_id', currentMember.group_id)
+        .from('contributions_v2')
+        .select('membership_id, amount')
+        .eq('chama_id', group.id)
         .eq('status', 'confirmed');
 
       const savingsMap: Record<string, number> = {};
       contributionsData?.forEach(c => {
-        if (!savingsMap[c.member_id]) savingsMap[c.member_id] = 0;
-        savingsMap[c.member_id] += Number(c.amount);
+        savingsMap[c.membership_id] = (savingsMap[c.membership_id] || 0) + Number(c.amount);
       });
 
+      // Fetch loans
       const { data: loansData } = await supabase
-        .from('loans')
-        .select('borrower_id, amount, status')
-        .eq('group_id', currentMember.group_id);
-        
+        .from('loans_v2')
+        .select('membership_id, amount, status')
+        .eq('chama_id', group.id);
+
       const loansMap: Record<string, any[]> = {};
       loansData?.forEach(l => {
-        if (!loansMap[l.borrower_id]) loansMap[l.borrower_id] = [];
-        loansMap[l.borrower_id].push(l);
+        if (!loansMap[l.membership_id]) loansMap[l.membership_id] = [];
+        loansMap[l.membership_id].push(l);
       });
 
       const today = new Date();
@@ -67,9 +70,16 @@ export default function MembersPage() {
       let newCount = 0;
       let flaggedCount = 0;
 
+      const colors = [
+        "bg-green-100 text-green-700", "bg-blue-100 text-blue-700",
+        "bg-purple-100 text-purple-700", "bg-teal-100 text-teal-700",
+        "bg-indigo-100 text-indigo-700", "bg-orange-100 text-orange-700"
+      ];
+
       const enhancedMembers = (membersData || []).map((m: any, idx: number) => {
+        const profile = m.profiles || {};
         const totalSaved = savingsMap[m.id] || 0;
-        const joinedDate = new Date(m.created_at);
+        const joinedDate = new Date(m.joined_at);
         const isNew = joinedDate.getMonth() === today.getMonth() && joinedDate.getFullYear() === today.getFullYear();
         const trustScore = m.trust_score || 0;
         const isFlagged = trustScore < 60;
@@ -79,39 +89,28 @@ export default function MembersPage() {
         if (isNew) newCount++;
         if (isFlagged) flaggedCount++;
 
-        const colors = [
-          "bg-green-100 text-green-700",
-          "bg-blue-100 text-blue-700",
-          "bg-purple-100 text-purple-700",
-          "bg-teal-100 text-teal-700",
-          "bg-indigo-100 text-indigo-700",
-          "bg-orange-100 text-orange-700"
-        ];
-        const colorClass = colors[idx % colors.length];
-        
-        const roleClass = m.role === 'admin' 
-          ? "bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176]" 
-          : "bg-gray-105 dark:bg-[#1a2218] text-[var(--text-muted)]";
+        const roleClass = ['admin', 'chairlady', 'treasurer', 'secretary'].includes(m.role)
+          ? "bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176]"
+          : "bg-gray-100 dark:bg-[#1a2218] text-[var(--text-muted)]";
 
         return {
           ...m,
+          full_name: profile.full_name || 'Unknown',
+          phone: profile.phone_number || '—',
+          email: profile.email || '',
           trust: trustScore,
-          initials: getInitials(m.full_name),
+          initials: getInitials(profile.full_name || '?'),
           joined: joinedDate.toLocaleString('default', { month: 'short', year: 'numeric' }),
           totalSaved,
           status,
-          colorClass,
+          colorClass: colors[idx % colors.length],
           roleClass,
           loans: loansMap[m.id] || []
         };
       });
 
       setMembers(enhancedMembers);
-      setStats({
-        active: activeCount,
-        newThisMonth: newCount,
-        flagged: flaggedCount
-      });
+      setStats({ active: activeCount, newThisMonth: newCount, flagged: flaggedCount });
 
     } catch (err) {
       console.error(err);
@@ -183,15 +182,6 @@ export default function MembersPage() {
             <p className="text-[14px] text-[var(--text-muted)] mt-1">
               {chamaName} — {members.length} members
             </p>
-          </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <button className="flex-1 md:flex-initial bg-transparent border border-[var(--border)] text-[var(--text-main)] hover:bg-gray-50 dark:hover:bg-[#1f2a1f] rounded-lg px-4 py-2 text-sm font-semibold transition-all">
-              Manage Roles
-            </button>
-            <button className="flex-1 md:flex-initial bg-[#22C55E] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-2 hover:bg-[#006e2f] transition-all font-semibold text-sm shadow-sm">
-              <span className="material-symbols-outlined text-sm font-bold">person_add</span>
-              Invite Member
-            </button>
           </div>
         </div>
       </div>
