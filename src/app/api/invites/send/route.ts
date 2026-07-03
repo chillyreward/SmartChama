@@ -124,23 +124,25 @@ export async function POST(request: Request) {
       return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'whatsapp', phone: formattedPhone })
 
     } else {
-      // For Kenya (+254), use Alphanumeric Sender ID or Messaging Service
-      // Alphanumeric works in Kenya without needing a local number
+      // SMS via Twilio Messaging Service (handles Kenya +254 routing automatically)
       const msgParams: any = {
         body: smsMessage,
         to: formattedPhone,
-      }
-
-      if (messagingServiceSid) {
-        // Preferred: Messaging Service handles routing automatically
-        msgParams.messagingServiceSid = messagingServiceSid
-      } else {
-        // Fallback: Alphanumeric sender (works for Kenya)
-        msgParams.from = 'SmartChama'
+        messagingServiceSid: messagingServiceSid || 'MG1c0ae3dc8f92a7965591e868cb3f4c9e'
       }
 
       const msg = await client.messages.create(msgParams)
-      console.log('SMS invite sent. SID:', msg.sid)
+      console.log('SMS SID:', msg.sid, '| Status:', msg.status, '| Error:', msg.errorCode)
+
+      if (msg.errorCode) {
+        return Response.json({
+          success: true,
+          code: inviteCode,
+          sms_sent: false,
+          note: `SMS failed (${msg.errorCode}): ${msg.errorMessage}. Share the code manually.`
+        })
+      }
+
       return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'sms', phone: formattedPhone })
     }
 
