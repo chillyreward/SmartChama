@@ -205,19 +205,33 @@ function SignupForm() {
     setLoading(true)
 
     try {
-      // 1. Verify group code exists
-      const { data: chama, error: chamaError } = await supabase
-        .from('chamas_v2')
-        .select('id, name, group_code, status')
-        .eq('group_code', code)
-        .eq('status', 'active')
+      // 1. Verify invite code exists in invite_tokens
+      const { data: inviteToken, error: tokenError } = await supabase
+        .from('invite_tokens')
+        .select('id, chama_id, is_active, expires_at, current_uses, max_uses, chamas_v2(id, name, status)')
+        .eq('token', code)
+        .eq('is_active', true)
         .single()
 
-      if (chamaError || !chama) {
+      if (tokenError || !inviteToken) {
         setError('Group code not found. Check with your admin and try again.')
         setLoading(false)
         return
       }
+
+      if (inviteToken.expires_at && new Date(inviteToken.expires_at) < new Date()) {
+        setError('This invite code has expired. Ask your admin for a new one.')
+        setLoading(false)
+        return
+      }
+
+      if (inviteToken.max_uses && inviteToken.current_uses >= inviteToken.max_uses) {
+        setError('This invite code has already been used. Ask your admin for a new one.')
+        setLoading(false)
+        return
+      }
+
+      const chama = (inviteToken.chamas_v2 as any)
 
       // 2. Create auth account
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -252,45 +266,45 @@ function SignupForm() {
         formattedPhone = '+254' + formattedPhone
       }
 
-      // 3. Create profile
-      await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
+      // 3. Create profile via server API (bypasses RLS)
+      await fetch('/api/profile/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
           full_name: fullName.trim(),
           email: email.trim(),
-          phone_number: formattedPhone || null,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' })
-
-      // 4. Create membership
-      const { error: membershipError } = await supabase
-        .from('chama_memberships')
-        .insert({
-          profile_id: userId,
-          chama_id: chama.id,
-          role: 'member',
-          trust_score: 0,
-          status: 'active',
-          joined_at: new Date().toISOString()
+          phone_number: formattedPhone || null
         })
+      })
 
-      if (membershipError) {
-        console.error(membershipError)
+      // 4. Create membership via server API (bypasses RLS)
+      const joinRes = await fetch('/api/admin/create-group', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          fullName: fullName.trim(),
+          email: email.trim(),
+          chamaName: '',
+          chamaId: inviteToken.chama_id,
+          role: 'member',
+          inviteId: inviteToken.id
+        })
+      })
+
+      if (!joinRes.ok) {
         setError('Could not join group. Please try again.')
         setLoading(false)
         return
       }
 
-      // 5. Sign in immediately
-      await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password
-      })
+      // 5. Sign in and redirect
+      await supabase.auth.signInWithPassword({ email: email.trim(), password })
 
       try {
-        sessionStorage.setItem('active_chama_id', chama.id)
-        localStorage.setItem('sc_last_chama_id', chama.id)
+        sessionStorage.setItem('active_chama_id', inviteToken.chama_id)
+        localStorage.setItem('sc_last_chama_id', inviteToken.chama_id)
       } catch(e) {}
 
       router.push('/dashboard')

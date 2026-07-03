@@ -300,7 +300,10 @@ export function NewContributionModal({
               <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-bounce" style={{ animationDelay: '150ms' }} />
               <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>Waiting for confirmation...</p>
+            <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>Waiting for M-Pesa confirmation...</p>
+            <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>
+              If you have paid and this stays here, close and re-open the page to see your updated balance.
+            </p>
           </div>
         )}
 

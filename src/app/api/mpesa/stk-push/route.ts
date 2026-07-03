@@ -14,9 +14,9 @@ export async function POST(request: Request) {
     );
   }
 
-  // Idempotency check
-  const month = new Date().toISOString().slice(0, 7);
-  const idemKey = `stk-${membership_id}-${chama_id}-${month}-${amount}`;
+  // Idempotency check — 5 minute window to prevent double-taps
+  const window = new Date(Math.floor(Date.now() / (5 * 60 * 1000)) * (5 * 60 * 1000)).toISOString().slice(0, 16);
+  const idemKey = `stk-${membership_id}-${chama_id}-${window}-${amount}`;
 
   const { data: existingKey } = await supabase
     .from('idempotency_keys')
