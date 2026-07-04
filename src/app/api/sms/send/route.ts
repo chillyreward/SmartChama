@@ -24,8 +24,8 @@ export async function POST(request: Request) {
 
     const params = new URLSearchParams({ username, to: formattedPhone, message });
 
-    // Only add sender ID on live (not sandbox)
-    if (username !== 'sandbox') params.append('from', senderId);
+    // Don't add sender ID — use AT default until SmartChama sender ID is approved
+    // if (username !== 'sandbox') params.append('from', senderId);
 
     const res = await fetch('https://api.africastalking.com/version1/messaging', {
       method: 'POST',
