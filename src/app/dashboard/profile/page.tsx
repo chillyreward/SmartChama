@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
@@ -127,8 +127,7 @@ export default function ProfilePage() {
           phone_number: phone,
           national_id: nationalId,
           county,
-          occupation,
-          updated_at: new Date().toISOString()
+          occupation
         })
         .eq('id', session.user.id)
 

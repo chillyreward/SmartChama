@@ -8,6 +8,11 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not set!')
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+
     const { user_id, full_name, phone_number, email, county, national_id } = await req.json()
 
     if (!user_id || !full_name) {

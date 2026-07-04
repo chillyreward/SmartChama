@@ -115,8 +115,7 @@ function SignupForm() {
           id: userId,
           full_name: fullName.trim(),
           email: email.trim(),
-          phone_number: formattedPhone || null,
-          updated_at: new Date().toISOString()
+          phone_number: formattedPhone || null
         }, { onConflict: 'id' })
 
       // 3. Create chama (trigger auto-generates code)

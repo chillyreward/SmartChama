@@ -100,8 +100,7 @@ export default function AdminProfilePage() {
           phone_number: phone,
           national_id: nationalId,
           county,
-          occupation,
-          updated_at: new Date().toISOString()
+          occupation
         })
         .eq('id', session.user.id)
 

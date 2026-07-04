@@ -15,10 +15,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // 1. Upsert profile
-    await supabaseAdmin
+    // 1. Upsert profile — must exist before chama (FK constraint)
+    const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({ id: userId, full_name: fullName, email }, { onConflict: 'id' })
+
+    if (profileError) {
+      console.error('Profile upsert error:', profileError)
+      // Profile might already exist — try update instead
+      await supabaseAdmin
+        .from('profiles')
+        .update({ full_name: fullName, email })
+        .eq('id', userId)
+    }
 
     // JOIN existing chama flow
     if (chamaId && !chamaName) {

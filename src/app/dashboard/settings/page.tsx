@@ -106,8 +106,7 @@ export default function SettingsPage() {
           email,
           national_id: nationalId,
           county,
-          occupation,
-          updated_at: new Date().toISOString()
+          occupation
         })
         .eq('id', session.user.id)
 

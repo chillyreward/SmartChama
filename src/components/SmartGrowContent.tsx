@@ -156,7 +156,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
       }
 
       // Insert transaction into transactions_v2
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       await supabase.from('transactions_v2').insert({
         chama_id: chama.id,
         membership_id: member.id,

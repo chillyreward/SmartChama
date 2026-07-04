@@ -61,18 +61,18 @@ export default function OnboardingPage() {
     useState('')
 
   useEffect(() => {
-    supabase.auth.getSession().then(
-      ({ data: { session } }) => {
-        if (!session) {
+    supabase.auth.getUser().then(
+      ({ data: { user } }) => {
+        if (!user) {
           router.push('/login')
           return
         }
-        setSession(session)
+        setSession({ user })
         
         // Check if profile already 
         // exists — skip step 1 if so
         checkExistingProfile(
-          session.user.id
+          user.id
         )
       }
     )

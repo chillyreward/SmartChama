@@ -18,8 +18,8 @@ export default function GroupSwitcher() {
     let cancelled = false
 
     async function fetchMemberships() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (cancelled || !session) return
+      const { data: { user } } = await supabase.auth.getUser()
+      if (cancelled || !user) return
 
       const { data } = await supabase
         .from('chama_memberships')
@@ -27,7 +27,7 @@ export default function GroupSwitcher() {
           id, role,
           chamas_v2 ( id, name )
         `)
-        .eq('profile_id', session.user.id)
+        .eq('profile_id', user.id)
         .eq('status', 'active')
 
       if (!cancelled && data) setMemberships(data)

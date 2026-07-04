@@ -15,7 +15,8 @@ export default function SelectGroupClient() {
     let cancelled = false;
 
     async function loadMemberships() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user } } = await supabase.auth.getUser();
+      const session = user ? { user } : null;
       if (cancelled) return;
       if (!session) {
         router.push('/login');
@@ -30,7 +31,7 @@ export default function SelectGroupClient() {
             id, name, county, contribution_amount
           )
         `)
-        .eq('profile_id', session.user.id)
+        .eq('profile_id', user.id)
         .eq('status', 'active');
 
       if (cancelled) return;
