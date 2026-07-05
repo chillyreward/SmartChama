@@ -124,34 +124,35 @@ export async function POST(request: Request) {
       return Response.json({ success: true, code: inviteCode, sms_sent: true, channel: 'whatsapp', phone: formattedPhone })
 
     } else {
-      // SMS via Africa's Talking — Kenya all-networks
-      const atApiKey = process.env.AFRICASTALKING_API_KEY
-      const atUsername = process.env.AFRICASTALKING_USERNAME
-      const senderId = process.env.AFRICASTALKING_SENDER_ID || 'SmartChama'
+      // SMS via Wakali — Kenya all-networks (Safaricom, Airtel, Telkom)
+      const wakaliKey = process.env.WAKALI_API_KEY
 
-      if (!atApiKey || !atUsername) {
+      if (!wakaliKey) {
         return Response.json({ success: true, code: inviteCode, sms_sent: false, note: 'SMS not configured. Share the code manually.' })
       }
 
-      const params = new URLSearchParams({ username: atUsername, to: formattedPhone, message: smsMessage })
-      // Don't add sender ID — use AT default until SmartChama sender ID is approved
-      // if (atUsername !== 'sandbox') params.append('from', senderId)
-
-      const atRes = await fetch('https://api.africastalking.com/version1/messaging', {
+      const res = await fetch('https://api.wakalisms.com/sms/send', {
         method: 'POST',
-        headers: { 'apiKey': atApiKey, 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-        body: params,
+        headers: {
+          'X-API-Key': wakaliKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipients: [formattedPhone],
+          message: smsMessage,
+        }),
       })
 
-      const atData = await atRes.json()
-      console.log('AT SMS:', JSON.stringify(atData))
-
-      const recipient = atData.SMSMessageData?.Recipients?.[0]
-      const delivered = recipient?.status === 'Success'
+      const data = await res.json()
+      console.log('Wakali SMS:', JSON.stringify(data))
 
       return Response.json({
-        success: true, code: inviteCode, sms_sent: delivered, channel: 'sms', phone: formattedPhone,
-        note: delivered ? undefined : `SMS failed (${recipient?.status || 'unknown'}). Share the code manually.`
+        success: true,
+        code: inviteCode,
+        sms_sent: res.ok,
+        channel: 'sms',
+        phone: formattedPhone,
+        note: res.ok ? undefined : `SMS failed: ${data.detail || data.message || 'Unknown error'}. Share the code manually.`
       })
     }
 
