@@ -680,10 +680,6 @@ export default function OnboardingPage() {
                 <select
                   value={county}
                   onChange={e => {
-                    console.log(
-                      'County selected:', 
-                      e.target.value
-                    )
                     setCounty(e.target.value)
                   }}
                   className="w-full px-4 
@@ -915,10 +911,6 @@ export default function OnboardingPage() {
                     type="number"
                     value={contributionAmount}
                     onChange={e => {
-                      console.log(
-                        'Amount changed to:', 
-                        e.target.value
-                      )
                       setContributionAmount(
                         e.target.value
                       )
@@ -972,10 +964,6 @@ export default function OnboardingPage() {
                 <select
                   value={frequency}
                   onChange={e => {
-                    console.log(
-                      'Frequency changed:', 
-                      e.target.value
-                    )
                     setFrequency(
                       e.target.value
                     )

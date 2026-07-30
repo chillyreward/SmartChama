@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { InviteModal } from "@/components/InviteModal";
+import { exportToPDF, exportToExcel } from "@/lib/export";
+import PageSkeleton from "@/components/PageSkeleton";
 
 export default function AdminMembersPage() {
   const router = useRouter();
@@ -30,6 +32,7 @@ export default function AdminMembersPage() {
 
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [flagReason, setFlagReason] = useState("");
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
 
@@ -139,6 +142,54 @@ export default function AdminMembersPage() {
     }
   };
 
+  const handleApprove = async (m: any) => {
+    try {
+      setProcessingId(m.id);
+      const { error } = await supabase
+        .from('chama_memberships')
+        .update({ status: 'active' })
+        .eq('id', m.id);
+
+      if (error) throw error;
+
+      await supabase.from('notifications').insert({
+        chama_id: group?.id,
+        profile_id: m.profile_id,
+        type: 'member_approved',
+        title: 'Membership Approved!',
+        message: `Your request to join ${group?.name || 'the chama'} has been approved by the admin.`
+      });
+
+      setToastMsg("Member approved!");
+      setTimeout(() => setToastMsg(""), 3000);
+      fetchData();
+    } catch (err) {
+      alert("Error approving member");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleReject = async (m: any) => {
+    try {
+      setProcessingId(m.id);
+      const { error } = await supabase
+        .from('chama_memberships')
+        .update({ status: 'rejected' })
+        .eq('id', m.id);
+
+      if (error) throw error;
+
+      setToastMsg("Member request rejected");
+      setTimeout(() => setToastMsg(""), 3000);
+      fetchData();
+    } catch (err) {
+      alert("Error rejecting member");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const handleSendReminder = async (m: any) => {
     try {
       const { error } = await supabase
@@ -181,6 +232,32 @@ export default function AdminMembersPage() {
     }
   };
 
+  const handleExportPDF = () => {
+    const headers = ['Full Name', 'Phone', 'Email', 'Role', 'Status', 'Total Saved (KSh)'];
+    const rows = filteredMembers.map(m => [
+      m.profile?.full_name || 'Member',
+      m.profile?.phone_number || 'N/A',
+      m.profile?.email || 'N/A',
+      m.role,
+      m.status,
+      Number(m.totalSaved || 0).toLocaleString('en-KE')
+    ]);
+    exportToPDF('Members Roster Report', group?.name || 'SmartChama', headers, rows, 'members_roster');
+  };
+
+  const handleExportExcel = () => {
+    const headers = ['Full Name', 'Phone', 'Email', 'Role', 'Status', 'Total Saved (KSh)'];
+    const rows = filteredMembers.map(m => [
+      m.profile?.full_name || 'Member',
+      m.profile?.phone_number || 'N/A',
+      m.profile?.email || 'N/A',
+      m.role,
+      m.status,
+      Number(m.totalSaved || 0)
+    ]);
+    exportToExcel('Members Roster Report', group?.name || 'SmartChama', headers, rows, 'members_roster');
+  };
+
   const getInitials = (name: string) => {
     if (!name) return "??";
     return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
@@ -202,16 +279,7 @@ export default function AdminMembersPage() {
   };
 
   if (loading) {
-    return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-28 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
-          ))}
-        </div>
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   const totalCount = members.length;
@@ -244,12 +312,26 @@ export default function AdminMembersPage() {
               {group?.name || "SmartChama"} · {totalCount} total registered members.
             </p>
           </div>
-          <div className="w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <button 
+              onClick={handleExportPDF}
+              className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>
+              Export PDF
+            </button>
+            <button 
+              onClick={handleExportExcel}
+              className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px] text-green-600">table_chart</span>
+              Export Excel
+            </button>
             <button
               onClick={() => setShowInviteModal(true)}
-              className="w-full md:w-auto bg-[#22C55E] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-2 hover:bg-[#006e2f] transition-all font-semibold text-sm shadow-sm cursor-pointer"
+              className="bg-[#22C55E] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-1.5 hover:bg-[#006e2f] transition-all font-semibold text-xs shadow-sm cursor-pointer"
             >
-              <span className="material-symbols-outlined text-sm font-bold">person_add</span>
+              <span className="material-symbols-outlined text-[16px]">person_add</span>
               Invite Member
             </button>
           </div>
@@ -371,26 +453,55 @@ export default function AdminMembersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <select 
-                        className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[#22C55E]"
-                        value=""
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === 'view') router.push(`/admin/members/${m.id}`);
-                          if (val === 'role') { setSelectedMember(m); setNewRole(m.role || "member"); setShowRoleModal(true); }
-                          if (val === 'remind') handleSendReminder(m);
-                          if (val === 'flag') { setSelectedMember(m); setShowFlagModal(true); }
-                          if (val === 'remove') handleRemove(m);
-                          e.target.value = ""; // Reset
-                        }}
-                      >
-                        <option value="">Actions</option>
-                        <option value="view">View Profile</option>
-                        <option value="role">Edit Role</option>
-                        <option value="remind">Send Reminder</option>
-                        <option value="flag">Flag Member</option>
-                        <option value="remove">Remove</option>
-                      </select>
+                      {m.status === 'pending' ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleApprove(m)}
+                            disabled={processingId === m.id}
+                            className="bg-[#22C55E] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#16A34A] transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          >
+                            {processingId === m.id ? (
+                              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <span className="material-symbols-outlined text-[14px]">check</span>
+                            )}
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleReject(m)}
+                            disabled={processingId === m.id}
+                            className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          >
+                            {processingId === m.id ? (
+                              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <span className="material-symbols-outlined text-[14px]">close</span>
+                            )}
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <select 
+                          className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[#22C55E]"
+                          value=""
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === 'view') router.push(`/admin/members/${m.id}`);
+                            if (val === 'role') { setSelectedMember(m); setNewRole(m.role || "member"); setShowRoleModal(true); }
+                            if (val === 'remind') handleSendReminder(m);
+                            if (val === 'flag') { setSelectedMember(m); setShowFlagModal(true); }
+                            if (val === 'remove') handleRemove(m);
+                            e.target.value = ""; // Reset
+                          }}
+                        >
+                          <option value="">Actions</option>
+                          <option value="view">View Profile</option>
+                          <option value="role">Edit Role</option>
+                          <option value="remind">Send Reminder</option>
+                          <option value="flag">Flag Member</option>
+                          <option value="remove">Remove</option>
+                        </select>
+                      )}
                     </td>
                   </tr>
                 ))

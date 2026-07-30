@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     const supabase = getSupabaseAdmin();
     
-    let phone = phone_number.replace(/\s/g, '');
+    let phone = String(phone_number).replace(/\s/g, '');
     if (phone.startsWith('0')) {
       phone = '+254' + phone.slice(1);
     }
@@ -19,55 +19,59 @@ export async function POST(request: Request) {
       phone = '+254' + phone;
     }
     
-    const { data: otpRecord, error: fetchError } = await supabase
+    // Fetch latest active OTP record by phone_number (NOT by code, to properly track attempts)
+    const { data: latestOtp } = await supabase
       .from('otp_codes')
       .select('*')
       .eq('phone_number', phone)
-      .eq('code', code)
-      .eq('used', false)
-      .gte('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
-    
-    if (fetchError || !otpRecord) {
-      // Track failed attempts
-      await supabase.rpc('increment', { row_id: 0 }); // Placeholder if rpc isn't set up, we can do manual update
-      
-      const { data: latestOtp } = await supabase
+      .maybeSingle();
+
+    if (!latestOtp) {
+      return NextResponse.json({ error: 'No OTP requested for this phone number. Please request a new one.' }, { status: 400 });
+    }
+
+    // Lockout check: if attempts >= 5
+    if ((latestOtp.attempts || 0) >= 5) {
+      return NextResponse.json({ error: 'Too many failed attempts. Please request a new OTP.' }, { status: 429 });
+    }
+
+    // Expiration check
+    if (new Date(latestOtp.expires_at) < new Date() || latestOtp.used) {
+      return NextResponse.json({ error: 'OTP code has expired or already been used. Please request a new one.' }, { status: 400 });
+    }
+
+    // Code match check
+    if (latestOtp.code !== String(code).trim()) {
+      // Increment attempts counter on wrong code
+      await supabase
         .from('otp_codes')
-        .select('id, attempts')
-        .eq('phone_number', phone)
-        .eq('code', code)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-        
-      if (latestOtp) {
-        await supabase
-          .from('otp_codes')
-          .update({ attempts: (latestOtp.attempts || 0) + 1 })
-          .eq('id', latestOtp.id);
+        .update({ attempts: (latestOtp.attempts || 0) + 1 })
+        .eq('id', latestOtp.id);
+
+      const remaining = 5 - ((latestOtp.attempts || 0) + 1);
+      if (remaining <= 0) {
+        return NextResponse.json({ error: 'Too many failed attempts. Please request a new OTP.' }, { status: 429 });
       }
-      
-      return NextResponse.json({ error: 'Invalid or expired code. Please request a new one.' }, { status: 400 });
+
+      return NextResponse.json({ error: `Invalid OTP code. ${remaining} attempts remaining.` }, { status: 400 });
     }
     
-    // Mark as used
+    // Code matched! Mark as used
     await supabase.from('otp_codes')
       .update({ used: true })
-      .eq('id', otpRecord.id);
+      .eq('id', latestOtp.id);
       
     // Find if user has a profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, email')
       .eq('phone_number', phone)
-      .single();
+      .maybeSingle();
       
     let magicLink = null;
     if (profile && profile.email) {
-      // Generate a magic link so the client can log in without a password
       const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email: profile.email

@@ -4,9 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function LandingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { session, member } = useAuth();
+  const isLoggedIn = !!session;
+  const dashboardPath = member?.role && ['admin', 'chairlady', 'treasurer', 'secretary'].includes(member.role) ? '/admin/dashboard' : '/dashboard';
 
   return (
     <header className="sidebar-bg border-b border-[var(--border)] sticky top-0 z-50 transition-colors duration-300">
@@ -30,7 +34,7 @@ export default function LandingNav() {
         </Link>
         
         {/* Desktop nav links — hidden mobile */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-8">
           <Link href="/#features" className="text-[15px] font-medium text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:text-[#8FA88F] dark:hover:text-[#4ae176] transition-colors">
             Features
           </Link>
@@ -46,25 +50,41 @@ export default function LandingNav() {
         </nav>
         
         {/* Desktop right buttons — hidden mobile */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
-          <Link href="/login" className="text-[15px] font-medium text-[#3d4a3d] dark:text-[#8FA88F] hover:text-[#006e2f] dark:text-[#8FA88F] dark:hover:text-[#4ae176] transition-colors mr-1">
-            Sign In
-          </Link>
-          <Link href="/signup" className="bg-[#22C55E] text-white text-[15px] font-semibold px-5 py-2.5 rounded hover:bg-[#006e2f] transition-colors ml-1">
-            Get Started
-          </Link>
+          {isLoggedIn ? (
+            <Link href={dashboardPath} className="bg-[#22C55E] text-white text-[15px] font-semibold px-5 py-2.5 rounded hover:bg-[#006e2f] transition-colors">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="text-[15px] font-medium hover:text-[#006e2f] transition-colors mr-1" style={{ color: 'var(--text-primary)' }}>
+                Sign In
+              </Link>
+              <Link href="/signup" className="bg-[#22C55E] text-white text-[15px] font-semibold px-5 py-2.5 rounded hover:bg-[#006e2f] transition-colors ml-1">
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile right — shown only on mobile */}
-        <div className="flex md:hidden items-center gap-3">
+        <div className="flex lg:hidden items-center gap-3">
           <ThemeToggle />
-          <Link href="/login" className="text-[14px] font-semibold text-[#8FA88F] hover:text-[#4ae176] transition-colors py-2 px-1">
-            Sign In
-          </Link>
-          <Link href="/signup" className="bg-[#22C55E] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold hover:bg-[#1ea94e] transition-colors max-[360px]:hidden">
-            Get Started
-          </Link>
+          {isLoggedIn ? (
+            <Link href={dashboardPath} className="bg-[#22C55E] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold hover:bg-[#1ea94e] transition-colors">
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="text-[14px] font-semibold hover:text-[#4ae176] transition-colors py-2 px-1" style={{ color: 'var(--text-primary)' }}>
+                Sign In
+              </Link>
+              <Link href="/signup" className="bg-[#22C55E] text-white px-3 py-1.5 rounded-lg text-[13px] font-semibold hover:bg-[#1ea94e] transition-colors max-[360px]:hidden">
+                Get Started
+              </Link>
+            </>
+          )}
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="w-9 h-9 flex items-center justify-center text-[var(--text-main)] hover:bg-emerald-950/20 rounded-lg transition-colors cursor-pointer"

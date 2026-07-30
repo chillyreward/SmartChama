@@ -1,8 +1,14 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getComplianceConfig } from '@/lib/compliance';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(request: Request) {
   try {
+    const { user, error: authError } = await requireAuth(request);
+    if (authError || !user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = getSupabaseAdmin();
     const { profile_id, chama_id } = await request.json();
 
@@ -54,12 +60,6 @@ export async function POST(request: Request) {
     }
 
     // Check 3: Round-number repeated contributions (laundering pattern)
-    const { data: recentContribs } = await supabase
-      .from('contributions_v2')
-      .select('amount')
-      .eq('membership_id', profile_id) // Wait, is profile_id used as membership_id here? Let's check the schema. In contributions_v2, the foreign key is membership_id referencing chama_memberships.id. But wait, in the prompt, the user writes: `.eq('membership_id', profile_id)`.
-      // Let's look up their chama_memberships.id first to get the correct membership_id!
-      // This is a critical bug fix! Let's get the membership ID of the profile in this chama:
     const { data: membership } = await supabase
       .from('chama_memberships')
       .select('id')

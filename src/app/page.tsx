@@ -265,7 +265,7 @@ export default function LandingPage() {
                 
                 <h3 className="text-xl font-bold font-geist text-[#161d16] dark:text-white mb-3">{f.title}</h3>
                 <p className="text-sm text-[#4F5A53] dark:text-[#8FA196] mb-6 leading-relaxed">{f.desc}</p>
-                <Link href="#" className="text-xs font-bold uppercase tracking-wider text-[#006e2f] dark:text-[#22C55E] hover:underline inline-block">
+                <Link href="/about" className="text-xs font-bold uppercase tracking-wider text-[#006e2f] dark:text-[#22C55E] hover:underline inline-block">
                   Learn more →
                 </Link>
               </div>

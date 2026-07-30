@@ -53,7 +53,6 @@ export default function AdminDashboard() {
 
       // If no membership found or not admin
       if (!rpcData?.found) {
-        console.log('No membership or access error:', rpcData?.error)
         if (rpcData?.error === 'not_admin') {
           router.replace('/dashboard')
         } else {

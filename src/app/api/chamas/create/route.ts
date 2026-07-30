@@ -1,18 +1,21 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { supabase as clientSupabase } from '@/lib/supabase';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(request: Request) {
   try {
+    const { user, error: authError } = await requireAuth(request);
+    if (!user || authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error("Server is missing Supabase credentials in env!");
       return NextResponse.json({ error: 'Server configuration error: Missing Supabase credentials' }, { status: 500 });
     }
 
     const body = await request.json();
-    console.log("Create Chama API Payload:", body);
     const { 
-      user_id, 
       email, 
       full_name, 
       phone, 
@@ -27,18 +30,24 @@ export async function POST(request: Request) {
       account_name
     } = body;
 
-    const supabase = getSupabaseAdmin(); // Admin bypasses RLS
+    // Use authenticated user.id
+    const user_id = user.id;
+
+    if (!chama_name) {
+      return NextResponse.json({ error: 'Chama group name is required' }, { status: 400 });
+    }
+
+    const supabase = getSupabaseAdmin();
 
     let finalPhone = phone;
     let finalFullName = full_name;
 
-    // Fallback: If full_name or phone is missing, fetch them from the profiles table
-    if (user_id && (!finalPhone || !finalFullName)) {
+    if (!finalPhone || !finalFullName) {
       const { data: dbProfile } = await supabase
         .from('profiles')
         .select('full_name, phone_number')
         .eq('id', user_id)
-        .single();
+        .maybeSingle();
 
       if (dbProfile) {
         if (!finalPhone) finalPhone = dbProfile.phone_number;
@@ -46,20 +55,9 @@ export async function POST(request: Request) {
       }
     }
 
-    // Default fallbacks to prevent "Missing required fields" errors
-    if (!finalPhone) {
-      finalPhone = '+254700000000';
-    }
-    if (!finalFullName) {
-      finalFullName = email ? email.split('@')[0] : 'Chama Member';
-    }
+    if (!finalPhone) finalPhone = '+254700000000';
+    if (!finalFullName) finalFullName = user.email ? user.email.split('@')[0] : 'Chama Member';
 
-    if (!user_id || !chama_name || !finalFullName || !finalPhone) {
-      console.log("Validation failed. Missing required fields:", { user_id, chama_name, finalFullName, finalPhone });
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    // 1. Upsert Profile
     let formattedPhone = finalPhone.replace(/\s/g, '');
     if (formattedPhone.startsWith('0')) {
       formattedPhone = '+254' + formattedPhone.slice(1);
@@ -74,21 +72,19 @@ export async function POST(request: Request) {
         id: user_id,
         full_name: finalFullName,
         phone_number: formattedPhone,
-        email
+        email: email || user.email
       });
 
     if (profileError) {
-      console.error("Profile Error:", profileError);
       return NextResponse.json({ error: `Error creating profile: ${profileError.message}` }, { status: 500 });
     }
 
-    // 2. Create the Chama
     const { data: chamaData, error: chamaError } = await supabase
       .from('chamas_v2')
       .insert({
         name: chama_name,
         contribution_amount: parseInt(contribution_amount) || 0,
-        contribution_frequency,
+        contribution_frequency: contribution_frequency || 'monthly',
         created_by: user_id,
         status: 'active'
       })
@@ -96,11 +92,9 @@ export async function POST(request: Request) {
       .single();
 
     if (chamaError) {
-      console.error("Chama Error:", chamaError);
       return NextResponse.json({ error: chamaError.message }, { status: 500 });
     }
 
-    // Run setup insertions in PARALLEL
     const [walletRes, configRes, membershipRes, activityRes] = await Promise.all([
       supabase.from('wallets').insert({
         chama_id: chamaData.id,
@@ -131,7 +125,6 @@ export async function POST(request: Request) {
     ]);
 
     if (membershipRes.error) {
-      console.error("Membership Error:", membershipRes.error);
       return NextResponse.json({ error: `Error creating membership: ${membershipRes.error.message}` }, { status: 500 });
     }
 

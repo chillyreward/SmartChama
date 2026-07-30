@@ -73,8 +73,8 @@ export default function GroupActivityPage() {
             description: `${c.membership?.profile?.full_name ?? 'Someone'} contributed KSh ${c.amount}`,
             date: new Date(c.created_at),
             icon: 'payments',
-            color: 'text-green-600',
-            bg: 'bg-green-100'
+            color: 'text-[#22C55E]',
+            bg: 'bg-emerald-500/10'
           })));
         }
         
@@ -86,8 +86,8 @@ export default function GroupActivityPage() {
             description: `${l.membership?.profile?.full_name ?? 'Someone'} ${l.status === 'active' ? 'received a loan of' : 'requested a loan of'} KSh ${l.amount}`,
             date: new Date(l.created_at),
             icon: 'account_balance',
-            color: 'text-blue-600',
-            bg: 'bg-blue-100'
+            color: 'text-blue-500',
+            bg: 'bg-blue-500/10'
           })));
         }
         
@@ -99,8 +99,8 @@ export default function GroupActivityPage() {
             description: `${m.profile?.full_name ?? 'Someone'} joined the group`,
             date: new Date(m.created_at),
             icon: 'person_add',
-            color: 'text-purple-600',
-            bg: 'bg-purple-100'
+            color: 'text-purple-500',
+            bg: 'bg-purple-500/10'
           })));
         }
         
@@ -131,22 +131,25 @@ export default function GroupActivityPage() {
   return (
     <div className="p-8 font-inter max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-headline-lg font-semibold text-on-surface font-geist">Group Activity</h1>
-        <p className="text-body-sm text-secondary mt-1">Recent events in {group?.name}</p>
+        <h1 className="text-3xl font-semibold font-geist" style={{ color: 'var(--text-primary)' }}>Group Activity</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Recent events in {group?.name}</p>
       </div>
 
-      <div className="bg-white border border-[#E5E7EB] rounded-xl shadow-sm p-6">
+      <div className="rounded-xl shadow-sm p-6 transition-colors" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         {activities.length === 0 ? (
           <div className="text-center py-10">
-            <span className="material-symbols-outlined text-gray-300 text-5xl mb-2">history</span>
-            <p className="text-body-sm text-secondary">No recent activity found.</p>
+            <span className="material-symbols-outlined text-5xl mb-2" style={{ color: 'var(--text-muted)' }}>history</span>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>No recent activity found.</p>
           </div>
         ) : (
-          <div className="relative border-l-2 border-gray-100 ml-4 pl-6 space-y-8">
-            {activities.map((activity, idx) => (
+          <div className="relative border-l-2 ml-4 pl-6 space-y-8" style={{ borderColor: 'var(--border)' }}>
+            {activities.map((activity) => (
               <div key={activity.id} className="relative">
                 {/* Timeline Dot */}
-                <div className={`absolute -left-[35px] w-8 h-8 rounded-full flex items-center justify-center ${activity.bg} shadow-sm ring-4 ring-white`}>
+                <div 
+                  className={`absolute -left-[35px] w-8 h-8 rounded-full flex items-center justify-center ${activity.bg} shadow-sm`}
+                  style={{ border: '2px solid var(--bg-card)' }}
+                >
                   <span className={`material-symbols-outlined text-sm ${activity.color}`}>
                     {activity.icon}
                   </span>
@@ -154,9 +157,9 @@ export default function GroupActivityPage() {
                 
                 {/* Content */}
                 <div>
-                  <h3 className="text-body-lg font-bold text-on-surface">{activity.title}</h3>
-                  <p className="text-body-sm text-secondary mt-1">{activity.description}</p>
-                  <div className="text-xs text-gray-400 mt-2 font-mono">
+                  <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{activity.title}</h3>
+                  <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{activity.description}</p>
+                  <div className="text-xs mt-2 font-mono" style={{ color: 'var(--text-muted)' }}>
                     {activity.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} at {activity.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>

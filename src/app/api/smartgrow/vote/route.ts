@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(request: Request) {
   try {
-    const { vote_id, profile_id, vote } = await request.json();
-
-    if (!vote_id || !profile_id || (vote !== 'yes' && vote !== 'no')) {
-      return NextResponse.json({ error: 'Invalid or missing fields' }, { status: 400 });
+    const { user, error: authError } = await requireAuth(request);
+    if (!user || authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const { vote_id, vote } = await request.json();
+
+    if (!vote_id || (vote !== 'yes' && vote !== 'no')) {
+      return NextResponse.json({ error: 'Invalid or missing fields: vote_id, vote (yes/no)' }, { status: 400 });
+    }
+
+    // Use authenticated user.id instead of body profile_id to prevent impersonation
+    const profile_id = user.id;
     
     const supabase = getSupabaseAdmin();
     
@@ -35,7 +44,7 @@ export async function POST(request: Request) {
     const noVotes = proposal.no_votes || [];
     
     if (yesVotes.includes(profile_id) || noVotes.includes(profile_id)) {
-      return NextResponse.json({ error: 'You have already voted' }, { status: 400 });
+      return NextResponse.json({ error: 'You have already voted on this proposal' }, { status: 400 });
     }
     
     // Append vote

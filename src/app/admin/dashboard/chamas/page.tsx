@@ -214,8 +214,6 @@ function MyChamasContent() {
         return;
       }
 
-      console.log("Chama created successfully:", chama);
-      
       // Close modal and reset form
       setShowCreateModal(false);
       setChamaName("");

@@ -68,7 +68,7 @@ export function InstallPrompt() {
 
   return (
     <div
-      className="fixed bottom-20 left-4 right-4 z-[9998] md:left-auto md:right-6 md:bottom-24 md:w-80 rounded-2xl p-4 shadow-2xl shadow-black/20 animate-slide-up"
+      className="fixed bottom-24 left-4 right-4 z-40 lg:left-auto lg:right-6 lg:bottom-8 lg:w-80 rounded-2xl p-4 shadow-2xl shadow-black/20 animate-slide-up"
       style={{
         backgroundColor: 'var(--bg-card)',
         border: '2px solid #22C55E'

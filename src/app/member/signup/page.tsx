@@ -122,8 +122,6 @@ export default function MemberSignup() {
     setError("");
 
     try {
-      console.log("Creating auth user with email:", email);
-
       let authData, authError;
       
       try {
@@ -148,7 +146,6 @@ export default function MemberSignup() {
       if (authError) {
         console.error("Auth signup error:", authError);
         
-        // Provide user-friendly error messages
         let userMessage = authError.message || "Failed to create account";
         
         if (authError.message?.includes('already registered')) {
@@ -167,8 +164,6 @@ export default function MemberSignup() {
       if (!authData.user) {
         throw new Error("Failed to create account - no user data returned");
       }
-
-      console.log("Auth user created successfully, user_id:", authData.user.id);
 
       const { data: tokenData, error: tokenError } = await supabase
         .from("invite_tokens")
@@ -191,10 +186,6 @@ export default function MemberSignup() {
         throw new Error("Invite code not found. Please request a new invite link.");
       }
 
-      console.log("Token validated, creating member record...");
-      console.log("Chama ID:", chamaId, "Token data chama_id:", tokenData.chama_id);
-
-      // Use chama_id from token data to ensure we have the correct UUID
       const memberChamaId = tokenData.chama_id || chamaId;
       
       if (!memberChamaId) {
@@ -228,22 +219,13 @@ export default function MemberSignup() {
         }
       }
 
-      console.log("Member record created, updating token usage...");
-
-      const updateResult = await supabase
+      await supabase
         .from("invite_tokens")
         .update({ current_uses: tokenData.current_uses + 1 })
         .eq("id", tokenData.id);
 
-      if (updateResult.error) {
-        console.warn("Failed to update token usage count:", updateResult.error);
-      }
-
-      console.log("Signup complete! Redirecting to login...");
-
       alert(`Welcome to ${chamaName}! Your account has been created.\n\nPlease login with:\nEmail: ${email}\nPassword: (the password you just created)`);
       
-      // Redirect to unified login page
       router.push("/login");
     } catch (err: any) {
       console.error("Signup error:", err);
@@ -262,10 +244,10 @@ export default function MemberSignup() {
 
   if (validatingToken) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400">Validating invite code...</p>
+          <div className="w-16 h-16 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p style={{ color: 'var(--text-secondary)' }}>Validating invite code...</p>
         </div>
       </div>
     );
@@ -273,16 +255,16 @@ export default function MemberSignup() {
 
   if (!tokenValid) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: 'var(--bg-page)' }}>
         <div className="max-w-md w-full text-center">
           <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
             <AlertCircle className="w-8 h-8 text-red-400" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Invalid Invite Code</h1>
-          <p className="text-slate-400 mb-6">{error}</p>
+          <h1 className="text-2xl font-bold mb-2 font-geist" style={{ color: 'var(--text-primary)' }}>Invalid Invite Code</h1>
+          <p className="mb-6 text-sm" style={{ color: 'var(--text-secondary)' }}>{error}</p>
           <Link
             href="/login"
-            className="inline-block bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-3 px-6 rounded-xl transition-colors"
+            className="inline-block bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-md"
           >
             Go to Login
           </Link>
@@ -292,50 +274,48 @@ export default function MemberSignup() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden transition-colors" style={{ backgroundColor: 'var(--bg-page)' }}>
       
       {/* Background Gradients */}
-      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-900"></div>
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 blur-[100px] rounded-full"></div>
+      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#22C55E] via-teal-500 to-[#16A34A]"></div>
 
       <div className="w-full max-w-md relative z-10">
         
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <div className="bg-slate-900 border border-slate-800 p-3 rounded-2xl shadow-2xl shadow-emerald-500/10">
-            <Wallet className="w-8 h-8 text-emerald-400" />
+          <div className="p-3 rounded-2xl shadow-xl transition-colors" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            <Wallet className="w-8 h-8 text-[#22C55E]" />
           </div>
         </div>
 
         {/* The Card */}
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 shadow-2xl">
+        <div className="rounded-[32px] p-8 shadow-2xl transition-colors" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
           
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             
             {/* Chama Badge */}
-            <div className="flex items-center justify-center gap-2 mb-6 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-              <CheckCircle className="w-5 h-5 text-emerald-400" />
+            <div className="flex items-center justify-center gap-2 mb-6 p-3 rounded-xl" style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}>
+              <CheckCircle className="w-5 h-5 text-[#22C55E]" />
               <div className="text-center">
-                <p className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Joining</p>
-                <p className="text-sm font-bold text-white">{chamaName}</p>
+                <p className="text-xs text-[#22C55E] font-bold uppercase tracking-wider">Joining</p>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{chamaName}</p>
               </div>
             </div>
 
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-white mb-2">Create Your Account</h1>
-              <p className="text-slate-400 text-sm">Enter your details to join the chama</p>
+              <h1 className="text-2xl font-bold mb-2 font-geist" style={{ color: 'var(--text-primary)' }}>Create Your Account</h1>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Enter your details to join the chama</p>
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+              <div className="mb-6 p-4 rounded-xl text-sm" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B' }}>
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSignup} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2 ml-1" style={{ color: 'var(--text-secondary)' }}>
                   Full Name
                 </label>
                 <input
@@ -344,12 +324,13 @@ export default function MemberSignup() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-emerald-500 focus:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[#22C55E] transition-all"
+                  style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', borderWidth: '1px', color: 'var(--text-primary)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2 ml-1" style={{ color: 'var(--text-secondary)' }}>
                   ID Number
                 </label>
                 <input
@@ -358,12 +339,13 @@ export default function MemberSignup() {
                   value={idNumber}
                   onChange={(e) => setIdNumber(e.target.value)}
                   placeholder="Enter your ID number"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-emerald-500 focus:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[#22C55E] transition-all"
+                  style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', borderWidth: '1px', color: 'var(--text-primary)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2 ml-1" style={{ color: 'var(--text-secondary)' }}>
                   Email Address
                 </label>
                 <input
@@ -372,12 +354,13 @@ export default function MemberSignup() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-emerald-500 focus:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[#22C55E] transition-all"
+                  style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', borderWidth: '1px', color: 'var(--text-primary)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2 ml-1" style={{ color: 'var(--text-secondary)' }}>
                   Phone Number
                 </label>
                 <input
@@ -386,13 +369,14 @@ export default function MemberSignup() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+254712345678"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-emerald-500 focus:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[#22C55E] transition-all"
+                  style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', borderWidth: '1px', color: 'var(--text-primary)' }}
                 />
-                <p className="text-xs text-slate-500 mt-1 ml-1">Include country code (e.g., +254)</p>
+                <p className="text-xs mt-1 ml-1" style={{ color: 'var(--text-muted)' }}>Include country code (e.g., +254)</p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2 ml-1" style={{ color: 'var(--text-secondary)' }}>
                   Password
                 </label>
                 <div className="relative">
@@ -402,34 +386,36 @@ export default function MemberSignup() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Create a password"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white outline-none focus:border-emerald-500 focus:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all pr-12 placeholder:text-slate-600"
+                    className="w-full rounded-xl px-4 py-3 outline-none focus:border-[#22C55E] transition-all pr-12"
+                    style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', borderWidth: '1px', color: 'var(--text-primary)' }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 mt-1 ml-1">Must be at least 8 characters</p>
+                <p className="text-xs mt-1 ml-1" style={{ color: 'var(--text-muted)' }}>Must be at least 8 characters</p>
               </div>
 
-              <div className="flex items-start gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800">
+              <div className="flex items-start gap-3 p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-input)', border: '1px solid var(--border)' }}>
                 <input
                   type="checkbox"
                   id="terms"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-1 w-4 h-4 text-emerald-500 bg-slate-900 border-slate-700 rounded focus:ring-emerald-500 focus:ring-offset-slate-900"
+                  className="mt-1 w-4 h-4 text-[#22C55E] rounded focus:ring-[#22C55E]"
                 />
-                <label htmlFor="terms" className="text-sm text-slate-400">
+                <label htmlFor="terms" className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                   I agree to the{" "}
-                  <Link href="/privacy" target="_blank" className="text-emerald-400 font-semibold hover:text-emerald-300">
+                  <Link href="/privacy" target="_blank" className="text-[#22C55E] font-semibold hover:underline">
                     Privacy Policy
                   </Link>
                   {" & "}
-                  <Link href="/terms" target="_blank" className="text-emerald-400 font-semibold hover:text-emerald-300">
+                  <Link href="/terms" target="_blank" className="text-[#22C55E] font-semibold hover:underline">
                     Terms of Service
                   </Link>
                   <span className="text-red-400 ml-1">*</span>
@@ -439,11 +425,11 @@ export default function MemberSignup() {
               <button
                 type="submit"
                 disabled={loading || !agreedToTerms}
-                className="w-full bg-white hover:bg-emerald-50 text-black font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Creating Account...
                   </>
                 ) : (
@@ -453,9 +439,9 @@ export default function MemberSignup() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-slate-500 text-sm">
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Already have an account?{" "}
-                <Link href="/login" className="text-emerald-400 font-semibold hover:text-emerald-300">
+                <Link href="/login" className="text-[#22C55E] font-semibold hover:underline">
                   Go to Login
                 </Link>
               </p>
@@ -465,7 +451,7 @@ export default function MemberSignup() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-slate-600 text-xs mt-8 flex items-center justify-center gap-2">
+        <p className="text-center text-xs mt-8 flex items-center justify-center gap-2" style={{ color: 'var(--text-muted)' }}>
           <Shield className="w-3 h-3" /> Secure Registration • © 2026 SmartChama
         </p>
 

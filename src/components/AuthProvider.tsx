@@ -4,9 +4,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import { usePathname } from "next/navigation";
+import { ChamaMembership, Chama } from "@/types/database";
 
-type Member = any;
-type Group = any;
+export type Member = ChamaMembership & { user_id: string; full_name?: string };
+export type Group = Chama;
 
 interface AuthContextType {
   session: Session | null;
@@ -36,7 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchMemberData = async (userId: string) => {
     try {
-      // 1. Find the active chama from sessionStorage, localStorage or cookies
       let activeChamaId: string | null = null;
       if (typeof window !== 'undefined') {
         activeChamaId = sessionStorage.getItem('active_chama_id') || localStorage.getItem('sc_last_chama_id');
@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (match) activeChamaId = match[2];
       }
 
-      // 2. Fetch memberships and active group data concurrently
       const membershipsPromise = supabase
         .from("chama_memberships")
         .select("*, profiles(*)")
@@ -59,48 +58,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const [
         { data: memberships, error: memberError },
-        { data: groupData, error: groupError }
+        { data: groupData }
       ] = await Promise.all([membershipsPromise, groupPromise]);
 
       if (memberError || !memberships || memberships.length === 0) {
-
-        // Retry once after 1s — RLS may not be ready on first page load after redirect
-        if (!memberError) {
-          await new Promise(r => setTimeout(r, 1000));
-          const { data: retryMemberships } = await supabase
-            .from("chama_memberships")
-            .select("*, profiles(*)")
-            .eq("profile_id", userId)
-            .eq("status", "active");
-
-          if (retryMemberships && retryMemberships.length > 0) {
-            const m = retryMemberships[0];
-            const cid = m.chama_id;
-            if (typeof document !== 'undefined') {
-              document.cookie = `active_chama_id=${cid}; path=/; max-age=${60 * 60 * 24 * 30}`;
-            }
-            const { data: g } = await supabase
-              .from("chamas_v2").select("*").eq("id", cid).single();
-            setMember({ ...m, user_id: m.profile_id, full_name: m.profiles?.full_name });
-            setGroup(g);
-            return;
-          }
-        }
-
-        // Only sign out on real auth errors
-        const isAuthError = memberError &&
-          typeof memberError === 'object' &&
-          'status' in memberError &&
-          (memberError.status === 401 || memberError.code === 'PGRST301');
+        const isAuthError = memberError && (
+          memberError.status === 401 ||
+          memberError.message?.includes('JWT') ||
+          memberError.message?.includes('token') ||
+          memberError.message?.includes('unauthorized') ||
+          memberError.code === 'PGRST301'
+        );
 
         if (isAuthError) {
           supabase.auth.signOut().catch(() => {});
+          setMember(null);
+          setGroup(null);
           setSession(null);
           setUser(null);
+        } else {
+          setMember(null);
+          setGroup(null);
         }
-
-        setMember(null);
-        setGroup(null);
         return;
       }
       
@@ -140,8 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
 
-      // Format for legacy compatibility in components
-      const enrichedMember = {
+      const enrichedMember: Member = {
         ...currentMembership,
         id: currentMembership.id,
         user_id: currentMembership.profile_id,
@@ -151,7 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setMember(enrichedMember);
       setGroup(finalGroupData);
     } catch (err) {
-      console.error(err);
+      // Ignore silent network errors in provider
     }
   };
 
@@ -175,7 +153,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setIsLoading(false);
         }
       } catch (err) {
-        console.error("Error in getInitialSession:", err);
         if (mounted) {
           setIsLoading(false);
         }
@@ -206,31 +183,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  // Listen to path and cookie changes to sync member and group state
+  // Debounced navigation state sync to prevent re-render loops
   useEffect(() => {
     let active = true;
-    async function syncState() {
+    const timeout = setTimeout(async () => {
       if (session?.user && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
-        let activeChamaId: string | null = null;
-        if (typeof window !== 'undefined') {
-          activeChamaId = sessionStorage.getItem('active_chama_id') || localStorage.getItem('sc_last_chama_id');
-        }
-        if (!activeChamaId && typeof document !== 'undefined') {
-          const match = document.cookie.match(new RegExp('(^| )active_chama_id=([^;]+)'));
-          if (match) activeChamaId = match[2];
-        }
-        if (!group || group.id !== activeChamaId || !member) {
-          if (active) {
-            await fetchMemberData(session.user.id);
-          }
+        if (active) {
+          await fetchMemberData(session.user.id);
         }
       }
-    }
-    syncState();
+    }, 100);
+
     return () => {
       active = false;
+      clearTimeout(timeout);
     };
-  }, [pathname, session, group, member]);
+  }, [pathname, session]);
 
   const refreshMemberData = async () => {
     if (user) {

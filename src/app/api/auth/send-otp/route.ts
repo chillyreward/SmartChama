@@ -4,7 +4,6 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 export async function POST(request: Request) {
   try {
     const { phone_number, purpose } = await request.json();
-    console.log('OTP request received for:', phone_number);
 
     if (!phone_number) {
       return NextResponse.json({ error: 'Phone number is required' }, { status: 400 });
@@ -36,11 +35,8 @@ export async function POST(request: Request) {
     
     // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('Generated OTP code (dev only, remove in production):', code);
-    
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min expiry
     
-    console.log('Attempting to save OTP to database...');
     const { error: insertError } = await supabase.from('otp_codes').insert({
       phone_number: phone,
       code,
@@ -53,12 +49,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Could not generate verification code.' }, { status: 500 });
     }
     
-    console.log('OTP saved to database successfully');
-    
     // Send via Africa's Talking
     if (process.env.AFRICASTALKING_API_KEY && process.env.AFRICASTALKING_USERNAME) {
       try {
-        console.log('Attempting to send SMS via Africa\'s Talking...');
         const atResponse = await fetch('https://api.africastalking.com/version1/messaging', {
           method: 'POST',
           headers: {
@@ -75,7 +68,6 @@ export async function POST(request: Request) {
         });
 
         const atResult = await atResponse.json();
-        console.log('Africa\'s Talking response:', JSON.stringify(atResult, null, 2));
 
         if (atResult.SMSMessageData?.Recipients?.[0]?.status !== 'Success') {
           console.error('SMS FAILED. Reason:', atResult.SMSMessageData?.Recipients?.[0]?.status);
@@ -84,7 +76,7 @@ export async function POST(request: Request) {
         console.error("Africa's Talking Error:", err);
       }
     } else {
-      console.log(`\n\n=== DEVELOPMENT MODE: SMS SIMULATION ===\nTo: ${phone}\nCode: ${code}\n=======================================\n\n`);
+      console.info(`[DEV] SMS to ${phone}: Code sent (check otp_codes table)`);
     }
     
     return NextResponse.json({ success: true, message: 'Verification code sent.' });

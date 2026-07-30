@@ -394,9 +394,16 @@ export default function MemberDashboard({
                           
                           <div className="text-right">
                             <p className={`text-[15px] font-semibold ${amountColor}`}>{sign} KSh {formatCurrency(tx.amount)}</p>
-                            <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]">
-                              {tx.type}
-                            </span>
+                            {tx.status === 'pending' ? (
+                              <span className="text-[11px] px-2 py-0.5 rounded-full font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 flex items-center gap-1 justify-end">
+                                <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
+                                Processing...
+                              </span>
+                            ) : (
+                              <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-transparent text-[var(--brand-green)]">
+                                {tx.type}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

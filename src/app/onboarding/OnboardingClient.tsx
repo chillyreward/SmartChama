@@ -32,9 +32,12 @@ export default function OnboardingClient() {
   });
 
   useEffect(() => {
+    let isMounted = true;
+
     async function checkState() {
-      const { data: { user } } = await supabase.auth.getUser();
-      const session = user ? { user } : null;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+
       if (!session) {
         router.push('/login');
         return;
@@ -54,6 +57,8 @@ export default function OnboardingClient() {
         .eq('id', session.user.id)
         .single();
       
+      if (!isMounted) return;
+
       if (profile && profile.full_name && profile.phone_number) {
         setProfileForm(prev => ({ 
           ...prev, 
@@ -66,6 +71,8 @@ export default function OnboardingClient() {
           .select('chama_id, role')
           .eq('profile_id', session.user.id)
           .eq('status', 'active');
+
+        if (!isMounted) return;
           
         if (memberships && memberships.length > 0) {
           const chamaIds = memberships.map(m => m.chama_id);
@@ -73,6 +80,8 @@ export default function OnboardingClient() {
             .from('chamas_v2')
             .select('id')
             .in('id', chamaIds);
+
+          if (!isMounted) return;
 
           if (validChamas && validChamas.length > 0) {
             let activeChamaId = null;
@@ -92,15 +101,64 @@ export default function OnboardingClient() {
             setStep(2);
           }
         } else {
-          setStep(2); // Has profile, needs chama
+          setStep(2);
         }
       } else {
-        setStep(1); // Needs profile
+        setStep(1);
       }
       setLoading(false);
     }
+
     checkState();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
+
+  const [groupCode, setGroupCode] = useState('');
+  const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState('');
+
+  const handleJoinChama = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanCode = groupCode.trim().toUpperCase();
+    if (!cleanCode || !user) return;
+    setJoining(true);
+    setJoinError('');
+
+    try {
+      const res = await fetch('/api/chamas/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          group_code: cleanCode
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setJoinError(data.error || 'Failed to join group. Check your code and try again.');
+        setJoining(false);
+        return;
+      }
+
+      const chamaId = data.chama_id;
+      if (chamaId) {
+        sessionStorage.setItem('active_chama_id', chamaId);
+        localStorage.setItem('sc_last_chama_id', chamaId);
+        document.cookie = `active_chama_id=${chamaId}; path=/; max-age=${60 * 60 * 24 * 30}`;
+      }
+
+      await refreshMemberData();
+      router.push('/dashboard');
+    } catch (err: any) {
+      setJoinError('Network error. Please check your connection and try again.');
+    } finally {
+      setJoining(false);
+    }
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,27 +173,24 @@ export default function OnboardingClient() {
       phone = '+254' + phone;
     }
 
-    // Save profile via server API (bypasses RLS)
-    const res = await fetch('/api/profile/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: user.id,
-        full_name: profileForm.full_name.trim(),
-        phone_number: phone || null,
-        email: user.email || ''
-      })
-    })
+    // Save profile record
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        full_name: profileForm.full_name,
+        phone_number: phone,
+        email: user.email
+      });
 
-    const result = await res.json()
-
-    if (!res.ok) {
-      console.error('Profile save failed:', result)
-      setError(result.error?.includes('phone') 
-        ? 'This phone number is already registered.' 
-        : `Failed to save profile: ${result.error || 'Please try again.'}`)
-      setSaving(false)
-      return
+    if (profileError) {
+      if (profileError.code === '23505') {
+        setError('This phone number is already registered.');
+      } else {
+        setError('Failed to save profile. Please try again.');
+      }
+      setSaving(false);
+      return;
     }
 
     setStep(2);
@@ -179,9 +234,8 @@ export default function OnboardingClient() {
       }
 
       document.cookie = `active_chama_id=${data.chama_id}; path=/; max-age=${60 * 60 * 24 * 30}`;
-      sessionStorage.setItem('active_chama_id', data.chama_id);
-      // Hard redirect so AuthProvider reloads with fresh membership
-      window.location.href = '/admin/dashboard';
+      await refreshMemberData();
+      router.push('/admin/dashboard');
     } catch (err) {
       setError('An unexpected error occurred.');
       setSaving(false);
@@ -285,7 +339,7 @@ export default function OnboardingClient() {
                   <p className="text-body-md text-[#60645f] dark:text-[#8FA88F] mt-1">Please provide your contact details.</p>
                 </div>
 
-                <form onSubmit={handleProfileSubmit} className="flex flex-col gap-5">
+                <form id="onboarding-profile-form" onSubmit={handleProfileSubmit} className="flex flex-col gap-5">
                   <div>
                     <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Full Name</label>
                     <input 
@@ -328,19 +382,58 @@ export default function OnboardingClient() {
 
             {step === 2 && (
               <>
-                <div className="mb-8">
-                  <h1 className="text-[28px] font-geist font-bold text-[#161d16] dark:text-[#E8F0E4]">Create a Group</h1>
-                  <p className="text-body-md text-[#60645f] dark:text-[#8FA88F] mt-1">Set up your Chama to start adding members.</p>
+                <div className="mb-6">
+                  <h1 className="text-[28px] font-geist font-bold text-[#161d16] dark:text-[#E8F0E4]">Get Started with a Chama</h1>
+                  <p className="text-body-md text-[#60645f] dark:text-[#8FA88F] mt-1">Join an existing group with an invite code, or create a new one.</p>
                 </div>
 
-                <div className="bg-[#edf6ea] dark:bg-[#1a2a1a] border border-[#22C55E]/30 dark:border-[#2d3d2d] rounded-lg p-4 mb-6 flex gap-3 items-start">
-                  <span className="material-symbols-outlined text-[#006e2f] dark:text-[#4ae176] shrink-0">info</span>
-                  <div className="text-body-sm text-[#3d4a3d] dark:text-[#8FA88F]">
-                    If you were invited to an existing group, ask your admin for the invite link.
+                {/* JOIN EXISTING GROUP SECTION */}
+                <div className="border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-xl p-5 mb-8 bg-white dark:bg-[#1a2218]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="material-symbols-outlined text-[#22C55E]">group_add</span>
+                    <h2 className="text-[16px] font-bold text-[#161d16] dark:text-[#E8F0E4]">Join an Existing Group</h2>
+                  </div>
+                  <p className="text-[13px] text-[#60645f] dark:text-[#8FA88F] mb-4">
+                    Have a 6-character group invite code from your Chama admin? Enter it below:
+                  </p>
+
+                  {joinError && (
+                    <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium">
+                      {joinError}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleJoinChama} className="flex flex-col sm:flex-row gap-3">
+                    <input 
+                      type="text" 
+                      maxLength={10}
+                      required
+                      value={groupCode}
+                      onChange={(e) => setGroupCode(e.target.value.toUpperCase())}
+                      placeholder="ENTER CODE (e.g. AB12CD)"
+                      className="flex-1 tracking-widest font-mono font-bold uppercase border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#0B0F0C] placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                    />
+                    <button 
+                      type="submit" 
+                      disabled={joining || !groupCode.trim()}
+                      className="bg-[#22C55E] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
+                    >
+                      {joining ? 'Joining...' : 'Join Group'}
+                    </button>
+                  </form>
+                </div>
+
+                {/* VISUAL DIVIDER */}
+                <div className="relative flex items-center justify-center my-8">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#E5E7EB] dark:border-[#2d3d2d]" />
+                  </div>
+                  <div className="relative px-4 bg-white dark:bg-[#0B0F0C] text-[11px] font-bold uppercase tracking-widest text-[#60645f] dark:text-[#8FA88F]">
+                    — OR CREATE A NEW GROUP —
                   </div>
                 </div>
 
-                <form onSubmit={handleCreateChama} className="flex flex-col gap-5">
+                <form id="onboarding-chama-form" onSubmit={handleCreateChama} className="flex flex-col gap-5">
                   <div>
                     <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Group Name</label>
                     <input 
@@ -518,12 +611,10 @@ export default function OnboardingClient() {
         {/* Fixed Continue Button on Mobile */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-safe bg-white dark:bg-[#0B0F0C] border-t border-[#E5E7EB] dark:border-[#1a2a1a] z-20">
           <button 
-            onClick={() => {
-              const form = document.querySelector('form');
-              if (form) form.requestSubmit();
-            }}
+            type="submit"
+            form={step === 1 ? 'onboarding-profile-form' : 'onboarding-chama-form'}
             disabled={saving}
-            className="w-full bg-[#22C55E] text-white py-4 rounded-xl text-[16px] font-semibold flex items-center justify-center gap-2"
+            className="w-full bg-[#22C55E] text-white py-4 rounded-xl text-[16px] font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {saving ? 'Processing...' : step === 1 ? 'Continue' : 'Create Group'}
           </button>

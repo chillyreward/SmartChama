@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/lib/supabase';
 
+import { ThemeToggle } from '@/components/ThemeToggle';
+
 export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean }) {
   const router = useRouter();
   const { member, group } = useAuth();
@@ -60,11 +62,11 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
   }, [group]);
 
   return (
-    <header className="md:hidden fixed top-0 left-0 right-0 z-30 sidebar-bg border-b border-[var(--border)] h-14 flex items-center justify-between px-4 pt-safe">
+    <header className="lg:hidden fixed top-0 left-0 right-0 z-30 sidebar-bg border-b border-[var(--border)] h-14 flex items-center justify-between px-4 pt-safe">
       {/* Left: Logo + group name */}
       <div className="flex items-center gap-2">
         <Image
-          src="/favicon.svg"
+          src="/logo.png"
           alt="SmartChama Logo"
           width={32}
           height={32}
@@ -87,8 +89,10 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
         </div>
       </div>
 
-      {/* Right: notification bell + avatar */}
-      <div className="flex items-center gap-2">
+      {/* Right: theme toggle + notification bell + avatar */}
+      <div className="flex items-center gap-1.5">
+        <ThemeToggle />
+
         {/* Notification bell with badge */}
         <button
           onClick={() => router.push(isAdmin ? '/admin/announcements' : '/dashboard/notifications')}

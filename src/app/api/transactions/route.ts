@@ -1,118 +1,103 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { requireAuth } from '@/lib/api-auth';
 import { recordTransactionOnBlockchain } from '@/lib/blockchain';
-
-// Use service role key to bypass RLS for fetching all transactions
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const userId = searchParams.get('userId');
+    const { user, error: authError } = await requireAuth(req);
+    if (!user || authError) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
 
-    let query = supabaseAdmin
-      .from('transactions')
+    const supabaseAdmin = getSupabaseAdmin();
+    const { searchParams } = new URL(req.url);
+    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50);
+
+    // Get user's memberships to ensure they can only query transactions for chamas they belong to
+    const { data: memberships } = await supabaseAdmin
+      .from('chama_memberships')
+      .select('id, chama_id')
+      .eq('profile_id', user.id)
+      .eq('status', 'active');
+
+    const chamaIds = memberships?.map(m => m.chama_id) || [];
+    const membershipIds = memberships?.map(m => m.id) || [];
+
+    if (chamaIds.length === 0 && membershipIds.length === 0) {
+      return NextResponse.json({ success: true, transactions: [] });
+    }
+
+    // Query transactions for user's chamas
+    const { data: transactions, error } = await supabaseAdmin
+      .from('transactions_v2')
       .select('*')
+      .in('chama_id', chamaIds)
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    // Filter by user if provided
-    if (userId) {
-      query = query.eq('user_id', userId);
-    }
-
-    const { data: transactions, error } = await query;
-
     if (error) {
-      console.error('Error fetching transactions:', error);
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
-
-    console.log(`Fetched ${transactions?.length || 0} transactions`);
 
     return NextResponse.json({
       success: true,
       transactions: transactions || [],
     });
   } catch (error: any) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    console.error('Transactions GET Error:', error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
+    const { user, error: authError } = await requireAuth(req);
+    if (!user || authError) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const { chamaId, memberId, amount, type, description } = body;
 
-    if (!chamaId || !memberId || !amount || !type) {
+    if (!chamaId || !amount || !type) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
+        { success: false, error: 'Missing required fields: chamaId, amount, type' },
         { status: 400 }
       );
     }
 
-    // Create transaction in database
+    const supabaseAdmin = getSupabaseAdmin();
+
+    // Verify user belongs to this Chama
+    const { data: membership } = await supabaseAdmin
+      .from('chama_memberships')
+      .select('id, role')
+      .eq('profile_id', user.id)
+      .eq('chama_id', chamaId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (!membership) {
+      return NextResponse.json({ success: false, error: 'You are not a member of this Chama' }, { status: 403 });
+    }
+
     const { data: transaction, error: dbError } = await supabaseAdmin
-      .from('transactions')
+      .from('transactions_v2')
       .insert({
         chama_id: chamaId,
-        member_id: memberId,
-        amount,
+        membership_id: membership.id,
+        amount: Number(amount),
         type,
-        description: description || `${type} transaction`,
-        status: 'completed',
+        status: 'confirmed',
         created_at: new Date().toISOString(),
       })
       .select()
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
-      return NextResponse.json(
-        { success: false, error: dbError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: false, error: dbError.message }, { status: 500 });
     }
-
-    // Record on blockchain (async, don't wait)
-    recordTransactionOnBlockchain({
-      chamaId,
-      memberId,
-      amount,
-      type,
-      timestamp: Date.now(),
-    })
-      .then(async (blockchainData) => {
-        if (blockchainData) {
-          // Update transaction with blockchain data
-          await supabaseAdmin
-            .from('transactions')
-            .update({
-              blockchain_hash: blockchainData.hash,
-              blockchain_explorer_url: blockchainData.explorerUrl,
-              blockchain_qr_code: blockchainData.qrCode,
-              blockchain_verified: true,
-            })
-            .eq('id', transaction.id);
-
-          console.log('Transaction recorded on blockchain:', blockchainData.hash);
-        }
-      })
-      .catch((error) => {
-        console.error('Blockchain recording failed:', error);
-        // Don't fail the transaction if blockchain fails
-      });
 
     return NextResponse.json({
       success: true,
@@ -120,10 +105,7 @@ export async function POST(req: Request) {
       message: 'Transaction created successfully',
     });
   } catch (error: any) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    console.error('Transactions POST Error:', error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }

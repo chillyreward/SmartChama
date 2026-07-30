@@ -12,11 +12,20 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [attempts, setAttempts] = useState(0)
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
+
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000)
+      setError(`Too many login attempts. Try again in ${remaining} seconds.`)
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -26,11 +35,19 @@ export default function LoginPage() {
     })
 
     if (authError) {
-      setError(
-        authError.message.includes('Invalid')
-          ? 'Incorrect email or password. Please try again.'
-          : 'Could not sign in. Please try again.'
-      )
+      const newAttempts = attempts + 1
+      setAttempts(newAttempts)
+      if (newAttempts >= 5) {
+        setLockedUntil(Date.now() + 60000)
+        setAttempts(0)
+        setError('Too many failed login attempts. Account locked for 60 seconds.')
+      } else {
+        setError(
+          authError.message.includes('Invalid')
+            ? `Incorrect email or password (${5 - newAttempts} attempts remaining).`
+            : 'Could not sign in. Please try again.'
+        )
+      }
       setLoading(false)
       return
     }

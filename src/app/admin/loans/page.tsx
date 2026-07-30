@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
+import PageSkeleton from "@/components/PageSkeleton";
 
 export default function AdminLoansPage() {
   const { member: adminMember, group, refreshMemberData } = useAuth();
@@ -257,12 +258,7 @@ export default function AdminLoansPage() {
   };
 
   if (loading) {
-    return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="h-28 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm mb-6"></div>
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

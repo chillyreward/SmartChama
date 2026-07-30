@@ -25,11 +25,13 @@ export function NewContributionModal({
   const [paymentConfig, setPaymentConfig] = useState<any>(null)
   const [loadingConfig, setLoadingConfig] = useState(true)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   // Clean up polling interval when modal unmounts
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
+      abortRef.current?.abort()
     }
   }, [])
 
@@ -83,6 +85,10 @@ export function NewContributionModal({
     setStep('sending')
     
     try {
+      // Cancel any previous in-flight request
+      abortRef.current?.abort()
+      abortRef.current = new AbortController()
+
       const response = await fetch('/api/mpesa/stk-push', {
         method: 'POST',
         headers: { 
@@ -94,7 +100,8 @@ export function NewContributionModal({
           membership_id: membershipId,
           chama_id: chamaId,
           account_ref: chamaName
-        })
+        }),
+        signal: abortRef.current.signal
       })
       
       const data = await response.json()
@@ -144,7 +151,8 @@ export function NewContributionModal({
         }
       }, 3000)
       
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') return
       setError('Network error. Please check your connection and try again.')
       setStep('form')
     }

@@ -3,6 +3,17 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.CRON_SECRET) {
+      return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 });
+    }
+
+    const cronSecret = process.env.CRON_SECRET;
+    const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = getSupabaseAdmin();
     
     // Find all expired active votes
@@ -36,9 +47,6 @@ export async function POST(request: Request) {
         
       if (!updateError) {
         processed.push({ id: vote.id, status: newStatus });
-        
-        // If approved, we could automatically trigger the investment logic here
-        // (e.g., deducting group funds, creating an investment record, etc.)
       }
     }
     

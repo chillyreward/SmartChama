@@ -89,17 +89,6 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           .eq('is_active', true)
           .order('risk_level');
 
-        // Seed if missing
-        if (!prodErr && prods && prods.length === 0) {
-          await supabase.from('smartgrow_products').insert(SEED_PRODUCTS);
-          const { data: newProds } = await supabase
-            .from('smartgrow_products')
-            .select('*')
-            .eq('is_active', true)
-            .order('risk_level');
-          prods = newProds;
-        }
-
         setProducts(prods || []);
 
         // Fetch Investments

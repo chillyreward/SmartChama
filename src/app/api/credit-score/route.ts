@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { requireAuth } from '@/lib/api-auth';
 import { calculateMemberCreditScore, calculateChamaCreditScore } from '@/lib/credit-scoring';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(req: Request) {
   try {
+    const { user, error: authError } = await requireAuth(req);
+    if (!user || authError) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type'); // 'member' or 'chama'
     const id = searchParams.get('id');
@@ -18,15 +21,14 @@ export async function GET(req: Request) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = getSupabaseAdmin();
 
     if (type === 'member') {
-      // Fetch member data
       const { data: member, error: memberError } = await supabase
-        .from('members')
-        .select('*')
+        .from('chama_memberships')
+        .select('*, profiles(full_name, created_at)')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (memberError || !member) {
         return NextResponse.json(
@@ -35,41 +37,28 @@ export async function GET(req: Request) {
         );
       }
 
-      // Fetch member transactions
-      const { data: transactions, error: txError } = await supabase
-        .from('transactions')
+      const { data: transactions } = await supabase
+        .from('transactions_v2')
         .select('*')
-        .eq('member_id', id)
+        .eq('membership_id', id)
         .order('created_at', { ascending: false });
 
-      if (txError) {
-        console.error('Error fetching transactions:', txError);
-      }
-
-      // Calculate total contributions
       const totalContributions = (transactions || [])
-        .filter(t => t.transaction_type === 'deposit' && t.status === 'completed')
-        .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        .filter(t => t.type === 'contribution' && t.status === 'confirmed')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      // Get loans
-      const loans = (transactions || []).filter(t => t.transaction_type === 'loan');
+      const loans = (transactions || []).filter(t => t.type === 'loan');
+      const missedPayments = (transactions || []).filter(t => t.status === 'failed').length;
 
-      // Calculate missed payments (simplified - you may want to enhance this)
-      const missedPayments = (transactions || [])
-        .filter(t => t.status === 'failed' || t.status === 'defaulted')
-        .length;
-
-      // Expected payments (simplified - based on months since joining)
-      const joinedDate = new Date(member.created_at);
-      const now = new Date();
+      const joinedDate = new Date(member.created_at || Date.now());
       const monthsSinceJoining = Math.floor(
-        (now.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
+        (Date.now() - joinedDate.getTime()) / (1000 * 60 * 60 * 24 * 30)
       );
       const expectedPayments = Math.max(1, monthsSinceJoining);
 
       const creditScore = calculateMemberCreditScore({
         memberId: member.id,
-        memberName: member.full_name,
+        memberName: (member.profiles as any)?.full_name || 'Member',
         joinedDate: member.created_at,
         transactions: transactions || [],
         loans,
@@ -84,12 +73,11 @@ export async function GET(req: Request) {
       });
 
     } else if (type === 'chama') {
-      // Fetch chama data
       const { data: chama, error: chamaError } = await supabase
-        .from('chamas')
+        .from('chamas_v2')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (chamaError || !chama) {
         return NextResponse.json(
@@ -98,57 +86,34 @@ export async function GET(req: Request) {
         );
       }
 
-      // Fetch all members
-      const { data: members, error: membersError } = await supabase
-        .from('members')
+      const { data: members } = await supabase
+        .from('chama_memberships')
         .select('*')
         .eq('chama_id', id);
 
-      if (membersError) {
-        console.error('Error fetching members:', membersError);
-      }
-
-      // Fetch all transactions for this chama
-      const { data: transactions, error: txError } = await supabase
-        .from('transactions')
+      const { data: transactions } = await supabase
+        .from('transactions_v2')
         .select('*')
         .eq('chama_id', id)
         .order('created_at', { ascending: false });
 
-      if (txError) {
-        console.error('Error fetching transactions:', txError);
-      }
-
-      // Calculate total savings
       const totalSavings = (transactions || [])
-        .filter(t => t.status === 'completed')
-        .reduce((sum, t) => {
-          const amount = parseFloat(t.amount);
-          if (t.transaction_type === 'deposit' || t.transaction_type === 'repayment') {
-            return sum + amount;
-          } else if (t.transaction_type === 'withdrawal' || t.transaction_type === 'loan') {
-            return sum - amount;
-          }
-          return sum;
-        }, 0);
+        .filter(t => t.status === 'confirmed')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      // Count active members (members with transactions in last 3 months)
-      const threeMonthsAgo = new Date();
-      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-
+      const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
       const activeMemberIds = new Set(
         (transactions || [])
           .filter(t => new Date(t.created_at) > threeMonthsAgo)
-          .map(t => t.member_id)
+          .map(t => t.membership_id)
       );
 
       const activeMembers = activeMemberIds.size;
       const totalMembers = (members || []).length;
 
-      // Calculate member credit scores (simplified - just use a default for now)
       const membersWithScores = (members || []).map(m => ({
         ...m,
-        creditScore: 650 // Default score - in production, calculate for each member
+        creditScore: m.trust_score || 650
       }));
 
       const creditScore = calculateChamaCreditScore({

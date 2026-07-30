@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,8 +8,10 @@ import { signOut } from '@/lib/auth-helpers';
 import { 
   LayoutDashboard, Users, Landmark, Wallet, 
   Receipt, Award, TrendingUp, LineChart, Settings, 
-  Megaphone, Shield, LogOut, Coins, ShieldAlert
+  Megaphone, Shield, LogOut, Coins, RefreshCw, Heart, ShieldAlert
 } from 'lucide-react';
+
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface SidebarProps {
   variant: 'admin' | 'member';
@@ -17,17 +19,19 @@ interface SidebarProps {
 
 export function Sidebar({ variant }: SidebarProps) {
   const pathname = usePathname();
-  const { member, group } = useAuth();
+  const { member } = useAuth();
 
   const adminNavItems = [
     { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Members", href: "/admin/members", icon: Users },
     { name: "Contributions", href: "/admin/contributions", icon: Coins },
+    { name: "Merry-Go-Round", href: "/admin/merry-go-round", icon: RefreshCw },
+    { name: "Welfare Fund", href: "/admin/welfare", icon: Heart },
+    { name: "Penalties", href: "/admin/penalties", icon: ShieldAlert },
     { name: "Loans", href: "/admin/loans", icon: Landmark },
     { name: "Wallet", href: "/admin/wallet", icon: Wallet },
     { name: "Transactions", href: "/admin/transactions", icon: Receipt },
-    { name: "Credit Scores", href: "/admin/trust-scores", icon: Award },
-    { name: "Fraud Detection", href: "/admin/fraud", icon: ShieldAlert },
+    { name: "Trust Scores", href: "/admin/trust-scores", icon: Award },
     { name: "SmartGrow", href: "/admin/smartgrow", icon: TrendingUp },
     { name: "Analytics", href: "/admin/analytics", icon: LineChart },
     { name: "Group Settings", href: "/admin/settings", icon: Settings },
@@ -39,6 +43,9 @@ export function Sidebar({ variant }: SidebarProps) {
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Savings", href: "/dashboard/savings", icon: Coins },
     { name: "Contributions", href: "/dashboard/contributions", icon: Coins },
+    { name: "Merry-Go-Round", href: "/dashboard/merry-go-round", icon: RefreshCw },
+    { name: "Welfare", href: "/dashboard/welfare", icon: Heart },
+    { name: "Penalties", href: "/dashboard/penalties", icon: ShieldAlert },
     { name: "Loans", href: "/dashboard/loans", icon: Landmark },
     { name: "Members", href: "/dashboard/members", icon: Users },
     { name: "Wallet", href: "/dashboard/wallet", icon: Wallet },
@@ -63,22 +70,25 @@ export function Sidebar({ variant }: SidebarProps) {
       }}>
       
       {/* Brand Logo & Title */}
-      <div className="flex items-center gap-3 h-16 px-6 border-b" style={{ borderColor: 'var(--border)' }}>
-        <Image
-          src="/logo.png"
-          alt="SmartChama"
-          width={32}
-          height={32}
-          className="h-8 w-8 object-contain"
-        />
-        <span className="text-[18px] font-bold tracking-tight font-geist text-[#22C55E]">
-          SmartChama
-        </span>
-        {variant === 'admin' && (
-          <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-red-100 dark:bg-red-950/20 text-[#ba1a1a] dark:text-red-400">
-            Admin
+      <div className="flex items-center justify-between h-16 px-5 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-2.5">
+          <Image
+            src="/logo.png"
+            alt="SmartChama"
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
+          />
+          <span className="text-[17px] font-bold tracking-tight font-geist text-[#22C55E]">
+            SmartChama
           </span>
-        )}
+          {variant === 'admin' && (
+            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950/20 text-[#ba1a1a] dark:text-red-400">
+              Admin
+            </span>
+          )}
+        </div>
+        <ThemeToggle />
       </div>
 
       {/* Nav links */}

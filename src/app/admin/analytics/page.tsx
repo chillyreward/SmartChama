@@ -5,6 +5,8 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
+import PageSkeleton from "@/components/PageSkeleton";
+
 export default function AdminAnalyticsPage() {
   const { member: adminMember, group } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -118,11 +120,7 @@ export default function AdminAnalyticsPage() {
   }, [rawLoans, rawContribs, dateFilter]);
 
   if (loading) {
-    return (
-      <div className="p-8 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

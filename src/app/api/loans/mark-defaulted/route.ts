@@ -1,14 +1,25 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.CRON_SECRET) {
+      return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 });
+    }
+
+    const cronSecret = process.env.CRON_SECRET;
+    const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = getSupabaseAdmin();
     
     // Find all active loans that are past due date
     const { data: overdueLoans, error: fetchError } = await supabase
-      .from('loans')
-      .select('id, borrower_id')
+      .from('loans_v2')
+      .select('id, membership_id')
       .eq('status', 'active')
       .lt('due_date', new Date().toISOString());
       
@@ -26,36 +37,28 @@ export async function POST(request: Request) {
     for (const loan of overdueLoans) {
       // 1. Mark loan as overdue
       const { error: updateLoanError } = await supabase
-        .from('loans')
+        .from('loans_v2')
         .update({ status: 'overdue' })
         .eq('id', loan.id);
         
       if (!updateLoanError) {
         processedLoans.push(loan.id);
         
-        // 2. Deduct 20 points from borrower's CREDIT SCORE
-        const { data: profile } = await supabase
-          .from('profiles')
+        // 2. Deduct 20 points from borrower's trust score
+        const { data: membership } = await supabase
+          .from('chama_memberships')
           .select('trust_score')
-          .eq('id', loan.borrower_id)
-          .single();
+          .eq('id', loan.membership_id)
+          .maybeSingle();
           
-        if (profile) {
-          const currentScore = profile.trust_score || 100; // Assuming starting score is 100
-          const newScore = Math.max(0, currentScore - 20); // Floor at 0
+        if (membership) {
+          const currentScore = membership.trust_score || 100;
+          const newScore = Math.max(0, currentScore - 20);
           
           await supabase
-            .from('profiles')
+            .from('chama_memberships')
             .update({ trust_score: newScore })
-            .eq('id', loan.borrower_id);
-            
-          // If we are still using members table as source of truth for legacy UI
-          // also update the members table (borrower_id links to user_id or id depending on schema, usually we'd update members.trust_score where id = borrower_id if it's the old schema)
-          await supabase
-            .from('members')
-            .update({ trust_score: newScore })
-            .eq('id', loan.borrower_id) // This assumes borrower_id maps to member.id in old schema
-            .or(`user_id.eq.${loan.borrower_id}`); // fallback just in case
+            .eq('id', loan.membership_id);
         }
       }
     }

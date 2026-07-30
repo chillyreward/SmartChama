@@ -68,18 +68,87 @@ export async function POST(req: Request) {
         const amount = parts[1];
         response = `END Check your phone for the M-Pesa prompt to pay KSh ${amount} to ${summary.chama_name}.`;
         
-        // Trigger STK push asynchronously
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        fetch(`${appUrl}/api/mpesa/stk-push`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phone: phone,
-            amount: Number(amount),
-            membership_id: summary.membership_id,
-            chama_id: summary.chama_id
-          })
-        }).catch(err => console.error('USSD STK Trigger error:', err));
+        // Direct M-Pesa STK push trigger (asynchronous)
+        (async () => {
+          try {
+            const numericAmount = Number(amount);
+            if (isNaN(numericAmount) || numericAmount < 1) return;
+
+            let formattedPhone = phone.replace(/\s/g, '');
+            if (formattedPhone.startsWith('+254')) formattedPhone = '254' + formattedPhone.slice(4);
+            else if (formattedPhone.startsWith('0')) formattedPhone = '254' + formattedPhone.slice(1);
+            else if (!formattedPhone.startsWith('254')) formattedPhone = '254' + formattedPhone;
+
+            const { data: pendingContribution } = await supabase
+              .from('contributions_v2')
+              .insert({
+                membership_id: summary.membership_id,
+                chama_id: summary.chama_id,
+                amount: numericAmount,
+                status: 'pending',
+                payment_method: 'mpesa'
+              })
+              .select()
+              .single();
+
+            if (!pendingContribution) return;
+
+            const auth = Buffer.from(
+              `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
+            ).toString('base64');
+            const isSandbox = (process.env.MPESA_BUSINESS_SHORT_CODE === '174379');
+            const safaricomBaseUrl = isSandbox ? 'https://sandbox.safaricom.co.ke' : 'https://api.safaricom.co.ke';
+
+            const tokenRes = await fetch(
+              `${safaricomBaseUrl}/oauth/v1/generate?grant_type=client_credentials`,
+              { headers: { 'Authorization': `Basic ${auth}` } }
+            );
+            const { access_token } = await tokenRes.json();
+            if (!access_token) return;
+
+            const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
+            const password = Buffer.from(
+              `${process.env.MPESA_BUSINESS_SHORT_CODE}${process.env.MPESA_PASSKEY}${timestamp}`
+            ).toString('base64');
+
+            const stkRes = await fetch(
+              `${safaricomBaseUrl}/mpesa/stkpush/v1/processrequest`,
+              {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${access_token}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  BusinessShortCode: process.env.MPESA_BUSINESS_SHORT_CODE,
+                  Password: password,
+                  Timestamp: timestamp,
+                  TransactionType: 'CustomerPayBillOnline',
+                  Amount: numericAmount,
+                  PartyA: formattedPhone,
+                  PartyB: process.env.MPESA_BUSINESS_SHORT_CODE,
+                  PhoneNumber: formattedPhone,
+                  CallBackURL: process.env.MPESA_CALLBACK_URL,
+                  AccountReference: summary.chama_name || 'SmartChama',
+                  TransactionDesc: 'Chama Contribution'
+                })
+              }
+            );
+
+            const stkData = await stkRes.json();
+            if (stkData.CheckoutRequestID) {
+              await supabase
+                .from('contributions_v2')
+                .update({
+                  mpesa_checkout_request_id: stkData.CheckoutRequestID,
+                  mpesa_merchant_request_id: stkData.MerchantRequestID
+                })
+                .eq('id', pendingContribution.id);
+            }
+          } catch (stkErr) {
+            console.error('USSD STK Trigger error:', stkErr);
+          }
+        })();
       }
     }
     else if (parts[0] === '3') {
@@ -152,23 +221,17 @@ export async function POST(req: Request) {
             
           if (pendingLoans && pendingLoans[loanIndex]) {
             const loanToApprove = pendingLoans[loanIndex];
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-            // Invoke safe approval transaction endpoint
-            const approveRes = await fetch(`${appUrl}/api/loans/approve`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                loanId: loanToApprove.id,
-                adminId: profile?.id
-              })
+            // Direct loan approval RPC call
+            const { data: approveResult, error: approveErr } = await supabase.rpc('approve_loan_safe', {
+              p_loan_id: loanToApprove.id,
+              p_approved_by: profile?.id
             });
 
-            if (approveRes.ok) {
+            if (!approveErr && approveResult?.success !== false) {
               response = `END Loan approved successfully.`;
             } else {
-              const errData = await approveRes.json();
-              response = `END Approval failed: ${errData.error || 'Check balance'}`;
+              response = `END Approval failed: ${approveResult?.error || approveErr?.message || 'Check balance'}`;
             }
           } else {
             response = `END Invalid loan selection.`;
