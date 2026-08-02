@@ -159,8 +159,8 @@ export default function AdminWalletPage() {
         }).eq('id', wallet.id);
 
         await supabase.from('transactions_v2').insert({
-          chama_id: group.id,
-          membership_id: adminMember.id,
+          chama_id: group?.id,
+          membership_id: adminMember?.id,
           type: 'withdrawal',
           amount: -Number(req.amount),
           status: 'confirmed',

@@ -26,7 +26,6 @@ export default function AdminProfilePage() {
   const [email, setEmail] = useState('')
   const [nationalId, setNationalId] = useState('')
   const [county, setCounty] = useState('Nairobi')
-  const [occupation, setOccupation] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
@@ -57,7 +56,6 @@ export default function AdminProfilePage() {
         setEmail(profile.email || session.user.email || '')
         setNationalId(profile.national_id || '')
         setCounty(profile.county || 'Nairobi')
-        setOccupation(profile.occupation || '')
         setAvatarUrl(profile.avatar_url || '')
       }
 
@@ -100,7 +98,6 @@ export default function AdminProfilePage() {
           phone_number: phone,
           national_id: nationalId,
           county,
-          occupation
         })
         .eq('id', session.user.id)
 
@@ -369,18 +366,6 @@ export default function AdminProfilePage() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                  Occupation
-                </label>
-                <input
-                  type="text"
-                  value={occupation}
-                  onChange={(e) => setOccupation(e.target.value)}
-                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden outline-none transition-all"
-                  placeholder="e.g. Finance Manager"
-                />
-              </div>
             </div>
 
             <div className="flex justify-end pt-4">

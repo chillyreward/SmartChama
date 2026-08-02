@@ -23,6 +23,8 @@ export default function SelectGroupClient() {
         return;
       }
 
+      if (!user?.id) return;
+
       const { data } = await supabase
         .from('chama_memberships')
         .select(`

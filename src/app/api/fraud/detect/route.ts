@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import OpenAI from 'openai'
+export const dynamic = 'force-dynamic';
+
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import OpenAI from 'openai';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+);
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key-for-build' });
 
 export async function POST(req: Request) {
   try {
@@ -210,13 +212,17 @@ Return ONLY valid JSON:
 
     // Save flags to fraud_flags table
     for (const flag of allFlags) {
-      await supabaseAdmin.from('fraud_flags').insert({
-        chama_id,
-        flag_type: flag.type || 'unusual_pattern',
-        description: flag.description,
-        severity: flag.severity || 'medium',
-        resolved: false
-      }).catch(() => {}) // non-fatal
+      try {
+        await supabaseAdmin.from('fraud_flags').insert({
+          chama_id,
+          flag_type: flag.type || 'unusual_pattern',
+          description: flag.description,
+          severity: flag.severity || 'medium',
+          resolved: false
+        })
+      } catch {
+        // non-fatal
+      }
     }
 
     return NextResponse.json({

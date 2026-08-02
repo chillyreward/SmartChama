@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { signOut } from '@/lib/auth-helpers';
+import GroupSwitcher from '@/components/GroupSwitcher';
 import { 
   LayoutDashboard, Users, Landmark, Wallet, 
   Receipt, Award, TrendingUp, LineChart, Settings, 
@@ -63,9 +64,9 @@ export function Sidebar({ variant }: SidebarProps) {
   };
 
   return (
-    <aside className="w-64 h-screen flex flex-col border-r shrink-0 transition-colors duration-300"
+    <aside className="w-64 h-screen flex flex-col border-r shrink-0 transition-colors duration-300 sidebar-bg"
       style={{ 
-        backgroundColor: 'var(--bg-card)', 
+        backgroundColor: 'var(--bg-sidebar)', 
         borderColor: 'var(--border)' 
       }}>
       
@@ -83,7 +84,7 @@ export function Sidebar({ variant }: SidebarProps) {
             SmartChama
           </span>
           {variant === 'admin' && (
-            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950/20 text-[#ba1a1a] dark:text-red-400">
+            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300">
               Admin
             </span>
           )}
@@ -91,8 +92,13 @@ export function Sidebar({ variant }: SidebarProps) {
         <ThemeToggle />
       </div>
 
+      {/* Multi-chama group switcher — only visible when user has 2+ groups */}
+      <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
+        <GroupSwitcher />
+      </div>
+
       {/* Nav links */}
-      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard' && item.href !== '/admin/dashboard');
           
@@ -100,10 +106,10 @@ export function Sidebar({ variant }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-[14px] ${
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all font-medium text-[14px] ${
                 isActive
                   ? 'bg-[#22C55E]/10 text-[#22C55E] font-bold border-l-4 border-[#22C55E] rounded-l-none'
-                  : 'text-[#60645f] dark:text-[#8FA88F] hover:text-[#22C55E] hover:bg-[#22C55E]/5'
+                  : 'text-[var(--text-secondary)] hover:text-[#22C55E] dark:hover:text-[#22C55E] hover:bg-[#22C55E]/5'
               }`}
             >
               <item.icon className="w-[18px] h-[18px] shrink-0" />
@@ -117,11 +123,11 @@ export function Sidebar({ variant }: SidebarProps) {
       <div className="p-4 border-t flex flex-col gap-3" style={{ borderColor: 'var(--border)' }}>
         {member && (
           <div className="flex items-center gap-3 px-2">
-            <div className="w-9 h-9 rounded-full bg-[#22C55E] text-white flex items-center justify-center font-bold text-sm">
+            <div className="w-9 h-9 rounded-full bg-[#22C55E] text-white flex items-center justify-center font-bold text-sm shadow-sm">
               {getInitials(member.full_name)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold truncate text-[var(--text-main)]">{member.full_name}</p>
+              <p className="text-xs font-bold truncate text-[var(--text-primary)]">{member.full_name}</p>
               <p className="text-[10px] truncate text-[var(--text-muted)]">{member.role}</p>
             </div>
           </div>
@@ -129,7 +135,7 @@ export function Sidebar({ variant }: SidebarProps) {
 
         <button
           onClick={signOut}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/25 transition-all text-[14px] font-medium border-0 bg-transparent text-left cursor-pointer"
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all text-[14px] font-medium border-0 bg-transparent text-left cursor-pointer"
         >
           <LogOut className="w-[18px] h-[18px]" />
           <span>Sign Out</span>

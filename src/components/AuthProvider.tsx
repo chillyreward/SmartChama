@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (memberError || !memberships || memberships.length === 0) {
         const isAuthError = memberError && (
-          memberError.status === 401 ||
+          memberError.code === '401' ||
           memberError.message?.includes('JWT') ||
           memberError.message?.includes('token') ||
           memberError.message?.includes('unauthorized') ||
@@ -88,14 +88,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!currentMembership) {
         currentMembership = memberships[0];
         activeChamaId = currentMembership.chama_id;
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('active_chama_id', activeChamaId);
-          localStorage.setItem('sc_last_chama_id', activeChamaId);
-        }
-        if (typeof document !== 'undefined') {
-          document.cookie = `active_chama_id=${activeChamaId}; path=/; max-age=${60 * 60 * 24 * 30}`;
-        }
-      } else {
+      }
+
+      if (activeChamaId) {
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('active_chama_id', activeChamaId);
           localStorage.setItem('sc_last_chama_id', activeChamaId);

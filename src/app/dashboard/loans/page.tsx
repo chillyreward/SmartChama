@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -554,7 +554,7 @@ export default function LoansPage() {
           <div className="card-bg border border-[var(--border)] rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-fade-in text-[var(--text-main)]">
             <h2 className="text-2xl font-bold font-geist text-[var(--text-main)]">Request a Loan</h2>
             <p className="text-sm text-[var(--brand-green)] font-semibold mt-1 mb-6">
-              Base interest rate: {group.loan_interest_rate || 10}%
+              Base interest rate: {group?.loan_interest_rate || 10}%
             </p>
 
             <div className="space-y-4">

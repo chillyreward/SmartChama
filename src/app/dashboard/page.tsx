@@ -258,7 +258,6 @@ export default function Dashboard() {
       chama={chama} 
       metrics={metrics} 
       initialTransactions={transactions}
-      onRefresh={fetchFreshData}
     />
   )
 }

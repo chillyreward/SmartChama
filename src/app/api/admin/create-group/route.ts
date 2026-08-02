@@ -78,13 +78,17 @@ export async function POST(req: Request) {
     }
 
     // 3. chama_admins record (best effort)
-    await supabaseAdmin.from('chama_admins').insert({
-      chama_id: chamaData.id,
-      admin_user_id: userId,
-      full_name: fullName,
-      email,
-      role: 'admin'
-    }).catch(() => {})
+    try {
+      await supabaseAdmin.from('chama_admins').insert({
+        chama_id: chamaData.id,
+        admin_user_id: userId,
+        full_name: fullName,
+        email,
+        role: 'admin'
+      })
+    } catch {
+      // non-fatal
+    }
 
     // 4. Add membership
     const { error: memberError } = await supabaseAdmin

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -232,17 +232,26 @@ export default function AdminMembersPage() {
     }
   };
 
-  const handleExportPDF = () => {
-    const headers = ['Full Name', 'Phone', 'Email', 'Role', 'Status', 'Total Saved (KSh)'];
-    const rows = filteredMembers.map(m => [
-      m.profile?.full_name || 'Member',
-      m.profile?.phone_number || 'N/A',
-      m.profile?.email || 'N/A',
-      m.role,
-      m.status,
-      Number(m.totalSaved || 0).toLocaleString('en-KE')
-    ]);
-    exportToPDF('Members Roster Report', group?.name || 'SmartChama', headers, rows, 'members_roster');
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+
+  const handleExportPDF = async () => {
+    try {
+      setIsExportingPDF(true);
+      const headers = ['Full Name', 'Phone', 'Email', 'Role', 'Status', 'Total Saved (KSh)'];
+      const rows = filteredMembers.map(m => [
+        m.profile?.full_name || 'Member',
+        m.profile?.phone_number || 'N/A',
+        m.profile?.email || 'N/A',
+        m.role,
+        m.status,
+        Number(m.totalSaved || 0).toLocaleString('en-KE')
+      ]);
+      exportToPDF('Members Roster Report', group?.name || 'SmartChama', headers, rows, 'members_roster');
+    } catch (err) {
+      console.error('PDF export error:', err);
+    } finally {
+      setIsExportingPDF(false);
+    }
   };
 
   const handleExportExcel = () => {
@@ -315,10 +324,15 @@ export default function AdminMembersPage() {
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             <button 
               onClick={handleExportPDF}
-              className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              disabled={isExportingPDF}
+              className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
             >
-              <span className="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>
-              Export PDF
+              {isExportingPDF ? (
+                <span className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <span className="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>
+              )}
+              {isExportingPDF ? 'Exporting...' : 'Export PDF'}
             </button>
             <button 
               onClick={handleExportExcel}

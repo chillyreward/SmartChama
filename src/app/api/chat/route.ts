@@ -1,9 +1,11 @@
-﻿import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
+export const dynamic = 'force-dynamic';
+
+import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+  apiKey: process.env.OPENAI_API_KEY || 'dummy-key-for-build',
+});
 
 const SYSTEM_PROMPT = `You are SmartChama Assistant, the official AI helper for SmartChama — a Kenyan digital savings group (chama) platform.
 
@@ -25,18 +27,18 @@ STRICT RULES:
 5. Never make up account details or features that don't exist on SmartChama.
 
 When asked something off-topic, always respond with:
-"I can only help with SmartChama-related questions — things like contributions, loans, credit scores, group management, and M-Pesa payments. For other topics, please use a general search engine."`
+"I can only help with SmartChama-related questions — things like contributions, loans, credit scores, group management, and M-Pesa payments. For other topics, please use a general search engine."`;
 
 export async function POST(req: Request) {
   try {
-    const { message, history = [] } = await req.json()
+    const { message, history = [] } = await req.json();
 
     if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
     if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 })
+      return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 });
     }
 
     // Build messages array with conversation history
@@ -44,27 +46,27 @@ export async function POST(req: Request) {
       { role: 'system', content: SYSTEM_PROMPT },
       ...history.slice(-10), // Keep last 10 messages for context
       { role: 'user', content: message }
-    ]
+    ];
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
       max_tokens: 500,
       temperature: 0.7,
-    })
+    });
 
-    const reply = completion.choices[0]?.message?.content || 'Sorry, I could not generate a response. Please try again.'
+    const reply = completion.choices[0]?.message?.content || 'Sorry, I could not generate a response. Please try again.';
 
-    return NextResponse.json({ reply })
+    return NextResponse.json({ reply });
 
   } catch (err: any) {
-    console.error('Chat API error:', err)
+    console.error('Chat API error:', err);
     if (err?.status === 401) {
-      return NextResponse.json({ error: 'Invalid OpenAI API key' }, { status: 500 })
+      return NextResponse.json({ error: 'Invalid OpenAI API key' }, { status: 500 });
     }
     if (err?.status === 429) {
-      return NextResponse.json({ error: 'Rate limit reached. Please try again in a moment.' }, { status: 429 })
+      return NextResponse.json({ error: 'Rate limit reached. Please try again in a moment.' }, { status: 429 });
     }
-    return NextResponse.json({ error: 'Failed to get response. Please try again.' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to get response. Please try again.' }, { status: 500 });
   }
 }

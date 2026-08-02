@@ -6,7 +6,9 @@
   --bg-card: #FFFFFF;
   --bg-sidebar: #FAFAFA;
   --bg-input: #F4F4F5;
-  --bg-hover: #F0FDF4;
+  --bg-hover: #ECFDF5;
+  --bg-hover-light: #F4F4F5;
+  --bg-hover-dark: #1F2937;
   --bg-subtle: #DCFCE7;
   --bg-muted: #F4F4F5;
   --border: #E4E4E7;
@@ -14,6 +16,8 @@
   --text-primary: #09090B;
   --text-secondary: #3F3F46;
   --text-muted: #71717A;
+  /* hover text stays dark in light mode, bright in dark mode */
+  --text-hover: #16A34A;
   --text-main: #1e293b;
   --color-border: var(--border);
   --color-bg-card: var(--bg-card);
@@ -29,13 +33,17 @@
   --bg-sidebar: #0D0D10;
   --bg-input: #18181B;
   --bg-hover: #14291D;
+  --bg-hover-light: #1F2937;
+  --bg-hover-dark: #111827;
   --bg-subtle: #052E16;
   --bg-muted: #18181B;
   --border: #27272A;
   --border-strong: #22C55E;
   --text-primary: #FAFAFA;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
+  --text-secondary: #D4D4D8;
+  --text-muted: #A1A1AA;
+  /* hover text is bright green in dark mode */
+  --text-hover: #4ADE80;
   --text-main: #f8fafc;
   --color-border: var(--border);
   --color-bg-card: var(--bg-card);
@@ -70,11 +78,37 @@ body {
 
 .sc-table tr:hover {
   background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Nav link hover — ensures text stays readable in both modes */
+.nav-link-hover:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-hover);
+}
+
+/* Fix: light-mode dropdown panels use card bg, not white */
+.sc-dropdown {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.sc-dropdown-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-hover);
 }
 
 .page-bg { background-color: var(--bg-page); color: var(--text-primary); }
 .card-bg { background-color: var(--bg-card); border-color: var(--border); color: var(--text-primary); }
 .sidebar-bg { background-color: var(--bg-sidebar); border-color: var(--border); color: var(--text-primary); }
+
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-muted { color: var(--text-muted); }
+.bg-theme-card { background-color: var(--bg-card); }
+.bg-theme-page { background-color: var(--bg-page); }
+.border-theme { border-color: var(--border); }
 
 /* Custom Animations */
 @keyframes elephantWalk {

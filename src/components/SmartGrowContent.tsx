@@ -44,7 +44,7 @@ const SEED_PRODUCTS = [
 ];
 
 export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRoute?: boolean }) {
-  const { member: authMember, group: authGroup, isLoading: authLoading } = useAuth();
+  const { session: authSession, member: authMember, group: authGroup, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [member, setMember] = useState<any>(null);
   const [chama, setChama] = useState<any>(null);
@@ -72,6 +72,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
 
     async function loadData() {
       try {
+        if (!authGroup?.id) return;
         const activeChamaId = authGroup.id;
 
         const { data: wal } = await supabase
@@ -153,7 +154,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
         amount: -amount,
         description: `SmartGrow: ${selectedProduct.name} with ${selectedProduct.provider}`,
         status: 'confirmed',
-        created_by: session?.user?.id || null,
+        created_by: authSession?.user?.id || null,
         created_at: new Date().toISOString()
       });
 

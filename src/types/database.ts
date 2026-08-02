@@ -11,7 +11,7 @@ export interface ChamaMembership {
   profile_id: string;
   chama_id: string;
   role: 'admin' | 'chairlady' | 'treasurer' | 'secretary' | 'member';
-  status: 'active' | 'suspended' | 'removed';
+  status: 'active' | 'suspended' | 'removed' | 'pending';
   trust_score: number;
   contribution_streak: number;
   joined_at?: string;
@@ -28,6 +28,14 @@ export interface Chama {
   status: 'active' | 'suspended' | 'dissolved';
   created_by?: string;
   created_at?: string;
+  loan_interest_rate?: number;
+  max_loan_multiplier?: number;
+  min_trust_score_for_loan?: number;
+  max_repayment_months?: number;
+  county?: string;
+  contribution_due_day?: number;
+  grace_period_days?: number;
+  late_penalty_amount?: number;
 }
 
 export interface Contribution {

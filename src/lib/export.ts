@@ -41,7 +41,19 @@ export function exportToPDF(
     }
   });
 
-  doc.save(`${filename}.pdf`);
+  // Force direct browser file download instead of triggering print/preview
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const cleanFilename = `${filename}_${dateStr}.pdf`;
+
+  const blob = doc.output('blob');
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = cleanFilename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
 export function exportToExcel(
@@ -61,5 +73,7 @@ export function exportToExcel(
   const ws = XLSX.utils.aoa_to_sheet([...metaRows, headers, ...rows]);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, title.replace(/[:\\\/?*\[\]]/g, '').substring(0, 30));
-  XLSX.writeFile(wb, `${filename}.xlsx`);
+  
+  const dateStr = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `${filename}_${dateStr}.xlsx`);
 }

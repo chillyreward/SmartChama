@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -214,7 +214,7 @@ export default function AdminTrustScoresPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Members', value: members.length, icon: 'group' },
-          { label: 'Avg Score', value: members.length ? Math.round(members.reduce((a, m) => a + m.trust_score, 0) / members.length) : 0, icon: 'analytics' },
+          { label: 'Avg Score', value: members.length > 0 ? Math.round(members.reduce((a, m) => a + (Number(m.trust_score) || 0), 0) / members.length) : 0, icon: 'analytics' },
           { label: 'Excellent (80+)', value: members.filter(m => m.trust_score >= 80).length, icon: 'verified', color: 'text-[#22C55E]' },
           { label: 'At Risk (<40)', value: members.filter(m => m.trust_score < 40).length, icon: 'warning', color: 'text-red-500' },
         ].map(stat => (
@@ -223,7 +223,7 @@ export default function AdminTrustScoresPage() {
               <span className={`material-symbols-outlined text-[18px] ${stat.color || 'text-[var(--text-muted)]'}`}>{stat.icon}</span>
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">{stat.label}</span>
             </div>
-            <div className="text-[28px] font-bold">{stat.value}</div>
+            <div className="text-[28px] font-bold">{String(stat.value ?? 0)}</div>
           </div>
         ))}
       </div>

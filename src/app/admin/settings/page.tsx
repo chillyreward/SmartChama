@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -266,7 +266,7 @@ export default function AdminSettingsPage() {
                     required
                     value={chamaName}
                     onChange={e => setChamaName(e.target.value)}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                 </div>
 
@@ -275,7 +275,7 @@ export default function AdminSettingsPage() {
                   <select
                     value={county}
                     onChange={e => setCounty(e.target.value)}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   >
                     {countiesList.map(c => (
                       <option key={c} value={c}>{c}</option>
@@ -290,7 +290,7 @@ export default function AdminSettingsPage() {
                     required
                     value={contributionAmount}
                     onChange={e => setContributionAmount(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                 </div>
 
@@ -323,7 +323,7 @@ export default function AdminSettingsPage() {
                   <select
                     value={contributionDueDay}
                     onChange={e => setContributionDueDay(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   >
                     {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
                       <option key={d} value={d}>Day {d}</option>
@@ -337,7 +337,7 @@ export default function AdminSettingsPage() {
                     type="number"
                     value={gracePeriodDays}
                     onChange={e => setGracePeriodDays(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                 </div>
 
@@ -347,7 +347,7 @@ export default function AdminSettingsPage() {
                     type="number"
                     value={latePenaltyAmount}
                     onChange={e => setLatePenaltyAmount(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                 </div>
 
@@ -356,7 +356,7 @@ export default function AdminSettingsPage() {
                   <select
                     value={maxLoanMultiplier}
                     onChange={e => setMaxLoanMultiplier(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   >
                     <option value="1">1x Member Savings</option>
                     <option value="2">2x Member Savings</option>
@@ -370,7 +370,7 @@ export default function AdminSettingsPage() {
                     type="number"
                     value={loanInterestRate}
                     onChange={e => setLoanInterestRate(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                 </div>
 
@@ -379,7 +379,7 @@ export default function AdminSettingsPage() {
                   <select
                     value={maxRepaymentMonths}
                     onChange={e => setMaxRepaymentMonths(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   >
                     {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                       <option key={m} value={m}>{m} Month{m > 1 ? 's' : ''}</option>
@@ -434,7 +434,7 @@ export default function AdminSettingsPage() {
                   <select
                     value={paymentType}
                     onChange={e => setPaymentType(e.target.value as any)}
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   >
                     <option value="till">Lipa Na M-Pesa Till Number</option>
                     <option value="paybill">M-Pesa Paybill</option>
@@ -451,7 +451,7 @@ export default function AdminSettingsPage() {
                       value={tillNumber}
                       onChange={e => setTillNumber(e.target.value)}
                       placeholder="e.g. 5432109"
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                     />
                   </div>
                 )}
@@ -466,7 +466,7 @@ export default function AdminSettingsPage() {
                         value={paybillNumber}
                         onChange={e => setPaybillNumber(e.target.value)}
                         placeholder="e.g. 247247"
-                        className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                        className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                       />
                     </div>
                     <div>
@@ -477,7 +477,7 @@ export default function AdminSettingsPage() {
                         value={accountNumber}
                         onChange={e => setAccountNumber(e.target.value)}
                         placeholder="e.g. CHAMA001"
-                        className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                        className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                       />
                     </div>
                   </div>
@@ -492,7 +492,7 @@ export default function AdminSettingsPage() {
                       value={phoneNumber}
                       onChange={e => setPhoneNumber(e.target.value)}
                       placeholder="e.g. 0712345678"
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                     />
                   </div>
                 )}
@@ -505,7 +505,7 @@ export default function AdminSettingsPage() {
                     value={accountName}
                     onChange={e => setAccountName(e.target.value)}
                     placeholder="e.g. SmartChama Group Custody Account"
-                    className="w-full bg-white dark:bg-[#1a1f1b] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                   <p className="text-[11px] text-[var(--text-muted)] mt-1">This verifies to members that they are depositing to the correct group custody wallet.</p>
                 </div>
@@ -582,7 +582,7 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
-      {showInviteModal && (
+      {showInviteModal && group && (
         <InviteModal
           onClose={() => {
             setShowInviteModal(false);

@@ -539,7 +539,7 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {showDepositModal && (
+      {showDepositModal && group && member && (
         <NewContributionModal 
           chamaId={group.id} 
           chamaName={group.name} 

@@ -334,7 +334,7 @@ export default function ContributionsPage() {
             fetchData(); // Refresh table after closing
           }}
           defaultAmount={group?.contribution_amount || 500}
-          memberPhone={member?.phone_number || ''}
+          memberPhone={member?.profile?.phone_number || (member as any)?.phone_number || ''}
           membershipId={member?.id || ''}
           chamaId={group?.id || ''}
           chamaName={group?.name || ''}

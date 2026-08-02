@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -275,7 +275,7 @@ export default function MemberDashboard({
       {/* ROW 1: Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         
-        <div className="bg-white dark:bg-[#161d16] border border-[#E5E7EB] dark:border-[#2d3d2d] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex justify-between items-start mb-4">
             <div className="text-[11px] font-bold tracking-wider text-[#60645f] dark:text-[#8FA88F] uppercase">YOUR CONTRIBUTIONS</div>
             <span className="material-symbols-outlined text-gray-300 dark:text-[#5a6e5a]">savings</span>

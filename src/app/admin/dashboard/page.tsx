@@ -42,13 +42,80 @@ export default function AdminDashboard() {
       )
 
       if (rpcError) {
-        console.error('Admin Dashboard RPC error:', rpcError)
-        setState(prev => ({
-          ...prev,
-          loading: false,
-          error: 'Could not load admin dashboard data.'
-        }))
-        return
+        console.error('Admin Dashboard RPC error:', rpcError, '— trying direct query fallback')
+        // Fallback: query directly without RPC
+        try {
+          const adminRoles = ['admin', 'chairlady', 'treasurer', 'secretary']
+          const { data: memberData, error: memErr } = await supabase
+            .from('chama_memberships')
+            .select('*, chamas_v2(*), profiles(full_name, email, phone_number, avatar_url)')
+            .eq('profile_id', user.id)
+            .eq('status', 'active')
+            .in('role', adminRoles)
+            .order('joined_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          if (memErr || !memberData) {
+            router.replace('/dashboard')
+            return
+          }
+
+          const chamaData = memberData.chamas_v2 as any
+          const profileData = memberData.profiles as any
+
+          if (chamaData?.id) {
+            try {
+              sessionStorage.setItem('active_chama_id', chamaData.id)
+              localStorage.setItem('sc_last_chama_id', chamaData.id)
+            } catch(e) {}
+          }
+
+          const [txResult, contribResult, loansResult, walletResult] = await Promise.all([
+            supabase.from('transactions_v2').select('*').eq('chama_id', chamaData.id).order('created_at', { ascending: false }).limit(10),
+            supabase.from('contributions_v2').select('amount, status, created_at, membership_id, mpesa_receipt').eq('chama_id', chamaData.id).eq('status', 'confirmed').order('created_at', { ascending: false }).limit(20),
+            supabase.from('loans_v2').select('id, status, amount, created_at, membership_id, chama_memberships(profiles(full_name))').eq('chama_id', chamaData.id).order('created_at', { ascending: false }).limit(20),
+            supabase.from('wallets').select('balance').eq('chama_id', chamaData.id).maybeSingle(),
+          ])
+
+          const totalContribs = (contribResult.data || []).reduce((s: number, c: any) => s + (Number(c.amount) || 0), 0)
+          const repaidLoans = (loansResult.data || []).filter((l: any) => l.status === 'repaid').length
+          const totalLoans = (loansResult.data || []).length
+          const activeLoans = (loansResult.data || []).filter((l: any) => l.status === 'active').length
+
+          setState({
+            loading: false,
+            error: null,
+            membership: {
+              id: memberData.id,
+              role: memberData.role,
+              trust_score: memberData.trust_score || 100,
+              full_name: profileData?.full_name || '',
+              email: profileData?.email || user.email || '',
+              phone: profileData?.phone_number || '',
+              chama_id: chamaData.id
+            },
+            chama: chamaData,
+            metrics: {
+              totalSavings: totalContribs,
+              memberCount: 0,
+              activeLoanCount: activeLoans,
+              collectionRate: totalLoans > 0 ? Math.round((repaidLoans / totalLoans) * 100) : 100,
+              avgTrust: 100,
+              walletBalance: (walletResult.data as any)?.balance || 0,
+              members: [],
+              contributions: contribResult.data || [],
+              loans: loansResult.data || [],
+              wallet: { balance: (walletResult.data as any)?.balance || 0 }
+            },
+            transactions: txResult.data || []
+          })
+          return
+        } catch (fallbackErr) {
+          console.error('Fallback also failed:', fallbackErr)
+          setState(prev => ({ ...prev, loading: false, error: 'Could not load admin dashboard data. Please refresh.' }))
+          return
+        }
       }
 
       // If no membership found or not admin
