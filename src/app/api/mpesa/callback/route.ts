@@ -44,9 +44,10 @@ export async function POST(request: Request) {
     }
 
     if (resultCode !== 0) {
+      const resultDesc = callback?.ResultDesc || `M-Pesa error code: ${resultCode}`;
       await supabase
         .from('contributions_v2')
-        .update({ status: 'failed', failed_reason: `M-Pesa error code: ${resultCode}` })
+        .update({ status: 'failed', failed_reason: resultDesc })
         .eq('id', contribution.id);
       return respondOk();
     }

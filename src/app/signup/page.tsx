@@ -501,6 +501,7 @@ function SignupForm() {
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
                   placeholder="Grace Wanjiku"
+                  required
                   className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
                 />
               </div>
@@ -515,6 +516,7 @@ function SignupForm() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
+                  required
                   className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
                 />
               </div>
@@ -548,6 +550,7 @@ function SignupForm() {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="Minimum 8 characters"
                     autoComplete="new-password"
+                    required
                     className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
                   />
                   <button

@@ -177,7 +177,8 @@ export async function POST(request: Request) {
     const resultPayload = {
       success: true,
       contributionId: pendingContribution.id,
-      checkoutRequestId: stkData.CheckoutRequestID
+      checkoutRequestId: stkData.CheckoutRequestID,
+      timeoutSeconds: 120
     };
 
     // Save the idempotency key

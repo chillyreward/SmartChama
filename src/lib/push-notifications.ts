@@ -7,7 +7,6 @@ export async function sendPushNotification(
   data: object = {}
 ) {
   if (!pushToken || (!pushToken.startsWith('ExponentPushToken[') && !pushToken.startsWith('ExpoPushToken['))) {
-    console.log('Skipping push notification: invalid token format', pushToken);
     return;
   }
 
@@ -29,7 +28,6 @@ export async function sendPushNotification(
     });
 
     const result = await res.json();
-    console.log('Expo Push Notification response:', result);
     return result;
   } catch (err) {
     console.error('Error sending Expo push notification:', err);

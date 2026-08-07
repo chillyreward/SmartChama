@@ -46,15 +46,22 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Capacitor (mobile)
+# Capacitor / Expo (mobile)
 android/
 ios/
 *.apk
 *.ipa
 *.aab
+mobile/node_modules/
+mobile/.expo/
+mobile/android/
+mobile/ios/
 
 # PWA
 public/workbox-*.js
 public/worker-*.js
 public/sw.js
 public/fallback-*.js
+
+# TypeScript build cache
+tsconfig.tsbuildinfo

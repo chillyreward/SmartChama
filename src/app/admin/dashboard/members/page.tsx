@@ -192,7 +192,7 @@ export default function MembersPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white flex items-center gap-3">
+          <h1 className="text-3xl font-black text-[var(--text-primary)] flex items-center gap-3">
             Members
             <span className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-full border border-slate-700">
               {viewMode === "chama" ? chamaMembers.length : unassignedMembers.length} {viewMode === "chama" ? "In Chamas" : "Unassigned"}
@@ -506,9 +506,9 @@ export default function MembersPage() {
 
       {/* EMPTY STATE */}
       {!loading && viewMode === "unassigned" && filteredMembers.length === 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-[32px] p-12 text-center">
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-[32px] p-12 text-center">
           <Users className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">No Unassigned Members</h3>
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No Unassigned Members</h3>
           <p className="text-slate-400">
             {searchQuery 
               ? "No members found matching your search criteria"
@@ -519,9 +519,9 @@ export default function MembersPage() {
 
       {/* EMPTY STATE - CHAMA MEMBERS */}
       {!loading && viewMode === "chama" && filteredChamaMembers.length === 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-[32px] p-12 text-center">
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-[32px] p-12 text-center">
           <Users className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">No Members Yet</h3>
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No Members Yet</h3>
           <p className="text-slate-400">
             {searchQuery 
               ? "No members found matching your search criteria"
@@ -533,7 +533,7 @@ export default function MembersPage() {
       {/* ADD TO CHAMA MODAL */}
       {showAddModal && selectedMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-[#020617] border border-slate-700 w-full max-w-md rounded-[32px] p-8 relative shadow-2xl">
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] w-full max-w-md rounded-[32px] p-8 relative shadow-2xl">
             
             <button 
               onClick={() => {
@@ -541,13 +541,13 @@ export default function MembersPage() {
                 setSelectedMember(null);
                 setSelectedChama("");
               }}
-              className="absolute top-6 right-6 text-slate-500 hover:text-white bg-slate-900 rounded-full p-2 transition-colors"
+              className="absolute top-6 right-6 text-slate-500 hover:text-[var(--text-primary)] bg-[var(--bg-page)] rounded-full p-2 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">Add Member to Chama</h2>
+              <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Add Member to Chama</h2>
               <p className="text-slate-400 text-sm">Select which chama to add this member to</p>
             </div>
 

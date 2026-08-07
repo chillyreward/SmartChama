@@ -1,14 +1,12 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
-
-export function exportToPDF(
+export async function exportToPDF(
   title: string,
   chamaName: string,
   headers: string[],
   rows: (string | number)[][],
   filename: string
 ) {
+  const { default: jsPDF } = await import('jspdf');
+  const { default: autoTable } = await import('jspdf-autotable');
   const doc = new jsPDF();
   
   // Document Header
@@ -56,13 +54,15 @@ export function exportToPDF(
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
-export function exportToExcel(
+export async function exportToExcel(
   title: string,
   chamaName: string,
   headers: string[],
   rows: (string | number)[][],
   filename: string
 ) {
+  const XLSX = await import('xlsx');
+
   const metaRows = [
     [title],
     [`Chama: ${chamaName || 'SmartChama Group'}`],

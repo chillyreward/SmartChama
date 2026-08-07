@@ -295,9 +295,9 @@ export default function AdminSignupPage() {
           {/* STEP 2 — Chama details */}
           {step === 2 && (
             <>
-              <h1 className="text-[28px] font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="text-[28px] font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                 Set up your Chama
-              </h1>
+              </h2>
               <p className="text-[14px] mb-7" style={{ color: 'var(--text-secondary)' }}>
                 Step 2 of 2 — Group details
               </p>

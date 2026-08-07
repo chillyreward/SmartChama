@@ -500,7 +500,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                   </div>
                   <p className="text-body-sm text-[var(--text-muted)] mt-1 flex justify-between">
                     <span>Available tracked pool: KSh {formatCurrency(wallet?.balance || 0)}</span>
-                    <span className="text-[#22C55E] cursor-pointer hover:underline font-bold" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</span>
+                    <button type="button" className="text-[#22C55E] cursor-pointer hover:underline font-bold focus:outline-none focus:ring-1 focus:ring-[#22C55E] rounded" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</button>
                   </p>
                 </div>
 

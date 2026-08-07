@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import InviteQR from "@/components/InviteQR";
 import {
   Building2, Users, CreditCard, Settings, ShieldCheck,
   Loader2, CheckCircle, ArrowLeft, TrendingUp, Wallet
@@ -152,7 +153,7 @@ export default function ChamaDetailPage() {
 
           {step === 'success' && (
             <div className="py-10">
-              <CheckCircle className="w-16 h-16 text-[#22C55E] mx-auto mb-4 animate-bounce" />
+              <CheckCircle className="w-16 h-16 text-[#22C55E] mx-auto mb-4" />
               <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Access Granted</p>
               <p className="text-[#22C55E] text-sm">Loading Chama Details...</p>
             </div>
@@ -176,11 +177,14 @@ export default function ChamaDetailPage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-geist font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
-            {chama.name}
-          </h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>Chama Overview & Management</p>
+        <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-geist font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
+              {chama.name}
+            </h1>
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>Chama Overview & Management</p>
+          </div>
+          <InviteQR groupCode={chama.group_code || chama.code || 'CHAMA'} chamaName={chama.name} />
         </div>
       </div>
 

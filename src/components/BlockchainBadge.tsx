@@ -42,7 +42,7 @@ export default function BlockchainBadge({
         <div
           className={`
             inline-flex items-center gap-1.5
-            bg-gradient-to-r from-purple-500 to-pink-500
+            bg-[#22C55E]
             text-white rounded-full
             ${sizeClasses[size]}
             font-medium
@@ -59,7 +59,7 @@ export default function BlockchainBadge({
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="View QR Code"
           >
-            <QrCode size={iconSizes[size]} className="text-purple-600" />
+            <QrCode size={iconSizes[size]} className="text-[#22C55E]" />
           </button>
         )}
 
@@ -72,7 +72,7 @@ export default function BlockchainBadge({
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="View on Blockchain Explorer"
           >
-            <ExternalLink size={iconSizes[size]} className="text-purple-600" />
+            <ExternalLink size={iconSizes[size]} className="text-[#22C55E]" />
           </a>
         )}
       </div>
@@ -91,7 +91,7 @@ export default function BlockchainBadge({
 
             {/* Content */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[#22C55E] rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-white" />
               </div>
 
@@ -101,7 +101,7 @@ export default function BlockchainBadge({
               </p>
 
               {/* QR Code */}
-              <div className="bg-white p-4 rounded-lg border-2 border-purple-200 inline-block mb-4">
+              <div className="bg-white p-4 rounded-lg border-2 border-emerald-200 inline-block mb-4">
                 <Image
                   src={qrCode}
                   alt="Transaction QR Code"
@@ -125,7 +125,7 @@ export default function BlockchainBadge({
                   href={explorerUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium"
+                  className="inline-flex items-center gap-2 text-[#22C55E] hover:text-emerald-700 font-medium"
                 >
                   View on Polygon Explorer
                   <ExternalLink size={16} />

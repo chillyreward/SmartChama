@@ -24,8 +24,9 @@ export default function LandingFooter() {
             </Link>
             <p className="text-body-sm text-gray-400 mb-6">Financial infrastructure for community wealth.</p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors"><span className="material-symbols-outlined">link</span></a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors"><span className="material-symbols-outlined">forum</span></a>
+              <a href="mailto:hello@smartchama.co.ke" className="text-gray-400 hover:text-white transition-colors" aria-label="Email us">
+                <span className="material-symbols-outlined">mail</span>
+              </a>
             </div>
           </div>
           
@@ -35,7 +36,6 @@ export default function LandingFooter() {
               <li><Link href="/#features" className="text-body-sm text-gray-300 hover:text-white transition-colors">Features</Link></li>
               <li><Link href="/#how-it-works" className="text-body-sm text-gray-300 hover:text-white transition-colors">How It Works</Link></li>
               <li><Link href="/#pricing" className="text-body-sm text-gray-300 hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href="/smartgrow" className="text-body-sm text-gray-300 hover:text-white transition-colors">SmartGrow</Link></li>
               <li><Link href="/security" className="text-body-sm text-gray-300 hover:text-white transition-colors">Security</Link></li>
             </ul>
           </div>
@@ -65,7 +65,7 @@ export default function LandingFooter() {
             © 2026 SmartChama Technologies Ltd. Built in Nairobi, Kenya.
           </div>
           <div className="text-body-sm text-gray-500">
-            Regulated by the Central Bank of Kenya.
+            A product of SmartChama Technologies Ltd.
           </div>
         </div>
       </div>

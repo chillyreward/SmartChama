@@ -1,0 +1,18 @@
+# SmartChama
+> Digital savings and loan management platform for Kenyan Chama groups.
+
+## About
+SmartChama is a fintech platform that digitizes informal savings groups (Chamas) in Kenya. It provides M-Pesa integration, loan management, merry-go-round scheduling, welfare funds, and AI-powered trust scoring.
+
+## Features
+- M-Pesa STK Push for contributions
+- Internal group loans with 5% interest
+- Merry-Go-Round rotating savings
+- Welfare emergency fund claims
+- SmartGrow investment proposals
+- AI Trust Score credit scoring
+- PDF financial statements
+
+## Contact
+Website: https://smartchama.vercel.app
+Location: Nairobi, Kenya

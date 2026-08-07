@@ -296,7 +296,7 @@ export default function HamsterOnboarding() {
             />
 
             {/* Floating icon badge */}
-            <div className="absolute top-4 right-4 text-3xl animate-bounce select-none">
+            <div className="absolute top-4 right-4 text-3xl select-none">
               {current.icon}
             </div>
 

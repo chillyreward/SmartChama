@@ -48,7 +48,7 @@ export default function LandingPage() {
               {/* Admin path */}
               <Link
                 href="/signup?role=admin"
-                className="group flex items-center justify-center sm:justify-start gap-3 px-7 py-4 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-all duration-200 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transform hover:-translate-y-0.5">
+                className="group flex items-center justify-center sm:justify-start gap-3 px-7 py-4 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-all duration-200 shadow-md">
                 <span className="material-symbols-outlined text-[24px]">
                   admin_panel_settings
                 </span>
@@ -95,7 +95,7 @@ export default function LandingPage() {
 
             {/* Trust signals */}
             <div className="flex flex-wrap sm:flex-nowrap gap-6 justify-center lg:justify-start mt-6 overflow-x-auto w-full pb-2">
-              {["M-Pesa Native STK Push", "2,400+ Active Groups", "KSh 48M+ Savings Secured"].map(signal => (
+              {["M-Pesa Native STK Push", "Free to Start", "Built in Nairobi"].map(signal => (
                 <div key={signal} className="flex items-center gap-2 flex-shrink-0">
                   <span className="material-symbols-outlined text-[18px] text-[#22C55E]">
                     check_circle
@@ -110,7 +110,7 @@ export default function LandingPage() {
 
           {/* Right Column — Real Dashboard Image Showcase */}
           <div className="lg:col-span-5 relative flex justify-center items-center">
-            <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[var(--border)] bg-[var(--bg-card)] group transform transition-all duration-500 hover:scale-[1.02]">
+            <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[var(--border)] bg-[var(--bg-card)] group transition-all duration-500">
               <Image
                 src="/images/hero_dashboard.jpg"
                 alt="SmartChama Group Dashboard Interface"
@@ -123,9 +123,9 @@ export default function LandingPage() {
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white text-xs font-semibold bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/10">
                 <span className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                  Live Chama Pool: KSh 450,200
+                  Real-time M-Pesa Tracking
                 </span>
-                <span className="text-emerald-400 font-mono">98/100 Trust Rating</span>
+                <span className="text-emerald-400 font-mono">Instant STK Push</span>
               </div>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function LandingPage() {
               </div>
               <div>
                 <h4 className="text-base font-bold text-[var(--text-primary)] font-geist">Empowering Kenyan Communities</h4>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">Trusted by savings groups across Nairobi, Mombasa, Kisumu, Nakuru & Eldoret.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Designed for savings groups across Kenya — from Nairobi to Eldoret.</p>
               </div>
             </div>
             <div className="md:col-span-7 flex flex-wrap items-center justify-start md:justify-end gap-6 text-[13px] font-semibold text-[var(--text-secondary)]">
@@ -204,7 +204,7 @@ export default function LandingPage() {
             </div>
 
             {/* The SmartChama way */}
-            <div className="bg-[#0E1410] border border-[#22C55E]/40 rounded-2xl p-8 hover:border-[#22C55E] transition-all duration-300 shadow-lg shadow-emerald-500/5">
+            <div className="bg-[#0E1410] border border-[#22C55E]/40 rounded-2xl p-8 hover:border-[#22C55E] transition-all duration-300 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <span className="w-8 h-8 rounded-full bg-[#22C55E]/20 text-[#22C55E] flex items-center justify-center font-bold text-lg">✓</span>
                 <h3 className="text-2xl font-bold font-geist text-[#22C55E]">The SmartChama Way</h3>
@@ -441,11 +441,11 @@ export default function LandingPage() {
             Ready to upgrade your Chama?
           </h2>
           <p className="text-gray-400 text-base md:text-lg max-w-xl mx-auto">
-            Join thousands of group members across Kenya using SmartChama today.
+            Start managing your Chama digitally — no paperwork, no WhatsApp chaos.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-            <Link href="/signup" className="bg-[#22C55E] text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-[#16a34a] transition-all shadow-lg shadow-emerald-500/20">
+            <Link href="/signup" className="bg-[#22C55E] text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-[#16a34a] transition-all shadow-md">
               Create Free Account
             </Link>
             <Link href="/login" className="border border-white/20 bg-white/5 text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-white/10 transition-all">

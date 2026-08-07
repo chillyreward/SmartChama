@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import { requireAuth } from '@/lib/api-auth';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,6 +14,11 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key-for
 
 export async function POST(req: Request) {
   try {
+    const { user, error: authError } = await requireAuth(req);
+    if (!user || authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { chama_id } = await req.json()
     if (!chama_id) return NextResponse.json({ error: 'chama_id required' }, { status: 400 })
 

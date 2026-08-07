@@ -143,14 +143,14 @@ export default function CreateChamaModal({ onSuccess, onClose, required = false 
             <p className="text-[13px] text-[var(--text-muted)] mt-0.5">Set up your group to start adding members</p>
           </div>
           {!required && onClose && (
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--border)] transition-colors">
+            <button onClick={onClose} aria-label="Close" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--border)] transition-colors">
               <span className="material-symbols-outlined text-[20px] text-[var(--text-muted)]">close</span>
             </button>
           )}
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
+        <form id="create-chama-form" onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg text-[13px] text-red-700 dark:text-red-400">
               {error}
@@ -283,7 +283,7 @@ export default function CreateChamaModal({ onSuccess, onClose, required = false 
             )}
           </div>
 
-          <button type="submit"
+          <button type="submit" form="create-chama-form"
             disabled={saving || nameStatus === 'taken' || nameStatus === 'checking'}
             className="w-full bg-[#22C55E] text-white py-3.5 rounded-xl text-[15px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2">
             {saving ? (

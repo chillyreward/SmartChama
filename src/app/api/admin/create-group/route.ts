@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireAuth } from '@/lib/api-auth'
 
 // Service role client — bypasses RLS
 const supabaseAdmin = createClient(
@@ -9,6 +10,11 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
+    const { user, error: authError } = await requireAuth(req);
+    if (!user || authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { userId, fullName, email, chamaName, chamaId, role, inviteId } = await req.json()
 
     if (!userId || !fullName || !email) {

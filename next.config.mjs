@@ -92,6 +92,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: true,
+  productionBrowserSourceMaps: false,
   images: {
     remotePatterns: [
       {

@@ -621,7 +621,7 @@ function MyChamasContent() {
 
             {step === 3 && (
               <div className="py-10">
-                <CheckCircle className="w-16 h-16 text-[#006e2f] mx-auto mb-4 animate-bounce" />
+                <CheckCircle className="w-16 h-16 text-[#006e2f] mx-auto mb-4" />
                 <p className="text-on-surface font-bold text-lg">Access Granted</p>
                 <p className="text-[#006e2f] text-sm">Loading Chama Details...</p>
               </div>

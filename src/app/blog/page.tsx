@@ -60,7 +60,7 @@ export default function BlogPage() {
       {/* HERO */}
       <section className="bg-white border-b border-[#E5E7EB] py-16 px-6">
         <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h1 className="text-[48px] font-geist font-bold text-[#161d16] mb-4">SmartChama Blog</h1>
+          <h1 className="text-[48px] font-geist font-bold text-[var(--text-primary)] mb-4">SmartChama Blog</h1>
           <p className="text-[18px] text-[#60645f] max-w-2xl">
             Insights on community finance, savings culture, and financial inclusion across Kenya and Africa.
           </p>
@@ -78,7 +78,7 @@ export default function BlogPage() {
               <span className="text-body-sm text-[#60645f]">June 2025</span>
             </div>
             
-            <h2 className="text-[32px] font-geist font-bold text-[#161d16] mb-6 leading-tight">
+            <h2 className="text-[32px] font-geist font-bold text-[var(--text-primary)] mb-6 leading-tight">
               Why your chama contribution record is more valuable than you think
             </h2>
             
@@ -104,7 +104,7 @@ export default function BlogPage() {
       {/* ARTICLES GRID */}
       <section className="bg-white py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-[28px] font-geist font-bold text-[#161d16] mb-10">All articles</h2>
+          <h2 className="text-[28px] font-geist font-bold text-[var(--text-primary)] mb-10">All articles</h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((article, idx) => (
@@ -116,7 +116,7 @@ export default function BlogPage() {
                   <span className="text-body-sm text-[#60645f]">{article.date}</span>
                 </div>
                 
-                <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-4 leading-tight group-hover:text-[#006e2f] transition-colors">
+                <h3 className="text-headline-sm font-geist font-bold text-[var(--text-primary)] mb-4 leading-tight group-hover:text-[#006e2f] transition-colors">
                   <Link href={article.link}>
                     {article.title}
                   </Link>

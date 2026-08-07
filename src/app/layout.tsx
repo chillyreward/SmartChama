@@ -5,10 +5,12 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import dynamic from 'next/dynamic';
 import LoadingScreen from "@/components/LoadingScreen";
-import { ChatBot } from "@/components/ChatBot";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
+
+const ChatBot = dynamic(() => import('@/components/ChatBot').then(mod => ({ default: mod.ChatBot })));
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -26,6 +28,9 @@ export const metadata: Metadata = {
     template: '%s | SmartChama'
   },
   description: 'Digital savings and loan management for African savings groups.',
+  alternates: {
+    canonical: 'https://smartchama.vercel.app',
+  },
   manifest: '/site.webmanifest',
   appleWebApp: {
     capable: true,

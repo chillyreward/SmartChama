@@ -98,7 +98,7 @@ export default function CreditScoresPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-white mb-2">Credit Scores</h1>
+        <h1 className="text-3xl font-black text-[var(--text-primary)] mb-2">Credit Scores</h1>
         <p className="text-slate-400">Monitor financial health and creditworthiness</p>
       </div>
 
@@ -133,8 +133,8 @@ export default function CreditScoresPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Chama Selector */}
           <div className="lg:col-span-1">
-            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+            <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6">
+              <h3 className="text-[var(--text-primary)] font-bold mb-4 flex items-center gap-2">
                 <Users className="w-5 h-5 text-amber-400" />
                 Select Chama
               </h3>
@@ -203,9 +203,9 @@ export default function CreditScoresPage() {
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Member List */}
               <div className="lg:col-span-1">
-                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+                <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6">
                   <div className="mb-4">
-                    <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+                    <h3 className="text-[var(--text-primary)] font-bold mb-3 flex items-center gap-2">
                       <Users className="w-5 h-5 text-emerald-400" />
                       Members ({filteredMembers.length})
                     </h3>

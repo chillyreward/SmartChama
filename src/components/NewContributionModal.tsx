@@ -177,7 +177,7 @@ export function NewContributionModal({
           <>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-[20px] font-bold">New Contribution</h2>
-              <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg"
+              <button onClick={onClose} aria-label="Close" className="w-8 h-8 flex items-center justify-center rounded-lg"
                 style={{ color: 'var(--text-muted)' }}>
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
@@ -221,62 +221,67 @@ export function NewContributionModal({
               </div>
             )}
 
-            {/* Phone field */}
-            <div className="mb-4">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                style={{ color: 'var(--text-muted)' }}>M-Pesa Phone Number</label>
-              <div className="flex">
-                <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] font-medium"
-                  style={{ backgroundColor: 'transparent', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
-                  +254
+            <form id="contribution-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+              {/* Phone field */}
+              <div className="mb-4">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                  style={{ color: 'var(--text-muted)' }}>M-Pesa Phone Number</label>
+                <div className="flex">
+                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] font-medium"
+                    style={{ backgroundColor: 'transparent', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                    +254
+                  </div>
+                  <input
+                    type="tel"
+                    value={phone.replace('+254', '').replace('254', '')}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="712 345 678"
+                    required
+                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                    style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-main)' }}
+                  />
                 </div>
-                <input
-                  type="tel"
-                  value={phone.replace('+254', '').replace('254', '')}
-                  onChange={e => setPhone(e.target.value)}
-                  placeholder="712 345 678"
-                  className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
-                  style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-main)' }}
-                />
               </div>
-            </div>
 
-            {/* Amount field */}
-            <div className="mb-5">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                style={{ color: 'var(--text-muted)' }}>Amount (KSh)</label>
-              <div className="flex">
-                <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] font-medium"
-                  style={{ backgroundColor: 'transparent', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
-                  KSh
+              {/* Amount field */}
+              <div className="mb-5">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                  style={{ color: 'var(--text-muted)' }}>Amount (KSh)</label>
+                <div className="flex">
+                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] font-medium"
+                    style={{ backgroundColor: 'transparent', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                    KSh
+                  </div>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    placeholder="5000"
+                    required
+                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                    style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-main)' }}
+                  />
                 </div>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  placeholder="5000"
-                  className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
-                  style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-main)' }}
-                />
+                <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                  Group contribution: KSh {defaultAmount.toLocaleString('en-KE')}
+                </p>
               </div>
-              <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
-                Group contribution: KSh {defaultAmount.toLocaleString('en-KE')}
-              </p>
-            </div>
 
-            {/* Error */}
-            {error && (
-              <div className="rounded-xl p-3 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-[13px] text-red-700 dark:text-red-400">
-                {error}
-              </div>
-            )}
+              {/* Error */}
+              {error && (
+                <div className="rounded-xl p-3 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-[13px] text-red-700 dark:text-red-400">
+                  {error}
+                </div>
+              )}
 
-            {/* Submit */}
-            <button
-              onClick={handleSubmit}
-              className="w-full py-4 rounded-xl text-[16px] font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] active:scale-[0.98] transition-all">
-              Send M-Pesa Request
-            </button>
+              {/* Submit */}
+              <button
+                type="submit"
+                form="contribution-form"
+                className="w-full py-4 rounded-xl text-[16px] font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] active:scale-[0.98] transition-all">
+                Send M-Pesa Request
+              </button>
+            </form>
           </>
         )}
 

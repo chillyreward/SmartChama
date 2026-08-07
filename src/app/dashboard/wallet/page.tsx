@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { NewContributionModal } from "@/components/NewContributionModal";
+import CurrencyConverter from "@/components/CurrencyConverter";
 
 export default function WalletPage() {
   const { member, group, isLoading: authLoading } = useAuth();
@@ -248,7 +249,7 @@ export default function WalletPage() {
   return (
     <div className="p-6 max-w-[1280px] mx-auto w-full relative font-inter text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in animate-bounce">
+        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in">
           <span className="material-symbols-outlined text-[18px]">check_circle</span>
           <span className="text-body-sm font-semibold">{toastMsg}</span>
         </div>
@@ -324,6 +325,11 @@ export default function WalletPage() {
             <span className="text-body-sm text-[#22C55E] font-bold">M-Pesa Connected</span>
           </div>
         </div>
+      </div>
+
+      {/* CURRENCY CONVERTER */}
+      <div className="mb-6">
+        <CurrencyConverter amountKES={walletStats.balance} />
       </div>
 
       {/* WALLET BREAKDOWN */}

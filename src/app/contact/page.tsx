@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import LandingNav from "@/components/LandingNav";
@@ -57,7 +57,7 @@ export default function ContactPage() {
       {/* HERO */}
       <section className="bg-white border-b border-[#E5E7EB] py-16 px-6">
         <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h1 className="text-[48px] font-geist font-bold text-[#161d16] mb-4">Get in touch</h1>
+          <h1 className="text-[48px] font-geist font-bold text-[var(--text-primary)] mb-4">Get in touch</h1>
           <p className="text-[18px] text-[#60645f] max-w-xl leading-relaxed">
             Whether you are a group looking to get started, a financial institution interested in our data, or a developer wanting to build on our platform, we want to hear from you.
           </p>

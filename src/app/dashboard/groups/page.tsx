@@ -400,7 +400,7 @@ function MyGroupsContent() {
 
             {step === 3 && (
               <div className="py-10">
-                <CheckCircle className="w-16 h-16 text-[#22C55E] mx-auto mb-4 animate-bounce" />
+                <CheckCircle className="w-16 h-16 text-[#22C55E] mx-auto mb-4" />
                 <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Access Granted</p>
                 <p className="text-[#22C55E] text-sm">Entering Secure Vault...</p>
               </div>

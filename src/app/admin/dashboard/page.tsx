@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import AdminDashboardPage from './AdminDashboardClient'
+import { SkeletonDashboard } from '@/components/Skeleton'
 
 export default function AdminDashboard() {
   const supabase = getSupabaseBrowser()
@@ -229,13 +230,8 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="text-center">
-          <div className="w-14 h-14 rounded-full border-4 border-[#22C55E]/20 border-t-[#22C55E] animate-spin mx-auto mb-4" />
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Loading admin dashboard...
-          </p>
-        </div>
+      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+        <SkeletonDashboard />
       </div>
     )
   }

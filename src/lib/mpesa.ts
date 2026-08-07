@@ -26,15 +26,12 @@ export async function generateAccessToken(): Promise<string> {
 
     const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString('base64');
     
-    console.log('Requesting M-Pesa access token...');
-    
     const response = await axios.get(AUTH_URL, {
       headers: {
         Authorization: `Basic ${auth}`,
       },
     });
 
-    console.log('Access token generated successfully');
     return response.data.access_token;
   } catch (error: any) {
     console.error('Error generating access token:', error.response?.data || error.message);
@@ -80,9 +77,6 @@ export async function initiateSTKPush(
   transactionDesc: string
 ) {
   try {
-    console.log('Initiating STK Push...');
-    console.log('Phone:', phoneNumber, 'Amount:', amount);
-    
     const accessToken = await generateAccessToken();
     const { password, timestamp } = generatePassword();
 
@@ -103,20 +97,12 @@ export async function initiateSTKPush(
       TransactionDesc: transactionDesc,
     };
 
-    console.log('STK Push Payload:', {
-      ...payload,
-      Password: '***HIDDEN***',
-      CallBackURL: CALLBACK_URL
-    });
-
     const response = await axios.post(STK_PUSH_URL, payload, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
     });
-
-    console.log('STK Push Response:', response.data);
 
     return {
       success: true,

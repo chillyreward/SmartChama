@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireAuth } from '@/lib/api-auth'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +9,11 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
+    const { user, error: authError } = await requireAuth(req);
+    if (!user || authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('SUPABASE_SERVICE_ROLE_KEY is not set!')
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
