@@ -8,8 +8,11 @@ const BUSINESS_SHORT_CODE = process.env.MPESA_BUSINESS_SHORT_CODE || '174379';
 const PASSKEY = process.env.MPESA_PASSKEY || '';
 const CALLBACK_URL = process.env.MPESA_CALLBACK_URL || 'https://yourdomain.com/api/mpesa/callback';
 
-// Sandbox URLs
-const BASE_URL = 'https://sandbox.safaricom.co.ke';
+// 174379 is Safaricom's sandbox shortcode; anything else is a live shortcode.
+// Must match the environment the STK push was sent to, or status queries fail.
+const BASE_URL = BUSINESS_SHORT_CODE === '174379'
+  ? 'https://sandbox.safaricom.co.ke'
+  : 'https://api.safaricom.co.ke';
 const AUTH_URL = `${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`;
 const STK_PUSH_URL = `${BASE_URL}/mpesa/stkpush/v1/processrequest`;
 const QUERY_URL = `${BASE_URL}/mpesa/stkpushquery/v1/query`;

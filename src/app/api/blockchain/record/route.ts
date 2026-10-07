@@ -1,7 +1,11 @@
+import { forbidden, isInternalRequest } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { ethers } from 'ethers';
 
 export async function POST(request: Request) {
+  // Server-to-server / cron only: no user calls this directly
+  if (!isInternalRequest(request)) return forbidden();
+
   try {
     const body = await request.json();
     

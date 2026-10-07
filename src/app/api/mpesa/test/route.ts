@@ -1,7 +1,11 @@
+import { devOnly } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { generateAccessToken } from '@/lib/mpesa';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const blocked = devOnly();
+  if (blocked) return blocked;
+
   try {
     console.log('Testing M-Pesa credentials...');
     

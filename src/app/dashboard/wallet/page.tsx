@@ -122,56 +122,22 @@ export default function WalletPage() {
   const castVote = async (consentId: string, voteType: 'approve' | 'reject') => {
     if (!member) return;
     try {
-      const { error: voteErr } = await supabase
-        .from('withdrawal_votes')
-        .insert({
-          consent_id: consentId,
-          membership_id: member.id,
-          vote: voteType
-        });
+      // Vote and tally happen in one locked database call, so members can't
+      // rewrite the vote counts or the request's status from the browser.
+      const { data, error: voteErr } = await supabase.rpc('cast_withdrawal_vote', {
+        p_consent_id: consentId,
+        p_vote: voteType
+      });
 
-      if (voteErr) {
-        if (voteErr.code === '23505') {
+      if (voteErr || !data?.success) {
+        if (data?.error === 'already_voted') {
           alert("You have already voted on this withdrawal request.");
         } else {
-          throw voteErr;
+          throw new Error(data?.error || voteErr?.message);
         }
         return;
       }
 
-      // Fetch all votes for this consent
-      const { data: allVotes } = await supabase
-        .from('withdrawal_votes')
-        .select('vote')
-        .eq('consent_id', consentId);
-
-      const votesFor = allVotes?.filter(v => v.vote === 'approve').length || 0;
-      const votesAgainst = allVotes?.filter(v => v.vote === 'reject').length || 0;
-
-      // Get total eligible voters
-      const { count: totalVoters } = await supabase
-        .from('chama_memberships')
-        .select('*', { count: 'exact', head: true })
-        .eq('chama_id', member.chama_id)
-        .eq('status', 'active');
-
-      const majority = Math.floor((totalVoters || 1) / 2) + 1;
-      let newStatus = 'pending';
-      if (votesFor >= majority) {
-        newStatus = 'approved';
-      } else if (votesAgainst >= majority) {
-        newStatus = 'rejected';
-      }
-
-      await supabase
-        .from('withdrawal_consents')
-        .update({
-          votes_for: votesFor,
-          votes_against: votesAgainst,
-          status: newStatus,
-          total_eligible_voters: totalVoters
-        })
-        .eq('id', consentId);
 
       setToastMsg(`Vote recorded: ${voteType}!`);
       setTimeout(() => setToastMsg(""), 3000);

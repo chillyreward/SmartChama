@@ -63,21 +63,14 @@ export default function AdminWalletPage() {
 
   const handleDeposit = async () => {
     try {
-      const amt = Number(depAmount);
-      await supabase.from('transactions_v2').insert({
-        chama_id: group?.id,
-        type: 'deposit',
-        amount: amt,
-        reference: depRef,
-        description: depNotes || 'Deposit funds',
-        membership_id: adminMember?.id,
-        status: 'confirmed',
-        created_at: new Date().toISOString()
+      // Balance, transaction, ledger and audit log update together in the database
+      const { data, error } = await supabase.rpc('record_manual_deposit', {
+        p_chama_id: group?.id,
+        p_amount: Number(depAmount),
+        p_reference: depRef || null,
+        p_notes: depNotes || null
       });
-
-      await supabase.from('wallets').update({
-        balance: Number(wallet.balance) + amt
-      }).eq('id', wallet.id);
+      if (error || !data?.success) throw new Error(data?.error || error?.message);
 
       setToastMsg("Deposit recorded successfully");
       setTimeout(() => setToastMsg(""), 3000);
@@ -124,6 +117,7 @@ export default function AdminWalletPage() {
           chama_id: group?.id,
           profile_id: m.profile_id,
           type: 'withdrawal_consent_request',
+          title: 'Withdrawal vote',
           message: `A new withdrawal consent request of KSh ${amt.toLocaleString()} has been initiated. Click to vote.`,
           read: false
         }));
@@ -147,26 +141,9 @@ export default function AdminWalletPage() {
     }
     if (confirm(`Execute withdrawal of KSh ${formatCurrency(req.amount)}?`)) {
       try {
-        const { error: wdErr } = await supabase
-          .from('withdrawal_consents')
-          .update({ status: 'executed', executed_at: new Date().toISOString() })
-          .eq('id', req.id);
-
-        if (wdErr) throw wdErr;
-        
-        await supabase.from('wallets').update({
-          balance: Number(wallet.balance) - Number(req.amount)
-        }).eq('id', wallet.id);
-
-        await supabase.from('transactions_v2').insert({
-          chama_id: group.id,
-          membership_id: adminMember.id,
-          type: 'withdrawal',
-          amount: -Number(req.amount),
-          status: 'confirmed',
-          reference: `WD-${Math.floor(Math.random()*10000)}`,
-          created_at: new Date().toISOString()
-        });
+        // Checks member approval and balance, then pays out under a wallet lock
+        const { data, error } = await supabase.rpc('execute_withdrawal', { p_consent_id: req.id });
+        if (error || !data?.success) throw new Error(data?.error || error?.message);
 
         setToastMsg("Withdrawal executed successfully!");
         setTimeout(() => setToastMsg(""), 3000);

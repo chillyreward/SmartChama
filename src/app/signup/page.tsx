@@ -5,6 +5,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
+function formatPhone(raw: string): string | null {
+  let p = raw.replace(/[\s-]/g, '')
+  if (!p) return null
+  if (p.startsWith('+')) return p
+  if (p.startsWith('254')) return '+' + p
+  if (p.startsWith('0')) p = p.slice(1)
+  return '+254' + p
+}
+
 function SignupForm() {
   const supabase = getSupabaseBrowser()
   const router = useRouter()
@@ -33,16 +42,32 @@ function SignupForm() {
   const [frequency, setFrequency] = useState('monthly')
 
   // Step 2 — Member: group code
-  const [groupCode, setGroupCode] = useState(searchParams.get('code') || '')
+  // Invite SMS links use ?token=, older links ?code=
+  const [groupCode, setGroupCode] = useState(searchParams.get('code') || searchParams.get('token') || '')
   
   // Success state — shows group code for admin after creation
   const [createdGroupCode, setCreatedGroupCode] = useState('')
   const [success, setSuccess] = useState(false)
+  const [pendingConfirmation, setPendingConfirmation] = useState(false)
 
   // Password strength
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
   const strengthColors = ['', '#EF4444', '#F59E0B', '#22C55E']
   const strengthLabels = ['', 'Weak', 'Good', 'Strong']
+
+  async function handleGoogleSignup() {
+    setError('')
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`
+      }
+    })
+    if (oauthError) {
+      setError('Could not sign up with Google. Please try again.')
+    }
+    // On success, browser is redirected to Google
+  }
 
   async function handleStep1() {
     setError('')
@@ -61,6 +86,48 @@ function SignupForm() {
     setStep(2)
   }
 
+  // Supabase only returns a session from signUp when email confirmation is off.
+  // With it on, the user must confirm first, so group setup finishes in /onboarding.
+  async function createAccount(): Promise<{ hasSession: boolean } | null> {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        // Read by the handle_new_user trigger to fill the profile row
+        data: {
+          full_name: fullName.trim(),
+          phone_number: formatPhone(phone)
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`
+      }
+    })
+
+    if (authError || !authData.user) {
+      if (authError?.message.toLowerCase().includes('already registered')) {
+        setError('An account with this email already exists. Please sign in instead.')
+      } else {
+        setError(authError?.message || 'Could not create account.')
+      }
+      return null
+    }
+
+    // With confirmation on, Supabase hides "email taken" by returning a user with no identities
+    if (authData.user.identities && authData.user.identities.length === 0) {
+      setError('An account with this email already exists. Please sign in instead.')
+      return null
+    }
+
+    return { hasSession: !!authData.session }
+  }
+
+  function rememberActiveChama(chamaId: string) {
+    try {
+      document.cookie = `active_chama_id=${chamaId}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`
+      sessionStorage.setItem('active_chama_id', chamaId)
+      localStorage.setItem('sc_last_chama_id', chamaId)
+    } catch (e) {}
+  }
+
   async function handleAdminSignup() {
     setError('')
     if (!groupName.trim()) {
@@ -75,112 +142,43 @@ function SignupForm() {
     setLoading(true)
 
     try {
-      // 1. Create auth account
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: { 
-            full_name: fullName.trim()
-          },
-          emailRedirectTo: undefined
-        }
-      })
+      const account = await createAccount()
+      if (!account) { setLoading(false); return }
 
-      if (authError || !authData.user) {
-        if (authError?.message.includes('already registered')) {
-          setError('An account with this email already exists. Please sign in instead.')
-        } else {
-          setError(authError?.message || 'Could not create account.')
-        }
+      if (!account.hasSession) {
+        try {
+          localStorage.setItem('sc_pending_group', JSON.stringify({
+            name: groupName.trim(), amount: contributionAmount, frequency
+          }))
+        } catch (e) {}
+        setPendingConfirmation(true)
         setLoading(false)
         return
       }
 
-      const userId = authData.user.id
-
-      // Format phone
-      let formattedPhone = phone.replace(/\s/g, '')
-      if (formattedPhone.startsWith('0')) {
-        formattedPhone = '+254' + formattedPhone.slice(1)
-      }
-      if (!formattedPhone.startsWith('+254') && phone.trim()) {
-        formattedPhone = '+254' + formattedPhone
-      }
-
-      // 2. Create profile
-      await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
+      const res = await fetch('/api/chamas/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           full_name: fullName.trim(),
-          email: email.trim(),
-          phone_number: formattedPhone || null
-        }, { onConflict: 'id' })
-
-      // 3. Create chama (trigger auto-generates code)
-      const { data: newChama, error: chamaError } = await supabase
-        .from('chamas_v2')
-        .insert({
-          name: groupName.trim(),
-          contribution_amount: Number(contributionAmount),
-          contribution_frequency: frequency,
-          status: 'active',
-          created_by: userId
+          phone,
+          chama_name: groupName.trim(),
+          contribution_amount: contributionAmount,
+          contribution_frequency: frequency
         })
-        .select('id, name, group_code')
-        .single()
-
-      if (chamaError || !newChama) {
-        console.error(chamaError)
-        setError('Could not create group. Please try again.')
-        setLoading(false)
-        return
-      }
-
-      // 4. Create membership
-      const { error: membershipError } = await supabase
-        .from('chama_memberships')
-        .insert({
-          profile_id: userId,
-          chama_id: newChama.id,
-          role: 'chairlady',
-          trust_score: 100,
-          status: 'active',
-          joined_at: new Date().toISOString()
-        })
-
-      if (membershipError) {
-        console.error(membershipError)
-        setError('Account created but group setup failed. Please contact support.')
-        setLoading(false)
-        return
-      }
-
-      // 5. Create wallet
-      await supabase
-        .from('wallets')
-        .insert({
-          chama_id: newChama.id,
-          balance: 0,
-          savings_pool: 0,
-          loans_disbursed: 0
-        })
-
-      // 6. Sign in immediately
-      await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password
       })
+      const data = await res.json()
 
-      // Save to storage
-      try {
-        sessionStorage.setItem('active_chama_id', newChama.id)
-        localStorage.setItem('sc_last_chama_id', newChama.id)
-      } catch(e) {}
+      if (!res.ok) {
+        // The account exists now; onboarding lets them retry creating the group
+        setError(data.error || 'Account created but group setup failed.')
+        setLoading(false)
+        router.push('/onboarding')
+        return
+      }
 
-      // Show success with the group code
-      setCreatedGroupCode(newChama.group_code)
+      rememberActiveChama(data.chama_id)
+      setCreatedGroupCode(data.group_code)
       setSuccess(true)
       setLoading(false)
 
@@ -193,9 +191,9 @@ function SignupForm() {
 
   async function handleMemberSignup() {
     setError('')
-    
+
     const code = groupCode.trim().toUpperCase()
-    
+
     if (code.length < 4) {
       setError('Please enter your group code.')
       return
@@ -204,108 +202,45 @@ function SignupForm() {
     setLoading(true)
 
     try {
-      // 1. Verify invite code exists in invite_tokens
-      const { data: inviteToken, error: tokenError } = await supabase
-        .from('invite_tokens')
-        .select('id, chama_id, is_active, expires_at, current_uses, max_uses, chamas_v2(id, name, status)')
-        .eq('token', code)
-        .eq('is_active', true)
-        .single()
+      // 1. Check the code before creating an account (works signed out)
+      const { data: preview, error: previewError } = await supabase.rpc('preview_join_code', { p_code: code })
 
-      if (tokenError || !inviteToken) {
-        setError('Group code not found. Check with your admin and try again.')
-        setLoading(false)
-        return
-      }
-
-      if (inviteToken.expires_at && new Date(inviteToken.expires_at) < new Date()) {
-        setError('This invite code has expired. Ask your admin for a new one.')
-        setLoading(false)
-        return
-      }
-
-      if (inviteToken.max_uses && inviteToken.current_uses >= inviteToken.max_uses) {
-        setError('This invite code has already been used. Ask your admin for a new one.')
-        setLoading(false)
-        return
-      }
-
-      const chama = (inviteToken.chamas_v2 as any)
-
-      // 2. Create auth account
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: { 
-            full_name: fullName.trim() 
-          },
-          emailRedirectTo: undefined
+      if (previewError || !preview?.valid) {
+        const messages: Record<string, string> = {
+          expired: 'This invite code has expired. Ask your admin for a new one.',
+          used_up: 'This invite code has already been used. Ask your admin for a new one.'
         }
-      })
-
-      if (authError || !authData.user) {
-        if (authError?.message.includes('already registered')) {
-          setError('An account with this email already exists. Please sign in instead.')
-        } else {
-          setError(authError?.message || 'Could not create account.')
-        }
+        setError(messages[preview?.error] || 'Group code not found. Check with your admin and try again.')
         setLoading(false)
         return
       }
 
-      const userId = authData.user.id
+      // 2. Create the auth account (the database trigger creates the profile)
+      const account = await createAccount()
+      if (!account) { setLoading(false); return }
 
-      // Format phone
-      let formattedPhone = phone.replace(/\s/g, '')
-      if (formattedPhone.startsWith('0')) {
-        formattedPhone = '+254' + formattedPhone.slice(1)
+      if (!account.hasSession) {
+        try { localStorage.setItem('sc_pending_join_code', code) } catch (e) {}
+        setPendingConfirmation(true)
+        setLoading(false)
+        return
       }
-      if (!formattedPhone.startsWith('+254') && phone.trim()) {
-        formattedPhone = '+254' + formattedPhone
-      }
 
-      // 3. Create profile via server API (bypasses RLS)
-      await fetch('/api/profile/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          full_name: fullName.trim(),
-          email: email.trim(),
-          phone_number: formattedPhone || null
-        })
-      })
-
-      // 4. Create membership via server API (bypasses RLS)
+      // 3. Join as the signed-in user
       const joinRes = await fetch('/api/admin/create-group', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          fullName: fullName.trim(),
-          email: email.trim(),
-          chamaName: '',
-          chamaId: inviteToken.chama_id,
-          role: 'member',
-          inviteId: inviteToken.id
-        })
+        body: JSON.stringify({ code })
       })
+      const joinData = await joinRes.json()
 
       if (!joinRes.ok) {
-        setError('Could not join group. Please try again.')
+        setError(joinData.error || 'Could not join group. Please try again.')
         setLoading(false)
         return
       }
 
-      // 5. Sign in and redirect
-      await supabase.auth.signInWithPassword({ email: email.trim(), password })
-
-      try {
-        sessionStorage.setItem('active_chama_id', inviteToken.chama_id)
-        localStorage.setItem('sc_last_chama_id', inviteToken.chama_id)
-      } catch(e) {}
-
+      rememberActiveChama(joinData.chamaId)
       router.push('/dashboard')
 
     } catch (err: any) {
@@ -313,6 +248,29 @@ function SignupForm() {
       setError(err.message || 'Something went wrong.')
       setLoading(false)
     }
+  }
+
+  // CONFIRM-EMAIL SCREEN — shown when Supabase requires email confirmation
+  if (pendingConfirmation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+        <div className="w-full max-w-md text-center">
+          <div className="w-20 h-20 rounded-full bg-[#F0FDF4] dark:bg-[#0E2E1B] flex items-center justify-center mx-auto mb-6">
+            <span className="material-symbols-outlined text-[40px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
+              mark_email_unread
+            </span>
+          </div>
+          <h1 className="text-[28px] font-bold mb-2">Confirm your email</h1>
+          <p className="text-[15px] mb-8 text-[#4F5A53] dark:text-[#8FA196]">
+            We sent a link to <strong className="text-[#161d16] dark:text-white">{email.trim()}</strong>.
+            Open it to activate your account and we&apos;ll finish {isAdminSignup ? 'creating your group' : 'adding you to your group'}.
+          </p>
+          <Link href="/login" className="inline-block w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors">
+            Go to Sign In
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   // SUCCESS SCREEN FOR ADMIN — shows the group code prominently
@@ -548,6 +506,29 @@ function SignupForm() {
                 onClick={handleStep1}
                 className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold mt-2 hover:bg-[#16A34A] transition-colors border-0">
                 Continue
+              </button>
+
+              {/* OR divider */}
+              <div className="flex items-center gap-3 mt-2">
+                <div className="flex-1 h-px bg-[#E5E7EB] dark:bg-[#1B2520]" />
+                <span className="text-[12px] font-medium uppercase tracking-wider text-[#8FA196]">or</span>
+                <div className="flex-1 h-px bg-[#E5E7EB] dark:bg-[#1B2520]" />
+              </div>
+
+              {/* Google sign-up */}
+              <button
+                type="button"
+                onClick={handleGoogleSignup}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border text-[15px] font-medium transition-all hover:border-[#22C55E] disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white">
+                <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                Continue with Google
               </button>
 
             </div>

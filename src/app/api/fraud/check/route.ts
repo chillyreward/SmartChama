@@ -1,7 +1,11 @@
+import { forbidden, isInternalRequest } from '@/lib/api-guard';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getComplianceConfig } from '@/lib/compliance';
 
 export async function POST(request: Request) {
+  // Server-to-server / cron only: no user calls this directly
+  if (!isInternalRequest(request)) return forbidden();
+
   try {
     const supabase = getSupabaseAdmin();
     const { profile_id, chama_id } = await request.json();

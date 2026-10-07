@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { calculateMemberCreditScore, calculateChamaCreditScore } from '@/lib/credit-scoring';
+import { requireUser } from '@/lib/require-user';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(req: Request) {
+  // Reads financial history with the service role: signed-in users only
+  const auth = await requireUser();
+  if (auth.response) return auth.response;
+
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type'); // 'member' or 'chama'

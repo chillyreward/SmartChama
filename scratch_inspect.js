@@ -1,5 +1,6 @@
-const supabaseUrl = 'https://stfjghudefipojpcdxtn.supabase.co'
-const serviceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0ZmpnaHVkZWZpcG9qcGNkeHRuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDMxMjM5NiwiZXhwIjoyMDg1ODg4Mzk2fQ.Oc-jCmysX6Fn8gSy2CeNwH_APDI4YkXk-5aGUfWTvlc'
+// Never hardcode keys here: this repo is public
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 async function queryRest(path) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${path}`, {

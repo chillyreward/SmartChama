@@ -1,3 +1,4 @@
+import { forbidden, isInternalRequest } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { recordTransactionOnBlockchain } from '@/lib/blockchain';
@@ -9,6 +10,9 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET(req: Request) {
+  // Server-to-server / cron only: no user calls this directly
+  if (!isInternalRequest(req)) return forbidden();
+
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -51,6 +55,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // Server-to-server / cron only: no user calls this directly
+  if (!isInternalRequest(req)) return forbidden();
+
   try {
     const body = await req.json();
     const { chamaId, memberId, amount, type, description } = body;

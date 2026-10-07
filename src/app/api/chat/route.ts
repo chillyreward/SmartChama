@@ -1,5 +1,6 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { requireUser } from '@/lib/require-user'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -29,11 +30,25 @@ When asked something off-topic, always respond with:
 
 export async function POST(req: Request) {
   try {
+    // Signed-in users only: each call is billed to our OpenAI account
+    const auth = await requireUser()
+    if (auth.response) return auth.response
+
     const { message, history = [] } = await req.json()
 
-    if (!message) {
+    if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
+    if (message.length > 2000) {
+      return NextResponse.json({ error: 'Message is too long' }, { status: 400 })
+    }
+
+    // History comes from the browser: keep only plain user/assistant turns, so a
+    // caller can't inject their own 'system' instructions.
+    const safeHistory: OpenAI.Chat.ChatCompletionMessageParam[] = (Array.isArray(history) ? history : [])
+      .filter((m: any) => (m?.role === 'user' || m?.role === 'assistant') && typeof m?.content === 'string')
+      .slice(-10)
+      .map((m: any) => ({ role: m.role, content: m.content.slice(0, 2000) }))
 
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 })
@@ -42,7 +57,7 @@ export async function POST(req: Request) {
     // Build messages array with conversation history
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: SYSTEM_PROMPT },
-      ...history.slice(-10), // Keep last 10 messages for context
+      ...safeHistory, // last 10 user/assistant turns
       { role: 'user', content: message }
     ]
 

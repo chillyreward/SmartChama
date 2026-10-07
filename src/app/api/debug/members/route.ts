@@ -1,8 +1,12 @@
+import { devOnly } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 
 export async function GET(req: Request) {
+  const blocked = devOnly();
+  if (blocked) return blocked;
+
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

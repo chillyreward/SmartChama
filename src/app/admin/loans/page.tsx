@@ -79,23 +79,34 @@ export default function AdminLoansPage() {
     try {
       setLoading(true);
 
-      const { data: wData } = await supabase.from('wallets').select('*').eq('group_id', group.id).single();
+      const { data: wData } = await supabase.from('wallets').select('*').eq('chama_id', group.id).maybeSingle();
       setWallet(wData);
 
       const { data: lData } = await supabase
-        .from('loans')
+        .from('loans_v2')
         .select(`
           *,
-          members(full_name, trust_score, phone_number),
+          chama_memberships(id, trust_score, profiles(full_name, phone_number)),
           loan_repayments(amount, created_at)
         `)
-        .eq('group_id', group.id)
+        .eq('chama_id', group.id)
         .order('created_at', { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
+      // Keep the shape the table below renders (members.full_name, etc.)
       const enhanced = lData?.map(l => {
         const totalRepaid = l.loan_repayments?.reduce((sum: number, r: any) => sum + Number(r.amount), 0) || 0;
-        return { ...l, totalRepaid };
+        const m = l.chama_memberships;
+        return {
+          ...l,
+          member_id: l.membership_id,
+          members: {
+            full_name: m?.profiles?.full_name,
+            phone_number: m?.profiles?.phone_number,
+            trust_score: m?.trust_score
+          },
+          totalRepaid
+        };
       }) || [];
 
       setLoans(enhanced);
@@ -111,6 +122,8 @@ export default function AdminLoansPage() {
     fetchData();
   }, [adminMember, group, page]);
 
+  // Approval runs server-side (/api/loans/approve → approve_loan_safe): it
+  // checks the caller is an official, locks the wallet, disburses, and notifies.
   const handleApprove = async (loan: any) => {
     if (!wallet) return;
     if (wallet.balance < loan.amount) {
@@ -119,43 +132,13 @@ export default function AdminLoansPage() {
     }
     if (confirm(`Approve loan of KSh ${formatCurrency(loan.amount)} for ${loan.members?.full_name}?`)) {
       try {
-        const dueDate = new Date();
-        dueDate.setMonth(dueDate.getMonth() + loan.repayment_months);
-
-        const { error } = await supabase.from('loans').update({
-          status: 'active',
-          approved_by: adminMember?.id,
-          approved_at: new Date().toISOString(),
-          due_date: dueDate.toISOString()
-        }).eq('id', loan.id);
-        
-        if (error) throw error;
-
-        // update wallet
-        await supabase.from('wallets').update({
-          balance: Number(wallet.balance) - Number(loan.amount),
-          loans_disbursed: Number(wallet.loans_disbursed) + Number(loan.amount)
-        }).eq('id', wallet.id);
-
-        // create tx
-        await supabase.from('transactions').insert({
-          group_id: group?.id,
-          member_id: loan.member_id,
-          type: 'loan_disbursement',
-          amount: -Number(loan.amount),
-          status: 'confirmed',
-          reference: `LOAN-${Math.floor(Math.random()*10000)}`,
-          created_at: new Date().toISOString()
+        const res = await fetch('/api/loans/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loanId: loan.id })
         });
-
-        // notify
-        await supabase.from('notifications').insert({
-          group_id: group?.id,
-          member_id: loan.member_id,
-          type: 'loan_approved',
-          message: `Your loan of KSh ${formatCurrency(loan.amount)} has been approved.`,
-          read: false
-        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not approve loan');
 
         setToastMsg("Loan approved and disbursed");
         setTimeout(() => setToastMsg(""), 3000);
@@ -169,18 +152,11 @@ export default function AdminLoansPage() {
   const handleDecline = async () => {
     if (!declineLoan) return;
     try {
-      await supabase.from('loans').update({
-        status: 'declined',
-        decline_reason: declineReason
-      }).eq('id', declineLoan.id);
-
-      await supabase.from('notifications').insert({
-        group_id: group?.id,
-        member_id: declineLoan.member_id,
-        type: 'loan_declined',
-        message: `Your loan request was declined. Reason: ${declineReason}`,
-        read: false
+      const { data, error } = await supabase.rpc('decline_loan', {
+        p_loan_id: declineLoan.id,
+        p_reason: declineReason
       });
+      if (error || !data?.success) throw new Error(data?.error || error?.message);
 
       setToastMsg("Loan declined");
       setTimeout(() => setToastMsg(""), 3000);
@@ -188,50 +164,23 @@ export default function AdminLoansPage() {
       setDeclineReason("");
       fetchData();
     } catch (err: any) {
-      alert("Error declining loan");
+      alert("Error declining loan: " + (err.message || ''));
     }
   };
 
   const handleRecordRepayment = async () => {
     if (!repaymentLoan || !repaymentAmount) return;
     try {
-      const amt = Number(repaymentAmount);
-
-      await supabase.from('loan_repayments').insert({
-        loan_id: repaymentLoan.id,
-        member_id: repaymentLoan.member_id,
-        amount: amt,
-        reference: repaymentRef,
-        created_at: new Date(repaymentDate).toISOString()
+      // Wallet, transaction, ledger and "repaid" status are all updated atomically
+      const { data, error } = await supabase.rpc('record_loan_repayment', {
+        p_loan_id: repaymentLoan.id,
+        p_amount: Number(repaymentAmount),
+        p_reference: repaymentRef || null,
+        p_paid_at: new Date(repaymentDate).toISOString()
       });
+      if (error || !data?.success) throw new Error(data?.error || error?.message);
 
-      // update wallet
-      await supabase.from('wallets').update({
-        balance: Number(wallet.balance) + amt
-      }).eq('id', wallet.id);
-
-      // tx
-      await supabase.from('transactions').insert({
-        group_id: group?.id,
-        member_id: repaymentLoan.member_id,
-        type: 'repayment',
-        amount: amt,
-        status: 'confirmed',
-        reference: repaymentRef,
-        created_at: new Date(repaymentDate).toISOString()
-      });
-
-      // check if fully repaid
-      const newTotal = repaymentLoan.totalRepaid + amt;
-      const totalDue = Number(repaymentLoan.amount) + (Number(repaymentLoan.amount) * (Number(repaymentLoan.interest_rate) / 100));
-
-      if (newTotal >= totalDue) {
-        await supabase.from('loans').update({ status: 'repaid' }).eq('id', repaymentLoan.id);
-      } else if (repaymentLoan.status === 'overdue') {
-        // if they made a partial repayment while overdue, it remains overdue unless we want logic to clear it
-      }
-
-      setToastMsg("Repayment recorded!");
+      setToastMsg(data.fully_repaid ? "Loan fully repaid!" : "Repayment recorded!");
       setTimeout(() => setToastMsg(""), 3000);
       setShowRepaymentModal(false);
       setRepaymentAmount("");
@@ -245,8 +194,8 @@ export default function AdminLoansPage() {
   const handleMarkOverdue = async (loan: any) => {
     if (confirm('Mark this loan as overdue? The member will be flagged.')) {
       try {
-        await supabase.from('loans').update({ status: 'overdue' }).eq('id', loan.id);
-        // optional: auto-flag member
+        const { error } = await supabase.from('loans_v2').update({ status: 'overdue' }).eq('id', loan.id);
+        if (error) throw error;
         setToastMsg("Loan marked as overdue");
         setTimeout(() => setToastMsg(""), 3000);
         fetchData();

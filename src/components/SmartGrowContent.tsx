@@ -134,39 +134,15 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
     setInvesting(true);
     
     try {
-      // Create Investment
-      const { error: invErr } = await supabase.from('smartgrow_investments').insert({
-        chama_id: chama.id,
-        product_id: selectedProduct.id,
-        amount: amount,
-        start_date: new Date().toISOString().split('T')[0], // DATE field format YYYY-MM-DD
-        status: 'active',
-        expected_return: selectedProduct.expected_return_min,
-        created_at: new Date().toISOString()
+      // Investment, wallet deduction, transaction and ledger in one locked call
+      const { data: invResult, error: invErr } = await supabase.rpc('record_smartgrow_investment', {
+        p_chama_id: chama.id,
+        p_product_id: selectedProduct.id,
+        p_amount: amount
       });
-
-      if (invErr) throw invErr;
-
-      // Deduct from wallet
+      if (invErr || !invResult?.success) throw new Error(invResult?.error || invErr?.message);
       const newBalance = (wallet?.balance || 0) - amount;
       const newInvested = (wallet?.invested || 0) + amount;
-      
-      if (wallet?.id) {
-        await supabase.from('wallets').update({ balance: newBalance, invested: newInvested }).eq('id', wallet.id);
-      }
-
-      // Insert transaction into transactions_v2
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      await supabase.from('transactions_v2').insert({
-        chama_id: chama.id,
-        membership_id: member.id,
-        type: 'smartgrow_investment',
-        amount: -amount,
-        description: `SmartGrow: ${selectedProduct.name} with ${selectedProduct.provider}`,
-        status: 'confirmed',
-        created_by: session?.user?.id || null,
-        created_at: new Date().toISOString()
-      });
 
       // Send SMS via our API (fire and forget)
       if (member.profile?.phone_number) {
@@ -175,6 +151,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             phone: member.profile.phone_number,
+            chama_id: chama.id,
             message: `SmartChama: Your group has invested KSh ${amount} in ${selectedProduct.name} (${selectedProduct.provider}). Track in your SmartGrow dashboard.`
           })
         }).catch(console.error);

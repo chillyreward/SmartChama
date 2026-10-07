@@ -1,8 +1,9 @@
 const { createClient } = require('@supabase/supabase-js')
 
-const supabaseUrl = 'https://stfjghudefipojpcdxtn.supabase.co'
-const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0ZmpnaHVkZWZpcG9qcGNkeHRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMTIzOTYsImV4cCI6MjA4NTg4ODM5Nn0.7lWo_gUi3zA5GF7wsGPdlStWwGLWI66QI4nRf0WjG_A'
-const serviceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0ZmpnaHVkZWZpcG9qcGNkeHRuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDMxMjM5NiwiZXhwIjoyMDg1ODg4Mzk2fQ.Oc-jCmysX6Fn8gSy2CeNwH_APDI4YkXk-5aGUfWTvlc'
+// Never hardcode keys here: this repo is public
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 // Admin client to setup user
 const adminSupabase = createClient(supabaseUrl, serviceKey, {

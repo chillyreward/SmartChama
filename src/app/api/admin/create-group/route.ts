@@ -1,111 +1,50 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { requireUser } from '@/lib/require-user'
 
-// Service role client — bypasses RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Joins the signed-in user to a chama by group code or invite token.
+// Creating a chama lives in /api/chamas/create.
+//
+// This route used to take userId/chamaId from the body and write with the
+// service role, which let anyone add any user to any chama. Joining now goes
+// through the join_chama_by_code() database function, which checks the code
+// and only ever acts on the caller.
+
+const ERRORS: Record<string, string> = {
+  invalid_code: 'Group code not found. Check with your admin and try again.',
+  expired: 'This invite code has expired. Ask your admin for a new one.',
+  used_up: 'This invite code has already been used. Ask your admin for a new one.',
+  no_profile: 'Your profile is not set up yet. Please complete your profile first.',
+  not_authenticated: 'Please sign in first.',
+}
 
 export async function POST(req: Request) {
   try {
-    const { userId, fullName, email, chamaName, chamaId, role, inviteId } = await req.json()
+    const auth = await requireUser()
+    if (auth.response) return auth.response
 
-    if (!userId || !fullName || !email) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    const { code } = await req.json()
+    if (!code || String(code).trim().length < 4) {
+      return NextResponse.json({ error: 'Please enter your group code.' }, { status: 400 })
     }
 
-    // 1. Upsert profile — must exist before chama (FK constraint)
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .upsert({ id: userId, full_name: fullName, email }, { onConflict: 'id' })
+    const { data, error } = await auth.supabase.rpc('join_chama_by_code', { p_code: String(code) })
 
-    if (profileError) {
-      console.error('Profile upsert error:', profileError)
-      // Profile might already exist — try update instead
-      await supabaseAdmin
-        .from('profiles')
-        .update({ full_name: fullName, email })
-        .eq('id', userId)
+    if (error) {
+      console.error('Join chama error:', error)
+      return NextResponse.json({ error: 'Could not join group. Please try again.' }, { status: 500 })
+    }
+    if (!data?.success) {
+      return NextResponse.json({ error: ERRORS[data?.error] || 'Could not join group.' }, { status: 400 })
     }
 
-    // JOIN existing chama flow
-    if (chamaId && !chamaName) {
-      // Check not already a member
-      const { data: existing } = await supabaseAdmin
-        .from('chama_memberships')
-        .select('id')
-        .eq('profile_id', userId)
-        .eq('chama_id', chamaId)
-        .single()
-
-      if (!existing) {
-        await supabaseAdmin.from('chama_memberships').insert({
-          profile_id: userId,
-          chama_id: chamaId,
-          role: role || 'member',
-          trust_score: 0,
-          status: 'active'
-        })
-      }
-
-      // Mark invite as used
-      if (inviteId) {
-        await supabaseAdmin
-          .from('invite_tokens')
-          .update({ status: 'used', used_at: new Date().toISOString(), used_by: userId })
-          .eq('id', inviteId)
-      }
-
-      return NextResponse.json({ success: true, chamaId })
-    }
-
-    // If no chama name — profile only
-    if (!chamaName || !chamaName.trim()) {
-      return NextResponse.json({ success: true })
-    }
-
-    // 2. Create new chama
-    const { data: chamaData, error: chamaError } = await supabaseAdmin
-      .from('chamas_v2')
-      .insert({ name: chamaName, created_by: userId })
-      .select('id')
-      .single()
-
-    if (chamaError || !chamaData) {
-      console.error('Chama error:', chamaError)
-      return NextResponse.json({ error: 'Failed to create group' }, { status: 500 })
-    }
-
-    // 3. chama_admins record (best effort)
-    await supabaseAdmin.from('chama_admins').insert({
-      chama_id: chamaData.id,
-      admin_user_id: userId,
-      full_name: fullName,
-      email,
-      role: 'admin'
-    }).catch(() => {})
-
-    // 4. Add membership
-    const { error: memberError } = await supabaseAdmin
-      .from('chama_memberships')
-      .insert({
-        profile_id: userId,
-        chama_id: chamaData.id,
-        role: 'admin',
-        trust_score: 100,
-        status: 'active'
-      })
-
-    if (memberError) {
-      console.error('Membership error:', memberError)
-      return NextResponse.json({ error: 'Failed to set up membership' }, { status: 500 })
-    }
-
-    return NextResponse.json({ chamaId: chamaData.id })
-
+    return NextResponse.json({
+      success: true,
+      chamaId: data.chama_id,
+      chamaName: data.chama_name,
+      alreadyMember: data.already_member
+    })
   } catch (err) {
-    console.error('Create group error:', err)
+    console.error('Join chama error:', err)
     return NextResponse.json({ error: 'Unexpected error' }, { status: 500 })
   }
 }

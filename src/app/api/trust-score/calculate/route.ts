@@ -1,4 +1,6 @@
-﻿import { NextResponse } from 'next/server'
+import { ADMIN_ROLES, forbidden, getChamaMembership, internalHeaders, isInternalRequest } from '@/lib/api-guard';
+import { requireUser } from '@/lib/require-user';
+import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 
@@ -9,6 +11,16 @@ const supabaseAdmin = createClient(
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
+// Officials of the chama (or internal callers) only: the service-role client
+// below would otherwise let anyone read and rewrite any chama's scores.
+async function denyUnlessOfficial(req: Request, chamaId: string | null) {
+  if (isInternalRequest(req)) return null
+  const auth = await requireUser()
+  if (auth.response) return auth.response
+  const official = await getChamaMembership(supabaseAdmin, auth.user.id, chamaId || '', ADMIN_ROLES)
+  return official ? null : forbidden('Only chama officials can do this.')
+}
+
 export async function POST(req: Request) {
   try {
     const { membership_id, chama_id } = await req.json()
@@ -16,11 +28,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing membership_id or chama_id' }, { status: 400 })
     }
 
+    const denied = await denyUnlessOfficial(req, chama_id)
+    if (denied) return denied
+
     // 1. Fetch member data
     const { data: membership } = await supabaseAdmin
       .from('chama_memberships')
       .select('*, profiles(full_name, email)')
       .eq('id', membership_id)
+      .eq('chama_id', chama_id)
       .single()
 
     if (!membership) {
@@ -173,6 +189,9 @@ export async function GET(req: Request) {
     const chama_id = searchParams.get('chama_id')
     if (!chama_id) return NextResponse.json({ error: 'chama_id required' }, { status: 400 })
 
+    const denied = await denyUnlessOfficial(req, chama_id)
+    if (denied) return denied
+
     const { data: memberships } = await supabaseAdmin
       .from('chama_memberships')
       .select('id')
@@ -186,7 +205,7 @@ export async function GET(req: Request) {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/trust-score/calculate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: internalHeaders(),
           body: JSON.stringify({ membership_id: m.id, chama_id })
         })
         const data = await res.json()

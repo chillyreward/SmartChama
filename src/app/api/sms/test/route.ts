@@ -1,6 +1,10 @@
+import { devOnly, internalHeaders } from '@/lib/api-guard';
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
+  const blocked = devOnly();
+  if (blocked) return blocked;
+
   try {
     // Get phone number from query params
     const { searchParams } = new URL(req.url);
@@ -18,7 +22,7 @@ export async function GET(req: Request) {
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sms/send`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: internalHeaders(),
       body: JSON.stringify({
         phoneNumber: phone,
         message: testMessage

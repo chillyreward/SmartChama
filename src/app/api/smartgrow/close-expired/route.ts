@@ -1,7 +1,11 @@
+import { forbidden, isInternalRequest } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
+  // Server-to-server / cron only: no user calls this directly
+  if (!isInternalRequest(request)) return forbidden();
+
   try {
     const supabase = getSupabaseAdmin();
     
@@ -48,3 +52,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+// Vercel cron sends GET requests
+export const GET = POST;

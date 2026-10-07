@@ -1,6 +1,10 @@
-﻿import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { forbidden, isInternalRequest, internalHeaders } from '@/lib/api-guard';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Server-to-server / cron only: no user calls this directly
+  if (!isInternalRequest(request)) return forbidden();
+
   const supabase = getSupabaseAdmin();
 
   const { data: pendingEvents } = await supabase
@@ -21,7 +25,7 @@ export async function GET() {
           `${process.env.NEXT_PUBLIC_APP_URL}/api/trust-score/calculate`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: internalHeaders(),
             body: JSON.stringify({ membership_id })
           }
         );
@@ -45,7 +49,7 @@ export async function GET() {
             `${process.env.NEXT_PUBLIC_APP_URL}/api/sms/send`,
             {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: internalHeaders(),
               body: JSON.stringify({
                 phone,
                 message: `SmartChama: Your KSh ${amount} contribution to ${chamaName} is confirmed. Receipt: ${receipt}.`
@@ -59,7 +63,7 @@ export async function GET() {
           `${process.env.NEXT_PUBLIC_APP_URL}/api/blockchain/record`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: internalHeaders(),
             body: JSON.stringify({
               type: 'CONTRIBUTION',
               membership_id,

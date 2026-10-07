@@ -1,64 +1,59 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { generateOtp, hashOtp, normalizeKenyanPhone, OTP_TTL_MS } from '@/lib/otp';
+
+const PURPOSES = ['login', 'signup', 'password_reset'];
 
 export async function POST(request: Request) {
   try {
     const { phone_number, purpose } = await request.json();
-    console.log('OTP request received for:', phone_number);
 
     if (!phone_number) {
       return NextResponse.json({ error: 'Phone number is required' }, { status: 400 });
     }
-    
+
+    const phone = normalizeKenyanPhone(phone_number);
+    if (!/^\+254(7|1)\d{8}$/.test(phone)) {
+      return NextResponse.json({ error: 'Enter a valid Kenyan phone number' }, { status: 400 });
+    }
+
     const supabase = getSupabaseAdmin();
-    
-    // Normalize phone
-    let phone = phone_number.replace(/\s/g, '');
-    if (phone.startsWith('0')) {
-      phone = '+254' + phone.slice(1);
-    }
-    if (!phone.startsWith('+254')) {
-      phone = '+254' + phone;
-    }
-    
-    // Rate limit: max 3 OTP requests per phone per 10 minutes
+
+    // Rate limit: max 3 codes per phone per 10 minutes
     const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    
     const { count } = await supabase
       .from('otp_codes')
-      .select('*', { count: 'exact' })
+      .select('id', { count: 'exact', head: true })
       .eq('phone_number', phone)
       .gte('created_at', tenMinAgo);
-    
+
     if (count !== null && count >= 3) {
       return NextResponse.json({ error: 'Too many requests. Please wait 10 minutes before trying again.' }, { status: 429 });
     }
-    
-    // Generate 6-digit code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('Generated OTP code (dev only, remove in production):', code);
-    
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 min expiry
-    
-    console.log('Attempting to save OTP to database...');
+
+    // Only the newest code is valid
+    await supabase
+      .from('otp_codes')
+      .update({ used: true })
+      .eq('phone_number', phone)
+      .eq('used', false);
+
+    const code = generateOtp();
+
     const { error: insertError } = await supabase.from('otp_codes').insert({
       phone_number: phone,
-      code,
-      purpose: purpose || 'login',
-      expires_at: expiresAt
+      code: hashOtp(phone, code),
+      purpose: PURPOSES.includes(purpose) ? purpose : 'login',
+      expires_at: new Date(Date.now() + OTP_TTL_MS).toISOString()
     });
 
     if (insertError) {
-      console.error('OTP database insert FAILED:', insertError.message);
+      console.error('OTP insert failed:', insertError.message);
       return NextResponse.json({ error: 'Could not generate verification code.' }, { status: 500 });
     }
-    
-    console.log('OTP saved to database successfully');
-    
-    // Send via Africa's Talking
+
     if (process.env.AFRICASTALKING_API_KEY && process.env.AFRICASTALKING_USERNAME) {
       try {
-        console.log('Attempting to send SMS via Africa\'s Talking...');
         const atResponse = await fetch('https://api.africastalking.com/version1/messaging', {
           method: 'POST',
           headers: {
@@ -75,21 +70,23 @@ export async function POST(request: Request) {
         });
 
         const atResult = await atResponse.json();
-        console.log('Africa\'s Talking response:', JSON.stringify(atResult, null, 2));
-
-        if (atResult.SMSMessageData?.Recipients?.[0]?.status !== 'Success') {
-          console.error('SMS FAILED. Reason:', atResult.SMSMessageData?.Recipients?.[0]?.status);
+        const status = atResult.SMSMessageData?.Recipients?.[0]?.status;
+        if (status !== 'Success') {
+          console.error('OTP SMS failed:', status);
         }
       } catch (err) {
         console.error("Africa's Talking Error:", err);
       }
+    } else if (process.env.NODE_ENV !== 'production') {
+      // Local development only: never log codes in production
+      console.log(`[DEV] OTP for ${phone}: ${code}`);
     } else {
-      console.log(`\n\n=== DEVELOPMENT MODE: SMS SIMULATION ===\nTo: ${phone}\nCode: ${code}\n=======================================\n\n`);
+      console.error('OTP SMS not sent: Africa\'s Talking is not configured');
     }
-    
+
     return NextResponse.json({ success: true, message: 'Verification code sent.' });
   } catch (error: any) {
-    console.error("Send OTP Error:", error);
+    console.error('Send OTP Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

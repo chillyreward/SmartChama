@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
+import { ADMIN_ROLES, forbidden, getChamaMembership } from '@/lib/api-guard'
+import { requireUser } from '@/lib/require-user'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,6 +15,13 @@ export async function POST(req: Request) {
   try {
     const { chama_id } = await req.json()
     if (!chama_id) return NextResponse.json({ error: 'chama_id required' }, { status: 400 })
+
+    // Officials only: this reads every member's financial history for the chama
+    const auth = await requireUser()
+    if (auth.response) return auth.response
+    if (!(await getChamaMembership(supabaseAdmin, auth.user.id, chama_id, ADMIN_ROLES))) {
+      return forbidden('Only chama officials can run fraud scans.')
+    }
 
     // 1. Fetch chama info
     const { data: chama } = await supabaseAdmin
@@ -216,7 +225,7 @@ Return ONLY valid JSON:
         description: flag.description,
         severity: flag.severity || 'medium',
         resolved: false
-      }).catch(() => {}) // non-fatal
+      }) // non-fatal: the query resolves with { error } rather than throwing
     }
 
     return NextResponse.json({

@@ -1,12 +1,26 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { ADMIN_ROLES, forbidden, getChamaMembership, internalHeaders, isInternalRequest } from '@/lib/api-guard';
+import { requireUser } from '@/lib/require-user';
 
 export async function POST(request: Request) {
   try {
-    const { loanId, adminId } = await request.json();
-    
+    const body = await request.json();
+    const loanId = body.loanId;
+
+    // The approver is the signed-in user. Only the USSD route (internal call,
+    // after matching the dialling phone to a profile) may name an adminId.
+    let adminId: string;
+    if (isInternalRequest(request)) {
+      adminId = body.adminId;
+    } else {
+      const auth = await requireUser();
+      if (auth.response) return auth.response;
+      adminId = auth.user.id;
+    }
+
     if (!loanId || !adminId) {
-      return NextResponse.json({ error: 'Missing loanId or adminId' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing loanId' }, { status: 400 });
     }
 
     const supabaseAdmin = getSupabaseAdmin();
@@ -20,6 +34,14 @@ export async function POST(request: Request) {
 
     if (loanError || !loan) {
       return NextResponse.json({ error: 'Loan not found' }, { status: 404 });
+    }
+
+    const approver = await getChamaMembership(supabaseAdmin, adminId, loan.chama_id, ADMIN_ROLES);
+    if (!approver) {
+      return forbidden('Only chama officials can approve loans.');
+    }
+    if (approver.id === loan.membership_id) {
+      return forbidden('You cannot approve your own loan.');
     }
 
     if (loan.status !== 'pending') {
@@ -51,7 +73,7 @@ export async function POST(request: Request) {
     try {
       const blockchainResult = await fetch(`${appUrl}/api/blockchain/record`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: internalHeaders(),
         body: JSON.stringify({
           type: 'LOAN_DISBURSEMENT',
           member_id: loan.chama_memberships?.membership_id,
@@ -80,7 +102,7 @@ export async function POST(request: Request) {
       try {
         await fetch(`${appUrl}/api/sms/send`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: internalHeaders(),
           body: JSON.stringify({
             phone,
             message: `SmartChama: Your loan of KSh ${loan.amount} from ${groupName} has been approved and will be disbursed shortly.`
@@ -95,8 +117,8 @@ export async function POST(request: Request) {
     try {
       await fetch(`${appUrl}/api/trust-score/calculate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ membership_id: loan.chama_memberships?.membership_id })
+        headers: internalHeaders(),
+        body: JSON.stringify({ membership_id: loan.chama_memberships?.membership_id, chama_id: loan.chama_id })
       });
     } catch (e) {
       console.error('CREDIT SCORE calculation error:', e);

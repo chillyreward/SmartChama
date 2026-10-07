@@ -1,3 +1,4 @@
+import { forbidden, isInternalRequest } from '@/lib/api-guard';
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -7,6 +8,9 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(req: Request) {
+  // Server-to-server / cron only: no user calls this directly
+  if (!isInternalRequest(req)) return forbidden();
+
   try {
     const { userId } = await req.json()
     if (!userId) return NextResponse.json({ isAdmin: false }, { status: 400 })

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
+import { ADMIN_ROLES, getChamaMembership, internalHeaders } from '@/lib/api-guard';
 
 export async function POST(req: Request) {
   try {
@@ -53,6 +54,12 @@ export async function POST(req: Request) {
       );
     }
 
+    // Must be an official of this chama, not just any signed-in user
+    const supabaseCheck = createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } });
+    if (!(await getChamaMembership(supabaseCheck, createdBy, chama_id, ADMIN_ROLES))) {
+      return NextResponse.json({ error: 'Only chama officials can create invites.' }, { status: 403 });
+    }
+
     // 3. Token Generation
     // Generate a unique 6-character alphanumeric string (e.g., using randomBytes)
     const randomChars = randomBytes(3).toString('hex').toUpperCase(); // 6 chars like XYZ123
@@ -73,11 +80,13 @@ export async function POST(req: Request) {
       .from('invite_tokens')
       .insert([
         {
-          token_code: tokenCode,
+          token: tokenCode,
           chama_id,
           created_by: createdBy,
           expires_at: expiresAt.toISOString(),
-          is_used: false
+          max_uses: 1,
+          is_active: true,
+          invited_phone: inviteePhone || null
         }
       ]);
 
@@ -92,11 +101,12 @@ export async function POST(req: Request) {
     // 5.1 Send SMS Notification
     if (inviteePhone) {
       try {
-        const { data: chamaData } = await supabaseAdmin.from('chamas').select('name').eq('id', chama_id).single();
+        const { data: chamaData } = await supabaseAdmin.from('chamas_v2').select('name').eq('id', chama_id).single();
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         
         await fetch(`${appUrl}/api/sms/send`, {
           method: 'POST',
+          headers: internalHeaders(),
           body: JSON.stringify({
             phone: inviteePhone,
             message: `You've been invited to join ${chamaData?.name || 'a group'} on SmartChama! Click to join: ${appUrl}/signup?token=${tokenCode} Expires in 7 days.`

@@ -1,7 +1,11 @@
+import { devOnly } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(req: Request) {
+  const blocked = devOnly();
+  if (blocked) return blocked;
+
   try {
     const supabase = getSupabaseAdmin();
 

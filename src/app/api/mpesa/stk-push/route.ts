@@ -1,9 +1,50 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getComplianceConfig } from '@/lib/compliance';
+import { isInternalRequest } from '@/lib/api-guard';
+import { requireUser } from '@/lib/require-user';
+
+// The callback can't be authenticated any other way, so it carries a secret
+function callbackUrl() {
+  const base = process.env.MPESA_CALLBACK_URL || '';
+  const secret = process.env.MPESA_CALLBACK_SECRET;
+  if (!secret) return base;
+  return `${base}${base.includes('?') ? '&' : '?'}secret=${encodeURIComponent(secret)}`;
+}
 
 export async function POST(request: Request) {
   const supabase = getSupabaseAdmin();
-  const { phone, amount, membership_id, chama_id } = await request.json();
+  const { phone, amount: rawAmount, membership_id, chama_id } = await request.json();
+
+  // Caller must own the membership: a signed-in member paying for themselves,
+  // or the USSD route (internal) acting for the phone that dialled in.
+  if (!isInternalRequest(request)) {
+    const auth = await requireUser();
+    if (auth.response) return auth.response;
+
+    const { data: membership } = await supabase
+      .from('chama_memberships')
+      .select('id')
+      .eq('id', membership_id)
+      .eq('chama_id', chama_id)
+      .eq('profile_id', auth.user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (!membership) {
+      return Response.json({ error: 'Membership not found.' }, { status: 403 });
+    }
+  }
+
+  // Daraja only accepts whole shillings
+  const amount = Math.round(Number(rawAmount));
+  if (!Number.isFinite(amount) || amount < 1 || amount > 250000) {
+    return Response.json({ error: 'Enter an amount between KSh 1 and KSh 250,000.' }, { status: 400 });
+  }
+
+  const formattedPhoneCheck = String(phone || '').replace(/^\+/, '').replace(/\s/g, '');
+  if (!/^254(7|1)\d{8}$/.test(formattedPhoneCheck)) {
+    return Response.json({ error: 'Enter a valid Safaricom number.' }, { status: 400 });
+  }
 
   // Validate compliance transaction limit first
   const limit = await getComplianceConfig('max_single_transaction');
@@ -92,7 +133,7 @@ export async function POST(request: Request) {
         PartyA: formattedPhone,
         PartyB: process.env.MPESA_BUSINESS_SHORT_CODE,
         PhoneNumber: formattedPhone,
-        CallBackURL: process.env.MPESA_CALLBACK_URL,
+        CallBackURL: callbackUrl(),
         AccountReference: 'SmartChama',
         TransactionDesc: 'Chama Contribution'
       })

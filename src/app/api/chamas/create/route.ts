@@ -1,23 +1,23 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { supabase as clientSupabase } from '@/lib/supabase';
+import { requireUser, formatKenyanPhone } from '@/lib/require-user';
+
+const FREQUENCIES = ['weekly', 'biweekly', 'monthly', 'quarterly'];
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error("Server is missing Supabase credentials in env!");
-      return NextResponse.json({ error: 'Server configuration error: Missing Supabase credentials' }, { status: 500 });
-    }
+    // Creator is always the signed-in user; any user_id in the body is ignored.
+    // The session client is enough under RLS: creators may insert the chama,
+    // their own first membership and the wallet.
+    const auth = await requireUser();
+    if (auth.response) return auth.response;
+    const { user, supabase } = auth;
 
     const body = await request.json();
-    console.log("Create Chama API Payload:", body);
-    const { 
-      user_id, 
-      email, 
-      full_name, 
-      phone, 
-      chama_name, 
-      contribution_amount, 
+    const {
+      full_name,
+      phone,
+      chama_name,
+      contribution_amount,
       contribution_frequency,
       payment_type,
       till_number,
@@ -27,117 +27,104 @@ export async function POST(request: Request) {
       account_name
     } = body;
 
-    const supabase = getSupabaseAdmin(); // Admin bypasses RLS
-
-    let finalPhone = phone;
-    let finalFullName = full_name;
-
-    // Fallback: If full_name or phone is missing, fetch them from the profiles table
-    if (user_id && (!finalPhone || !finalFullName)) {
-      const { data: dbProfile } = await supabase
-        .from('profiles')
-        .select('full_name, phone_number')
-        .eq('id', user_id)
-        .single();
-
-      if (dbProfile) {
-        if (!finalPhone) finalPhone = dbProfile.phone_number;
-        if (!finalFullName) finalFullName = dbProfile.full_name;
-      }
+    if (!chama_name || !String(chama_name).trim()) {
+      return NextResponse.json({ error: 'Please enter a group name.' }, { status: 400 });
     }
 
-    // Default fallbacks to prevent "Missing required fields" errors
-    if (!finalPhone) {
-      finalPhone = '+254700000000';
-    }
-    if (!finalFullName) {
-      finalFullName = email ? email.split('@')[0] : 'Chama Member';
-    }
+    // The auth trigger creates the profile at sign-up; this only fills in gaps.
+    // Never write a placeholder phone: phone_number is unique, so a shared
+    // default makes every sign-up after the first fail.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, full_name, phone_number')
+      .eq('id', user.id)
+      .maybeSingle();
 
-    if (!user_id || !chama_name || !finalFullName || !finalPhone) {
-      console.log("Validation failed. Missing required fields:", { user_id, chama_name, finalFullName, finalPhone });
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const profilePatch: Record<string, unknown> = { id: user.id, email: user.email ?? null };
+    if (!profile?.full_name) {
+      profilePatch.full_name =
+        full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
     }
-
-    // 1. Upsert Profile
-    let formattedPhone = finalPhone.replace(/\s/g, '');
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = '+254' + formattedPhone.slice(1);
-    }
-    if (!formattedPhone.startsWith('+254')) {
-      formattedPhone = '+254' + formattedPhone;
-    }
+    const formattedPhone = formatKenyanPhone(phone);
+    if (formattedPhone && !profile?.phone_number) profilePatch.phone_number = formattedPhone;
 
     const { error: profileError } = await supabase
       .from('profiles')
-      .upsert({
-        id: user_id,
-        full_name: finalFullName,
-        phone_number: formattedPhone,
-        email
-      });
+      .upsert(profilePatch, { onConflict: 'id' });
 
     if (profileError) {
-      console.error("Profile Error:", profileError);
-      return NextResponse.json({ error: `Error creating profile: ${profileError.message}` }, { status: 500 });
+      console.error('Profile Error:', profileError);
+      const msg = profileError.code === '23505'
+        ? 'That phone number is already linked to another account.'
+        : `Error saving profile: ${profileError.message}`;
+      return NextResponse.json({ error: msg }, { status: profileError.code === '23505' ? 409 : 500 });
     }
 
-    // 2. Create the Chama
+    // 2. Create the Chama (trigger fills group_code)
     const { data: chamaData, error: chamaError } = await supabase
       .from('chamas_v2')
       .insert({
-        name: chama_name,
-        contribution_amount: parseInt(contribution_amount) || 0,
-        contribution_frequency,
-        created_by: user_id,
+        name: String(chama_name).trim(),
+        contribution_amount: Number(contribution_amount) || 0,
+        contribution_frequency: FREQUENCIES.includes(contribution_frequency) ? contribution_frequency : 'monthly',
+        created_by: user.id,
         status: 'active'
       })
-      .select()
+      .select('id, name, group_code')
       .single();
 
-    if (chamaError) {
-      console.error("Chama Error:", chamaError);
-      return NextResponse.json({ error: chamaError.message }, { status: 500 });
+    if (chamaError || !chamaData) {
+      console.error('Chama Error:', chamaError);
+      return NextResponse.json({ error: chamaError?.message || 'Could not create group' }, { status: 500 });
     }
 
-    // Run setup insertions in PARALLEL
-    const [walletRes, configRes, membershipRes, activityRes] = await Promise.all([
-      supabase.from('wallets').insert({
-        chama_id: chamaData.id,
-        balance: 0
-      }),
-      supabase.from('chama_payment_config').insert({
-        chama_id: chamaData.id,
-        payment_type: payment_type || 'till',
-        till_number: till_number || null,
-        paybill_number: paybill_number || null,
-        account_number: account_number || null,
-        phone_number: phone_number || null,
-        account_name: account_name || null,
-        is_verified: false
-      }),
-      supabase.from('chama_memberships').insert({
-        profile_id: user_id,
-        chama_id: chamaData.id,
-        role: 'chairlady',
-        trust_score: 100,
-        status: 'active'
-      }),
+    // Membership must exist before anything else that checks "is admin of chama"
+    const { error: membershipError } = await supabase.from('chama_memberships').insert({
+      profile_id: user.id,
+      chama_id: chamaData.id,
+      role: 'chairlady',
+      trust_score: 100,
+      status: 'active'
+    });
+
+    if (membershipError) {
+      console.error('Membership Error:', membershipError);
+      return NextResponse.json({ error: `Error creating membership: ${membershipError.message}` }, { status: 500 });
+    }
+
+    const [walletRes, activityRes] = await Promise.all([
+      supabase.from('wallets').insert({ chama_id: chamaData.id, balance: 0 }),
       supabase.from('group_activity').insert({
         chama_id: chamaData.id,
         event_type: 'group_created',
         description: 'Group created'
       })
     ]);
+    if (walletRes.error) console.error('Wallet Error:', walletRes.error);
+    if (activityRes.error) console.error('Activity Error:', activityRes.error);
 
-    if (membershipRes.error) {
-      console.error("Membership Error:", membershipRes.error);
-      return NextResponse.json({ error: `Error creating membership: ${membershipRes.error.message}` }, { status: 500 });
+    // Payment config is optional; a failure here shouldn't undo the group
+    if (payment_type && (till_number || paybill_number || phone_number)) {
+      const { error: configError } = await supabase.from('chama_payment_config').insert({
+        chama_id: chamaData.id,
+        payment_type,
+        till_number: till_number || null,
+        paybill_number: paybill_number || null,
+        account_number: account_number || null,
+        phone_number: phone_number || null,
+        account_name: account_name || null,
+        is_verified: false
+      });
+      if (configError) console.error('Payment config Error:', configError);
     }
 
-    return NextResponse.json({ success: true, chama_id: chamaData.id });
+    return NextResponse.json({
+      success: true,
+      chama_id: chamaData.id,
+      group_code: chamaData.group_code
+    });
   } catch (error: any) {
-    console.error("Create Chama Error:", error);
+    console.error('Create Chama Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

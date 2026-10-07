@@ -1,9 +1,22 @@
+import { randomInt } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { ADMIN_ROLES, getChamaMembership } from '@/lib/api-guard'
+import { requireUser } from '@/lib/require-user'
 
 export async function POST(request: Request) {
   const supabase = getSupabaseAdmin()
 
-  const { phone, name, chama_id, invited_by, channel = 'sms' } = await request.json()
+  const { phone, name, chama_id, channel = 'sms' } = await request.json()
+
+  // Only officials of this chama may invite, and the inviter is always the
+  // signed-in user (not a body field), so nobody can mint invites or send
+  // branded SMS for a chama they don't run.
+  const auth = await requireUser()
+  if (auth.response) return auth.response
+  const invited_by = auth.user.id
+  if (!(await getChamaMembership(supabase, invited_by, chama_id, ADMIN_ROLES))) {
+    return Response.json({ error: 'Only chama officials can send invites.' }, { status: 403 })
+  }
 
   if (!phone || !chama_id) {
     return Response.json({ error: 'Phone number and chama_id are required.' }, { status: 400 })
@@ -21,7 +34,9 @@ export async function POST(request: Request) {
   ])
 
   // Generate invite code
-  const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+  // Unambiguous characters (no 0/O, 1/I), from a secure RNG
+  const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const inviteCode = Array.from({ length: 8 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('')
 
   // Save invite token
   const { error: tokenError } = await supabase
@@ -32,7 +47,9 @@ export async function POST(request: Request) {
       created_by: invited_by,
       expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
       max_uses: 1,
-      is_active: true
+      is_active: true,
+      invited_phone: formattedPhone,
+      invited_name: name || null
     })
 
   if (tokenError) {

@@ -1,3 +1,4 @@
+import { devOnly } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -8,6 +9,9 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(req: Request) {
+  const blocked = devOnly();
+  if (blocked) return blocked;
+
   try {
     const { amount, phoneNumber } = await req.json();
 

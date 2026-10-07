@@ -81,16 +81,31 @@ export default function OnboardingPage() {
   async function checkExistingProfile(
     userId: string
   ) {
-    const { data: profile } = 
+    const { data: profile } =
       await supabase
         .from('profiles')
-        .select('id, full_name, phone_number')
+        .select('id, full_name, phone_number, national_id')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
-    if (profile?.full_name && 
-        profile?.phone_number) {
-      // Profile complete, check 
+    // Finish a sign-up that was waiting on email confirmation
+    try {
+      const pendingCode = localStorage.getItem('sc_pending_join_code')
+      if (pendingCode) setInviteCode(pendingCode)
+      const pendingGroup = localStorage.getItem('sc_pending_group')
+      if (pendingGroup) {
+        const g = JSON.parse(pendingGroup)
+        setGroupName(g.name || '')
+        setContributionAmount(g.amount || '')
+        setFrequency(g.frequency || 'monthly')
+      }
+    } catch (e) {}
+
+    // Phone is optional (Google sign-ups have none), so a profile is complete
+    // once it has a name plus either a phone or a national ID.
+    if (profile?.full_name &&
+        (profile?.phone_number || profile?.national_id)) {
+      // Profile complete, check
       // if already in a chama
       const { data: memberships } = 
         await supabase
@@ -126,6 +141,15 @@ export default function OnboardingPage() {
       setPhone(profile.phone_number || '')
       // Skip to step 0 (choose path)
       setStep(0)
+    } else {
+      // No profile or incomplete profile
+      // Pre-fill name from Google/OAuth metadata if available
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.user_metadata?.full_name || user?.user_metadata?.name) {
+        setFullName(user.user_metadata.full_name || user.user_metadata.name || '')
+      }
+      // Show profile completion step
+      setStep(1)
     }
   }
 
@@ -133,14 +157,8 @@ export default function OnboardingPage() {
   async function handleSaveProfile() {
     setError('')
     
-    // Validate each field individually 
-    // with specific error messages
     if (!fullName.trim()) {
       setError('Please enter your full name.')
-      return
-    }
-    if (!phone.trim()) {
-      setError('Please enter your phone number.')
       return
     }
     if (!county) {
@@ -154,27 +172,24 @@ export default function OnboardingPage() {
 
     setLoading(true)
 
-    // Format phone number
-    let formattedPhone = 
-      phone.replace(/\s/g, '')
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = '+254' + 
-        formattedPhone.slice(1)
-    }
-    if (!formattedPhone
-      .startsWith('+254')) {
-      formattedPhone = '+254' + 
-        formattedPhone
+    // Format phone number if provided
+    let formattedPhone: string | null = null
+    if (phone.trim()) {
+      formattedPhone = phone.replace(/\s/g, '')
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '+254' + formattedPhone.slice(1)
+      }
+      if (!formattedPhone.startsWith('+254')) {
+        formattedPhone = '+254' + formattedPhone
+      }
     }
 
     const res = await fetch('/api/profile/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        user_id: session.user.id,
         full_name: fullName.trim(),
         phone_number: formattedPhone,
-        email: session.user.email || '',
         county,
         national_id: nationalId.trim()
       })
@@ -204,10 +219,7 @@ export default function OnboardingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: user.id,
-          email: user.email,
-          full_name: user.user_metadata?.full_name || user.email,
-          phone: '',
+          full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
           chama_name: groupName.trim(),
           contribution_amount: contributionAmount,
           contribution_frequency: frequency,
@@ -234,6 +246,7 @@ export default function OnboardingPage() {
         sessionStorage.setItem('active_chama_id', chamaId)
         localStorage.setItem('sc_last_chama_id', chamaId)
       }
+      localStorage.removeItem('sc_pending_group')
 
       window.location.href = '/admin/dashboard'
 
@@ -252,43 +265,24 @@ export default function OnboardingPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data: invite } = await supabase
-        .from('invite_tokens')
-        .select('id, chama_id, expires_at')
-        .eq('token', inviteCode.trim().toUpperCase())
-        .gt('expires_at', new Date().toISOString())
-        .limit(1)
-        .single()
-
-      if (!invite) {
-        setError('Invalid or expired invite code. Ask your admin for a new one.')
-        setLoading(false)
-        return
-      }
-
       const res = await fetch('/api/admin/create-group', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          fullName: user.user_metadata?.full_name || user.email,
-          email: user.email || '',
-          chamaName: '',
-          chamaId: invite.chama_id,
-          role: 'member',
-          inviteId: invite.id
-        })
+        body: JSON.stringify({ code: inviteCode.trim().toUpperCase() })
       })
+      const data = await res.json()
 
       if (!res.ok) {
-        setError('Could not join group. Please try again.')
+        setError(data.error || 'Could not join group. Please try again.')
         setLoading(false)
         return
       }
 
-      document.cookie = `active_chama_id=${invite.chama_id}; path=/; max-age=${60 * 60 * 24 * 30}`
-      sessionStorage.setItem('active_chama_id', invite.chama_id)
-      localStorage.setItem('sc_last_chama_id', invite.chama_id)
+      const chamaId = data.chamaId
+      document.cookie = `active_chama_id=${chamaId}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`
+      sessionStorage.setItem('active_chama_id', chamaId)
+      localStorage.setItem('sc_last_chama_id', chamaId)
+      localStorage.removeItem('sc_pending_join_code')
       window.location.href = '/dashboard'
 
     } catch (err) {
@@ -608,6 +602,7 @@ export default function OnboardingPage() {
                       'var(--text-secondary)' 
                   }}>
                   Phone Number
+                  <span className="ml-1 normal-case font-normal">(optional)</span>
                 </label>
                 <div className="flex">
                   <div 
