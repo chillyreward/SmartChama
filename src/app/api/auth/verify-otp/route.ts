@@ -66,7 +66,10 @@ export async function POST(request: Request) {
       .eq('phone_number', phone)
       .maybeSingle();
 
+    // Web uses magicLink; the Android app exchanges token_hash with
+    // supabase.auth.verifyOtp({ token_hash, type: 'magiclink' }).
     let magicLink = null;
+    let tokenHash = null;
     if (profile?.email) {
       const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
@@ -74,6 +77,7 @@ export async function POST(request: Request) {
       });
       if (!linkError && linkData?.properties?.action_link) {
         magicLink = linkData.properties.action_link;
+        tokenHash = linkData.properties.hashed_token ?? null;
       }
     }
 
@@ -81,7 +85,8 @@ export async function POST(request: Request) {
       success: true,
       verified: true,
       isNewUser: !profile,
-      magicLink
+      magicLink,
+      token_hash: tokenHash
     });
   } catch (error: any) {
     console.error('Verify OTP Error:', error);

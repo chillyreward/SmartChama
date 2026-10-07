@@ -1695,5 +1695,192 @@ REVOKE ALL ON FUNCTION cleanup_expired_otps() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION cleanup_idempotency_keys() FROM PUBLIC, anon, authenticated;
 
 -- ============================================================
+-- PART 8: ANDROID APP SUPPORT
+-- ============================================================
+-- Group chat, loan-request notifications, M-Pesa loan repayments and
+-- account deletion (a Google Play requirement for apps with accounts).
+
+-- ---------- Group chat ----------
+CREATE TABLE IF NOT EXISTS chama_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  member_id UUID NOT NULL REFERENCES chama_memberships(id) ON DELETE CASCADE,
+  content TEXT NOT NULL CHECK (char_length(content) BETWEEN 1 AND 2000),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_chama_messages_chama_date ON chama_messages(chama_id, created_at DESC);
+
+ALTER TABLE chama_messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "members_read_messages" ON chama_messages;
+CREATE POLICY "members_read_messages" ON chama_messages FOR SELECT TO authenticated USING (
+  check_is_chama_member(chama_id, auth.uid())
+);
+-- Post only as your own active membership in that chama
+DROP POLICY IF EXISTS "members_post_messages" ON chama_messages;
+CREATE POLICY "members_post_messages" ON chama_messages FOR INSERT TO authenticated WITH CHECK (
+  owns_membership(member_id, chama_id)
+);
+-- Authors may delete their own messages; officials may moderate
+DROP POLICY IF EXISTS "delete_messages" ON chama_messages;
+CREATE POLICY "delete_messages" ON chama_messages FOR DELETE TO authenticated USING (
+  owns_membership(member_id, chama_id) OR check_is_chama_admin(chama_id, auth.uid())
+);
+
+-- ---------- Loan request -> notify officials ----------
+-- Members can't write notifications for other people under RLS, so the
+-- database does it when a pending loan is created.
+CREATE OR REPLACE FUNCTION notify_officials_of_loan_request()
+RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_name TEXT;
+BEGIN
+  IF NEW.status <> 'pending' THEN
+    RETURN NEW;
+  END IF;
+  SELECT p.full_name INTO v_name
+  FROM chama_memberships m JOIN profiles p ON p.id = m.profile_id
+  WHERE m.id = NEW.membership_id;
+
+  INSERT INTO notifications (profile_id, chama_id, type, title, message)
+  SELECT m.profile_id, NEW.chama_id, 'loan_request', 'New loan request',
+         COALESCE(v_name, 'A member') || ' requested a loan of KSh ' || to_char(NEW.amount, 'FM999,999,990')
+         || COALESCE(' for ' || NULLIF(NEW.purpose, ''), '') || '.'
+  FROM chama_memberships m
+  WHERE m.chama_id = NEW.chama_id AND m.status = 'active'
+    AND m.role IN ('admin', 'chairlady', 'treasurer', 'secretary')
+    AND m.id <> NEW.membership_id;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS loans_notify_officials ON loans_v2;
+CREATE TRIGGER loans_notify_officials
+  AFTER INSERT ON loans_v2
+  FOR EACH ROW EXECUTE FUNCTION notify_officials_of_loan_request();
+
+-- ---------- M-Pesa loan repayments ----------
+-- An STK push for a loan stores loan_id on the pending contribution row; the
+-- verified callback then applies it to the loan instead of the savings pool.
+ALTER TABLE contributions_v2 ADD COLUMN IF NOT EXISTS loan_id UUID REFERENCES loans_v2(id) ON DELETE SET NULL;
+
+CREATE OR REPLACE FUNCTION apply_mpesa_loan_repayment(p_contribution_id UUID, p_receipt TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_c contributions_v2%ROWTYPE;
+  v_loan loans_v2%ROWTYPE;
+  v_total_due NUMERIC;
+  v_new_total NUMERIC;
+BEGIN
+  SELECT * INTO v_c FROM contributions_v2 WHERE id = p_contribution_id FOR UPDATE;
+  IF NOT FOUND OR v_c.loan_id IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'not a loan repayment');
+  END IF;
+
+  SELECT * INTO v_loan FROM loans_v2 WHERE id = v_c.loan_id FOR UPDATE;
+  PERFORM 1 FROM wallets WHERE chama_id = v_c.chama_id FOR UPDATE;
+
+  v_total_due := round(v_loan.amount * (1 + v_loan.interest_rate / 100), 2);
+  v_new_total := coalesce(v_loan.total_repaid, 0) + v_c.amount;
+
+  INSERT INTO loan_repayments (loan_id, amount, mpesa_receipt, reference, paid_at)
+  VALUES (v_loan.id, v_c.amount, p_receipt, p_receipt, now());
+
+  UPDATE loans_v2
+  SET total_repaid = v_new_total,
+      status = CASE WHEN v_new_total >= v_total_due THEN 'repaid' ELSE status END
+  WHERE id = v_loan.id;
+
+  INSERT INTO wallets (chama_id) VALUES (v_c.chama_id) ON CONFLICT (chama_id) DO NOTHING;
+  UPDATE wallets
+  SET balance = balance + v_c.amount,
+      loans_disbursed = greatest(loans_disbursed - least(v_c.amount, v_loan.amount), 0),
+      updated_at = now()
+  WHERE chama_id = v_c.chama_id;
+
+  INSERT INTO transactions_v2 (chama_id, membership_id, type, amount, reference, description, status)
+  VALUES (v_c.chama_id, v_c.membership_id, 'loan_repayment', v_c.amount, p_receipt, 'Loan repayment via M-Pesa', 'confirmed');
+
+  PERFORM record_ledger_transaction(v_c.chama_id, 'member_loans', 'chama_pool', v_c.membership_id, v_c.amount,
+                                    'Loan repayment - ' || coalesce(p_receipt, ''));
+
+  RETURN jsonb_build_object('success', true, 'fully_repaid', v_new_total >= v_total_due);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION apply_mpesa_loan_repayment(UUID, TEXT) FROM PUBLIC, anon, authenticated;
+
+-- ---------- Account deletion ----------
+-- Called by /api/account/delete (service role) after the caller is
+-- authenticated. Personal details are erased; contribution, loan and ledger
+-- rows stay (the group's financial records must be kept), now attached to an
+-- anonymous "Former member". Refuses while the person still owes the group
+-- or is the only official of a chama that has other members.
+CREATE OR REPLACE FUNCTION anonymize_account(p_user UUID)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_blocking_chama TEXT;
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM loans_v2 l JOIN chama_memberships m ON m.id = l.membership_id
+    WHERE m.profile_id = p_user AND l.status IN ('active', 'overdue', 'approved')
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'outstanding_loan');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM member_penalties pn JOIN chama_memberships m ON m.id = pn.membership_id
+    WHERE m.profile_id = p_user AND pn.status = 'unpaid'
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'unpaid_penalty');
+  END IF;
+
+  SELECT c.name INTO v_blocking_chama
+  FROM chama_memberships mine
+  JOIN chamas_v2 c ON c.id = mine.chama_id
+  WHERE mine.profile_id = p_user AND mine.status = 'active'
+    AND mine.role IN ('admin', 'chairlady', 'treasurer', 'secretary')
+    AND NOT EXISTS (
+      SELECT 1 FROM chama_memberships o
+      WHERE o.chama_id = mine.chama_id AND o.profile_id <> p_user AND o.status = 'active'
+        AND o.role IN ('admin', 'chairlady', 'treasurer', 'secretary'))
+    AND EXISTS (
+      SELECT 1 FROM chama_memberships o
+      WHERE o.chama_id = mine.chama_id AND o.profile_id <> p_user AND o.status = 'active')
+  LIMIT 1;
+  IF v_blocking_chama IS NOT NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'sole_official', 'chama_name', v_blocking_chama);
+  END IF;
+
+  UPDATE chama_memberships SET status = 'removed', updated_at = now()
+  WHERE profile_id = p_user AND status <> 'removed';
+
+  DELETE FROM chama_messages WHERE member_id IN (SELECT id FROM chama_memberships WHERE profile_id = p_user);
+  DELETE FROM notifications WHERE profile_id = p_user;
+
+  UPDATE profiles
+  SET full_name = 'Former member',
+      phone_number = NULL,
+      email = NULL,
+      national_id = NULL,
+      county = NULL,
+      occupation = NULL,
+      avatar_url = NULL,
+      push_token = NULL
+  WHERE id = p_user;
+
+  RETURN jsonb_build_object('success', true);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION anonymize_account(UUID) FROM PUBLIC, anon, authenticated;
+
+-- ============================================================
 -- DONE.
 -- ============================================================

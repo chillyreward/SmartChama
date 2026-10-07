@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
   const { data: contribution } = await supabase
     .from('contributions_v2')
-    .select('id, membership_id, chama_id, amount, status')
+    .select('id, membership_id, chama_id, amount, status, loan_id')
     .eq('mpesa_checkout_request_id', checkoutRequestId)
     .maybeSingle();
 
@@ -116,6 +116,27 @@ export async function POST(request: Request) {
     .select('id');
 
   if (!confirmed || confirmed.length === 0) {
+    return respondOk();
+  }
+
+  // Loan repayment: apply to the loan (repayment row, wallet, ledger) instead
+  // of counting it as savings.
+  if (contribution.loan_id) {
+    const { error: repayError } = await supabase.rpc('apply_mpesa_loan_repayment', {
+      p_contribution_id: contribution.id,
+      p_receipt: receipt ?? null
+    });
+    if (repayError) console.error('Loan repayment apply failed:', contribution.id, repayError);
+
+    await supabase.from('outbox').insert({
+      event_type: 'loan_repayment_confirmed',
+      payload: {
+        membership_id: contribution.membership_id,
+        chama_id: contribution.chama_id,
+        amount: contribution.amount,
+        receipt
+      }
+    });
     return respondOk();
   }
 

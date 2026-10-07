@@ -15,7 +15,7 @@ function callbackUrl() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { phone, amount, membership_id, chama_id, account_ref } = body;
+    const { phone, amount, membership_id, chama_id, account_ref, loan_id } = body;
 
     // Validate required fields
     if (!phone || !amount || !membership_id || !chama_id) {
@@ -75,6 +75,25 @@ export async function POST(request: Request) {
       );
     }
 
+    // Loan repayment: the loan must belong to this membership and be outstanding,
+    // and the payment can't exceed what's still owed.
+    if (loan_id) {
+      const { data: loan } = await supabase
+        .from('loans_v2')
+        .select('id, amount, interest_rate, total_repaid, status')
+        .eq('id', loan_id)
+        .eq('membership_id', membership_id)
+        .eq('chama_id', chama_id)
+        .maybeSingle();
+      if (!loan || !['active', 'overdue', 'approved'].includes(loan.status)) {
+        return NextResponse.json({ error: 'This loan is not open for repayment.' }, { status: 400 });
+      }
+      const owed = Math.ceil(Number(loan.amount) * (1 + Number(loan.interest_rate) / 100) - Number(loan.total_repaid || 0));
+      if (numericAmount > owed) {
+        return NextResponse.json({ error: `You only owe KSh ${owed.toLocaleString()} on this loan.` }, { status: 400 });
+      }
+    }
+
     // Validate compliance transaction limit
     const limit = await getComplianceConfig('max_single_transaction');
     if (limit && numericAmount > limit.amount) {
@@ -87,7 +106,7 @@ export async function POST(request: Request) {
     // Idempotency: absorb double-taps within a 5-minute window. (A per-month key
     // would stop a member retrying after cancelling the M-Pesa prompt.)
     const window = new Date(Math.floor(Date.now() / (5 * 60 * 1000)) * (5 * 60 * 1000)).toISOString().slice(0, 16);
-    const idemKey = `stk-${membership_id}-${chama_id}-${window}-${numericAmount}`;
+    const idemKey = `stk-${membership_id}-${chama_id}-${loan_id || 'save'}-${window}-${numericAmount}`;
 
     const { data: existingKey } = await supabase
       .from('idempotency_keys')
@@ -107,7 +126,8 @@ export async function POST(request: Request) {
         chama_id,
         amount: numericAmount,
         status: 'pending',
-        payment_method: 'mpesa'
+        payment_method: 'mpesa',
+        loan_id: loan_id || null
       })
       .select()
       .single();

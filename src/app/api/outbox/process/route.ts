@@ -61,6 +61,17 @@ export async function GET(request: Request) {
           if (phone) {
             await sendSms(phone, `SmartChama: Your loan of KSh ${amount} from ${group_name || 'your group'} has been approved and will be disbursed shortly.`);
           }
+        } else if (event.event_type === 'loan_repayment_confirmed') {
+          const { membership_id, amount, receipt } = payload;
+          const { data: m } = await supabase
+            .from('chama_memberships')
+            .select('profiles(phone_number), chamas_v2(name)')
+            .eq('id', membership_id)
+            .maybeSingle();
+          const phone = (m?.profiles as any)?.phone_number;
+          if (phone) {
+            await sendSms(phone, `SmartChama: Loan repayment of KSh ${amount} to ${(m?.chamas_v2 as any)?.name || 'your group'} received. Receipt: ${receipt}.`);
+          }
         } else if (event.event_type === 'send_sms') {
           const { phone, message } = payload;
           if (phone && message) {
