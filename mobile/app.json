@@ -15,7 +15,7 @@
       "package": "com.smartchama.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0B0F0C"
+        "backgroundColor": "#FFFFFF"
       },
       "permissions": [
         "INTERNET"
