@@ -15,6 +15,7 @@ const ERRORS: Record<string, string> = {
   used_up: 'This invite code has already been used. Ask your admin for a new one.',
   no_profile: 'Your profile is not set up yet. Please complete your profile first.',
   not_authenticated: 'Please sign in first.',
+  not_allowed: "You can't rejoin this group. Please contact the group admin.",
 }
 
 export async function POST(req: Request) {
@@ -41,7 +42,8 @@ export async function POST(req: Request) {
       success: true,
       chamaId: data.chama_id,
       chamaName: data.chama_name,
-      alreadyMember: data.already_member
+      alreadyMember: data.already_member,
+      pending: data.pending === true
     })
   } catch (err) {
     console.error('Join chama error:', err)

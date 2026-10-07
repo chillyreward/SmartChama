@@ -23,10 +23,10 @@ export default function CookiePage() {
           <table className="w-full border-collapse text-left border border-[#E5E7EB]">
             <thead className="bg-[#FAFAFA]">
               <tr>
-                <th className="border-b border-[#E5E7EB] p-4 text-[#161d16] font-bold">Name</th>
-                <th className="border-b border-[#E5E7EB] p-4 text-[#161d16] font-bold">Purpose</th>
-                <th className="border-b border-[#E5E7EB] p-4 text-[#161d16] font-bold">Duration</th>
-                <th className="border-b border-[#E5E7EB] p-4 text-[#161d16] font-bold">Can you opt out</th>
+                <th className="border-b border-[#E5E7EB] p-4 text-[var(--text-primary)] font-bold">Name</th>
+                <th className="border-b border-[#E5E7EB] p-4 text-[var(--text-primary)] font-bold">Purpose</th>
+                <th className="border-b border-[#E5E7EB] p-4 text-[var(--text-primary)] font-bold">Duration</th>
+                <th className="border-b border-[#E5E7EB] p-4 text-[var(--text-primary)] font-bold">Can you opt out</th>
               </tr>
             </thead>
             <tbody className="text-[#3d4a3d]">
@@ -101,13 +101,13 @@ export default function CookiePage() {
 
       <main className="flex-1 py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-[40px] font-geist font-bold text-[#161d16] mb-2">Cookie Policy</h1>
+          <h1 className="text-[40px] font-geist font-bold text-[var(--text-primary)] mb-2">Cookie Policy</h1>
           <p className="text-body-sm text-[#60645f] mb-10">Last updated: June 2025</p>
 
           <div className="space-y-12">
             {sections.map((section, idx) => (
               <section key={idx}>
-                <h2 className="text-[24px] font-geist font-bold text-[#161d16] mb-4">
+                <h2 className="text-[24px] font-geist font-bold text-[var(--text-primary)] mb-4">
                   {section.title}
                 </h2>
                 <div className="text-[16px] text-[#3d4a3d] leading-relaxed">

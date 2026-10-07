@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { requireAuth } from '@/lib/api-auth';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Created lazily (on first request), so builds don't need the service key
+const getAdmin = () => getSupabaseAdmin()
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { count, error } = await supabaseAdmin
-      .from('chamas')
+    const { user, error: authError } = await requireAuth(request);
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { count, error } = await getAdmin()
+      .from('chamas_v2')
       .select('*', { count: 'exact', head: true });
 
     if (error) {

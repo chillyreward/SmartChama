@@ -26,8 +26,6 @@ export default function MemberLogin() {
       // Convert phone to email format (same as signup)
       const generatedEmail = `${phone.replace(/\+/g, '')}@smartchama.member`;
 
-      console.log("Attempting login with email:", generatedEmail);
-
       // Sign in with Supabase Auth using generated email
       let authData, authError;
       
@@ -51,8 +49,6 @@ export default function MemberLogin() {
       if (!authData.user) {
         throw new Error("Login failed - no user data returned");
       }
-
-      console.log("Auth successful, checking member status...");
 
       // Check if user is a member
       const { data: memberData, error: memberError } = await supabase
@@ -83,7 +79,6 @@ export default function MemberLogin() {
         return;
       }
 
-      console.log("Login successful, redirecting...");
       // Redirect to member dashboard with member name
       const memberName = memberData.full_name || "Member";
       router.push(`/dashboard?user=${encodeURIComponent(memberName)}`);
@@ -103,16 +98,16 @@ export default function MemberLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen flex" style={{ backgroundColor: 'var(--bg-page)' }}>
       {/* Left Side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col">
         {/* Header */}
         <header className="flex items-center justify-between p-6 lg:p-8">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#22C55E] rounded-lg flex items-center justify-center">
               <Wallet className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-slate-900">SmartChama</span>
+            <span className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>SmartChama</span>
           </div>
           <LanguageSwitcher />
         </header>
@@ -121,21 +116,21 @@ export default function MemberLogin() {
         <div className="flex-1 flex items-center justify-center px-6 lg:px-16">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">
+              <h1 className="text-3xl lg:text-4xl font-bold mb-2 font-geist" style={{ color: 'var(--text-primary)' }}>
                 {t.welcome}
               </h1>
-              <p className="text-slate-600">Member Portal - Sign in to your account</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Member Portal - Sign in to your account</p>
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              <div className="mb-6 p-4 rounded-xl text-sm" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B' }}>
                 {error}
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
                   Phone Number
                 </label>
                 <input
@@ -144,13 +139,19 @@ export default function MemberLogin() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+254712345678"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-slate-900 placeholder:text-slate-400"
+                  className="w-full px-4 py-3 rounded-lg outline-none transition-colors"
+                  style={{
+                    backgroundColor: 'var(--bg-input)',
+                    borderColor: 'var(--border)',
+                    borderWidth: '1px',
+                    color: 'var(--text-primary)'
+                  }}
                 />
-                <p className="text-xs text-slate-500 mt-1">Use the phone number you registered with</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Use the phone number you registered with</p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
                   {t.password}
                 </label>
                 <div className="relative">
@@ -160,12 +161,19 @@ export default function MemberLogin() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t.createPassword}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none pr-12 text-slate-900 placeholder:text-slate-400"
+                    className="w-full px-4 py-3 rounded-lg outline-none pr-12 transition-colors"
+                    style={{
+                      backgroundColor: 'var(--bg-input)',
+                      borderColor: 'var(--border)',
+                      borderWidth: '1px',
+                      color: 'var(--text-primary)'
+                    }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    style={{ color: 'var(--text-muted)' }}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -175,23 +183,23 @@ export default function MemberLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 {loading ? t.signingIn : t.loginToPortal}
               </button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-slate-600 text-sm">
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Don't have an account?{" "}
-                <Link href="/member/signup" className="text-emerald-500 font-semibold hover:text-emerald-600">
+                <Link href="/member/signup" className="text-[#22C55E] font-semibold hover:underline">
                   Sign up with invite code
                 </Link>
               </p>
             </div>
 
             <div className="mt-8 text-center">
-              <Link href="/login" className="text-slate-500 text-sm hover:text-slate-700">
+              <Link href="/login" className="text-sm hover:underline" style={{ color: 'var(--text-muted)' }}>
                 Are you an admin? Login here
               </Link>
             </div>
@@ -199,13 +207,13 @@ export default function MemberLogin() {
         </div>
 
         {/* Footer */}
-        <footer className="p-6 text-center text-slate-500 text-sm">
+        <footer className="p-6 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
           © 2026 SmartChama. All rights reserved.
         </footer>
       </div>
 
       {/* Right Side - Hero */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-500 to-emerald-700 p-12 flex-col">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#22C55E] to-[#15803D] p-12 flex-col">
         <div className="mb-12">
           <h2 className="text-4xl font-bold text-white mb-4">{t.growTogether}</h2>
           <p className="text-emerald-100 text-lg">{t.tagline}</p>

@@ -278,6 +278,16 @@ export default function OnboardingPage() {
         return
       }
 
+      if (data.pending) {
+        localStorage.removeItem('sc_pending_join_code')
+        setError('')
+        setLoading(false)
+        alert(`Your request to join ${data.chamaName || 'the group'} has been sent. You'll get access once an admin approves it.`)
+        // Not /login: a signed-in user there bounces back through onboarding
+        router.push('/')
+        return
+      }
+
       const chamaId = data.chamaId
       document.cookie = `active_chama_id=${chamaId}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`
       sessionStorage.setItem('active_chama_id', chamaId)
@@ -675,10 +685,6 @@ export default function OnboardingPage() {
                 <select
                   value={county}
                   onChange={e => {
-                    console.log(
-                      'County selected:', 
-                      e.target.value
-                    )
                     setCounty(e.target.value)
                   }}
                   className="w-full px-4 
@@ -910,10 +916,6 @@ export default function OnboardingPage() {
                     type="number"
                     value={contributionAmount}
                     onChange={e => {
-                      console.log(
-                        'Amount changed to:', 
-                        e.target.value
-                      )
                       setContributionAmount(
                         e.target.value
                       )
@@ -967,10 +969,6 @@ export default function OnboardingPage() {
                 <select
                   value={frequency}
                   onChange={e => {
-                    console.log(
-                      'Frequency changed:', 
-                      e.target.value
-                    )
                     setFrequency(
                       e.target.value
                     )

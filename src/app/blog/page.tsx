@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
@@ -14,42 +14,42 @@ export default function BlogPage() {
       date: "May 2025",
       title: "How to run a chama that lasts more than two years",
       preview: "Most chamas dissolve within 18 months. The reasons are almost always the same: poor record keeping, disputes over loan repayments, and lack of clear rules. Here is what successful groups do differently...",
-      link: "#"
+      link: "/blog"
     },
     {
       category: "LOANS",
       date: "April 2025",
       title: "Setting fair interest rates for internal chama loans",
       preview: "One of the most common sources of conflict in savings groups is loan interest. Charge too little and the group loses value. Charge too much and members resent the system. Here is how to find the right rate...",
-      link: "#"
+      link: "/blog"
     },
     {
       category: "TECHNOLOGY",
       date: "March 2025",
       title: "M-Pesa and the future of community savings",
       preview: "When M-Pesa launched in 2007, it changed how Kenya moves money. Today, it is changing how Kenya saves together. Here is how mobile money is transforming the chama model...",
-      link: "#"
+      link: "/blog"
     },
     {
       category: "FINANCIAL IDENTITY",
       date: "February 2025",
-      title: "What is a CREDIT SCORE and why does it matter?",
-      preview: "Your SmartChama CREDIT SCORE is a number between 0 and 100 that represents your financial reliability within your group. But it is more than just a number. It is the beginning of a financial identity...",
-      link: "#"
+      title: "What is a trust score and why does it matter?",
+      preview: "Your SmartChama trust score is a number between 0 and 100 that represents your financial reliability within your group. But it is more than just a number. It is the beginning of a financial identity...",
+      link: "/blog"
     },
     {
       category: "GUIDE",
       date: "January 2025",
       title: "How to start a chama from scratch in 2025",
       preview: "Starting a savings group is simple in theory and complicated in practice. Who sets the rules? How much should each member contribute? What happens when someone defaults? This guide answers all of it...",
-      link: "#"
+      link: "/blog"
     },
     {
       category: "SMARTGROW",
       date: "December 2024",
       title: "Where should your chama invest its idle funds?",
       preview: "Most savings groups keep their money in a mobile wallet earning nothing. But there are regulated, low-risk investment options available to Kenyan groups that most chairladies do not know about...",
-      link: "#"
+      link: "/blog"
     }
   ];
 
@@ -60,7 +60,7 @@ export default function BlogPage() {
       {/* HERO */}
       <section className="bg-white border-b border-[#E5E7EB] py-16 px-6">
         <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h1 className="text-[48px] font-geist font-bold text-[#161d16] mb-4">SmartChama Blog</h1>
+          <h1 className="text-[48px] font-geist font-bold text-[var(--text-primary)] mb-4">SmartChama Blog</h1>
           <p className="text-[18px] text-[#60645f] max-w-2xl">
             Insights on community finance, savings culture, and financial inclusion across Kenya and Africa.
           </p>
@@ -78,7 +78,7 @@ export default function BlogPage() {
               <span className="text-body-sm text-[#60645f]">June 2025</span>
             </div>
             
-            <h2 className="text-[32px] font-geist font-bold text-[#161d16] mb-6 leading-tight">
+            <h2 className="text-[32px] font-geist font-bold text-[var(--text-primary)] mb-6 leading-tight">
               Why your chama contribution record is more valuable than you think
             </h2>
             
@@ -94,7 +94,7 @@ export default function BlogPage() {
               </p>
             </div>
 
-            <Link href="#" className="inline-flex items-center gap-2 text-[#006e2f] font-semibold hover:underline">
+            <Link href="/blog" className="inline-flex items-center gap-2 text-[#006e2f] font-semibold hover:underline">
               Read full article <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
             </Link>
           </div>
@@ -104,7 +104,7 @@ export default function BlogPage() {
       {/* ARTICLES GRID */}
       <section className="bg-white py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-[28px] font-geist font-bold text-[#161d16] mb-10">All articles</h2>
+          <h2 className="text-[28px] font-geist font-bold text-[var(--text-primary)] mb-10">All articles</h2>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((article, idx) => (
@@ -116,7 +116,7 @@ export default function BlogPage() {
                   <span className="text-body-sm text-[#60645f]">{article.date}</span>
                 </div>
                 
-                <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-4 leading-tight group-hover:text-[#006e2f] transition-colors">
+                <h3 className="text-headline-sm font-geist font-bold text-[var(--text-primary)] mb-4 leading-tight group-hover:text-[#006e2f] transition-colors">
                   <Link href={article.link}>
                     {article.title}
                   </Link>

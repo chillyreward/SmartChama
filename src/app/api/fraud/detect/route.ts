@@ -1,15 +1,15 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import OpenAI from 'openai'
 import { ADMIN_ROLES, forbidden, getChamaMembership } from '@/lib/api-guard'
 import { requireUser } from '@/lib/require-user'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Created lazily (on first request), so builds don't need the service key
+const getAdmin = () => getSupabaseAdmin()
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy-key-for-build' })
 
 export async function POST(req: Request) {
   try {
@@ -19,19 +19,19 @@ export async function POST(req: Request) {
     // Officials only: this reads every member's financial history for the chama
     const auth = await requireUser()
     if (auth.response) return auth.response
-    if (!(await getChamaMembership(supabaseAdmin, auth.user.id, chama_id, ADMIN_ROLES))) {
+    if (!(await getChamaMembership(getAdmin(), auth.user.id, chama_id, ADMIN_ROLES))) {
       return forbidden('Only chama officials can run fraud scans.')
     }
 
     // 1. Fetch chama info
-    const { data: chama } = await supabaseAdmin
+    const { data: chama } = await getAdmin()
       .from('chamas_v2')
       .select('name, created_at, contribution_amount')
       .eq('id', chama_id)
       .single()
 
     // 2. Fetch all active members
-    const { data: members } = await supabaseAdmin
+    const { data: members } = await getAdmin()
       .from('chama_memberships')
       .select('id, profile_id, role, trust_score, joined_at, profiles(full_name, phone_number, email)')
       .eq('chama_id', chama_id)
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     // 3. Fetch recent contributions (last 30 days)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-    const { data: recentContributions } = await supabaseAdmin
+    const { data: recentContributions } = await getAdmin()
       .from('contributions_v2')
       .select('id, membership_id, amount, status, payment_method, mpesa_receipt, created_at')
       .eq('chama_id', chama_id)
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       .order('created_at', { ascending: false })
 
     // 4. Fetch recent transactions
-    const { data: transactions } = await supabaseAdmin
+    const { data: transactions } = await getAdmin()
       .from('transactions_v2')
       .select('id, type, amount, membership_id, created_at, description')
       .eq('chama_id', chama_id)
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       .limit(100)
 
     // 5. Fetch loans
-    const { data: loans } = await supabaseAdmin
+    const { data: loans } = await getAdmin()
       .from('loans_v2')
       .select('id, membership_id, amount, status, created_at, approved_at')
       .eq('chama_id', chama_id)
@@ -219,7 +219,7 @@ Return ONLY valid JSON:
 
     // Save flags to fraud_flags table
     for (const flag of allFlags) {
-      await supabaseAdmin.from('fraud_flags').insert({
+      await getAdmin().from('fraud_flags').insert({
         chama_id,
         flag_type: flag.type || 'unusual_pattern',
         description: flag.description,

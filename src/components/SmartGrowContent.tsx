@@ -44,7 +44,7 @@ const SEED_PRODUCTS = [
 ];
 
 export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRoute?: boolean }) {
-  const { member: authMember, group: authGroup, isLoading: authLoading } = useAuth();
+  const { session: authSession, member: authMember, group: authGroup, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [member, setMember] = useState<any>(null);
   const [chama, setChama] = useState<any>(null);
@@ -72,6 +72,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
 
     async function loadData() {
       try {
+        if (!authGroup?.id) return;
         const activeChamaId = authGroup.id;
 
         const { data: wal } = await supabase
@@ -88,17 +89,6 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           .select('*')
           .eq('is_active', true)
           .order('risk_level');
-
-        // Seed if missing
-        if (!prodErr && prods && prods.length === 0) {
-          await supabase.from('smartgrow_products').insert(SEED_PRODUCTS);
-          const { data: newProds } = await supabase
-            .from('smartgrow_products')
-            .select('*')
-            .eq('is_active', true)
-            .order('risk_level');
-          prods = newProds;
-        }
 
         setProducts(prods || []);
 
@@ -487,7 +477,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                   </div>
                   <p className="text-body-sm text-[var(--text-muted)] mt-1 flex justify-between">
                     <span>Available tracked pool: KSh {formatCurrency(wallet?.balance || 0)}</span>
-                    <span className="text-[#22C55E] cursor-pointer hover:underline font-bold" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</span>
+                    <button type="button" className="text-[#22C55E] cursor-pointer hover:underline font-bold focus:outline-none focus:ring-1 focus:ring-[#22C55E] rounded" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</button>
                   </p>
                 </div>
 

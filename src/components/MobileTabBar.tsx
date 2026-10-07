@@ -44,7 +44,7 @@ export function MobileTabBar() {
   return (
     <>
       {/* Tab bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 sidebar-bg border-t border-[var(--border)] h-16 flex items-center safe-area-inset-bottom pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 sidebar-bg border-t border-[var(--border)] h-16 flex items-center safe-area-inset-bottom pb-safe">
         {memberTabs.map((tab) => {
           const isActive = tab.href
             ? pathname === tab.href || (pathname.startsWith(tab.href + '/') && tab.href !== '/dashboard')
@@ -96,12 +96,12 @@ export function MobileTabBar() {
         <>
           {/* Backdrop */}
           <div
-            className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
             onClick={() => setMoreOpen(false)}
           />
 
           {/* Sheet */}
-          <div className="md:hidden fixed bottom-16 left-0 right-0 z-50 card-bg border-t border-[var(--border)] rounded-t-3xl pb-safe max-h-[80vh] overflow-y-auto">
+          <div className="lg:hidden fixed bottom-16 left-0 right-0 z-50 card-bg border-t border-[var(--border)] rounded-t-3xl pb-safe max-h-[80vh] overflow-y-auto">
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-4">
               <div className="w-10 h-1 rounded-full bg-[#E5E7EB] dark:bg-[#2d3d2d]" />

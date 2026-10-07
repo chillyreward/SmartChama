@@ -29,25 +29,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex h-screen overflow-hidden page-bg font-inter text-[var(--text-main)]">
       
       {/* ONE sidebar, desktop only */}
-      <div className="hidden md:flex flex-col flex-shrink-0 w-64">
+      <div className="hidden lg:flex flex-col flex-shrink-0 w-64">
         <Sidebar variant="member" />
       </div>
 
       {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         
-        {/* MOBILE HEADER (Only visible on mobile) */}
-        <div className="md:hidden flex-shrink-0">
+        {/* MOBILE HEADER (Only visible on mobile/tablet) */}
+        <div className="lg:hidden flex-shrink-0">
           <MobileHeader isAdmin={false} />
         </div>
 
         {/* Scrollable page content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6 pt-16 md:pt-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 pb-24 lg:pb-6 pt-16 lg:pt-6">
           {children}
         </main>
 
-        {/* MOBILE BOTTOM TAB BAR (Only visible on mobile) */}
-        <div className="md:hidden">
+        {/* MOBILE BOTTOM TAB BAR (Only visible on mobile/tablet) */}
+        <div className="lg:hidden">
           <MobileTabBar />
         </div>
 

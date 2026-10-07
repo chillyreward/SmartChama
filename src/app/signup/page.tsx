@@ -49,6 +49,9 @@ function SignupForm() {
   const [createdGroupCode, setCreatedGroupCode] = useState('')
   const [success, setSuccess] = useState(false)
   const [pendingConfirmation, setPendingConfirmation] = useState(false)
+  // Group-code joins wait for an official to approve the request
+  const [pendingApproval, setPendingApproval] = useState(false)
+  const [targetChamaName, setTargetChamaName] = useState('')
 
   // Password strength
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
@@ -240,6 +243,13 @@ function SignupForm() {
         return
       }
 
+      if (joinData.pending) {
+        setTargetChamaName(joinData.chamaName || preview.chama_name || '')
+        setPendingApproval(true)
+        setLoading(false)
+        return
+      }
+
       rememberActiveChama(joinData.chamaId)
       router.push('/dashboard')
 
@@ -248,6 +258,41 @@ function SignupForm() {
       setError(err.message || 'Something went wrong.')
       setLoading(false)
     }
+  }
+
+  if (pendingApproval) {
+    return (
+      <div 
+        className="min-h-screen flex flex-col justify-center items-center p-6"
+        style={{ backgroundColor: 'var(--bg-page)' }}
+      >
+        <div 
+          className="w-full max-w-md rounded-2xl p-8 text-center transition-colors duration-300 shadow-xl"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border)'
+          }}
+        >
+          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="material-symbols-outlined text-[36px]">hourglass_top</span>
+          </div>
+
+          <h1 className="text-2xl font-bold mb-2 font-geist" style={{ color: 'var(--text-primary)' }}>
+            Request Pending Approval
+          </h1>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
+            Your request to join <span className="font-semibold text-[#22C55E]">{targetChamaName}</span> has been sent to the group admin. You will be able to access the dashboard once approved.
+          </p>
+
+          <Link
+            href="/login"
+            className="w-full inline-block py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0 text-center"
+          >
+            Return to Login
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   // CONFIRM-EMAIL SCREEN — shown when Supabase requires email confirmation

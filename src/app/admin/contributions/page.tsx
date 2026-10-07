@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
+import { exportToPDF, exportToExcel } from "@/lib/export";
+import PageSkeleton from "@/components/PageSkeleton";
 
 export default function AdminContributionsPage() {
   const { member: adminMember, group } = useAuth();
@@ -112,6 +114,32 @@ export default function AdminContributionsPage() {
     }
   };
 
+  const handleExportPDF = () => {
+    const headers = ['Date', 'Member', 'Amount (KSh)', 'Method', 'Reference', 'Status'];
+    const rows = contributions.map(c => [
+      new Date(c.created_at || c.date).toLocaleDateString('en-KE'),
+      c.members?.full_name || 'Member',
+      Number(c.amount || 0).toLocaleString('en-KE'),
+      c.payment_method || c.method || 'M-Pesa',
+      c.mpesa_receipt || c.reference || 'N/A',
+      c.status || 'confirmed'
+    ]);
+    exportToPDF('Contributions Report', group?.name || 'SmartChama', headers, rows, 'contributions_report');
+  };
+
+  const handleExportExcel = () => {
+    const headers = ['Date', 'Member', 'Amount (KSh)', 'Method', 'Reference', 'Status'];
+    const rows = contributions.map(c => [
+      new Date(c.created_at || c.date).toLocaleDateString('en-KE'),
+      c.members?.full_name || 'Member',
+      Number(c.amount || 0),
+      c.payment_method || c.method || 'M-Pesa',
+      c.mpesa_receipt || c.reference || 'N/A',
+      c.status || 'confirmed'
+    ]);
+    exportToExcel('Contributions Report', group?.name || 'SmartChama', headers, rows, 'contributions_report');
+  };
+
   const handleBulkRemind = async () => {
     try {
       const lateContribs = contributions.filter(c => c.status === 'late' || c.status === 'pending');
@@ -139,11 +167,7 @@ export default function AdminContributionsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (
@@ -166,16 +190,30 @@ export default function AdminContributionsPage() {
           <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Contributions</h1>
           <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Manage all group contributions and payments</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          <button onClick={handleBulkRemind} className="w-full sm:w-auto bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-355 border border-orange-200 dark:border-orange-900/30 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-orange-100 dark:hover:bg-orange-950/40 transition-all shadow-sm flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">notifications_active</span>
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <button 
+            onClick={handleExportPDF} 
+            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>
+            Export PDF
+          </button>
+          <button 
+            onClick={handleExportExcel} 
+            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px] text-green-600">table_chart</span>
+            Export Excel
+          </button>
+          <button onClick={handleBulkRemind} className="bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-355 border border-orange-200 dark:border-orange-900/30 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-orange-100 dark:hover:bg-orange-950/40 transition-all shadow-sm flex items-center justify-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">notifications_active</span>
             Bulk Remind
           </button>
           <button 
             onClick={() => setShowRecordModal(true)}
-            className="w-full sm:w-auto bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2"
+            className="bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[16px]">add</span>
             Record Contribution
           </button>
         </div>

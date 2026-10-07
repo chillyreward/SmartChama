@@ -1,7 +1,13 @@
 -- ============================================================
--- SMARTCHAMA FULL SCHEMA MIGRATION
--- Run this ONCE on a fresh Supabase project (ewigxollsudiyqucajqv)
--- Go to: Supabase Dashboard → SQL Editor → paste & run
+-- SMARTCHAMA FULL SCHEMA MIGRATION  (single source of truth)
+-- Supabase project: ewigxollsudiyqucajqv
+-- Go to: Supabase Dashboard → SQL Editor → paste & run.
+-- Idempotent: safe to re-run after edits.
+--
+-- Supersedes everything in migrations/ (v2–v7 and the one-off fixes). Do NOT
+-- also run migrations/migration_v7_*.sql: they re-create tables under other
+-- names (e.g. `ledger`) and add USING (true) read policies that expose every
+-- chama's data to any signed-in user.
 -- ============================================================
 
 
@@ -87,6 +93,12 @@ CREATE TABLE IF NOT EXISTS chama_memberships (
   UNIQUE(profile_id, chama_id)
 );
 
+-- 'pending' = asked to join with the group code, awaiting an official;
+-- 'rejected' = request declined. Re-created so re-runs pick up the new values.
+ALTER TABLE chama_memberships DROP CONSTRAINT IF EXISTS chama_memberships_status_check;
+ALTER TABLE chama_memberships ADD CONSTRAINT chama_memberships_status_check
+  CHECK (status IN ('active', 'pending', 'flagged', 'inactive', 'removed', 'rejected'));
+
 CREATE INDEX IF NOT EXISTS idx_memberships_profile ON chama_memberships(profile_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_chama ON chama_memberships(chama_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_chama_status ON chama_memberships(chama_id, status);
@@ -127,6 +139,7 @@ CREATE INDEX IF NOT EXISTS idx_contributions_chama_date ON contributions_v2(cham
 -- stk-push saves both ids in one update; without this column that update
 -- fails and the M-Pesa callback can never find its contribution
 ALTER TABLE contributions_v2 ADD COLUMN IF NOT EXISTS mpesa_merchant_request_id TEXT;
+ALTER TABLE contributions_v2 ADD COLUMN IF NOT EXISTS failed_reason TEXT;
 CREATE INDEX IF NOT EXISTS idx_contributions_checkout ON contributions_v2(mpesa_checkout_request_id);
 
 -- LOANS_V2
@@ -200,6 +213,7 @@ ALTER TABLE invite_tokens ADD COLUMN IF NOT EXISTS used_at TIMESTAMPTZ;
 ALTER TABLE invite_tokens ADD COLUMN IF NOT EXISTS used_by UUID REFERENCES profiles(id) ON DELETE SET NULL;
 ALTER TABLE invite_tokens ADD COLUMN IF NOT EXISTS invited_phone TEXT;
 ALTER TABLE invite_tokens ADD COLUMN IF NOT EXISTS invited_name TEXT;
+ALTER TABLE invite_tokens ADD COLUMN IF NOT EXISTS invited_email TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_invite_tokens_token ON invite_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_invite_tokens_chama ON invite_tokens(chama_id);
@@ -779,6 +793,9 @@ CREATE TRIGGER profiles_touch_updated_at
 -- Accepts either a chama's permanent group_code (shown to the admin after
 -- creating the group) or a one-off invite token. Runs as SECURITY DEFINER because
 -- a non-member can't read chamas_v2 or insert their own membership under RLS.
+--  - group code   -> 'pending' membership; officials are notified and approve it
+--                    on the admin Members page (anyone holding the code can ask)
+--  - invite token -> 'active' immediately (an official already chose this person)
 
 CREATE OR REPLACE FUNCTION join_chama_by_code(p_code TEXT)
 RETURNS JSONB
@@ -792,6 +809,9 @@ DECLARE
   v_chama chamas_v2%ROWTYPE;
   v_invite invite_tokens%ROWTYPE;
   v_membership_id UUID;
+  v_status TEXT;
+  v_existing TEXT;
+  v_name TEXT;
 BEGIN
   IF v_user IS NULL THEN
     RETURN jsonb_build_object('success', false, 'error', 'not_authenticated');
@@ -824,14 +844,39 @@ BEGIN
     END IF;
   END IF;
 
+  v_status := CASE WHEN v_invite.id IS NOT NULL THEN 'active' ELSE 'pending' END;
+
+  SELECT status INTO v_existing FROM chama_memberships WHERE profile_id = v_user AND chama_id = v_chama.id;
+  IF v_existing IN ('removed', 'rejected', 'flagged') THEN
+    RETURN jsonb_build_object('success', false, 'error', 'not_allowed');
+  END IF;
+
   INSERT INTO chama_memberships (profile_id, chama_id, role, trust_score, status, joined_at)
-  VALUES (v_user, v_chama.id, 'member', 0, 'active', now())
+  VALUES (v_user, v_chama.id, 'member', 0, v_status, now())
   ON CONFLICT (profile_id, chama_id) DO NOTHING
   RETURNING id INTO v_membership_id;
 
   IF v_membership_id IS NULL THEN
-    -- Already in this chama: don't burn an invite use
-    RETURN jsonb_build_object('success', true, 'chama_id', v_chama.id, 'chama_name', v_chama.name, 'already_member', true);
+    -- Already in (or already asked to join) this chama: don't burn an invite use
+    RETURN jsonb_build_object('success', true, 'chama_id', v_chama.id, 'chama_name', v_chama.name,
+                              'already_member', true, 'pending', v_existing = 'pending');
+  END IF;
+
+  v_name := COALESCE((SELECT full_name FROM profiles WHERE id = v_user), 'A new member');
+
+  IF v_status = 'pending' THEN
+    INSERT INTO notifications (profile_id, chama_id, type, title, message)
+    SELECT m.profile_id, v_chama.id, 'member_request', 'New Member Request',
+           v_name || ' requested to join ' || v_chama.name || '.'
+    FROM chama_memberships m
+    WHERE m.chama_id = v_chama.id AND m.status = 'active'
+      AND m.role IN ('admin', 'chairlady', 'treasurer', 'secretary');
+
+    INSERT INTO group_activity (chama_id, event_type, description)
+    VALUES (v_chama.id, 'member_requested', v_name || ' requested to join');
+
+    RETURN jsonb_build_object('success', true, 'chama_id', v_chama.id, 'chama_name', v_chama.name,
+                              'already_member', false, 'pending', true);
   END IF;
 
   IF v_invite.id IS NOT NULL THEN
@@ -845,10 +890,10 @@ BEGIN
   END IF;
 
   INSERT INTO group_activity (chama_id, event_type, description)
-  VALUES (v_chama.id, 'member_joined',
-          COALESCE((SELECT full_name FROM profiles WHERE id = v_user), 'A new member') || ' joined the group');
+  VALUES (v_chama.id, 'member_joined', v_name || ' joined the group');
 
-  RETURN jsonb_build_object('success', true, 'chama_id', v_chama.id, 'chama_name', v_chama.name, 'already_member', false);
+  RETURN jsonb_build_object('success', true, 'chama_id', v_chama.id, 'chama_name', v_chama.name,
+                            'already_member', false, 'pending', false);
 END;
 $$;
 
@@ -1503,6 +1548,151 @@ GRANT EXECUTE ON FUNCTION check_is_chama_member(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION check_is_chama_admin(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION owns_membership(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION shares_chama_with(UUID) TO authenticated;
+
+-- ============================================================
+-- PART 7: MERRY-GO-ROUND, WELFARE, PENALTIES, PUSH, AVATARS
+-- ============================================================
+-- Folded in from migrations/migration_v5_merrygoround.sql and
+-- migration_v6_welfare_and_penalties.sql, plus RLS they lacked. The API
+-- routes use the service role and do their own membership checks; RLS here
+-- stops the browser/mobile app reading or writing these tables directly.
+
+CREATE TABLE IF NOT EXISTS merry_go_round_cycles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  name TEXT NOT NULL DEFAULT 'Merry-Go-Round',
+  amount_per_member NUMERIC NOT NULL CHECK (amount_per_member > 0),
+  frequency TEXT NOT NULL DEFAULT 'monthly',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'cancelled')),
+  current_round INTEGER NOT NULL DEFAULT 1,
+  total_rounds INTEGER NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS merry_go_round_schedule (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cycle_id UUID NOT NULL REFERENCES merry_go_round_cycles(id) ON DELETE CASCADE,
+  round_number INTEGER NOT NULL,
+  recipient_membership_id UUID NOT NULL REFERENCES chama_memberships(id),
+  scheduled_date DATE,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid')),
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (cycle_id, round_number)
+);
+
+CREATE TABLE IF NOT EXISTS merry_go_round_contributions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cycle_id UUID NOT NULL REFERENCES merry_go_round_cycles(id) ON DELETE CASCADE,
+  round_number INTEGER NOT NULL,
+  membership_id UUID NOT NULL REFERENCES chama_memberships(id),
+  amount NUMERIC NOT NULL CHECK (amount > 0),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'failed')),
+  mpesa_receipt TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (cycle_id, round_number, membership_id)
+);
+
+CREATE TABLE IF NOT EXISTS member_penalties (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  membership_id UUID NOT NULL REFERENCES chama_memberships(id) ON DELETE CASCADE,
+  type TEXT NOT NULL DEFAULT 'custom', -- 'late_contribution', 'missed_meeting', 'loan_default', 'custom'
+  amount NUMERIC NOT NULL CHECK (amount > 0),
+  reason TEXT,
+  status TEXT NOT NULL DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'paid', 'waived')),
+  imposed_by UUID REFERENCES chama_memberships(id),
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_member_penalties_chama ON member_penalties(chama_id, status);
+
+CREATE TABLE IF NOT EXISTS welfare_fund (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL UNIQUE REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  balance NUMERIC NOT NULL DEFAULT 0 CHECK (balance >= 0),
+  monthly_contribution NUMERIC NOT NULL DEFAULT 500,
+  max_claim_amount NUMERIC NOT NULL DEFAULT 50000,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS welfare_claims (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  membership_id UUID NOT NULL REFERENCES chama_memberships(id) ON DELETE CASCADE,
+  amount NUMERIC NOT NULL CHECK (amount > 0),
+  reason TEXT NOT NULL, -- 'bereavement', 'medical', 'wedding', 'education', 'other'
+  description TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'paid')),
+  approved_by UUID REFERENCES chama_memberships(id),
+  approved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_welfare_claims_chama ON welfare_claims(chama_id, status);
+
+ALTER TABLE merry_go_round_cycles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE merry_go_round_schedule ENABLE ROW LEVEL SECURITY;
+ALTER TABLE merry_go_round_contributions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE member_penalties ENABLE ROW LEVEL SECURITY;
+ALTER TABLE welfare_fund ENABLE ROW LEVEL SECURITY;
+ALTER TABLE welfare_claims ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "members_see_mgr_cycles" ON merry_go_round_cycles;
+CREATE POLICY "members_see_mgr_cycles" ON merry_go_round_cycles FOR SELECT TO authenticated USING (check_is_chama_member(chama_id, auth.uid()));
+DROP POLICY IF EXISTS "members_see_mgr_schedule" ON merry_go_round_schedule;
+CREATE POLICY "members_see_mgr_schedule" ON merry_go_round_schedule FOR SELECT TO authenticated USING (
+  EXISTS (SELECT 1 FROM merry_go_round_cycles c WHERE c.id = cycle_id AND check_is_chama_member(c.chama_id, auth.uid()))
+);
+DROP POLICY IF EXISTS "members_see_mgr_contributions" ON merry_go_round_contributions;
+CREATE POLICY "members_see_mgr_contributions" ON merry_go_round_contributions FOR SELECT TO authenticated USING (
+  EXISTS (SELECT 1 FROM merry_go_round_cycles c WHERE c.id = cycle_id AND check_is_chama_member(c.chama_id, auth.uid()))
+);
+DROP POLICY IF EXISTS "members_see_penalties" ON member_penalties;
+CREATE POLICY "members_see_penalties" ON member_penalties FOR SELECT TO authenticated USING (check_is_chama_member(chama_id, auth.uid()));
+DROP POLICY IF EXISTS "members_see_welfare_fund" ON welfare_fund;
+CREATE POLICY "members_see_welfare_fund" ON welfare_fund FOR SELECT TO authenticated USING (check_is_chama_member(chama_id, auth.uid()));
+DROP POLICY IF EXISTS "members_see_welfare_claims" ON welfare_claims;
+CREATE POLICY "members_see_welfare_claims" ON welfare_claims FOR SELECT TO authenticated USING (check_is_chama_member(chama_id, auth.uid()));
+
+-- Expo push token, written by the mobile app for its own profile
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS push_token TEXT;
+
+-- Avatars: public read; each user may only write inside their own <uid>/ folder
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Public Read Avatars" ON storage.objects;
+CREATE POLICY "Public Read Avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+
+DROP POLICY IF EXISTS "own_avatar_insert" ON storage.objects;
+CREATE POLICY "own_avatar_insert" ON storage.objects FOR INSERT TO authenticated WITH CHECK (
+  bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text
+);
+DROP POLICY IF EXISTS "own_avatar_update" ON storage.objects;
+CREATE POLICY "own_avatar_update" ON storage.objects FOR UPDATE TO authenticated USING (
+  bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text
+);
+DROP POLICY IF EXISTS "own_avatar_delete" ON storage.objects;
+CREATE POLICY "own_avatar_delete" ON storage.objects FOR DELETE TO authenticated USING (
+  bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Housekeeping, called from the outbox cron or by hand (service role only)
+CREATE OR REPLACE FUNCTION cleanup_expired_otps()
+RETURNS INT LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  WITH d AS (DELETE FROM otp_codes WHERE expires_at < now() - interval '1 day' RETURNING 1)
+  SELECT count(*)::int FROM d;
+$$;
+
+CREATE OR REPLACE FUNCTION cleanup_idempotency_keys()
+RETURNS INT LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  WITH d AS (DELETE FROM idempotency_keys WHERE created_at < now() - interval '1 day' RETURNING 1)
+  SELECT count(*)::int FROM d;
+$$;
+
+REVOKE ALL ON FUNCTION cleanup_expired_otps() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION cleanup_idempotency_keys() FROM PUBLIC, anon, authenticated;
 
 -- ============================================================
 -- DONE.

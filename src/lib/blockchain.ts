@@ -1,4 +1,3 @@
-import { ethers } from "ethers";
 import QRCode from "qrcode";
 
 // Polygon Mumbai Testnet configuration
@@ -25,10 +24,10 @@ export async function recordTransactionOnBlockchain(
   try {
     // Check if blockchain is configured
     if (!process.env.BLOCKCHAIN_PRIVATE_KEY) {
-      console.log("Blockchain not configured - skipping");
       return null;
     }
 
+    const { ethers } = await import("ethers");
     const provider = new ethers.JsonRpcProvider(POLYGON_RPC);
     const wallet = new ethers.Wallet(process.env.BLOCKCHAIN_PRIVATE_KEY, provider);
 
@@ -73,6 +72,7 @@ export async function verifyBlockchainTransaction(
   txHash: string
 ): Promise<boolean> {
   try {
+    const { ethers } = await import("ethers");
     const provider = new ethers.JsonRpcProvider(POLYGON_RPC);
     const receipt = await provider.getTransactionReceipt(txHash);
     return receipt !== null && receipt.status === 1;

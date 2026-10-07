@@ -1,22 +1,26 @@
 import { forbidden, isInternalRequest } from '@/lib/api-guard';
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { requireAuth } from '@/lib/api-auth'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Created lazily (on first request), so builds don't need the service key
+const getAdmin = () => getSupabaseAdmin()
 
 export async function POST(req: Request) {
   // Server-to-server / cron only: no user calls this directly
   if (!isInternalRequest(req)) return forbidden();
 
   try {
+    const { user, error: authError } = await requireAuth(req);
+    if (!user || authError) {
+      return NextResponse.json({ isAdmin: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { userId } = await req.json()
     if (!userId) return NextResponse.json({ isAdmin: false }, { status: 400 })
 
     // Check chama_memberships for admin role
-    const { data: memberships } = await supabaseAdmin
+    const { data: memberships } = await getAdmin()
       .from('chama_memberships')
       .select('role, chama_id')
       .eq('profile_id', userId)
@@ -29,7 +33,7 @@ export async function POST(req: Request) {
     }
 
     // Fallback: check chama_admins
-    const { data: adminRows } = await supabaseAdmin
+    const { data: adminRows } = await getAdmin()
       .from('chama_admins')
       .select('chama_id')
       .eq('admin_user_id', userId)

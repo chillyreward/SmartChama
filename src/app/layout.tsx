@@ -1,17 +1,26 @@
 // app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import dynamic from 'next/dynamic';
 import LoadingScreen from "@/components/LoadingScreen";
-import { ChatBot } from "@/components/ChatBot";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
+const ChatBot = dynamic(() => import('@/components/ChatBot').then(mod => ({ default: mod.ChatBot })));
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: {
@@ -19,6 +28,9 @@ export const metadata: Metadata = {
     template: '%s | SmartChama'
   },
   description: 'Digital savings and loan management for African savings groups.',
+  alternates: {
+    canonical: 'https://smartchama.vercel.app',
+  },
   manifest: '/site.webmanifest',
   appleWebApp: {
     capable: true,
@@ -98,12 +110,6 @@ export default function RootLayout({
           content="SmartChama" 
         />
 
-        {/* Viewport for mobile */}
-        <meta 
-          name="viewport" 
-          content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" 
-        />
-
         {/* Microsoft tiles */}
         <meta 
           name="msapplication-TileColor" 
@@ -133,7 +139,7 @@ export default function RootLayout({
           `
         }} />
       </head>
-      <body className={`${inter.variable} ${geist.variable} font-inter antialiased bg-[#0A0A0A] text-[#F0FDF4]`}>
+      <body className={`${inter.variable} ${geist.variable} font-inter antialiased`}>
         <LoadingScreen />
         <LanguageProvider>
           <AuthProvider>

@@ -54,8 +54,10 @@ export async function POST(request: Request) {
     return respondOk();
   }
 
-  // Idempotency at callback level
-  if (contribution.status !== 'pending') {
+  // Idempotency at callback level. 'failed' is still processed: the outbox
+  // sweep marks long-pending payments failed, and a late callback must not lose
+  // a real payment (Daraja is re-checked below either way).
+  if (contribution.status !== 'pending' && contribution.status !== 'failed') {
     return respondOk();
   }
 
@@ -70,9 +72,10 @@ export async function POST(request: Request) {
   }
 
   if (queryResult !== '0') {
+    const reason = query.data?.ResultDesc || callback?.ResultDesc || `M-Pesa error code: ${queryResult}`;
     await supabase
       .from('contributions_v2')
-      .update({ status: 'failed' })
+      .update({ status: 'failed', failed_reason: String(reason).slice(0, 300) })
       .eq('id', contribution.id)
       .eq('status', 'pending');
     return respondOk();
@@ -95,7 +98,7 @@ export async function POST(request: Request) {
       .from('contributions_v2')
       .update({ status: 'partial', mpesa_receipt: receipt ?? null })
       .eq('id', contribution.id)
-      .eq('status', 'pending');
+      .in('status', ['pending', 'failed']);
     return respondOk();
   }
 
@@ -109,7 +112,7 @@ export async function POST(request: Request) {
       confirmed_at: new Date().toISOString()
     })
     .eq('id', contribution.id)
-    .eq('status', 'pending')
+    .in('status', ['pending', 'failed'])
     .select('id');
 
   if (!confirmed || confirmed.length === 0) {
@@ -151,6 +154,27 @@ export async function POST(request: Request) {
       receipt: receipt
     }
   });
+
+  // Send Push Notification
+  try {
+    const { data: memberProfile } = await supabase
+      .from('chama_memberships')
+      .select('profile_id')
+      .eq('id', contribution.membership_id)
+      .maybeSingle();
+
+    if (memberProfile?.profile_id) {
+      const { notifyUserByProfileId } = await import('@/lib/push-notifications');
+      await notifyUserByProfileId(
+        memberProfile.profile_id,
+        'Payment Confirmed! 💳',
+        `Your contribution of KSh ${contribution.amount} has been received. Receipt: ${receipt}`,
+        { type: 'contribution_confirmed', receipt }
+      );
+    }
+  } catch (pushErr) {
+    console.error('Push notification trigger error:', pushErr);
+  }
 
   return respondOk();
 }

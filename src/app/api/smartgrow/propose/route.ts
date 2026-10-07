@@ -1,18 +1,25 @@
 import { forbidden, isInternalRequest } from '@/lib/api-guard';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { requireAuth } from '@/lib/api-auth';
 
 export async function POST(request: Request) {
   // Server-to-server / cron only: no user calls this directly
   if (!isInternalRequest(request)) return forbidden();
 
   try {
-    const { chama_id, product_id, proposed_by } = await request.json();
-
-    if (!chama_id || !product_id || !proposed_by) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const { user, error: authError } = await requireAuth(request);
+    if (!user || authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
+    const { chama_id, product_id } = await request.json();
+
+    if (!chama_id || !product_id) {
+      return NextResponse.json({ error: 'Missing required fields: chama_id, product_id' }, { status: 400 });
+    }
+
+    const proposed_by = user.id;
     const supabase = getSupabaseAdmin();
     
     // Check if there is already an active vote for this product in this chama
@@ -22,7 +29,7 @@ export async function POST(request: Request) {
       .eq('chama_id', chama_id)
       .eq('smartgrow_product_id', product_id)
       .eq('status', 'active')
-      .single();
+      .maybeSingle();
       
     if (existing) {
       return NextResponse.json({ error: 'An active vote for this product already exists' }, { status: 400 });

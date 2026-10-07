@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyBlockchainTransaction, getExplorerUrl } from "@/lib/blockchain";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
+    const { user, error: authError } = await requireAuth(request);
+    if (!user || authError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const txHash = searchParams.get("hash");
 

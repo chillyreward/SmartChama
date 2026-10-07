@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
+import { exportToPDF, exportToExcel } from "@/lib/export";
+import PageSkeleton from "@/components/PageSkeleton";
 
 export default function AdminTransactionsPage() {
   const { member: adminMember, group } = useAuth();
@@ -19,6 +21,34 @@ export default function AdminTransactionsPage() {
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
   const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
+
+  const handleExportPDF = () => {
+    if (filteredTx.length === 0) return;
+    const headers = ["Date", "Type", "Member", "Reference", "Status", "Amount (KSh)"];
+    const rows = filteredTx.map(t => [
+      new Date(t.created_at).toLocaleDateString('en-KE'),
+      t.type,
+      t.membership?.profile?.full_name || 'System',
+      t.reference || 'N/A',
+      t.status || 'confirmed',
+      Number(t.amount || 0).toLocaleString('en-KE')
+    ]);
+    exportToPDF('Financial Ledger Report', group?.name || 'SmartChama', headers, rows, 'transactions_report');
+  };
+
+  const handleExportExcel = () => {
+    if (filteredTx.length === 0) return;
+    const headers = ["Date", "Type", "Member", "Reference", "Status", "Amount (KSh)"];
+    const rows = filteredTx.map(t => [
+      new Date(t.created_at).toLocaleDateString('en-KE'),
+      t.type,
+      t.membership?.profile?.full_name || 'System',
+      t.reference || 'N/A',
+      t.status || 'confirmed',
+      Number(t.amount || 0)
+    ]);
+    exportToExcel('Financial Ledger Report', group?.name || 'SmartChama', headers, rows, 'transactions_report');
+  };
 
   const handleExportCSV = () => {
     if (filteredTx.length === 0) return;
@@ -94,11 +124,7 @@ export default function AdminTransactionsPage() {
   }, [searchQuery, filter, transactions]);
 
   if (loading) {
-    return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (
@@ -114,13 +140,27 @@ export default function AdminTransactionsPage() {
           <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">All Transactions</h1>
           <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Complete financial ledger for the group</p>
         </div>
-        <div className="w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <button 
+            onClick={handleExportPDF}
+            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>
+            Export PDF
+          </button>
+          <button 
+            onClick={handleExportExcel}
+            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px] text-green-600">table_chart</span>
+            Export Excel
+          </button>
           <button 
             onClick={handleExportCSV}
-            className="w-full md:w-auto bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">download</span>
-            Export CSV
+            <span className="material-symbols-outlined text-[16px]">download</span>
+            CSV
           </button>
         </div>
       </div>

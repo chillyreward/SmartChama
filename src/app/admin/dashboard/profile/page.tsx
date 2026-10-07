@@ -135,7 +135,7 @@ export default function ProfilePage() {
     <div className="space-y-8 max-w-4xl">
       
       <div>
-        <h1 className="text-3xl font-black text-white">Profile</h1>
+        <h1 className="text-3xl font-black text-[var(--text-primary)]">Profile</h1>
         <p className="text-slate-400 mt-1">Manage your personal information</p>
       </div>
 

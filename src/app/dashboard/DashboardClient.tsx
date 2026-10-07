@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -275,7 +275,7 @@ export default function MemberDashboard({
       {/* ROW 1: Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         
-        <div className="bg-white dark:bg-[#161d16] border border-[#E5E7EB] dark:border-[#2d3d2d] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex justify-between items-start mb-4">
             <div className="text-[11px] font-bold tracking-wider text-[#60645f] dark:text-[#8FA88F] uppercase">YOUR CONTRIBUTIONS</div>
             <span className="material-symbols-outlined text-gray-300 dark:text-[#5a6e5a]">savings</span>
@@ -394,9 +394,16 @@ export default function MemberDashboard({
                           
                           <div className="text-right">
                             <p className={`text-[15px] font-semibold ${amountColor}`}>{sign} KSh {formatCurrency(tx.amount)}</p>
-                            <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]">
-                              {tx.type}
-                            </span>
+                            {tx.status === 'pending' ? (
+                              <span className="text-[11px] px-2 py-0.5 rounded-full font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 flex items-center gap-1 justify-end">
+                                <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse" />
+                                Processing...
+                              </span>
+                            ) : (
+                              <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-transparent text-[var(--brand-green)]">
+                                {tx.type}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

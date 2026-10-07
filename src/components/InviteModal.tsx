@@ -208,13 +208,19 @@ export function InviteModal({
         {/* SENT */}
         {step === 'sent' && (
           <div className="flex flex-col items-center text-center gap-5 py-2">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: `${channelConfig[result?.channel || channel].color}15` }}>
-              <span className="material-symbols-outlined text-[32px]"
-                style={{ color: channelConfig[result?.channel || channel].color, fontVariationSettings: "'FILL' 1" }}>
-                {result?.sms_sent ? (result?.channel === 'whatsapp' ? 'chat' : 'sms') : 'key'}
-              </span>
-            </div>
+            {(() => {
+              const currentChan = (result?.channel || channel) === 'whatsapp' ? 'whatsapp' : 'sms';
+              const cfg = channelConfig[currentChan];
+              return (
+                <div className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${cfg.color}15` }}>
+                  <span className="material-symbols-outlined text-[32px]"
+                    style={{ color: cfg.color, fontVariationSettings: "'FILL' 1" }}>
+                    {result?.sms_sent ? (currentChan === 'whatsapp' ? 'chat' : 'sms') : 'key'}
+                  </span>
+                </div>
+              );
+            })()}
 
             <div>
               <h3 className="text-[18px] font-bold mb-1">

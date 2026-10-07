@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "SmartChama",
+    "slug": "smartchama",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "smartchama",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F0C"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smartchama.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "SmartChama uses the camera to scan QR codes for group invites.",
+        "NSPhotoLibraryUsageDescription": "SmartChama needs access to save QR codes and receipts."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0F0C"
+      },
+      "package": "com.smartchama.app",
+      "versionCode": 1,
+      "permissions": ["CAMERA", "INTERNET", "VIBRATE"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B0F0C",
+          "image": "./assets/splash.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
