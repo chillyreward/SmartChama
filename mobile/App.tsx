@@ -1,13 +1,36 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, SafeAreaView, View, ActivityIndicator, Text, TouchableOpacity, StatusBar } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View, ActivityIndicator, Text, TouchableOpacity, StatusBar, BackHandler, Linking, Platform } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 const WEB_APP_URL = 'https://smartchama.vercel.app';
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <SmartChamaWebView />
+    </SafeAreaProvider>
+  );
+}
+
+function SmartChamaWebView() {
   const webViewRef = useRef<WebView>(null);
+  const canGoBackRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  // Android hardware back button navigates inside the web app before exiting.
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (canGoBackRef.current) {
+        webViewRef.current?.goBack();
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, []);
 
   const handleRetry = () => {
     setError(false);
@@ -16,7 +39,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="light-content" backgroundColor="#0B0F0C" />
       {error ? (
         <View style={styles.errorContainer}>
@@ -35,6 +58,15 @@ export default function App() {
           onError={() => {
             setLoading(false);
             setError(true);
+          }}
+          onNavigationStateChange={(nav) => {
+            canGoBackRef.current = nav.canGoBack;
+          }}
+          // tel:, mailto:, whatsapp:, sms: etc. open in the phone's own apps.
+          onShouldStartLoadWithRequest={(req) => {
+            if (/^https?:/i.test(req.url) || req.url.startsWith('about:')) return true;
+            Linking.openURL(req.url).catch(() => {});
+            return false;
           }}
           javaScriptEnabled={true}
           domStorageEnabled={true}
@@ -62,7 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0B0F0C',
   },
   loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#0B0F0C',
     alignItems: 'center',
     justifyContent: 'center',
