@@ -2171,5 +2171,97 @@ CREATE INDEX IF NOT EXISTS idx_chama_messages_member ON chama_messages(member_id
 CREATE INDEX IF NOT EXISTS idx_ledger_membership ON ledger_entries(membership_id);
 
 -- ============================================================
+-- PART 10: VERIFIED PHONE NUMBERS
+-- ============================================================
+-- A phone number is set only by the server after the owner enters the SMS
+-- code sent to it (/api/phone/send-code + /api/phone/verify). Phone sign-in
+-- and USSD trust only verified numbers, so nobody can claim a number they
+-- don't hold.
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_verified_at TIMESTAMPTZ;
+
+-- Codes for phone verification are bound to the account that asked for them
+ALTER TABLE otp_codes ADD COLUMN IF NOT EXISTS profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE otp_codes DROP CONSTRAINT IF EXISTS otp_codes_purpose_check;
+ALTER TABLE otp_codes ADD CONSTRAINT otp_codes_purpose_check
+  CHECK (purpose IN ('login', 'signup', 'password_reset', 'phone_verify'));
+CREATE INDEX IF NOT EXISTS idx_otp_profile ON otp_codes(profile_id) WHERE profile_id IS NOT NULL;
+
+-- Browser/app sessions can't write phone fields; the verify route (service
+-- role) and server functions can.
+CREATE OR REPLACE FUNCTION guard_profile_phone()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF current_user NOT IN ('authenticated', 'anon') THEN
+    RETURN NEW;
+  END IF;
+  IF TG_OP = 'INSERT' THEN
+    NEW.phone_number := NULL;
+    NEW.phone_verified_at := NULL;
+  ELSIF NEW.phone_number IS DISTINCT FROM OLD.phone_number
+        OR NEW.phone_verified_at IS DISTINCT FROM OLD.phone_verified_at THEN
+    RAISE EXCEPTION 'Verify your phone number with the SMS code to change it'
+      USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS profiles_guard_phone ON profiles;
+CREATE TRIGGER profiles_guard_phone BEFORE INSERT OR UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION guard_profile_phone();
+REVOKE ALL ON FUNCTION guard_profile_phone() FROM PUBLIC, anon, authenticated;
+
+-- New accounts no longer take a phone number from sign-up form metadata
+-- (unverified); it is added through verification afterwards.
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, email, avatar_url)
+  VALUES (
+    NEW.id,
+    COALESCE(
+      NULLIF(NEW.raw_user_meta_data->>'full_name', ''),
+      NULLIF(NEW.raw_user_meta_data->>'name', ''),
+      split_part(COALESCE(NEW.email, ''), '@', 1),
+      'User'
+    ),
+    NEW.email,
+    NEW.raw_user_meta_data->>'avatar_url'
+  )
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  RAISE WARNING 'handle_new_user failed for %: %', NEW.id, SQLERRM;
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION handle_new_user() FROM PUBLIC, anon, authenticated;
+
+-- USSD: only verified numbers map to a member
+CREATE OR REPLACE VIEW ussd_member_summary AS
+SELECT DISTINCT ON (p.phone_number)
+  p.phone_number,
+  p.id AS profile_id,
+  p.full_name,
+  m.id AS membership_id,
+  m.chama_id,
+  m.role,
+  c.name AS chama_name
+FROM profiles p
+JOIN chama_memberships m ON m.profile_id = p.id AND m.status = 'active'
+JOIN chamas_v2 c ON c.id = m.chama_id AND c.status = 'active'
+WHERE p.phone_number IS NOT NULL AND p.phone_verified_at IS NOT NULL
+ORDER BY p.phone_number, m.joined_at DESC NULLS LAST;
+REVOKE ALL ON ussd_member_summary FROM PUBLIC, anon, authenticated;
+
+-- Numbers saved before verification existed are not trusted: clear them so
+-- their owners verify (the app asks for a number when none is set).
+UPDATE profiles SET phone_number = NULL WHERE phone_number IS NOT NULL AND phone_verified_at IS NULL;
+
+-- ============================================================
 -- DONE.
 -- ============================================================

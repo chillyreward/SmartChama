@@ -5,14 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
-function formatPhone(raw: string): string | null {
-  let p = raw.replace(/[\s-]/g, '')
-  if (!p) return null
-  if (p.startsWith('+')) return p
-  if (p.startsWith('254')) return '+' + p
-  if (p.startsWith('0')) p = p.slice(1)
-  return '+254' + p
-}
 
 function SignupForm() {
   const supabase = getSupabaseBrowser()
@@ -33,7 +25,6 @@ function SignupForm() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [phone, setPhone] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
   // Step 2 — Admin: group details
@@ -98,8 +89,7 @@ function SignupForm() {
       options: {
         // Read by the handle_new_user trigger to fill the profile row
         data: {
-          full_name: fullName.trim(),
-          phone_number: formatPhone(phone)
+          full_name: fullName.trim()
         },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`
       }
@@ -164,7 +154,6 @@ function SignupForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           full_name: fullName.trim(),
-          phone,
           chama_name: groupName.trim(),
           contribution_amount: contributionAmount,
           contribution_frequency: frequency
@@ -485,24 +474,6 @@ function SignupForm() {
                   autoComplete="email"
                   className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
                 />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
-                  Phone Number <span className="ml-1 normal-case font-normal">(optional)</span>
-                </label>
-                <div className="flex">
-                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] bg-[#FAFAFA] dark:bg-[#0B0F0C] border-[#E5E7EB] dark:border-[#1B2520] text-[#4F5A53] dark:text-[#8FA196]">
-                    +254
-                  </div>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    placeholder="712 345 678"
-                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
-                  />
-                </div>
               </div>
 
               <div>

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth-helpers'
 
 import { loadNationalId, saveNationalId } from '@/lib/private-profile'
+import PhoneVerification from '@/components/PhoneVerification'
 export default function SettingsPage() {
   const { session, member, group, isLoading: authLoading, refreshMemberData } = useAuth()
   const router = useRouter()
@@ -290,15 +291,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
-                      Phone Number (Primary ID)
-                    </label>
-                    <input
-                      type="text"
-                      disabled
-                      value={phoneNumber}
-                      className="w-full bg-gray-50 dark:bg-gray-900/30 border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-gray-400 focus:outline-hidden"
-                    />
+                    <PhoneVerification currentPhone={phoneNumber} onVerified={setPhoneNumber} label="Phone number (primary ID)" />
                   </div>
 
                   <div>

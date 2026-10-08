@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       full_name: String(full_name).trim(),
       email: user.email ?? null,
     }
-    if (phone_number !== undefined) row.phone_number = formatKenyanPhone(phone_number)
+    // Phone numbers are added only through SMS verification (/api/phone/*)
     if (county !== undefined) row.county = county || null
 
     const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' })

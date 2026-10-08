@@ -45,8 +45,7 @@ export async function POST(request: Request) {
       profilePatch.full_name =
         full_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
     }
-    const formattedPhone = formatKenyanPhone(phone);
-    if (formattedPhone && !profile?.phone_number) profilePatch.phone_number = formattedPhone;
+    // Phone numbers are added only through SMS verification (/api/phone/*)
 
     const { error: profileError } = await supabase
       .from('profiles')

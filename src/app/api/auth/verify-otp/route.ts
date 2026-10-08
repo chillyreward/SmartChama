@@ -64,6 +64,8 @@ export async function POST(request: Request) {
       .from('profiles')
       .select('id, email')
       .eq('phone_number', phone)
+      // Only numbers proven with an SMS code can be used to sign in
+      .not('phone_verified_at', 'is', null)
       .maybeSingle();
 
     // Web uses magicLink; the Android app exchanges token_hash with

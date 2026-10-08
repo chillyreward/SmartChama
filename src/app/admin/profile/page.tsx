@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 import { loadNationalId, saveNationalId } from '@/lib/private-profile'
+import PhoneVerification from '@/components/PhoneVerification'
 interface ChamaType {
   id: string
   name: string
@@ -96,7 +97,6 @@ export default function AdminProfilePage() {
         .from('profiles')
         .update({
           full_name: fullName,
-          phone_number: phone,
           county,
         })
         .eq('id', session.user.id)
@@ -304,21 +304,8 @@ export default function AdminProfilePage() {
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5 flex items-center justify-between">
-                  Phone Number
-                  {phone && (
-                    <span className="text-[11px] text-[var(--brand-green)] font-bold flex items-center gap-0.5">
-                      <span className="material-symbols-outlined text-[14px]">verified</span> Verified
-                    </span>
-                  )}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden outline-none transition-all"
-                />
+                {/* Saved only after the SMS code is confirmed */}
+                <PhoneVerification currentPhone={phone} onVerified={setPhone} label="Phone number" />
               </div>
 
               <div>

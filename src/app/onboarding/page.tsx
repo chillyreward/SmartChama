@@ -5,6 +5,7 @@ import { useRouter }
   from 'next/navigation'
 import { getSupabaseBrowser } 
   from '@/lib/supabase-browser'
+import PhoneVerification from '@/components/PhoneVerification'
 import { loadNationalId } from '@/lib/private-profile'
 
 // Step 0: Choose path
@@ -603,61 +604,8 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  Phone Number
-                  <span className="ml-1 normal-case font-normal">(optional)</span>
-                </label>
-                <div className="flex">
-                  <div 
-                    className="flex 
-                      items-center px-3 
-                      rounded-l-xl border 
-                      border-r-0 
-                      text-[14px]"
-                    style={{
-                      backgroundColor: 
-                        'var(--bg-hover)',
-                      borderColor: 
-                        'var(--border)',
-                      color: 
-                        'var(--text-secondary)'
-                    }}>
-                    +254
-                  </div>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={e => 
-                      setPhone(
-                        e.target.value
-                      )}
-                    placeholder="712 345 678"
-                    className="flex-1 
-                      px-4 py-3 
-                      rounded-r-xl border 
-                      text-[15px]
-                      focus:outline-none 
-                      focus:border-[#22C55E]"
-                    style={{
-                      backgroundColor: 
-                        'var(--bg-input)',
-                      borderColor: 
-                        'var(--border)',
-                      color: 
-                        'var(--text-primary)'
-                    }}
-                  />
-                </div>
+                {/* Optional now; required for phone sign-in, USSD and M-Pesa defaults */}
+                <PhoneVerification currentPhone={phone || null} onVerified={setPhone} label="Phone number (optional)" />
               </div>
 
               <div>
