@@ -1727,6 +1727,16 @@ CREATE POLICY "delete_messages" ON chama_messages FOR DELETE TO authenticated US
   owns_membership(member_id, chama_id) OR check_is_chama_admin(chama_id, auth.uid())
 );
 
+-- Live chat: publish inserts to Supabase Realtime (RLS still applies per user)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime')
+     AND NOT EXISTS (SELECT 1 FROM pg_publication_tables
+                     WHERE pubname = 'supabase_realtime' AND tablename = 'chama_messages') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE chama_messages;
+  END IF;
+END $$;
+
 -- ---------- Loan request -> notify officials ----------
 -- Members can't write notifications for other people under RLS, so the
 -- database does it when a pending loan is created.
