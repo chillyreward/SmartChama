@@ -67,7 +67,11 @@ export async function POST(request: Request) {
   if (!sent.success) {
     return NextResponse.json({ error: 'We could not send the SMS. Check the number and try again.' }, { status: 502 })
   }
-  if (sent.simulated && process.env.NODE_ENV !== 'production') {
+  if (sent.simulated) {
+    if (process.env.NODE_ENV === 'production') {
+      // No SMS provider configured: don't pretend a code was sent
+      return NextResponse.json({ error: 'SMS is not set up yet. Please try again later.' }, { status: 503 })
+    }
     console.log(`[DEV] phone verification code for ${phone}: ${code}`)
   }
 
