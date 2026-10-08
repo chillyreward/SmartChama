@@ -183,13 +183,22 @@ export default function LoansPage() {
   };
 
   const handleAction = async (loanId: string, action: 'active' | 'declined') => {
-    const { error: updateErr } = await supabase
-      .from('loans_v2')
-      .update({ status: action })
-      .eq('id', loanId);
+    let failed = '';
+    if (action === 'active') {
+      // Approval debits the group wallet and writes the ledger (server-side, locked)
+      const res = await fetch('/api/loans/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loanId })
+      });
+      if (!res.ok) failed = (await res.json().catch(() => ({}))).error || 'Approval failed.';
+    } else {
+      const { data, error } = await supabase.rpc('decline_loan', { p_loan_id: loanId, p_reason: 'Declined by an official' });
+      if (error || !data?.success) failed = data?.error || 'Decline failed.';
+    }
 
-    if (updateErr) {
-      alert("Action failed.");
+    if (failed) {
+      alert(failed);
     } else {
       setToastMsg(`Loan ${action === 'active' ? 'approved' : 'declined'}!`);
       setTimeout(() => setToastMsg(""), 3000);

@@ -5,6 +5,7 @@ import { useRouter }
   from 'next/navigation'
 import { getSupabaseBrowser } 
   from '@/lib/supabase-browser'
+import { loadNationalId } from '@/lib/private-profile'
 
 // Step 0: Choose path
 // Step 1: Complete profile  
@@ -84,7 +85,7 @@ export default function OnboardingPage() {
     const { data: profile } =
       await supabase
         .from('profiles')
-        .select('id, full_name, phone_number, national_id')
+        .select('id, full_name, phone_number')
         .eq('id', userId)
         .maybeSingle()
 
@@ -103,8 +104,10 @@ export default function OnboardingPage() {
 
     // Phone is optional (Google sign-ups have none), so a profile is complete
     // once it has a name plus either a phone or a national ID.
+    // National ID is stored privately (owner-only table)
+    const savedNationalId = profile ? await loadNationalId(supabase as any, userId) : ''
     if (profile?.full_name &&
-        (profile?.phone_number || profile?.national_id)) {
+        (profile?.phone_number || savedNationalId)) {
       // Profile complete, check
       // if already in a chama
       const { data: memberships } = 

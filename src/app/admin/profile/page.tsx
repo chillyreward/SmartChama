@@ -5,6 +5,7 @@ import { useAuth } from '@/components/AuthProvider'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
+import { loadNationalId, saveNationalId } from '@/lib/private-profile'
 interface ChamaType {
   id: string
   name: string
@@ -54,7 +55,7 @@ export default function AdminProfilePage() {
         setFullName(profile.full_name || '')
         setPhone(profile.phone_number || '')
         setEmail(profile.email || session.user.email || '')
-        setNationalId(profile.national_id || '')
+        setNationalId(await loadNationalId(supabase as any, session.user.id))
         setCounty(profile.county || 'Nairobi')
         setAvatarUrl(profile.avatar_url || '')
       }
@@ -96,7 +97,6 @@ export default function AdminProfilePage() {
         .update({
           full_name: fullName,
           phone_number: phone,
-          national_id: nationalId,
           county,
         })
         .eq('id', session.user.id)

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { supabase } from '@/lib/supabase'
 
+import { loadNationalId, saveNationalId } from '@/lib/private-profile'
 export default function ProfilePage() {
   const { session, member, group, isLoading: authLoading, refreshMemberData } = useAuth()
 
@@ -53,7 +54,7 @@ export default function ProfilePage() {
         setFullName(profile.full_name || '')
         setPhone(profile.phone_number || '')
         setEmail(profile.email || session.user.email || '')
-        setNationalId(profile.national_id || '')
+        setNationalId(await loadNationalId(supabase as any, session.user.id))
         setCounty(profile.county || 'Nairobi')
         setOccupation(profile.occupation || '')
         setAvatarUrl(profile.avatar_url || '')
@@ -125,7 +126,6 @@ export default function ProfilePage() {
         .update({
           full_name: fullName,
           phone_number: phone,
-          national_id: nationalId,
           county,
           occupation
         })

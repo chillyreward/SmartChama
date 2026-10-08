@@ -1892,5 +1892,284 @@ $$;
 REVOKE ALL ON FUNCTION anonymize_account(UUID) FROM PUBLIC, anon, authenticated;
 
 -- ============================================================
+-- PART 9: SECURITY HARDENING (audit 2026-10-08)
+-- ============================================================
+
+-- ---------- 9.1 Private profile fields ----------
+-- RLS is per row, so every column of `profiles` is readable by fellow chama
+-- members. National ID and the push token (which lets anyone send notifications
+-- to that phone) move to an owner-only table.
+CREATE TABLE IF NOT EXISTS profile_private (
+  profile_id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  national_id TEXT,
+  push_token TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE profile_private ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own_private_select" ON profile_private;
+CREATE POLICY "own_private_select" ON profile_private FOR SELECT TO authenticated USING (profile_id = auth.uid());
+DROP POLICY IF EXISTS "own_private_insert" ON profile_private;
+CREATE POLICY "own_private_insert" ON profile_private FOR INSERT TO authenticated WITH CHECK (profile_id = auth.uid());
+DROP POLICY IF EXISTS "own_private_update" ON profile_private;
+CREATE POLICY "own_private_update" ON profile_private FOR UPDATE TO authenticated
+  USING (profile_id = auth.uid()) WITH CHECK (profile_id = auth.uid());
+
+-- Move existing values across, then drop the exposed columns (only if present,
+-- so re-running this file is safe)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'national_id') THEN
+    INSERT INTO profile_private (profile_id, national_id)
+    SELECT id, national_id FROM profiles WHERE national_id IS NOT NULL
+    ON CONFLICT (profile_id) DO UPDATE SET national_id = COALESCE(profile_private.national_id, EXCLUDED.national_id);
+    ALTER TABLE profiles DROP COLUMN national_id;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'push_token') THEN
+    INSERT INTO profile_private (profile_id, push_token)
+    SELECT id, push_token FROM profiles WHERE push_token IS NOT NULL
+    ON CONFLICT (profile_id) DO UPDATE SET push_token = COALESCE(profile_private.push_token, EXCLUDED.push_token);
+    ALTER TABLE profiles DROP COLUMN push_token;
+  END IF;
+END $$;
+
+-- anonymize_account() referenced the old columns
+CREATE OR REPLACE FUNCTION anonymize_account(p_user UUID)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_blocking_chama TEXT;
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM loans_v2 l JOIN chama_memberships m ON m.id = l.membership_id
+    WHERE m.profile_id = p_user AND l.status IN ('active', 'overdue', 'approved')
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'outstanding_loan');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM member_penalties pn JOIN chama_memberships m ON m.id = pn.membership_id
+    WHERE m.profile_id = p_user AND pn.status = 'unpaid'
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'unpaid_penalty');
+  END IF;
+
+  SELECT c.name INTO v_blocking_chama
+  FROM chama_memberships mine
+  JOIN chamas_v2 c ON c.id = mine.chama_id
+  WHERE mine.profile_id = p_user AND mine.status = 'active'
+    AND mine.role IN ('admin', 'chairlady', 'treasurer', 'secretary')
+    AND NOT EXISTS (
+      SELECT 1 FROM chama_memberships o
+      WHERE o.chama_id = mine.chama_id AND o.profile_id <> p_user AND o.status = 'active'
+        AND o.role IN ('admin', 'chairlady', 'treasurer', 'secretary'))
+    AND EXISTS (
+      SELECT 1 FROM chama_memberships o
+      WHERE o.chama_id = mine.chama_id AND o.profile_id <> p_user AND o.status = 'active')
+  LIMIT 1;
+  IF v_blocking_chama IS NOT NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'sole_official', 'chama_name', v_blocking_chama);
+  END IF;
+
+  UPDATE chama_memberships SET status = 'removed', updated_at = now()
+  WHERE profile_id = p_user AND status <> 'removed';
+
+  DELETE FROM chama_messages WHERE member_id IN (SELECT id FROM chama_memberships WHERE profile_id = p_user);
+  DELETE FROM notifications WHERE profile_id = p_user;
+  DELETE FROM profile_private WHERE profile_id = p_user;
+
+  UPDATE profiles
+  SET full_name = 'Former member',
+      phone_number = NULL,
+      email = NULL,
+      county = NULL,
+      occupation = NULL,
+      avatar_url = NULL
+  WHERE id = p_user;
+
+  RETURN jsonb_build_object('success', true);
+END;
+$$;
+REVOKE ALL ON FUNCTION anonymize_account(UUID) FROM PUBLIC, anon, authenticated;
+
+-- ---------- 9.2 Money and membership records can't be edited directly ----------
+-- Officials could PATCH loans_v2 (amount, total_repaid, status 'active') or
+-- re-point a membership at another user through the REST API, bypassing the
+-- locked functions. Direct API updates (role authenticated) are now limited to
+-- the fields the UI legitimately changes; the SECURITY DEFINER functions run as
+-- the table owner and are unaffected.
+
+CREATE OR REPLACE FUNCTION guard_loan_update()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF current_user NOT IN ('authenticated', 'anon') THEN
+    RETURN NEW; -- server functions / service role
+  END IF;
+  IF NEW.amount IS DISTINCT FROM OLD.amount
+     OR NEW.interest_rate IS DISTINCT FROM OLD.interest_rate
+     OR NEW.repayment_months IS DISTINCT FROM OLD.repayment_months
+     OR NEW.total_repaid IS DISTINCT FROM OLD.total_repaid
+     OR NEW.membership_id IS DISTINCT FROM OLD.membership_id
+     OR NEW.chama_id IS DISTINCT FROM OLD.chama_id
+     OR NEW.approved_by IS DISTINCT FROM OLD.approved_by
+     OR NEW.approved_at IS DISTINCT FROM OLD.approved_at
+     OR NEW.due_date IS DISTINCT FROM OLD.due_date THEN
+    RAISE EXCEPTION 'Loan amounts and repayments can only change through approval or repayment'
+      USING ERRCODE = '42501';
+  END IF;
+  -- Only flagging an outstanding loan as overdue (or clearing that flag) is a direct edit
+  IF NEW.status IS DISTINCT FROM OLD.status
+     AND NOT (OLD.status = 'active' AND NEW.status = 'overdue')
+     AND NOT (OLD.status = 'overdue' AND NEW.status = 'active') THEN
+    RAISE EXCEPTION 'Use loan approval or decline to change this loan''s status'
+      USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS loans_guard_update ON loans_v2;
+CREATE TRIGGER loans_guard_update BEFORE UPDATE ON loans_v2 FOR EACH ROW EXECUTE FUNCTION guard_loan_update();
+
+CREATE OR REPLACE FUNCTION guard_membership_update()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF current_user NOT IN ('authenticated', 'anon') THEN
+    RETURN NEW;
+  END IF;
+  IF NEW.profile_id IS DISTINCT FROM OLD.profile_id
+     OR NEW.chama_id IS DISTINCT FROM OLD.chama_id
+     OR NEW.joined_at IS DISTINCT FROM OLD.joined_at
+     OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+    RAISE EXCEPTION 'A membership can''t be moved to another person or group' USING ERRCODE = '42501';
+  END IF;
+  IF NEW.trust_score < 0 OR NEW.trust_score > 100 THEN
+    RAISE EXCEPTION 'Trust score must be 0-100' USING ERRCODE = '22023';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS memberships_guard_update ON chama_memberships;
+CREATE TRIGGER memberships_guard_update BEFORE UPDATE ON chama_memberships FOR EACH ROW EXECUTE FUNCTION guard_membership_update();
+
+CREATE OR REPLACE FUNCTION guard_chama_update()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF current_user IN ('authenticated', 'anon')
+     AND (NEW.created_by IS DISTINCT FROM OLD.created_by OR NEW.group_code IS DISTINCT FROM OLD.group_code) THEN
+    RAISE EXCEPTION 'The group creator and join code can''t be changed here' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS chamas_guard_update ON chamas_v2;
+CREATE TRIGGER chamas_guard_update BEFORE UPDATE ON chamas_v2 FOR EACH ROW EXECUTE FUNCTION guard_chama_update();
+
+-- ---------- 9.3 Remove direct inserts nothing legitimate uses ----------
+-- Confirmed contributions and transactions are written only by the server
+-- (M-Pesa callback, record_* functions). Direct inserts let an official invent
+-- savings history or fake transactions.
+DROP POLICY IF EXISTS "members_insert_contributions" ON contributions_v2;
+CREATE POLICY "members_insert_contributions" ON contributions_v2 FOR INSERT TO authenticated WITH CHECK (
+  status = 'pending' AND owns_membership(membership_id, chama_id)
+);
+DROP POLICY IF EXISTS "members_insert_transactions" ON transactions_v2;
+-- Activity feed: officials only (members could post fake "X paid KSh 50,000")
+DROP POLICY IF EXISTS "members_insert_activity" ON group_activity;
+CREATE POLICY "members_insert_activity" ON group_activity FOR INSERT TO authenticated WITH CHECK (
+  check_is_chama_admin(chama_id, auth.uid())
+);
+
+-- ---------- 9.4 Storage: avatars stay public by URL but can't be listed ----------
+-- A public bucket serves files by URL without any SELECT policy; the policy only
+-- added the ability to list every object (and so every user id).
+DROP POLICY IF EXISTS "Public Read Avatars" ON storage.objects;
+
+-- ---------- 9.5 Membership helper functions answer only about the caller ----------
+-- Callable over RPC, they let any signed-in user probe whether any user id
+-- belongs to any chama. Policies always pass auth.uid(); server-side callers
+-- (service role, auth.uid() NULL) keep full use.
+CREATE OR REPLACE FUNCTION check_is_chama_member(p_chama_id UUID, p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT (auth.uid() IS NULL OR p_user_id = auth.uid())
+     AND EXISTS (
+       SELECT 1 FROM chama_memberships
+       WHERE chama_id = p_chama_id AND profile_id = p_user_id AND status = 'active'
+     );
+$$;
+
+CREATE OR REPLACE FUNCTION check_is_chama_admin(p_chama_id UUID, p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT (auth.uid() IS NULL OR p_user_id = auth.uid())
+     AND EXISTS (
+       SELECT 1 FROM chama_memberships
+       WHERE chama_id = p_chama_id AND profile_id = p_user_id AND status = 'active'
+         AND role IN ('admin','chairlady','treasurer','secretary')
+     );
+$$;
+
+-- ---------- 9.6 Longer join codes ----------
+-- 6 hex characters (16.7M combinations) can be brute-forced through the
+-- public preview_join_code RPC. New groups get 8 characters from a 31-symbol
+-- alphabet without look-alikes (~850 billion). Existing codes keep working.
+CREATE OR REPLACE FUNCTION generate_group_code()
+RETURNS TEXT
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_alphabet CONSTANT TEXT := 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  v_code TEXT;
+BEGIN
+  LOOP
+    SELECT string_agg(substr(v_alphabet, 1 + floor(random() * length(v_alphabet))::int, 1), '')
+    INTO v_code FROM generate_series(1, 8);
+    EXIT WHEN NOT EXISTS (SELECT 1 FROM chamas_v2 WHERE group_code = v_code);
+  END LOOP;
+  RETURN v_code;
+END;
+$$;
+
+-- ---------- 9.7 Advisor warnings: fixed search_path, no RPC access to trigger functions ----------
+ALTER FUNCTION set_group_code() SET search_path = public;
+ALTER FUNCTION touch_updated_at() SET search_path = public;
+ALTER FUNCTION refresh_ussd_summary() SET search_path = public;
+
+REVOKE ALL ON FUNCTION handle_new_user() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION notify_officials_of_loan_request() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION guard_loan_update() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION guard_membership_update() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION guard_chama_update() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION set_group_code() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION touch_updated_at() FROM PUBLIC, anon, authenticated;
+
+-- ---------- 9.8 Indexes on foreign keys used by RLS checks and joins ----------
+CREATE INDEX IF NOT EXISTS idx_notifications_chama ON notifications(chama_id);
+CREATE INDEX IF NOT EXISTS idx_chamas_created_by ON chamas_v2(created_by);
+CREATE INDEX IF NOT EXISTS idx_contributions_loan ON contributions_v2(loan_id);
+CREATE INDEX IF NOT EXISTS idx_loan_repayments_loan ON loan_repayments(loan_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_membership ON transactions_v2(membership_id);
+CREATE INDEX IF NOT EXISTS idx_group_activity_chama ON group_activity(chama_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_log_chama ON audit_log(chama_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sg_proposals_chama ON smartgrow_proposals(chama_id);
+CREATE INDEX IF NOT EXISTS idx_sg_votes_membership ON smartgrow_votes(membership_id);
+CREATE INDEX IF NOT EXISTS idx_sg_investments_chama ON smartgrow_investments(chama_id);
+CREATE INDEX IF NOT EXISTS idx_withdrawal_votes_membership ON withdrawal_votes(membership_id);
+CREATE INDEX IF NOT EXISTS idx_mgr_cycles_chama ON merry_go_round_cycles(chama_id);
+CREATE INDEX IF NOT EXISTS idx_mgr_contrib_membership ON merry_go_round_contributions(membership_id);
+CREATE INDEX IF NOT EXISTS idx_penalties_membership ON member_penalties(membership_id);
+CREATE INDEX IF NOT EXISTS idx_welfare_claims_membership ON welfare_claims(membership_id);
+CREATE INDEX IF NOT EXISTS idx_chama_messages_member ON chama_messages(member_id);
+CREATE INDEX IF NOT EXISTS idx_ledger_membership ON ledger_entries(membership_id);
+
+-- ============================================================
 -- DONE.
 -- ============================================================

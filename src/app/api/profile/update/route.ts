@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireUser, formatKenyanPhone } from '@/lib/require-user'
 
+import { saveNationalId } from '@/lib/private-profile'
 export async function POST(req: Request) {
   try {
     const auth = await requireUser()
@@ -22,7 +23,6 @@ export async function POST(req: Request) {
     }
     if (phone_number !== undefined) row.phone_number = formatKenyanPhone(phone_number)
     if (county !== undefined) row.county = county || null
-    if (national_id !== undefined) row.national_id = national_id || null
 
     const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' })
 
@@ -35,6 +35,14 @@ export async function POST(req: Request) {
         )
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    if (national_id !== undefined) {
+      const { error: idError } = await saveNationalId(supabase, user.id, national_id)
+      if (idError) {
+        console.error('National ID save error:', idError)
+        return NextResponse.json({ error: 'Could not save your ID number.' }, { status: 500 })
+      }
     }
 
     return NextResponse.json({ success: true })

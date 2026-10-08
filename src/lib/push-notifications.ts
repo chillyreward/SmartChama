@@ -42,14 +42,15 @@ export async function notifyUserByProfileId(
 ) {
   try {
     const supabase = getSupabaseAdmin();
-    const { data: profile } = await supabase
-      .from('profiles')
+    // Push tokens are private to their owner (profile_private)
+    const { data: priv } = await supabase
+      .from('profile_private')
       .select('push_token')
-      .eq('id', profileId)
-      .single();
+      .eq('profile_id', profileId)
+      .maybeSingle();
 
-    if (profile?.push_token) {
-      await sendPushNotification(profile.push_token, title, body, data);
+    if (priv?.push_token) {
+      await sendPushNotification(priv.push_token, title, body, data);
     }
   } catch (err) {
     console.error('Error sending user push notification:', err);

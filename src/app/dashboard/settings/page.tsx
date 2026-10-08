@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth-helpers'
 
+import { loadNationalId, saveNationalId } from '@/lib/private-profile'
 export default function SettingsPage() {
   const { session, member, group, isLoading: authLoading, refreshMemberData } = useAuth()
   const router = useRouter()
@@ -65,7 +66,7 @@ export default function SettingsPage() {
         setFullName(profile.full_name || '')
         setEmail(profile.email || '')
         setPhoneNumber(profile.phone_number || '')
-        setNationalId(profile.national_id || '')
+        setNationalId(await loadNationalId(supabase as any, session.user.id))
         setCounty(profile.county || '')
         setOccupation(profile.occupation || '')
         if (profile.notification_prefs) {
@@ -104,13 +105,16 @@ export default function SettingsPage() {
         .update({
           full_name: fullName,
           email,
-          national_id: nationalId,
           county,
           occupation
         })
         .eq('id', session.user.id)
 
       if (error) throw error
+
+      // National ID is stored privately (owner-only), not on the shared profile
+      const { error: idError } = await saveNationalId(supabase as any, session.user.id, nationalId.trim())
+      if (idError) throw idError
 
       setToastMsg('Profile updated successfully.')
       setTimeout(() => setToastMsg(''), 3000)
