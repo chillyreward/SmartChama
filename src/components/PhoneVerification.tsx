@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Adds or changes the user's phone number. The number is saved only after the
 // user types the code we text to it (/api/phone/send-code, /api/phone/verify),
@@ -11,14 +11,18 @@ type Props = {
   verified?: boolean
   onVerified?: (phone: string) => void
   label?: string
+  /** Number typed earlier (e.g. on the sign-up form) */
+  initialPhone?: string
+  /** Send the code to initialPhone straight away */
+  autoSend?: boolean
 }
 
 const inputClass =
   'w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]'
 
-export default function PhoneVerification({ currentPhone, verified, onVerified, label = 'Phone number' }: Props) {
+export default function PhoneVerification({ currentPhone, verified, onVerified, label = 'Phone number', initialPhone = '', autoSend = false }: Props) {
   const [editing, setEditing] = useState(!currentPhone)
-  const [phone, setPhone] = useState('')
+  const [phone, setPhone] = useState(initialPhone)
   const [sentTo, setSentTo] = useState<string | null>(null)
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
@@ -36,10 +40,10 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
     return data
   }
 
-  async function sendCode() {
+  async function sendCode(number = phone) {
     setError(''); setInfo(''); setBusy(true)
     try {
-      const data = await post('/api/phone/send-code', { phone_number: phone })
+      const data = await post('/api/phone/send-code', { phone_number: number })
       setSentTo(data.phone)
       setCode('')
       setInfo(`We sent a 6-digit code to ${data.phone}.`)
@@ -49,6 +53,15 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
       setBusy(false)
     }
   }
+
+  const autoSent = useRef(false)
+  useEffect(() => {
+    if (autoSend && initialPhone && !currentPhone && !autoSent.current) {
+      autoSent.current = true
+      sendCode(initialPhone)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSend, initialPhone, currentPhone])
 
   async function verify() {
     if (!sentTo) return
@@ -99,7 +112,7 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
           />
           <button
             type="button"
-            onClick={sendCode}
+            onClick={() => sendCode()}
             disabled={busy || phone.replace(/\D/g, '').length < 9}
             className="shrink-0 px-4 rounded-xl bg-[#22C55E] text-white text-[14px] font-semibold disabled:opacity-50"
           >
@@ -131,7 +144,7 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
             </button>
           </div>
           <div className="flex gap-4 text-[13px]">
-            <button type="button" onClick={sendCode} disabled={busy} className="font-semibold text-[#22C55E] hover:underline disabled:opacity-50">
+            <button type="button" onClick={() => sendCode()} disabled={busy} className="font-semibold text-[#22C55E] hover:underline disabled:opacity-50">
               Resend code
             </button>
             <button type="button" onClick={() => { setSentTo(null); setInfo(''); setError('') }} className="text-[#4F5A53] dark:text-[#8FA196] hover:underline">

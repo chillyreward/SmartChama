@@ -94,6 +94,12 @@ export default function OnboardingPage() {
     try {
       const pendingCode = localStorage.getItem('sc_pending_join_code')
       if (pendingCode) setInviteCode(pendingCode)
+      const pendingProfile = localStorage.getItem('sc_pending_profile')
+      if (pendingProfile) {
+        const pp = JSON.parse(pendingProfile)
+        if (pp.national_id) setNationalId(pp.national_id)
+        if (pp.phone) setPhone(pp.phone)
+      }
       const pendingGroup = localStorage.getItem('sc_pending_group')
       if (pendingGroup) {
         const g = JSON.parse(pendingGroup)
@@ -1202,7 +1208,8 @@ export default function OnboardingPage() {
                   setInviteCode(
                     e.target.value
                       .toUpperCase()
-                      .slice(0, 8)
+                      .replace(/[^A-Z0-9-]/g, '')
+                      .slice(0, 14)
                   )}
                 placeholder="e.g. SC4829"
                 className="w-full px-4 
