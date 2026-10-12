@@ -94,6 +94,9 @@ export default function OnboardingPage() {
     try {
       const pendingCode = localStorage.getItem('sc_pending_join_code')
       if (pendingCode) setInviteCode(pendingCode)
+      // Group code carried through Google/Apple sign-up
+      const urlCode = new URLSearchParams(window.location.search).get('code')
+      if (urlCode) setInviteCode(urlCode.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 14))
       const pendingProfile = localStorage.getItem('sc_pending_profile')
       if (pendingProfile) {
         const pp = JSON.parse(pendingProfile)

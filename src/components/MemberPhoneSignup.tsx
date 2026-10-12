@@ -118,17 +118,16 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
     <div className="space-y-4">
       <div>
         <label htmlFor="m-name" className={label}>Full name</label>
-        <input id="m-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Jane Wanjiru" autoComplete="name" className={input} />
+        <input id="m-name" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="off" className={input} />
       </div>
       <div>
-        <label htmlFor="m-phone" className={label}>M-Pesa phone number</label>
-        <input id="m-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="0712 345 678" className={input} />
+        <label htmlFor="m-phone" className={label}>Phone number</label>
+        <input id="m-phone" type="tel" inputMode="tel" autoComplete="off" value={phone} onChange={(e) => setPhone(e.target.value)} className={input} />
         <p className="text-[12px] mt-1.5 text-[#8FA196]">You&apos;ll sign in with this number. We&apos;ll text a code to confirm it.</p>
       </div>
       <div>
         <label htmlFor="m-id" className={label}>National ID number</label>
-        <input id="m-id" inputMode="numeric" autoComplete="off" value={nationalId} onChange={(e) => setNationalId(e.target.value.replace(/\D/g, '').slice(0, 9))} placeholder="12345678" className={input} />
-        <p className="text-[12px] mt-1.5 text-[#8FA196]">Kept private: other members can&apos;t see it.</p>
+        <input id="m-id" inputMode="numeric" autoComplete="off" value={nationalId} onChange={(e) => setNationalId(e.target.value.replace(/\D/g, '').slice(0, 9))} className={input} />
       </div>
       <div>
         <label htmlFor="m-code" className={label}>Group or invite code</label>
@@ -136,7 +135,6 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
           id="m-code"
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 14))}
-          placeholder="PSJKB863"
           autoComplete="off"
           className={input + ' font-mono tracking-[0.2em] uppercase'}
         />
@@ -153,7 +151,7 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
       </div>
       <div>
         <label htmlFor="m-confirm" className={label}>Confirm password</label>
-        <input id="m-confirm" type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Type the password again" autoComplete="new-password" className={input} />
+        <input id="m-confirm" type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" className={input} />
         {confirmPassword && confirmPassword !== password && <p className="mt-1.5 text-[12px] text-red-500">Passwords don&apos;t match yet.</p>}
       </div>
       <label className="flex items-start gap-3 text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
