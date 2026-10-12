@@ -35,8 +35,13 @@ export default function OnboardingPage() {
   // inputs including selects
   const [fullName, setFullName] = 
     useState('')
-  const [phone, setPhone] = 
+  const [phone, setPhone] =
     useState('')
+  // A number counts only once confirmed by SMS code (saved on the profile by
+  // /api/phone/verify). Typed-but-unconfirmed numbers just pre-fill the box.
+  const [phoneVerified, setPhoneVerified] = useState(false)
+  // Joined with a group code and waiting for an official to approve
+  const [pendingChamaName, setPendingChamaName] = useState<string | null>(null)
   const [county, setCounty] = 
     useState('')
   const [nationalId, setNationalId] = 
@@ -112,12 +117,15 @@ export default function OnboardingPage() {
       }
     } catch (e) {}
 
-    // Phone is optional (Google sign-ups have none), so a profile is complete
-    // once it has a name plus either a phone or a national ID.
-    // National ID is stored privately (owner-only table)
+    // A profile is complete with a name and a verified phone number
+    // (phone_number is only ever written after the SMS code is confirmed).
+    if (profile?.phone_number) {
+      setPhone(profile.phone_number)
+      setPhoneVerified(true)
+    }
     const savedNationalId = profile ? await loadNationalId(supabase as any, userId) : ''
-    if (profile?.full_name &&
-        (profile?.phone_number || savedNationalId)) {
+    if (savedNationalId) setNationalId(savedNationalId)
+    if (profile?.full_name && profile?.phone_number) {
       // Profile complete, check
       // if already in a chama
       const { data: memberships } = 
@@ -125,13 +133,20 @@ export default function OnboardingPage() {
           .from('chama_memberships')
           .select('chama_id, role, status, chamas_v2(id, name)')
           .eq('profile_id', userId)
-          .eq('status', 'active')
+          .in('status', ['active', 'pending'])
 
-      if (memberships && 
-          memberships.length > 0) {
+      const activeOnes = (memberships ?? []).filter((m: any) => m.status === 'active')
+      const pendingOne = (memberships ?? []).find((m: any) => m.status === 'pending')
+      if (activeOnes.length === 0 && pendingOne) {
+        setFullName(profile.full_name || '')
+        setPendingChamaName((pendingOne.chamas_v2 as any)?.name || 'your group')
+        return
+      }
+
+      if (activeOnes.length > 0) {
         // Already in a chama — 
         // go straight to dashboard
-        const m = memberships[0]
+        const m = activeOnes[0]
         sessionStorage.setItem(
           'active_chama_id',
           (m.chamas_v2 as any).id
@@ -180,6 +195,10 @@ export default function OnboardingPage() {
     }
     if (!nationalId.trim()) {
       setError('Please enter your National ID number.')
+      return
+    }
+    if (!phoneVerified) {
+      setError('Verify your phone number: send the code and enter it.')
       return
     }
 
@@ -314,6 +333,35 @@ export default function OnboardingPage() {
       setError('Something went wrong. Please try again.')
       setLoading(false)
     }
+  }
+
+  // ═══ WAITING FOR APPROVAL ═══
+  if (pendingChamaName) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-page)' }}>
+        <div className="w-full max-w-md rounded-2xl p-8 text-center space-y-4" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <span className="material-symbols-outlined text-[44px] text-amber-500">hourglass_top</span>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Waiting for approval</h1>
+          <p className="text-[15px]" style={{ color: 'var(--text-secondary)' }}>
+            Your request to join <strong>{pendingChamaName}</strong> has been sent to the group&apos;s officials.
+            You&apos;ll get access as soon as one of them approves it.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full py-3 rounded-xl bg-[#22C55E] text-white font-semibold"
+          >
+            Check again
+          </button>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}
+            className="w-full py-3 rounded-xl border text-[15px]"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    )
   }
 
   // ═══ THE UI ═══
@@ -614,8 +662,14 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                {/* Optional now; required for phone sign-in, USSD and M-Pesa defaults */}
-                <PhoneVerification currentPhone={phone || null} onVerified={setPhone} label="Phone number (optional)" />
+                {/* Required: used for sign-in, USSD and M-Pesa payment prompts */}
+                <PhoneVerification
+                  currentPhone={phoneVerified ? phone : null}
+                  verified={phoneVerified}
+                  initialPhone={phoneVerified ? '' : phone}
+                  onVerified={(p) => { setPhone(p); setPhoneVerified(true) }}
+                  label="Phone number"
+                />
               </div>
 
               <div>
