@@ -56,7 +56,8 @@ export async function proxy(req: NextRequest) {
   if (isPublic) return res
 
   // Protected member routes — redirect to login if no session
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/select-group')) {
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/select-group') ||
+      pathname.startsWith('/verify-identity') || pathname.startsWith('/staff')) {
     if (!user) {
       const loginUrl = new URL('/login', req.url)
       loginUrl.searchParams.set('redirect', pathname)

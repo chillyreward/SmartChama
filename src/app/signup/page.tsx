@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
+import PhoneVerification from '@/components/PhoneVerification'
+import KycVerification from '@/components/KycVerification'
 
 
 function SignupForm() {
@@ -39,6 +41,10 @@ function SignupForm() {
   // Success state — shows group code for admin after creation
   const [createdGroupCode, setCreatedGroupCode] = useState('')
   const [success, setSuccess] = useState(false)
+  // After the group is created: verify phone (step 3), then identity (step 4)
+  const [postStep, setPostStep] = useState<null | 'phone' | 'identity'>(null)
+  const [verifiedPhone, setVerifiedPhone] = useState('')
+  const [kycMessage, setKycMessage] = useState('')
   const [pendingConfirmation, setPendingConfirmation] = useState(false)
   // Group-code joins wait for an official to approve the request
   const [pendingApproval, setPendingApproval] = useState(false)
@@ -171,7 +177,7 @@ function SignupForm() {
 
       rememberActiveChama(data.chama_id)
       setCreatedGroupCode(data.group_code)
-      setSuccess(true)
+      setPostStep('phone')
       setLoading(false)
 
     } catch (err: any) {
@@ -307,6 +313,56 @@ function SignupForm() {
     )
   }
 
+  // STEPS 3–4 FOR ADMIN — phone and identity checks after the group exists
+  // (both need the new account to be signed in, so they come after creation)
+  if (postStep) {
+    const finish = () => { setPostStep(null); setSuccess(true) }
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+        <div className="w-full max-w-xl space-y-6 py-10">
+          <div className="space-y-1">
+            <p className="text-[12px] font-semibold uppercase tracking-widest text-[#22C55E]">
+              Step {postStep === 'phone' ? 3 : 4} of 4 · {groupName} is created
+            </p>
+            <h1 className="text-[28px] font-bold">
+              {postStep === 'phone' ? 'Verify your phone number' : 'Verify your identity'}
+            </h1>
+            <p className="text-[15px] text-[#4F5A53] dark:text-[#8FA196]">
+              {postStep === 'phone'
+                ? "We'll text you a code. Your number is used for M-Pesa prompts, SMS sign-in and USSD."
+                : 'Add your ID number, a photo of your national ID or passport, and a live selfie. Loan payouts, withdrawals and investments unlock once you are verified.'}
+            </p>
+          </div>
+
+          {postStep === 'phone' ? (
+            <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-5 space-y-4">
+              <PhoneVerification
+                currentPhone={verifiedPhone || null}
+                onVerified={(p) => { setVerifiedPhone(p); setPostStep('identity') }}
+                label="M-Pesa phone number"
+              />
+            </div>
+          ) : kycMessage ? (
+            <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-6 space-y-4 text-center">
+              <p className="text-[15px]">{kycMessage}</p>
+              <button onClick={finish} className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white font-semibold">Continue</button>
+            </div>
+          ) : (
+            <KycVerification onDone={(o) => { if (o.status === 'rejected') return; setKycMessage(o.message) }} />
+          )}
+
+          <button
+            type="button"
+            onClick={() => (postStep === 'phone' ? setPostStep('identity') : finish())}
+            className="block mx-auto text-[14px] text-[#4F5A53] dark:text-[#8FA196] hover:underline"
+          >
+            {postStep === 'phone' ? 'Skip for now' : 'Do this later'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // SUCCESS SCREEN FOR ADMIN — shows the group code prominently
   if (success && createdGroupCode) {
     return (
@@ -348,11 +404,24 @@ function SignupForm() {
             Copy Group Code
           </button>
 
-          <button
-            onClick={() => router.push('/admin/dashboard')}
-            className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0">
-            Go to Admin Dashboard
-          </button>
+          {kycMessage ? (
+            <button
+              onClick={() => router.push('/admin/dashboard')}
+              className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0">
+              Go to Admin Dashboard
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => router.push('/verify-identity?next=/admin/dashboard')}
+                className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0">
+                Verify your identity
+              </button>
+              <p className="mt-3 text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
+                Needed before loans, withdrawals or investments: your ID or passport and a selfie.
+              </p>
+            </>
+          )}
 
         </div>
       </div>

@@ -2263,5 +2263,299 @@ REVOKE ALL ON ussd_member_summary FROM PUBLIC, anon, authenticated;
 UPDATE profiles SET phone_number = NULL WHERE phone_number IS NOT NULL AND phone_verified_at IS NULL;
 
 -- ============================================================
+-- PART 11: IDENTITY VERIFICATION (KYC) FOR GROUP CREATORS
+-- ============================================================
+-- A group creator submits an ID number, ID photos (national ID front + back,
+-- or passport photo page) and a live selfie. The server compares the selfie
+-- with the face on the ID. The group works straight away, but money can't
+-- leave it (loan payouts, withdrawals, SmartGrow investments) until the
+-- creator is verified.
+--
+-- ID images and selfies are sensitive personal (biometric) data: they live in
+-- a private bucket that only the server reads.
+
+CREATE TABLE IF NOT EXISTS kyc_verifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  document_type TEXT NOT NULL CHECK (document_type IN ('national_id', 'passport')),
+  document_number TEXT NOT NULL,
+  id_front_path TEXT NOT NULL,
+  id_back_path TEXT,
+  selfie_path TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'review'
+    CHECK (status IN ('verified', 'review', 'rejected')),
+  face_match_score NUMERIC(5,2),
+  provider TEXT,
+  rejection_reason TEXT,
+  consent_at TIMESTAMPTZ NOT NULL,
+  reviewed_by UUID REFERENCES profiles(id),
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_kyc_profile ON kyc_verifications(profile_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_kyc_status ON kyc_verifications(status, created_at);
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS kyc_status TEXT NOT NULL DEFAULT 'none';
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_kyc_status_check;
+ALTER TABLE profiles ADD CONSTRAINT profiles_kyc_status_check
+  CHECK (kyc_status IN ('none', 'review', 'verified', 'rejected'));
+
+-- SmartChama staff who review identity checks
+CREATE TABLE IF NOT EXISTS platform_admins (
+  profile_id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE kyc_verifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE platform_admins ENABLE ROW LEVEL SECURITY;
+
+-- Owners see their own submissions (status and reason); writes are server-only
+DROP POLICY IF EXISTS "own_kyc_select" ON kyc_verifications;
+CREATE POLICY "own_kyc_select" ON kyc_verifications FOR SELECT TO authenticated USING (profile_id = auth.uid());
+-- platform_admins: no policies (server-only)
+
+-- kyc_status is set by the server only, like the phone fields
+CREATE OR REPLACE FUNCTION guard_profile_kyc()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN
+  IF current_user IN ('authenticated', 'anon') THEN
+    IF TG_OP = 'INSERT' THEN
+      NEW.kyc_status := 'none';
+    ELSIF NEW.kyc_status IS DISTINCT FROM OLD.kyc_status THEN
+      RAISE EXCEPTION 'Identity status is set by verification' USING ERRCODE = '42501';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS profiles_guard_kyc ON profiles;
+CREATE TRIGGER profiles_guard_kyc BEFORE INSERT OR UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION guard_profile_kyc();
+REVOKE ALL ON FUNCTION guard_profile_kyc() FROM PUBLIC, anon, authenticated;
+
+-- Private bucket: users upload into their own folder and may view their own
+-- files; nobody can list, change or delete them (evidence must stay intact).
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('kyc', 'kyc', false)
+ON CONFLICT (id) DO UPDATE SET public = false;
+
+DROP POLICY IF EXISTS "kyc_own_upload" ON storage.objects;
+CREATE POLICY "kyc_own_upload" ON storage.objects FOR INSERT TO authenticated WITH CHECK (
+  bucket_id = 'kyc' AND (storage.foldername(name))[1] = auth.uid()::text
+);
+DROP POLICY IF EXISTS "kyc_own_read" ON storage.objects;
+CREATE POLICY "kyc_own_read" ON storage.objects FOR SELECT TO authenticated USING (
+  bucket_id = 'kyc' AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- ---------- Money stays in a group until its creator is verified ----------
+CREATE OR REPLACE FUNCTION chama_creator_verified(p_chama_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM chamas_v2 c JOIN profiles p ON p.id = c.created_by
+    WHERE c.id = p_chama_id AND p.kyc_status = 'verified'
+  );
+$$;
+GRANT EXECUTE ON FUNCTION chama_creator_verified(UUID) TO authenticated;
+REVOKE ALL ON FUNCTION chama_creator_verified(UUID) FROM PUBLIC, anon;
+
+-- The three functions that move money out of a group, now refusing until the
+-- creator is verified (same bodies as Part 6 plus the check).
+CREATE OR REPLACE FUNCTION approve_loan_safe(
+  p_loan_id UUID,
+  p_chama_id UUID,
+  p_amount NUMERIC,
+  p_admin_id UUID
+) RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_loan loans_v2%ROWTYPE;
+  v_wallet wallets%ROWTYPE;
+  v_borrower UUID;
+BEGIN
+  SELECT * INTO v_loan FROM loans_v2 WHERE id = p_loan_id AND chama_id = p_chama_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Loan not found');
+  END IF;
+  IF v_loan.status <> 'pending' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Loan is not pending');
+  END IF;
+  IF v_loan.amount <> p_amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Amount mismatch');
+  END IF;
+  IF NOT check_is_chama_admin(p_chama_id, p_admin_id) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Only chama officials can approve loans');
+  END IF;
+  SELECT profile_id INTO v_borrower FROM chama_memberships WHERE id = v_loan.membership_id;
+  IF v_borrower = p_admin_id THEN
+    RETURN jsonb_build_object('success', false, 'error', 'You cannot approve your own loan');
+  END IF;
+
+  IF NOT chama_creator_verified(p_chama_id) THEN
+    RETURN jsonb_build_object('success', false, 'error',
+      'Money can''t leave this group until its creator has verified their identity (ID and selfie).');
+  END IF;
+
+  SELECT * INTO v_wallet FROM wallets WHERE chama_id = p_chama_id FOR UPDATE;
+  IF NOT FOUND OR v_wallet.balance < v_loan.amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Insufficient group balance');
+  END IF;
+
+  UPDATE loans_v2
+  SET status = 'active',
+      approved_by = p_admin_id,
+      approved_at = now(),
+      due_date = (now() + make_interval(months => v_loan.repayment_months))::date
+  WHERE id = p_loan_id;
+
+  UPDATE wallets
+  SET balance = balance - v_loan.amount,
+      loans_disbursed = loans_disbursed + v_loan.amount,
+      updated_at = now()
+  WHERE chama_id = p_chama_id;
+
+  INSERT INTO transactions_v2 (chama_id, membership_id, type, amount, description, status, created_by)
+  VALUES (p_chama_id, v_loan.membership_id, 'loan_disbursement', -v_loan.amount, 'Loan disbursement', 'confirmed', p_admin_id);
+
+  PERFORM record_ledger_transaction(p_chama_id, 'chama_pool', 'member_loans', v_loan.membership_id, v_loan.amount, 'Loan disbursement');
+
+  INSERT INTO notifications (profile_id, chama_id, type, title, message)
+  VALUES (v_borrower, p_chama_id, 'loan_approved', 'Loan approved',
+          'Your loan of KSh ' || to_char(v_loan.amount, 'FM999,999,990') || ' has been approved.');
+
+  RETURN jsonb_build_object('success', true);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION execute_withdrawal(p_consent_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_consent withdrawal_consents%ROWTYPE;
+  v_wallet wallets%ROWTYPE;
+  v_membership UUID;
+BEGIN
+  SELECT * INTO v_consent FROM withdrawal_consents WHERE id = p_consent_id FOR UPDATE;
+  IF NOT FOUND OR NOT check_is_chama_admin(v_consent.chama_id, auth.uid()) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Request not found');
+  END IF;
+  IF v_consent.status <> 'approved' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Only member-approved requests can be paid out');
+  END IF;
+
+  IF NOT chama_creator_verified(v_consent.chama_id) THEN
+    RETURN jsonb_build_object('success', false, 'error',
+      'Money can''t leave this group until its creator has verified their identity (ID and selfie).');
+  END IF;
+
+  SELECT * INTO v_wallet FROM wallets WHERE chama_id = v_consent.chama_id FOR UPDATE;
+  IF NOT FOUND OR v_wallet.balance < v_consent.amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Insufficient group balance');
+  END IF;
+
+  SELECT id INTO v_membership FROM chama_memberships WHERE chama_id = v_consent.chama_id AND profile_id = auth.uid();
+
+  UPDATE wallets
+  SET balance = balance - v_consent.amount,
+      savings_pool = greatest(savings_pool - v_consent.amount, 0),
+      updated_at = now()
+  WHERE chama_id = v_consent.chama_id;
+
+  UPDATE withdrawal_consents
+  SET status = 'executed', executed_at = now(), executed_by = auth.uid()
+  WHERE id = p_consent_id;
+
+  INSERT INTO transactions_v2 (chama_id, membership_id, type, amount, reference, description, status, created_by)
+  VALUES (v_consent.chama_id, v_membership, 'withdrawal', -v_consent.amount, 'WD-' || left(p_consent_id::text, 8),
+          coalesce(v_consent.reason, 'Approved withdrawal'), 'confirmed', auth.uid());
+
+  PERFORM record_ledger_transaction(v_consent.chama_id, 'chama_pool', 'external_cash', v_membership, v_consent.amount, 'Withdrawal');
+
+  INSERT INTO audit_log (chama_id, actor_id, action, target_type, target_id, details)
+  VALUES (v_consent.chama_id, auth.uid(), 'withdrawal_executed', 'withdrawal_consent', p_consent_id,
+          jsonb_build_object('amount', v_consent.amount));
+
+  RETURN jsonb_build_object('success', true);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION record_smartgrow_investment(p_chama_id UUID, p_product_id UUID, p_amount NUMERIC)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_product smartgrow_products%ROWTYPE;
+  v_wallet wallets%ROWTYPE;
+  v_membership UUID;
+  v_investment UUID;
+BEGIN
+  IF NOT check_is_chama_admin(p_chama_id, auth.uid()) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Only chama officials can invest group funds');
+  END IF;
+
+  SELECT * INTO v_product FROM smartgrow_products WHERE id = p_product_id AND is_active;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Product not available');
+  END IF;
+  IF p_amount IS NULL OR p_amount < v_product.min_amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Below the product minimum');
+  END IF;
+
+  IF NOT chama_creator_verified(p_chama_id) THEN
+    RETURN jsonb_build_object('success', false, 'error',
+      'Money can''t leave this group until its creator has verified their identity (ID and selfie).');
+  END IF;
+
+  SELECT * INTO v_wallet FROM wallets WHERE chama_id = p_chama_id FOR UPDATE;
+  IF NOT FOUND OR v_wallet.balance < p_amount THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Insufficient group balance');
+  END IF;
+
+  SELECT id INTO v_membership FROM chama_memberships WHERE chama_id = p_chama_id AND profile_id = auth.uid();
+
+  INSERT INTO smartgrow_investments (chama_id, product_id, amount, expected_return, status, start_date)
+  VALUES (p_chama_id, p_product_id, p_amount, v_product.expected_return_min, 'active', current_date)
+  RETURNING id INTO v_investment;
+
+  UPDATE wallets
+  SET balance = balance - p_amount, invested = invested + p_amount, updated_at = now()
+  WHERE chama_id = p_chama_id;
+
+  INSERT INTO transactions_v2 (chama_id, membership_id, type, amount, description, status, created_by)
+  VALUES (p_chama_id, v_membership, 'smartgrow_investment', -p_amount,
+          'SmartGrow: ' || v_product.name || ' with ' || v_product.provider, 'confirmed', auth.uid());
+
+  PERFORM record_ledger_transaction(p_chama_id, 'chama_pool', 'investments', v_membership, p_amount, 'SmartGrow: ' || v_product.name);
+
+  RETURN jsonb_build_object('success', true, 'investment_id', v_investment);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION approve_loan_safe(UUID, UUID, NUMERIC, UUID) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION execute_withdrawal(UUID) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION record_smartgrow_investment(UUID, UUID, NUMERIC) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION execute_withdrawal(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION record_smartgrow_investment(UUID, UUID, NUMERIC) TO authenticated;
+
+-- Failed phone + password sign-ins, for rate limiting (server-only)
+CREATE TABLE IF NOT EXISTS login_attempts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  identifier TEXT NOT NULL,
+  ip TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_identifier ON login_attempts(identifier, created_at);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON login_attempts(ip, created_at);
+ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
+
+-- Reviewers are added by hand in the SQL editor, e.g.:
+--   INSERT INTO platform_admins (profile_id)
+--   SELECT id FROM profiles WHERE email = 'you@example.com';
+
+-- ============================================================
 -- DONE.
 -- ============================================================

@@ -29,12 +29,45 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ 
-      email: email.trim(), 
-      password 
-    })
+    // One field takes either an email or a phone number. Phone sign-in goes via
+    // the server, which looks up the account for that (verified) number.
+    const identifier = email.trim()
+    const usingPhone = !identifier.includes('@')
+    let userId: string | null = null
+    let authError: { message: string } | null = null
 
-    if (authError) {
+    if (usingPhone) {
+      const res = await fetch('/api/auth/password-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_number: identifier, password })
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.status === 429 || res.status === 400) {
+        setError(data.error || 'Could not sign in.')
+        setLoading(false)
+        return
+      }
+      if (!res.ok) {
+        authError = { message: res.status === 401 ? 'Invalid' : (data.error || 'Could not sign in.') }
+      } else {
+        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token
+        })
+        if (sessionError) authError = { message: sessionError.message }
+        userId = sessionData.user?.id ?? null
+      }
+    } else {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: identifier,
+        password
+      })
+      if (error) authError = error
+      userId = authData.user?.id ?? null
+    }
+
+    if (authError || !userId) {
       const newAttempts = attempts + 1
       setAttempts(newAttempts)
       if (newAttempts >= 5) {
@@ -43,8 +76,8 @@ export default function LoginPage() {
         setError('Too many failed login attempts. Account locked for 60 seconds.')
       } else {
         setError(
-          authError.message.includes('Invalid')
-            ? `Incorrect email or password (${5 - newAttempts} attempts remaining).`
+          authError?.message.includes('Invalid')
+            ? `Incorrect ${usingPhone ? 'phone number' : 'email'} or password (${5 - newAttempts} attempts remaining).`
             : 'Could not sign in. Please try again.'
         )
       }
@@ -58,7 +91,7 @@ export default function LoginPage() {
         role, status, 
         chamas_v2!inner(id)
       `)
-      .eq('profile_id', authData.user.id)
+      .eq('profile_id', userId)
       .eq('status', 'active')
 
     if (!memberships?.length) {
@@ -99,8 +132,8 @@ export default function LoginPage() {
   }
 
   async function handleForgotPassword() {
-    if (!email.trim()) {
-      setError('Enter your email address above first.')
+    if (!email.trim() || !email.includes('@')) {
+      setError('Enter your email address above first. Password reset links are sent by email.')
       return
     }
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
@@ -175,13 +208,15 @@ export default function LoginPage() {
               <label
                 className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
                 style={{ color: 'var(--text-secondary)' }}>
-                Email Address
+                Phone number or email
               </label>
               <input
-                type="email"
+                type="text"
+                inputMode="email"
+                autoComplete="username"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="0712 345 678 or you@example.com"
                 required
                 className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
                 style={{

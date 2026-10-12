@@ -252,7 +252,8 @@ export default function OnboardingPage() {
       }
       localStorage.removeItem('sc_pending_group')
 
-      window.location.href = '/admin/dashboard'
+      // Next step: identity check (the group works now; payouts unlock once verified)
+      window.location.href = '/verify-identity?next=/admin/dashboard'
 
     } catch (err) {
       console.error('Create group error:', err)

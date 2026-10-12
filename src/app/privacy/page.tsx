@@ -149,7 +149,25 @@ export default function PrivacyPage() {
       )
     },
     {
-      title: "8. Contact",
+      title: "8. Identity verification (group creators)",
+      content: (
+        <>
+          <p className="mb-2">
+            Before money can leave a group (loan payouts, withdrawals and investments), the person who created it must
+            verify their identity. With your consent we collect your national ID or passport number, photos of the
+            document, and a live selfie.
+          </p>
+          <ul className="list-disc pl-5 space-y-2 my-4">
+            <li>We compare your selfie with the photo on your document using an automated face-comparison service (Amazon Web Services Rekognition) acting on our behalf. If the result is unclear, a SmartChama team member checks the images.</li>
+            <li>The images are kept in private storage that only our verification system and authorised staff can open. They are not shown to other members of your group.</li>
+            <li>We use them only to confirm your identity and prevent fraud. We keep them for as long as you run a group and as long as the law requires afterwards, then delete them.</li>
+            <li>You can ask us to delete them by contacting us (see below); your group's payouts will then be locked again.</li>
+          </ul>
+        </>
+      )
+    },
+    {
+      title: "9. Contact",
       content: (
         <>
           <p className="mb-2">

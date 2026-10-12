@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import MobileHeader from "@/components/MobileHeader";
 import { MobileAdminTabBar } from "@/components/MobileAdminTabBar";
 import { Sidebar } from "@/components/Sidebar";
+import KycBanner from "@/components/KycBanner";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { session, member, group, isLoading } = useAuth();
@@ -54,6 +55,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Scrollable page content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6 pb-24 lg:pb-6 pt-16 lg:pt-6">
+          <KycBanner creatorId={(group as any)?.created_by} />
           {children}
         </main>
 
