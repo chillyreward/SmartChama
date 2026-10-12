@@ -2557,5 +2557,40 @@ ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
 --   SELECT id FROM profiles WHERE email = 'you@example.com';
 
 -- ============================================================
+-- PART 12: CONTRIBUTION SCHEDULE (DAILY OR CHOSEN DATES)
+-- ============================================================
+-- A chama contributes either every day, or on specific dates its officials
+-- pick on a calendar ('custom'). Older groups keep weekly/monthly/etc.
+
+ALTER TABLE chamas_v2 DROP CONSTRAINT IF EXISTS chamas_v2_contribution_frequency_check;
+ALTER TABLE chamas_v2 ADD CONSTRAINT chamas_v2_contribution_frequency_check
+  CHECK (contribution_frequency IN ('daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly'));
+
+CREATE TABLE IF NOT EXISTS chama_contribution_dates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  due_date DATE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (chama_id, due_date)
+);
+CREATE INDEX IF NOT EXISTS idx_contribution_dates_chama ON chama_contribution_dates(chama_id, due_date);
+
+ALTER TABLE chama_contribution_dates ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "members_see_contribution_dates" ON chama_contribution_dates;
+CREATE POLICY "members_see_contribution_dates" ON chama_contribution_dates FOR SELECT TO authenticated USING (
+  check_is_chama_member(chama_id, auth.uid())
+);
+-- Officials add or remove dates (today or later)
+DROP POLICY IF EXISTS "officials_add_contribution_dates" ON chama_contribution_dates;
+CREATE POLICY "officials_add_contribution_dates" ON chama_contribution_dates FOR INSERT TO authenticated WITH CHECK (
+  check_is_chama_admin(chama_id, auth.uid()) AND due_date >= (now() AT TIME ZONE 'Africa/Nairobi')::date
+);
+DROP POLICY IF EXISTS "officials_remove_contribution_dates" ON chama_contribution_dates;
+CREATE POLICY "officials_remove_contribution_dates" ON chama_contribution_dates FOR DELETE TO authenticated USING (
+  check_is_chama_admin(chama_id, auth.uid()) AND due_date >= (now() AT TIME ZONE 'Africa/Nairobi')::date
+);
+
+-- ============================================================
 -- DONE.
 -- ============================================================

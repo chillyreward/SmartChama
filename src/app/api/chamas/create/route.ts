@@ -1,7 +1,25 @@
 import { NextResponse } from 'next/server';
 import { requireUser, formatKenyanPhone } from '@/lib/require-user';
 
-const FREQUENCIES = ['weekly', 'biweekly', 'monthly', 'quarterly'];
+const FREQUENCIES = ['daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly'];
+const MAX_DATES = 120;
+
+// Chosen contribution dates (YYYY-MM-DD): real dates, today (Nairobi) or later,
+// within two years, no duplicates.
+function cleanDates(input: unknown): string[] | null {
+  if (!Array.isArray(input)) return null;
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Nairobi' });
+  const limit = new Date(Date.now() + 2 * 366 * 86400000).toISOString().slice(0, 10);
+  const out = new Set<string>();
+  for (const d of input) {
+    if (typeof d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+    const parsed = new Date(d + 'T00:00:00Z');
+    if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== d) return null;
+    if (d < today || d > limit) return null;
+    out.add(d);
+  }
+  return [...out].sort();
+}
 
 export async function POST(request: Request) {
   try {
@@ -19,6 +37,7 @@ export async function POST(request: Request) {
       chama_name,
       contribution_amount,
       contribution_frequency,
+      contribution_dates,
       payment_type,
       till_number,
       paybill_number,
@@ -26,6 +45,15 @@ export async function POST(request: Request) {
       phone_number,
       account_name
     } = body;
+
+    const frequency = FREQUENCIES.includes(contribution_frequency) ? contribution_frequency : 'monthly';
+    const dates = frequency === 'custom' ? cleanDates(contribution_dates) : [];
+    if (frequency === 'custom' && (!dates || dates.length === 0)) {
+      return NextResponse.json({ error: 'Pick at least one contribution date (today or later).' }, { status: 400 });
+    }
+    if (dates && dates.length > MAX_DATES) {
+      return NextResponse.json({ error: `Pick at most ${MAX_DATES} dates. You can add more later.` }, { status: 400 });
+    }
 
     if (!chama_name || !String(chama_name).trim()) {
       return NextResponse.json({ error: 'Please enter a group name.' }, { status: 400 });
@@ -65,7 +93,7 @@ export async function POST(request: Request) {
       .insert({
         name: String(chama_name).trim(),
         contribution_amount: Number(contribution_amount) || 0,
-        contribution_frequency: FREQUENCIES.includes(contribution_frequency) ? contribution_frequency : 'monthly',
+        contribution_frequency: frequency,
         created_by: user.id,
         status: 'active'
       })
@@ -89,6 +117,13 @@ export async function POST(request: Request) {
     if (membershipError) {
       console.error('Membership Error:', membershipError);
       return NextResponse.json({ error: `Error creating membership: ${membershipError.message}` }, { status: 500 });
+    }
+
+    if (dates && dates.length > 0) {
+      const { error: datesError } = await supabase
+        .from('chama_contribution_dates')
+        .insert(dates.map((due_date) => ({ chama_id: chamaData.id, due_date })));
+      if (datesError) console.error('Contribution dates error:', datesError);
     }
 
     const [walletRes, activityRes] = await Promise.all([

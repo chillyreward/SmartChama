@@ -6,6 +6,7 @@ import { useRouter }
 import { getSupabaseBrowser } 
   from '@/lib/supabase-browser'
 import PhoneVerification from '@/components/PhoneVerification'
+import ContributionSchedulePicker, { ContributionSchedule } from '@/components/ContributionSchedulePicker'
 import { loadNationalId } from '@/lib/private-profile'
 
 // Step 0: Choose path
@@ -56,8 +57,8 @@ export default function OnboardingPage() {
   const [contributionAmount, 
     setContributionAmount] = 
     useState('')
-  const [frequency, setFrequency] = 
-    useState('monthly')
+  // Every day, or specific dates picked on a calendar
+  const [schedule, setSchedule] = useState<ContributionSchedule>({ mode: 'custom', dates: [] })
   const [groupDescription, 
     setGroupDescription] = useState('')
   const [meetingDay, setMeetingDay] = 
@@ -113,7 +114,7 @@ export default function OnboardingPage() {
         const g = JSON.parse(pendingGroup)
         setGroupName(g.name || '')
         setContributionAmount(g.amount || '')
-        setFrequency(g.frequency || 'monthly')
+        setSchedule({ mode: g.frequency === 'daily' ? 'daily' : 'custom', dates: Array.isArray(g.dates) ? g.dates : [] })
       }
     } catch (e) {}
 
@@ -241,6 +242,10 @@ export default function OnboardingPage() {
 
   async function handleCreateGroup() {
     setError('')
+    if (schedule.mode === 'custom' && schedule.dates.length === 0) {
+      setError('Pick at least one contribution date on the calendar, or choose Every day.')
+      return
+    }
     setLoading(true)
 
     try {
@@ -254,7 +259,8 @@ export default function OnboardingPage() {
           full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
           chama_name: groupName.trim(),
           contribution_amount: contributionAmount,
-          contribution_frequency: frequency,
+          contribution_frequency: schedule.mode,
+          contribution_dates: schedule.mode === 'custom' ? schedule.dates : [],
           payment_type: 'till',
           till_number: '',
           paybill_number: '',
@@ -907,8 +913,7 @@ export default function OnboardingPage() {
                     color: 
                       'var(--text-secondary)' 
                   }}>
-                  Monthly Contribution 
-                  (KSh)
+                  Contribution amount (KSh)
                 </label>
                 <div className="flex">
                   <div 
@@ -958,64 +963,12 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  Contribution Frequency
-                </label>
-                {/*
-                  CRITICAL FIX:
-                  Native select with 
-                  explicit value and 
-                  onChange handler.
-                  Log the value so 
-                  you can see it 
-                  updating in the 
-                  console.
-                */}
-                <select
-                  value={frequency}
-                  onChange={e => {
-                    setFrequency(
-                      e.target.value
-                    )
-                  }}
-                  className="w-full px-4 
-                    py-3 rounded-xl border 
-                    text-[15px]
-                    focus:outline-none 
-                    focus:border-[#22C55E]
-                    appearance-none"
-                  style={{
-                    backgroundColor: 
-                      'var(--bg-input)',
-                    borderColor: 
-                      'var(--border)',
-                    color: 
-                      'var(--text-primary)'
-                  }}>
-                  <option value="weekly">
-                    Weekly
-                  </option>
-                  <option value="biweekly">
-                    Fortnightly 
-                    (every 2 weeks)
-                  </option>
-                  <option value="monthly">
-                    Monthly
-                  </option>
-                  <option value="quarterly">
-                    Quarterly
-                  </option>
-                </select>
+                <span
+                  className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                  style={{ color: 'var(--text-secondary)' }}>
+                  Contribution schedule
+                </span>
+                <ContributionSchedulePicker value={schedule} onChange={setSchedule} />
               </div>
 
               <div>
@@ -1163,13 +1116,15 @@ export default function OnboardingPage() {
               </div>
               <div className="flex 
                 items-center gap-2">
-                <span style={{ 
-                  color: frequency 
-                    ? '#22C55E' 
-                    : 'var(--text-muted)' 
+                <span style={{
+                  color: schedule.mode === 'daily' || schedule.dates.length
+                    ? '#22C55E'
+                    : 'var(--text-muted)'
                 }}>
-                  {frequency ? '✓' : '○'} 
-                  Frequency: {frequency}
+                  {schedule.mode === 'daily' || schedule.dates.length ? '✓' : '○'}{' '}
+                  Schedule: {schedule.mode === 'daily'
+                    ? 'every day'
+                    : `${schedule.dates.length} date${schedule.dates.length === 1 ? '' : 's'}`}
                 </span>
               </div>
             </div>

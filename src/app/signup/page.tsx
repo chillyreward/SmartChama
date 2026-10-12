@@ -8,6 +8,7 @@ import PhoneVerification from '@/components/PhoneVerification'
 import KycVerification from '@/components/KycVerification'
 import MemberPhoneSignup, { MemberSignupResult } from '@/components/MemberPhoneSignup'
 import SocialSignIn from '@/components/SocialSignIn'
+import ContributionSchedulePicker, { ContributionSchedule } from '@/components/ContributionSchedulePicker'
 
 
 function SignupForm() {
@@ -35,7 +36,8 @@ function SignupForm() {
   // Step 2 — Admin: group details
   const [groupName, setGroupName] = useState('')
   const [contributionAmount, setContributionAmount] = useState('')
-  const [frequency, setFrequency] = useState('monthly')
+  // Every day, or specific dates picked on a calendar
+  const [schedule, setSchedule] = useState<ContributionSchedule>({ mode: 'custom', dates: [] })
 
   // Step 2 — Member: group code
   // Invite SMS links use ?token=, older links ?code=
@@ -126,6 +128,10 @@ function SignupForm() {
       setError('Please enter a group name.')
       return
     }
+    if (schedule.mode === 'custom' && schedule.dates.length === 0) {
+      setError('Pick at least one contribution date on the calendar, or choose Every day.')
+      return
+    }
     if (!contributionAmount || Number(contributionAmount) < 1) {
       setError('Please enter a contribution amount.')
       return
@@ -140,7 +146,7 @@ function SignupForm() {
       if (!account.hasSession) {
         try {
           localStorage.setItem('sc_pending_group', JSON.stringify({
-            name: groupName.trim(), amount: contributionAmount, frequency
+            name: groupName.trim(), amount: contributionAmount, frequency: schedule.mode, dates: schedule.dates
           }))
         } catch (e) {}
         setPendingConfirmation(true)
@@ -155,7 +161,8 @@ function SignupForm() {
           full_name: fullName.trim(),
           chama_name: groupName.trim(),
           contribution_amount: contributionAmount,
-          contribution_frequency: frequency
+          contribution_frequency: schedule.mode,
+          contribution_dates: schedule.mode === 'custom' ? schedule.dates : []
         })
       })
       const data = await res.json()
@@ -596,7 +603,7 @@ function SignupForm() {
 
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
-                  Monthly Contribution (KSh)
+                  Contribution amount (KSh)
                 </label>
                 <div className="flex">
                   <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] bg-[#FAFAFA] dark:bg-[#0B0F0C] border-[#E5E7EB] dark:border-[#1B2520] text-[#4F5A53] dark:text-[#8FA196]">
@@ -614,17 +621,10 @@ function SignupForm() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
-                  Contribution Frequency
-                </label>
-                <select
-                  value={frequency}
-                  onChange={e => setFrequency(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E] appearance-none">
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                </select>
+                <span className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                  Contribution schedule
+                </span>
+                <ContributionSchedulePicker value={schedule} onChange={setSchedule} />
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -635,7 +635,7 @@ function SignupForm() {
                 </button>
                 <button
                   onClick={handleAdminSignup}
-                  disabled={loading || !groupName.trim() || !contributionAmount}
+                  disabled={loading || !groupName.trim() || !contributionAmount || (schedule.mode === 'custom' && schedule.dates.length === 0)}
                   className="flex-1 py-3 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] disabled:opacity-50 transition-colors border-0">
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
