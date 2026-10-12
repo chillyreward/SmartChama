@@ -225,62 +225,6 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            {/* Demo accounts section */}
-            <div className="mt-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
-                <span className="text-[12px] font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
-                  Try a demo account
-                </span>
-                <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {/* Admin demo button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('demo.admin@smartchama.co.ke');
-                    setPassword('DemoAdmin2024!');
-                  }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all hover:border-[#22C55E]"
-                  style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-input)' }}
-                >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-subtle)' }}>
-                    <Crown className="w-4 h-4 text-[#22C55E]" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      Admin Demo
-                    </p>
-                  </div>
-                </button>
-
-                {/* Member demo button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('demo.member@smartchama.co.ke');
-                    setPassword('DemoMember2024!');
-                  }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all hover:border-[#22C55E]"
-                  style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-input)' }}
-                >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-subtle)' }}>
-                    <User className="w-4 h-4 text-[#22C55E]" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      Member Demo
-                    </p>
-                  </div>
-                </button>
-              </div>
-              <p className="text-[11px] text-center mt-2" style={{ color: 'var(--text-muted)' }}>
-                Clicking a demo button auto-fills test credentials.
-              </p>
-            </div>
-
             <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border)' }}>
               <p className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Don't have an admin account? <Link href="/admin/signup" className="text-[#22C55E] hover:underline font-bold">Create Chama</Link>
