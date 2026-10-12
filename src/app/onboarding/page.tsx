@@ -7,7 +7,8 @@ import { getSupabaseBrowser }
   from '@/lib/supabase-browser'
 import PhoneVerification from '@/components/PhoneVerification'
 import ContributionSchedulePicker, { ContributionSchedule } from '@/components/ContributionSchedulePicker'
-import { loadNationalId } from '@/lib/private-profile'
+import { loadNationalId, loadIdDocumentPath } from '@/lib/private-profile'
+import IdDocumentUpload from '@/components/IdDocumentUpload'
 
 // Step 0: Choose path
 // Step 1: Complete profile  
@@ -45,6 +46,7 @@ export default function OnboardingPage() {
   const [pendingChamaName, setPendingChamaName] = useState<string | null>(null)
   const [county, setCounty] = 
     useState('')
+  const [idDocumentPath, setIdDocumentPath] = useState<string | null>(null)
   const [nationalId, setNationalId] = 
     useState('')
 
@@ -126,6 +128,8 @@ export default function OnboardingPage() {
     }
     const savedNationalId = profile ? await loadNationalId(supabase as any, userId) : ''
     if (savedNationalId) setNationalId(savedNationalId)
+    const savedIdDoc = profile ? await loadIdDocumentPath(supabase as any, userId) : null
+    if (savedIdDoc) setIdDocumentPath(savedIdDoc)
     if (profile?.full_name && profile?.phone_number) {
       // Profile complete, check
       // if already in a chama
@@ -198,6 +202,10 @@ export default function OnboardingPage() {
       setError('Please enter your National ID number.')
       return
     }
+    if (!idDocumentPath) {
+      setError('Upload a photo of your ID.')
+      return
+    }
     if (!phoneVerified) {
       setError('Verify your phone number: send the code and enter it.')
       return
@@ -224,7 +232,8 @@ export default function OnboardingPage() {
         full_name: fullName.trim(),
         phone_number: formattedPhone,
         county,
-        national_id: nationalId.trim()
+        national_id: nationalId.trim(),
+        id_document_path: idDocumentPath
       })
     })
 
@@ -236,8 +245,10 @@ export default function OnboardingPage() {
     }
 
     setLoading(false)
-    // Move to choose path step
-    setStep(0)
+    // Re-check where this person belongs: an existing group goes to its
+    // dashboard, a pending request to the waiting screen, otherwise the
+    // create/join choice (step 0)
+    await checkExistingProfile(session.user.id)
   }
 
   async function handleCreateGroup() {
@@ -800,6 +811,10 @@ export default function OnboardingPage() {
                       'var(--text-primary)'
                   }}
                 />
+              </div>
+
+              <div>
+                <IdDocumentUpload value={idDocumentPath} onUploaded={setIdDocumentPath} />
               </div>
 
             </div>

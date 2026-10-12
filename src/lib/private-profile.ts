@@ -18,3 +18,12 @@ export async function saveNationalId(supabase: SupabaseClient, userId: string, n
     .from('profile_private')
     .upsert({ profile_id: userId, national_id: nationalId || null, updated_at: new Date().toISOString() }, { onConflict: 'profile_id' })
 }
+
+export async function loadIdDocumentPath(supabase: SupabaseClient, userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('profile_private')
+    .select('id_document_path')
+    .eq('profile_id', userId)
+    .maybeSingle()
+  return data?.id_document_path ?? null
+}

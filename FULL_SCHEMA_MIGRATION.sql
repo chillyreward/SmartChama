@@ -2566,6 +2566,9 @@ ALTER TABLE chamas_v2 DROP CONSTRAINT IF EXISTS chamas_v2_contribution_frequency
 ALTER TABLE chamas_v2 ADD CONSTRAINT chamas_v2_contribution_frequency_check
   CHECK (contribution_frequency IN ('daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly'));
 
+-- Photo of the member's ID (path in the private kyc bucket), owner-only table
+ALTER TABLE profile_private ADD COLUMN IF NOT EXISTS id_document_path TEXT;
+
 CREATE TABLE IF NOT EXISTS chama_contribution_dates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,

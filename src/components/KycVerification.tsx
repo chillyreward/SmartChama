@@ -13,7 +13,7 @@ const MAX_SIDE = 1600
 
 // Downscale and re-encode as JPEG: keeps uploads small (Rekognition's limit is
 // 5 MB) and strips the phone's location metadata from the photo.
-async function toJpeg(source: Blob | HTMLCanvasElement): Promise<Blob> {
+export async function toJpeg(source: Blob | HTMLCanvasElement): Promise<Blob> {
   let canvas: HTMLCanvasElement
   if (source instanceof HTMLCanvasElement) {
     canvas = source

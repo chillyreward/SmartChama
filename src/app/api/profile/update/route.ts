@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     if (auth.response) return auth.response
     const { user, supabase } = auth
 
-    const { full_name, phone_number, county, national_id } = await req.json()
+    const { full_name, county, national_id, id_document_path } = await req.json()
 
     if (!full_name || !String(full_name).trim()) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -35,6 +35,20 @@ export async function POST(req: Request) {
         )
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    if (id_document_path !== undefined) {
+      if (id_document_path !== null &&
+          (typeof id_document_path !== 'string' || !id_document_path.startsWith(`${user.id}/`) || id_document_path.includes('..'))) {
+        return NextResponse.json({ error: 'Upload the ID photo again.' }, { status: 400 })
+      }
+      const { error: docError } = await supabase
+        .from('profile_private')
+        .upsert({ profile_id: user.id, id_document_path, updated_at: new Date().toISOString() }, { onConflict: 'profile_id' })
+      if (docError) {
+        console.error('ID photo save error:', docError)
+        return NextResponse.json({ error: 'Could not save your ID photo.' }, { status: 500 })
+      }
     }
 
     if (national_id !== undefined) {
