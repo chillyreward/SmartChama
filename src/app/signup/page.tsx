@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import PhoneVerification from '@/components/PhoneVerification'
 import KycVerification from '@/components/KycVerification'
+import MemberPhoneSignup, { MemberSignupResult } from '@/components/MemberPhoneSignup'
 
 
 function SignupForm() {
@@ -38,11 +39,6 @@ function SignupForm() {
   // Step 2 — Member: group code
   // Invite SMS links use ?token=, older links ?code=
   const [groupCode, setGroupCode] = useState(searchParams.get('code') || searchParams.get('token') || '')
-  // Member details: ID number (saved privately) and phone (verified by SMS code)
-  const [memberIdNumber, setMemberIdNumber] = useState('')
-  const [memberPhone, setMemberPhone] = useState('')
-  // After joining: confirm the phone with the SMS code, then finish
-  const [memberJoin, setMemberJoin] = useState<null | { chamaId: string; chamaName: string; pending: boolean }>(null)
   
   // Success state — shows group code for admin after creation
   const [createdGroupCode, setCreatedGroupCode] = useState('')
@@ -197,123 +193,23 @@ function SignupForm() {
     }
   }
 
-  async function handleMemberSignup() {
-    setError('')
-
-    const code = groupCode.trim().toUpperCase()
-
-    if (code.length < 4) {
-      setError('Please enter your group or invite code.')
+  // Member signed up with phone (MemberPhoneSignup): keep the session, then
+  // go to the group, or show "request pending" for group-code joins
+  async function handleMemberDone(r: MemberSignupResult) {
+    if (!r.signed_in || !r.access_token || !r.refresh_token) {
+      router.push('/login')
       return
     }
-    const idNumber = memberIdNumber.replace(/\s/g, '')
-    if (!/^\d{7,9}$/.test(idNumber)) {
-      setError('Enter your national ID number (7 to 9 digits).')
-      return
-    }
-    if (memberPhone.replace(/\D/g, '').length < 9) {
-      setError('Enter your M-Pesa phone number.')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      // 1. Check the code before creating an account (works signed out)
-      const { data: preview, error: previewError } = await supabase.rpc('preview_join_code', { p_code: code })
-
-      if (previewError || !preview?.valid) {
-        const messages: Record<string, string> = {
-          expired: 'This invite code has expired. Ask your admin for a new one.',
-          used_up: 'This invite code has already been used. Ask your admin for a new one.'
-        }
-        setError(messages[preview?.error] || 'Group code not found. Check with your admin and try again.')
-        setLoading(false)
-        return
-      }
-
-      // 2. Create the auth account (the database trigger creates the profile)
-      const account = await createAccount()
-      if (!account) { setLoading(false); return }
-
-      if (!account.hasSession) {
-        try {
-          localStorage.setItem('sc_pending_join_code', code)
-          localStorage.setItem('sc_pending_profile', JSON.stringify({ national_id: idNumber, phone: memberPhone }))
-        } catch (e) {}
-        setPendingConfirmation(true)
-        setLoading(false)
-        return
-      }
-
-      // 3. Save the ID number (private, owner-only)
-      await fetch('/api/profile/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name: fullName.trim(), national_id: idNumber })
-      })
-
-      // 4. Join as the signed-in user
-      const joinRes = await fetch('/api/admin/create-group', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-      })
-      const joinData = await joinRes.json()
-
-      if (!joinRes.ok) {
-        setError(joinData.error || 'Could not join group. Please try again.')
-        setLoading(false)
-        return
-      }
-
-      // 5. Confirm the phone number with the SMS code (next screen)
-      setMemberJoin({
-        chamaId: joinData.chamaId,
-        chamaName: joinData.chamaName || preview.chama_name || '',
-        pending: !!joinData.pending
-      })
-      setLoading(false)
-
-    } catch (err: any) {
-      console.error(err)
-      setError(err.message || 'Something went wrong.')
-      setLoading(false)
-    }
-  }
-
-  const finishMemberSignup = () => {
-    if (!memberJoin) return
-    if (memberJoin.pending) {
-      setTargetChamaName(memberJoin.chamaName)
-      setMemberJoin(null)
+    await supabase.auth.setSession({ access_token: r.access_token, refresh_token: r.refresh_token })
+    if (!r.joined) {
+      router.push('/onboarding')
+    } else if (r.pending) {
+      setTargetChamaName(r.chama_name || '')
       setPendingApproval(true)
-      return
+    } else if (r.chama_id) {
+      rememberActiveChama(r.chama_id)
+      router.push('/dashboard')
     }
-    rememberActiveChama(memberJoin.chamaId)
-    router.push('/dashboard')
-  }
-
-  if (memberJoin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
-        <div className="w-full max-w-md space-y-6 py-10">
-          <div className="space-y-1">
-            <p className="text-[12px] font-semibold uppercase tracking-widest text-[#22C55E]">Last step</p>
-            <h1 className="text-[28px] font-bold">Confirm your phone number</h1>
-            <p className="text-[15px] text-[#4F5A53] dark:text-[#8FA196]">
-              We texted a 6-digit code to the number you entered. It&apos;s used for M-Pesa prompts, SMS sign-in and USSD.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-5">
-            <PhoneVerification initialPhone={memberPhone} autoSend onVerified={finishMemberSignup} label="M-Pesa phone number" />
-          </div>
-          <button type="button" onClick={finishMemberSignup} className="block mx-auto text-[14px] text-[#4F5A53] dark:text-[#8FA196] hover:underline">
-            Skip for now
-          </button>
-        </div>
-      </div>
-    )
   }
 
   if (pendingApproval) {
@@ -537,6 +433,17 @@ function SignupForm() {
       <div className="flex items-start justify-center p-6 pt-10">
         <div className="w-full max-w-md">
 
+          {!isAdminSignup && (
+            <>
+              <h1 className="text-[26px] font-bold mb-1">Join your chama</h1>
+              <p className="text-[14px] mb-6 text-[#4F5A53] dark:text-[#8FA196]">
+                Sign up with your phone number. You&apos;ll need the code from your group admin.
+              </p>
+              <MemberPhoneSignup initialCode={groupCode} onDone={handleMemberDone} />
+            </>
+          )}
+
+          {isAdminSignup && (<>
           {/* Step indicator */}
           <div className="flex items-center gap-3 mb-8">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold bg-[#22C55E] text-white">
@@ -771,85 +678,7 @@ function SignupForm() {
             </div>
           )}
 
-          {/* ═══ STEP 2 MEMBER ═══ */}
-          {step === 2 && !isAdminSignup && (
-            <div className="space-y-4">
-              
-              <div>
-                <label htmlFor="group-code" className="block text-[11px] font-semibold uppercase tracking-wider mb-2 text-[#4F5A53] dark:text-[#8FA196]">
-                  Group or invite code
-                </label>
-                <input
-                  id="group-code"
-                  type="text"
-                  value={groupCode}
-                  onChange={e => setGroupCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 14))}
-                  placeholder="PSJKB863"
-                  maxLength={14}
-                  autoFocus
-                  autoComplete="off"
-                  className="w-full px-4 py-4 rounded-xl border text-[26px] font-bold font-mono tracking-[0.25em] text-center uppercase focus:outline-none focus:border-[#22C55E] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#22C55E]"
-                />
-                <p className="text-[12px] text-center mt-2 text-[#8FA196]">
-                  The group code or personal invite code from your group admin
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="member-id-number" className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
-                  National ID number
-                </label>
-                <input
-                  id="member-id-number"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="off"
-                  value={memberIdNumber}
-                  onChange={e => setMemberIdNumber(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                  placeholder="12345678"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
-                />
-                <p className="text-[12px] mt-1.5 text-[#8FA196]">Kept private: other members can&apos;t see it.</p>
-              </div>
-
-              <div>
-                <label htmlFor="member-phone" className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
-                  M-Pesa phone number
-                </label>
-                <input
-                  id="member-phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  value={memberPhone}
-                  onChange={e => setMemberPhone(e.target.value)}
-                  placeholder="0712 345 678"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
-                />
-                <p className="text-[12px] mt-1.5 text-[#8FA196]">We&apos;ll text you a code to confirm it.</p>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setStep(1)}
-                  className="px-6 py-3 rounded-xl border text-[15px] font-medium bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white">
-                  Back
-                </button>
-                <button
-                  onClick={handleMemberSignup}
-                  disabled={loading || groupCode.length < 4 || memberIdNumber.length < 7 || memberPhone.replace(/\D/g, '').length < 9}
-                  className="flex-1 py-3 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] disabled:opacity-50 transition-colors border-0">
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      Joining...
-                    </span>
-                  ) : 'Join Group'}
-                </button>
-              </div>
-
-            </div>
-          )}
+          </>)}
 
           <p className="text-center text-[13px] mt-6 text-[#4F5A53] dark:text-[#8FA196]">
             Already have an account?{' '}
