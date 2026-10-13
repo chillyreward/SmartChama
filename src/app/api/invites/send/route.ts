@@ -17,8 +17,12 @@ export async function POST(request: Request) {
       phone,
       email,
       name,
-      chama_id
+      chama_id,
+      channel
     } = await request.json();
+    // SMS goes out through our SMS provider (Wakali). WhatsApp can't be sent
+    // from the server: the admin's phone opens WhatsApp with the message ready.
+    const viaWhatsApp = channel === 'whatsapp';
 
     const targetContact = phone || email;
 
@@ -81,18 +85,24 @@ export async function POST(request: Request) {
     }
 
     let smsSent = false;
+    let provider: string | undefined;
+    let whatsappUrl: string | null = null;
     let note = 'Invite created. Share code manually: ' + inviteCode;
 
-    if (formattedPhone) {
-      const chamaNameStr = chama?.name || 'SmartChama';
-      const inviterStr = admin?.full_name || 'An Admin';
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-      const link = appUrl ? ` ${appUrl}/signup?token=${inviteCode}` : '';
-      const messageText = `You have been invited by ${inviterStr} to join ${chamaNameStr} on SmartChama. Use invite code: ${inviteCode} to register.${link} Expires in 48 hours.`;
+    const chamaNameStr = chama?.name || 'SmartChama';
+    const inviterStr = admin?.full_name || 'An Admin';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    const link = appUrl ? ` ${appUrl}/signup?token=${inviteCode}` : '';
+    const messageText = `You have been invited by ${inviterStr} to join ${chamaNameStr} on SmartChama. Use invite code: ${inviteCode} to register.${link} Expires in 48 hours.`;
 
+    if (formattedPhone && viaWhatsApp) {
+      whatsappUrl = `https://wa.me/${formattedPhone.replace(/\D/g, '')}?text=${encodeURIComponent(messageText)}`;
+      note = 'Invite created. Send it from WhatsApp.';
+    } else if (formattedPhone) {
       try {
         const result = await sendSms(formattedPhone, messageText);
         smsSent = result.success && !result.simulated;
+        provider = result.provider;
         note = smsSent ? `SMS invite sent to ${formattedPhone}` : 'Invite saved, but SMS was not sent. Share code manually.';
       } catch (smsErr) {
         console.warn('SMS send warning (non-fatal):', smsErr);
@@ -104,6 +114,10 @@ export async function POST(request: Request) {
       success: true,
       code: inviteCode,
       sms_sent: smsSent,
+      provider,
+      channel: viaWhatsApp ? 'whatsapp' : 'sms',
+      phone: formattedPhone,
+      whatsapp_url: whatsappUrl,
       note
     });
   } catch (error: any) {

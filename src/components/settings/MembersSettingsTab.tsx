@@ -278,7 +278,7 @@ export function MembersSettingsTab({
                   />
                 </div>
                 <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
-                  SMS invite sent via Twilio
+                  The invite code is sent to this number by SMS
                 </p>
               </div>
             </div>
@@ -353,7 +353,7 @@ export function MembersSettingsTab({
                 </p>
                 <p className="text-[13px] text-[#15803D]">
                   {inviteResult.sms_sent
-                    ? 'SMS delivered via Twilio. Share this code as backup:'
+                    ? 'SMS sent. Share this code as backup:'
                     : inviteResult.note || 'Share this invite code manually:'}
                 </p>
                 <div className="mt-3 flex items-center gap-3">

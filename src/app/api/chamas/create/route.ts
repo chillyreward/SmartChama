@@ -1,27 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser, formatKenyanPhone } from '@/lib/require-user';
+import { validateSchedule } from '@/lib/contribution-schedule';
 
-const FREQUENCIES = ['daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'];
-// Repeat from one start date, stored as the group's single contribution date
-const RECURRING = ['monthly', 'quarterly', 'yearly'];
-const MAX_DATES = 120;
-
-// Chosen contribution dates (YYYY-MM-DD): real dates, today (Nairobi) or later,
-// within two years, no duplicates.
-function cleanDates(input: unknown): string[] | null {
-  if (!Array.isArray(input)) return null;
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Nairobi' });
-  const limit = new Date(Date.now() + 2 * 366 * 86400000).toISOString().slice(0, 10);
-  const out = new Set<string>();
-  for (const d of input) {
-    if (typeof d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
-    const parsed = new Date(d + 'T00:00:00Z');
-    if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== d) return null;
-    if (d < today || d > limit) return null;
-    out.add(d);
-  }
-  return [...out].sort();
-}
 
 export async function POST(request: Request) {
   try {
@@ -48,20 +28,13 @@ export async function POST(request: Request) {
       account_name
     } = body;
 
-    const frequency = FREQUENCIES.includes(contribution_frequency) ? contribution_frequency : 'monthly';
-    const usesDates = frequency === 'custom' || RECURRING.includes(frequency);
-    let dates = usesDates ? cleanDates(contribution_dates) : [];
-    if (usesDates && (!dates || dates.length === 0)) {
-      return NextResponse.json({
-        error: frequency === 'custom'
-          ? 'Pick at least one contribution date (today or later).'
-          : 'Pick the first contribution date (today or later).'
-      }, { status: 400 });
+    // An unknown frequency (very old clients) still means monthly with no dates
+    const schedule = validateSchedule(contribution_frequency ?? 'monthly', contribution_dates);
+    if ('error' in schedule && contribution_frequency) {
+      return NextResponse.json({ error: schedule.error }, { status: 400 });
     }
-    if (dates && RECURRING.includes(frequency)) dates = dates.slice(0, 1);
-    if (dates && dates.length > MAX_DATES) {
-      return NextResponse.json({ error: `Pick at most ${MAX_DATES} dates. You can add more later.` }, { status: 400 });
-    }
+    const frequency = 'error' in schedule ? 'monthly' : schedule.frequency;
+    const dates = 'error' in schedule ? [] : schedule.dates;
 
     if (!chama_name || !String(chama_name).trim()) {
       return NextResponse.json({ error: 'Please enter a group name.' }, { status: 400 });

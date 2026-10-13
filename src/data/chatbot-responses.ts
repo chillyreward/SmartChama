@@ -80,7 +80,7 @@ export const responses: {
   // INVITES AND MEMBERSHIP
   {
     triggers: ['how to join', 'join a group', 'invite code', 'how do i get invited'],
-    answer: 'To join a SmartChama group, you need an invite from the group admin. The admin will send you an SMS with an invitation code via Twilio. Use the code when signing up at SmartChama. You cannot join a group without an invite code.'
+    answer: 'To join a SmartChama group, you need an invite from the group admin. The admin will send you an SMS or WhatsApp message with an invitation code. Use the code when signing up at SmartChama. You cannot join a group without an invite code.'
   },
   {
     triggers: ['how to invite member', 'add member', 'invite someone', 'admin invite'],

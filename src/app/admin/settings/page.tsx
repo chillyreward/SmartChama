@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { InviteModal } from "@/components/InviteModal";
 import { MembersSettingsTab } from "@/components/settings/MembersSettingsTab";
+import ContributionScheduleSettings from "@/components/settings/ContributionScheduleSettings";
 
 export default function AdminSettingsPage() {
   const { session, member: adminMember, group, refreshMemberData } = useAuth();
@@ -24,8 +25,6 @@ export default function AdminSettingsPage() {
   const [chamaName, setChamaName] = useState("");
   const [county, setCounty] = useState("Nairobi");
   const [contributionAmount, setContributionAmount] = useState(500);
-  const [contributionFrequency, setContributionFrequency] = useState<'weekly' | 'monthly'>('monthly');
-  const [contributionDueDay, setContributionDueDay] = useState(1);
   const [gracePeriodDays, setGracePeriodDays] = useState(3);
   const [latePenaltyAmount, setLatePenaltyAmount] = useState(100);
 
@@ -58,8 +57,6 @@ export default function AdminSettingsPage() {
       setChamaName(group.name || "");
       setCounty(group.county || "Nairobi");
       setContributionAmount(Number(group.contribution_amount || 0));
-      setContributionFrequency(group.contribution_frequency || 'monthly');
-      setContributionDueDay(Number(group.contribution_due_day || 1));
       setGracePeriodDays(Number(group.grace_period_days || 3));
       setLatePenaltyAmount(Number(group.late_penalty_amount || 0));
 
@@ -117,8 +114,6 @@ export default function AdminSettingsPage() {
           name: chamaName,
           county,
           contribution_amount: Number(contributionAmount),
-          contribution_frequency: contributionFrequency,
-          contribution_due_day: Number(contributionDueDay),
           grace_period_days: Number(gracePeriodDays),
           late_penalty_amount: Number(latePenaltyAmount),
           updated_at: new Date().toISOString()
@@ -283,43 +278,6 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Contribution Frequency</label>
-                  <div className="flex gap-4 pt-1.5">
-                    <label className="flex items-center gap-2 text-[14px] text-[var(--text-main)] cursor-pointer">
-                      <input
-                        type="radio"
-                        checked={contributionFrequency === 'weekly'}
-                        onChange={() => setContributionFrequency('weekly')}
-                        className="accent-[#22C55E]"
-                      />
-                      Weekly
-                    </label>
-                    <label className="flex items-center gap-2 text-[14px] text-[var(--text-main)] cursor-pointer">
-                      <input
-                        type="radio"
-                        checked={contributionFrequency === 'monthly'}
-                        onChange={() => setContributionFrequency('monthly')}
-                        className="accent-[#22C55E]"
-                      />
-                      Monthly
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Due Day (1-28)</label>
-                  <select
-                    value={contributionDueDay}
-                    onChange={e => setContributionDueDay(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  >
-                    {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
-                      <option key={d} value={d}>Day {d}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
                   <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Grace Period (Days)</label>
                   <input
                     type="number"
@@ -350,6 +308,9 @@ export default function AdminSettingsPage() {
                 </button>
               </div>
             </form>
+          )}
+          {activeTab === 'Chama Rules' && group?.id && (
+            <ContributionScheduleSettings chamaId={group.id} onSaved={refreshMemberData} />
           )}
 
           {activeTab === 'members' && (

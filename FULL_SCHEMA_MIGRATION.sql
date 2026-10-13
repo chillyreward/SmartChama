@@ -2598,11 +2598,30 @@ CREATE POLICY "officials_remove_contribution_dates" ON chama_contribution_dates 
 -- PART 13: MONTHLY / QUARTERLY / YEARLY SCHEDULES
 -- ============================================================
 -- Monthly, quarterly and yearly schedules repeat from one start date, kept as
--- the group's single row in chama_contribution_dates. Only 'yearly' is new.
+-- the group's latest row in chama_contribution_dates. Only 'yearly' is new.
+-- Also: member notification preferences and the reminder log.
 
 ALTER TABLE chamas_v2 DROP CONSTRAINT IF EXISTS chamas_v2_contribution_frequency_check;
 ALTER TABLE chamas_v2 ADD CONSTRAINT chamas_v2_contribution_frequency_check
   CHECK (contribution_frequency IN ('daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'));
+
+-- Member notification choices (reminders on/off, SMS on/off), saved from the
+-- member settings page. The app wrote to this column but it never existed.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS notification_prefs JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+-- One row per reminder sent, so the daily job (/api/reminders/run) never
+-- sends the same reminder twice. Server-only: RLS on, no policies.
+CREATE TABLE IF NOT EXISTS contribution_reminders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  membership_id UUID NOT NULL REFERENCES chama_memberships(id) ON DELETE CASCADE,
+  due_date DATE NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('three_days', 'due_today')),
+  sent_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (chama_id, membership_id, due_date, kind)
+);
+ALTER TABLE contribution_reminders ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON contribution_reminders FROM anon, authenticated;
 
 -- ============================================================
 -- DONE.

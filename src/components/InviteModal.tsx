@@ -134,8 +134,8 @@ export function InviteModal({
               </span>
               <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                 {channel === 'whatsapp'
-                  ? `A WhatsApp message with the invite code will be sent to join ${chamaName}.`
-                  : `An SMS with the invite code will be sent via Twilio to join ${chamaName}.`}
+                  ? `WhatsApp opens with the invite code for ${chamaName} ready to send.`
+                  : `An SMS with the invite code to join ${chamaName} will be sent to this number.`}
               </p>
             </div>
 
@@ -200,7 +200,7 @@ export function InviteModal({
             <span className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
               style={{ borderColor: `${channelConfig[channel].color}40`, borderTopColor: 'transparent' }} />
             <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-              Sending {channel === 'whatsapp' ? 'WhatsApp message' : 'SMS'} via Twilio...
+              {channel === 'whatsapp' ? 'Preparing WhatsApp message...' : 'Sending SMS...'}
             </p>
           </div>
         )}
@@ -224,16 +224,27 @@ export function InviteModal({
 
             <div>
               <h3 className="text-[18px] font-bold mb-1">
-                {result?.sms_sent
-                  ? `${result?.channel === 'whatsapp' ? 'WhatsApp' : 'SMS'} Sent!`
-                  : 'Invite Created'}
+                {result?.sms_sent ? 'SMS Sent!' : 'Invite Created'}
               </h3>
               <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
                 {result?.sms_sent
-                  ? `Message delivered to ${result?.phone || phone}.`
+                  ? `The invite code was sent to ${result?.phone || phone}.`
                   : result?.note || 'Share this code manually.'}
               </p>
             </div>
+
+            {result?.whatsapp_url && (
+              <a
+                href={result.whatsapp_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 rounded-xl text-[14px] font-semibold text-white flex items-center justify-center gap-2"
+                style={{ backgroundColor: channelConfig.whatsapp.color }}
+              >
+                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
+                Open WhatsApp to send
+              </a>
+            )}
 
             {/* Code */}
             <div className="w-full rounded-xl p-4 flex flex-col items-center gap-2"

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/components/AuthProvider';
+import NextContributionCard from '@/components/NextContributionCard';
 
 export default function MemberDashboard({
   member: initialMember,
@@ -239,6 +240,11 @@ export default function MemberDashboard({
           </Link>
         </div>
       </div>
+
+      <NextContributionCard
+        chamaId={chama?.id}
+        isOfficial={['admin', 'chairlady', 'treasurer', 'secretary'].includes(member?.role || '')}
+      />
 
       {/* ROW 1: Metric Cards */}
       <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">

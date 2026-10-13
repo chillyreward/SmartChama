@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/components/AuthProvider';
+import NextContributionCard from '@/components/NextContributionCard';
 
 export default function AdminDashboardPage({
   member: initialAdmin,
@@ -356,6 +357,8 @@ export default function AdminDashboardPage({
         </p>
       </div>
       
+      <NextContributionCard chamaId={chama?.id} isOfficial />
+
       {/* METRICS */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
