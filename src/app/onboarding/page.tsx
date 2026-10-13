@@ -6,7 +6,7 @@ import { useRouter }
 import { getSupabaseBrowser } 
   from '@/lib/supabase-browser'
 import PhoneVerification from '@/components/PhoneVerification'
-import ContributionSchedulePicker, { ContributionSchedule } from '@/components/ContributionSchedulePicker'
+import ContributionSchedulePicker, { ContributionSchedule, scheduleComplete, scheduleDates, scheduleSummary, toScheduleMode } from '@/components/ContributionSchedulePicker'
 import { loadNationalId, loadIdDocumentPath } from '@/lib/private-profile'
 import IdDocumentUpload from '@/components/IdDocumentUpload'
 
@@ -111,14 +111,31 @@ export default function OnboardingPage() {
         if (pp.national_id) setNationalId(pp.national_id)
         if (pp.phone) setPhone(pp.phone)
       }
-      const pendingGroup = localStorage.getItem('sc_pending_group')
-      if (pendingGroup) {
-        const g = JSON.parse(pendingGroup)
-        setGroupName(g.name || '')
-        setContributionAmount(g.amount || '')
-        setSchedule({ mode: g.frequency === 'daily' ? 'daily' : 'custom', dates: Array.isArray(g.dates) ? g.dates : [] })
-      }
     } catch (e) {}
+
+    // Group set up at sign-up: this browser's copy, else the copy saved on the
+    // account (the email confirmation link may open on another device)
+    let savedGroup: { name?: string; amount?: string; frequency?: string; dates?: string[] } | null = null
+    try {
+      const local = localStorage.getItem('sc_pending_group')
+      if (local) savedGroup = JSON.parse(local)
+    } catch (e) {}
+    if (!savedGroup?.name) {
+      const { data: { user } } = await supabase.auth.getUser()
+      const meta = user?.user_metadata?.pending_group
+      if (meta?.name) savedGroup = meta
+    }
+    if (savedGroup?.name) {
+      const g = {
+        name: String(savedGroup.name),
+        amount: String(savedGroup.amount || ''),
+        frequency: toScheduleMode(savedGroup.frequency),
+        dates: Array.isArray(savedGroup.dates) ? savedGroup.dates : [],
+      }
+      setGroupName(g.name)
+      setContributionAmount(g.amount)
+      setSchedule({ mode: g.frequency, dates: g.dates })
+    }
 
     // A profile is complete with a name and a verified phone number
     // (phone_number is only ever written after the SMS code is confirmed).
@@ -172,6 +189,23 @@ export default function OnboardingPage() {
       // Pre-fill the form fields
       setFullName(profile.full_name || '')
       setPhone(profile.phone_number || '')
+      if (savedGroup?.name) {
+        // They already set up a group at sign-up: create it now instead of
+        // asking "create or join" again. On failure the group form opens,
+        // pre-filled, with the error.
+        setStep('2A')
+        await createGroup({
+          name: String(savedGroup.name),
+          amount: String(savedGroup.amount || ''),
+          schedule: { mode: toScheduleMode(savedGroup.frequency), dates: Array.isArray(savedGroup.dates) ? savedGroup.dates : [] },
+        })
+        return
+      }
+      if (inviteCodeFromSignup()) {
+        // Signed up with a group code: go straight to joining
+        setStep('2B')
+        return
+      }
       // Skip to step 0 (choose path)
       setStep(0)
     } else {
@@ -251,10 +285,32 @@ export default function OnboardingPage() {
     await checkExistingProfile(session.user.id)
   }
 
+  function inviteCodeFromSignup() {
+    try {
+      return localStorage.getItem('sc_pending_join_code') || new URLSearchParams(window.location.search).get('code')
+    } catch (e) {
+      return null
+    }
+  }
+
   async function handleCreateGroup() {
+    await createGroup({ name: groupName, amount: contributionAmount, schedule })
+  }
+
+  async function createGroup(g: { name: string; amount: string; schedule: ContributionSchedule }) {
     setError('')
-    if (schedule.mode === 'custom' && schedule.dates.length === 0) {
-      setError('Pick at least one contribution date on the calendar, or choose Every day.')
+    if (!g.name.trim()) {
+      setError('Please enter a group name.')
+      return
+    }
+    if (!g.amount || Number(g.amount) < 1) {
+      setError('Please enter a contribution amount.')
+      return
+    }
+    if (!scheduleComplete(g.schedule)) {
+      setError(g.schedule.mode === 'custom'
+        ? 'Pick at least one contribution date on the calendar, or choose Every day.'
+        : 'Tap the first contribution date on the calendar.')
       return
     }
     setLoading(true)
@@ -268,10 +324,10 @@ export default function OnboardingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
-          chama_name: groupName.trim(),
-          contribution_amount: contributionAmount,
-          contribution_frequency: schedule.mode,
-          contribution_dates: schedule.mode === 'custom' ? schedule.dates : [],
+          chama_name: g.name.trim(),
+          contribution_amount: g.amount,
+          contribution_frequency: g.schedule.mode,
+          contribution_dates: scheduleDates(g.schedule),
           payment_type: 'till',
           till_number: '',
           paybill_number: '',
@@ -296,6 +352,9 @@ export default function OnboardingPage() {
         localStorage.setItem('sc_last_chama_id', chamaId)
       }
       localStorage.removeItem('sc_pending_group')
+      if (user.user_metadata?.pending_group) {
+        await supabase.auth.updateUser({ data: { pending_group: null } }).catch(() => {})
+      }
 
       // Next step: identity check (the group works now; payouts unlock once verified)
       window.location.href = '/verify-identity?next=/admin/dashboard'
@@ -1132,14 +1191,12 @@ export default function OnboardingPage() {
               <div className="flex 
                 items-center gap-2">
                 <span style={{
-                  color: schedule.mode === 'daily' || schedule.dates.length
+                  color: scheduleComplete(schedule)
                     ? '#22C55E'
                     : 'var(--text-muted)'
                 }}>
-                  {schedule.mode === 'daily' || schedule.dates.length ? '✓' : '○'}{' '}
-                  Schedule: {schedule.mode === 'daily'
-                    ? 'every day'
-                    : `${schedule.dates.length} date${schedule.dates.length === 1 ? '' : 's'}`}
+                  {scheduleComplete(schedule) ? '✓' : '○'}{' '}
+                  Schedule: {scheduleSummary(schedule)}
                 </span>
               </div>
             </div>

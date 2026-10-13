@@ -1,10 +1,40 @@
 'use client'
 import { useMemo, useState } from 'react'
 
-// Contribution schedule: every day, or specific dates tapped on a calendar
-// (any number, today or later, nothing repeats automatically).
+// Contribution schedule:
+//  - every day
+//  - monthly / quarterly / yearly, repeating from a first due date picked on
+//    the calendar (dates holds that one start date)
+//  - specific dates tapped on a calendar (any number, nothing repeats)
 
-export type ContributionSchedule = { mode: 'daily' | 'custom'; dates: string[] } // dates: YYYY-MM-DD
+export type ScheduleMode = 'daily' | 'monthly' | 'quarterly' | 'yearly' | 'custom'
+export type ContributionSchedule = { mode: ScheduleMode; dates: string[] } // dates: YYYY-MM-DD
+
+const RECURRING: Record<string, string> = { monthly: 'month', quarterly: '3 months', yearly: 'year' }
+export const isRecurring = (mode: ScheduleMode) => mode in RECURRING
+
+// Ready to save: every day needs nothing, the others need a date
+export function scheduleComplete(s: ContributionSchedule) {
+  return s.mode === 'daily' || s.dates.length > 0
+}
+
+// Dates to send with the group: none for every day, the start date for a
+// repeating schedule, all picked dates otherwise
+export function scheduleDates(s: ContributionSchedule) {
+  if (s.mode === 'daily') return []
+  return isRecurring(s.mode) ? s.dates.slice(0, 1) : s.dates
+}
+
+export function scheduleSummary(s: ContributionSchedule) {
+  if (s.mode === 'daily') return 'every day'
+  if (isRecurring(s.mode)) return s.dates[0] ? `${s.mode}, from ${prettyDate(s.dates[0])}` : `${s.mode}, pick a start date`
+  return `${s.dates.length} date${s.dates.length === 1 ? '' : 's'}`
+}
+
+// Missing or unknown frequencies (older saved drafts) fall back to picked dates
+export function toScheduleMode(f: unknown): ScheduleMode {
+  return f === 'daily' || f === 'monthly' || f === 'quarterly' || f === 'yearly' ? f : 'custom'
+}
 
 const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -42,10 +72,18 @@ export default function ContributionSchedulePicker({
   const monthLabel = new Date(Date.UTC(view.year, view.month, 1)).toLocaleDateString('en-KE', { month: 'long', year: 'numeric', timeZone: 'UTC' })
   const atCurrentMonth = view.year === ty && view.month === tm - 1
 
+  const recurring = isRecurring(value.mode)
   const toggle = (d: string) => {
+    if (recurring) {
+      onChange({ ...value, dates: selected.has(d) ? [] : [d] })
+      return
+    }
     const next = selected.has(d) ? value.dates.filter((x) => x !== d) : [...value.dates, d].sort()
     onChange({ ...value, dates: next })
   }
+  // A repeating schedule keeps only the earliest picked date as its start
+  const pick = (mode: ScheduleMode) =>
+    onChange({ mode, dates: isRecurring(mode) ? value.dates.slice(0, 1) : value.dates })
   const shift = (delta: number) => {
     const m = view.month + delta
     setView({ year: view.year + Math.floor(m / 12), month: ((m % 12) + 12) % 12 })
@@ -56,7 +94,7 @@ export default function ContributionSchedulePicker({
       type="button"
       role="radio"
       aria-checked={value.mode === mode}
-      onClick={() => onChange({ ...value, mode })}
+      onClick={() => pick(mode)}
       className={`text-left p-3 rounded-xl border transition-colors ${value.mode === mode ? 'border-[#22C55E] bg-[#F0FDF4] dark:bg-[#0E2E1B]' : 'border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410]'}`}
     >
       <span className="block text-[14px] font-semibold text-[#161d16] dark:text-white">{title}</span>
@@ -66,12 +104,15 @@ export default function ContributionSchedulePicker({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Contribution schedule">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label="Contribution schedule">
         {radio('daily', 'Every day', 'Members contribute daily')}
+        {radio('monthly', 'Monthly', 'Once a month')}
+        {radio('quarterly', 'Quarterly', 'Every 3 months')}
+        {radio('yearly', 'Yearly', 'Once a year')}
         {radio('custom', 'Specific dates', 'Pick the dates on a calendar')}
       </div>
 
-      {value.mode === 'custom' && (
+      {value.mode !== 'daily' && (
         <div className="rounded-xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-3 space-y-3">
           <div className="flex items-center justify-between">
             <button type="button" onClick={() => shift(-1)} disabled={atCurrentMonth} aria-label="Previous month"
@@ -114,7 +155,13 @@ export default function ContributionSchedulePicker({
             })}
           </div>
 
-          {value.dates.length > 0 ? (
+          {recurring ? (
+            <p className="text-[12px] text-[#4F5A53] dark:text-[#8FA196]">
+              {value.dates[0]
+                ? <>First contribution on <span className="font-semibold text-[#16A34A]">{prettyDate(value.dates[0])}</span>, then every {RECURRING[value.mode]} on the same day{Number(value.dates[0].slice(8)) > 28 ? ' (the last day in shorter months)' : ''}.</>
+                : <>Tap the first due date. It repeats every {RECURRING[value.mode]} from there.</>}
+            </p>
+          ) : value.dates.length > 0 ? (
             <div className="space-y-2">
               <p className="text-[12px] font-semibold text-[#4F5A53] dark:text-[#8FA196]">
                 {value.dates.length} contribution date{value.dates.length === 1 ? '' : 's'}

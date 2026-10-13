@@ -2595,5 +2595,15 @@ CREATE POLICY "officials_remove_contribution_dates" ON chama_contribution_dates 
 );
 
 -- ============================================================
+-- PART 13: MONTHLY / QUARTERLY / YEARLY SCHEDULES
+-- ============================================================
+-- Monthly, quarterly and yearly schedules repeat from one start date, kept as
+-- the group's single row in chama_contribution_dates. Only 'yearly' is new.
+
+ALTER TABLE chamas_v2 DROP CONSTRAINT IF EXISTS chamas_v2_contribution_frequency_check;
+ALTER TABLE chamas_v2 ADD CONSTRAINT chamas_v2_contribution_frequency_check
+  CHECK (contribution_frequency IN ('daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'));
+
+-- ============================================================
 -- DONE.
 -- ============================================================

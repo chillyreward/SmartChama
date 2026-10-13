@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireUser, formatKenyanPhone } from '@/lib/require-user';
 
-const FREQUENCIES = ['daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly'];
+const FREQUENCIES = ['daily', 'custom', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'];
+// Repeat from one start date, stored as the group's single contribution date
+const RECURRING = ['monthly', 'quarterly', 'yearly'];
 const MAX_DATES = 120;
 
 // Chosen contribution dates (YYYY-MM-DD): real dates, today (Nairobi) or later,
@@ -47,10 +49,16 @@ export async function POST(request: Request) {
     } = body;
 
     const frequency = FREQUENCIES.includes(contribution_frequency) ? contribution_frequency : 'monthly';
-    const dates = frequency === 'custom' ? cleanDates(contribution_dates) : [];
-    if (frequency === 'custom' && (!dates || dates.length === 0)) {
-      return NextResponse.json({ error: 'Pick at least one contribution date (today or later).' }, { status: 400 });
+    const usesDates = frequency === 'custom' || RECURRING.includes(frequency);
+    let dates = usesDates ? cleanDates(contribution_dates) : [];
+    if (usesDates && (!dates || dates.length === 0)) {
+      return NextResponse.json({
+        error: frequency === 'custom'
+          ? 'Pick at least one contribution date (today or later).'
+          : 'Pick the first contribution date (today or later).'
+      }, { status: 400 });
     }
+    if (dates && RECURRING.includes(frequency)) dates = dates.slice(0, 1);
     if (dates && dates.length > MAX_DATES) {
       return NextResponse.json({ error: `Pick at most ${MAX_DATES} dates. You can add more later.` }, { status: 400 });
     }

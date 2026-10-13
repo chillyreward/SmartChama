@@ -8,7 +8,7 @@ import PhoneVerification from '@/components/PhoneVerification'
 import KycVerification from '@/components/KycVerification'
 import MemberPhoneSignup, { MemberSignupResult } from '@/components/MemberPhoneSignup'
 import SocialSignIn from '@/components/SocialSignIn'
-import ContributionSchedulePicker, { ContributionSchedule } from '@/components/ContributionSchedulePicker'
+import ContributionSchedulePicker, { ContributionSchedule, scheduleComplete, scheduleDates } from '@/components/ContributionSchedulePicker'
 
 
 function SignupForm() {
@@ -90,7 +90,11 @@ function SignupForm() {
       options: {
         // Read by the handle_new_user trigger to fill the profile row
         data: {
-          full_name: fullName.trim()
+          full_name: fullName.trim(),
+          // The group set up on this form. With email confirmation on, the
+          // confirmation link can open on another device, so onboarding reads
+          // it from here as well as from localStorage.
+          pending_group: pendingGroup()
         },
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`
       }
@@ -114,6 +118,10 @@ function SignupForm() {
     return { hasSession: !!authData.session }
   }
 
+  function pendingGroup() {
+    return { name: groupName.trim(), amount: contributionAmount, frequency: schedule.mode, dates: scheduleDates(schedule) }
+  }
+
   function rememberActiveChama(chamaId: string) {
     try {
       document.cookie = `active_chama_id=${chamaId}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`
@@ -128,8 +136,10 @@ function SignupForm() {
       setError('Please enter a group name.')
       return
     }
-    if (schedule.mode === 'custom' && schedule.dates.length === 0) {
-      setError('Pick at least one contribution date on the calendar, or choose Every day.')
+    if (!scheduleComplete(schedule)) {
+      setError(schedule.mode === 'custom'
+        ? 'Pick at least one contribution date on the calendar, or choose Every day.'
+        : 'Tap the first contribution date on the calendar.')
       return
     }
     if (!contributionAmount || Number(contributionAmount) < 1) {
@@ -145,9 +155,7 @@ function SignupForm() {
 
       if (!account.hasSession) {
         try {
-          localStorage.setItem('sc_pending_group', JSON.stringify({
-            name: groupName.trim(), amount: contributionAmount, frequency: schedule.mode, dates: schedule.dates
-          }))
+          localStorage.setItem('sc_pending_group', JSON.stringify(pendingGroup()))
         } catch (e) {}
         setPendingConfirmation(true)
         setLoading(false)
@@ -162,7 +170,7 @@ function SignupForm() {
           chama_name: groupName.trim(),
           contribution_amount: contributionAmount,
           contribution_frequency: schedule.mode,
-          contribution_dates: schedule.mode === 'custom' ? schedule.dates : []
+          contribution_dates: scheduleDates(schedule)
         })
       })
       const data = await res.json()
@@ -635,7 +643,7 @@ function SignupForm() {
                 </button>
                 <button
                   onClick={handleAdminSignup}
-                  disabled={loading || !groupName.trim() || !contributionAmount || (schedule.mode === 'custom' && schedule.dates.length === 0)}
+                  disabled={loading || !groupName.trim() || !contributionAmount || !scheduleComplete(schedule)}
                   className="flex-1 py-3 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] disabled:opacity-50 transition-colors border-0">
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
