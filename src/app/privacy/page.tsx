@@ -24,7 +24,6 @@ export default function PrivacyPage() {
           <p className="font-bold text-[#161d16] mt-6 mb-2">When you use the platform:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Contribution amounts and dates</li>
-            <li>Loan requests and repayment records</li>
             <li>Credit Score and its components</li>
             <li>Login times and device information</li>
             <li>SMS delivery records</li>
@@ -66,7 +65,6 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Your contribution history and status</li>
             <li>Your Credit Score</li>
-            <li>Your loan history within the group</li>
             <li>Your contact details</li>
           </ul>
 
@@ -75,7 +73,6 @@ export default function PrivacyPage() {
             <li>Whether you have paid your contribution</li>
             <li>Your name and role in the group</li>
           </ul>
-          <p>They cannot see your loan details.</p>
 
           <p className="mt-6">
             SmartChama staff can access your data only when needed to provide support or investigate a reported issue.
@@ -153,7 +150,7 @@ export default function PrivacyPage() {
       content: (
         <>
           <p className="mb-2">
-            Before money can leave a group (loan payouts, withdrawals and investments), the person who created it must
+            Before money can leave a group (withdrawals and investments), the person who created it must
             verify their identity. With your consent we collect your national ID or passport number, photos of the
             document, and a live selfie.
           </p>

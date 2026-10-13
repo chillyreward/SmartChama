@@ -5,13 +5,13 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 // Account deletion (required by Google Play for apps that create accounts).
 // Used by the Android app (Bearer token) and the /account/delete web page (cookie).
 //
-// Personal details are erased and sign-in is disabled. Contribution, loan and
+// Personal details are erased and sign-in is disabled. Contribution and
 // ledger rows are kept for the group's financial records, attached to an
 // anonymous "Former member" profile. Hard-deleting the auth user would cascade
 // into those records, so the account is disabled instead.
 
 const ERRORS: Record<string, string> = {
-  outstanding_loan: 'You still have a loan to repay. Clear it before deleting your account.',
+  outstanding_loan: 'You still owe your group money. Settle it before deleting your account.',
   unpaid_penalty: 'You have an unpaid penalty. Settle it or ask an official to waive it first.',
   sole_official: 'You are the only official of a group with other members. Hand over your role first.',
 }

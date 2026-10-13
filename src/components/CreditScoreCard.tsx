@@ -121,61 +121,19 @@ function MemberCreditScoreCard({ creditScore }: { creditScore: any }) {
           <ScoreFactor 
             label="Payment History" 
             score={creditScore.factors.paymentHistory} 
-            weight="35%"
+            weight="45%"
           />
           <ScoreFactor 
             label="Contribution Consistency" 
             score={creditScore.factors.contributionConsistency} 
-            weight="30%"
-          />
-          <ScoreFactor 
-            label="Loan Repayment" 
-            score={creditScore.factors.loanRepayment} 
-            weight="25%"
+            weight="40%"
           />
           <ScoreFactor 
             label="Account Age" 
             score={creditScore.factors.accountAge} 
-            weight="10%"
+            weight="15%"
           />
         </div>
-      </div>
-
-      {/* Loan Eligibility */}
-      <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          {creditScore.loanEligibility.eligible ? (
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-red-400" />
-          )}
-          <span className="text-white font-bold text-sm">
-            {creditScore.loanEligibility.eligible ? 'Loan Eligible' : 'Not Eligible'}
-          </span>
-        </div>
-        
-        {creditScore.loanEligibility.eligible && (
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Max Loan:</span>
-              <span className="text-white font-bold">
-                KES {creditScore.loanEligibility.maxLoanAmount.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Recommended:</span>
-              <span className="text-emerald-400 font-bold">
-                KES {creditScore.loanEligibility.recommendedAmount.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Interest Rate:</span>
-              <span className="text-white font-bold">
-                {creditScore.loanEligibility.interestRate}% p.a.
-              </span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Insights */}
@@ -265,11 +223,6 @@ function ChamaCreditScoreCard({ creditScore }: { creditScore: any }) {
           icon={<TrendingUp className="w-4 h-4" />}
         />
         <MetricCard 
-          label="Default Rate" 
-          value={`${creditScore.healthMetrics.defaultRate}%`}
-          icon={creditScore.healthMetrics.defaultRate > 10 ? <TrendingDown className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-        />
-        <MetricCard 
           label="Active Members" 
           value={creditScore.healthMetrics.activeMembers}
           icon={<TrendingUp className="w-4 h-4" />}
@@ -300,7 +253,7 @@ function ChamaCreditScoreCard({ creditScore }: { creditScore: any }) {
         <p className="text-slate-400 text-xs">
           {creditScore.investmentReadiness 
             ? 'This chama qualifies for institutional partnerships and investment opportunities.'
-            : 'Improve score, retention, and reduce defaults to access investment opportunities.'}
+            : 'Improve score, retention and on-time contributions to access investment opportunities.'}
         </p>
       </div>
 

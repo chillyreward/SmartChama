@@ -24,15 +24,11 @@ export default function MemberDashboard({
   const chama = initialChama || authChama;
 
   const [loadingSavings, setLoadingSavings] = useState(!initialMetrics);
-  const [loadingLoans, setLoadingLoans] = useState(!initialMetrics);
   const [loadingTransactions, setLoadingTransactions] = useState(!initialTransactions);
   const [loadingHealth, setLoadingHealth] = useState(true);
   const [error, setError] = useState('');
   
   const [totalSavings, setTotalSavings] = useState(initialMetrics ? initialMetrics.totalSaved : 0);
-  const [activeLoans, setActiveLoans] = useState(initialMetrics ? initialMetrics.activeLoans : 0);
-  const [loanData, setLoanData] = useState<any[]>(initialMetrics ? initialMetrics.loans : []);
-  const [repaymentRate, setRepaymentRate] = useState<number | null>(initialMetrics ? initialMetrics.repaymentRate : null);
   const [chartData, setChartData] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>(initialTransactions || []);
   const [groupHealth, setGroupHealth] = useState<any>(null);
@@ -46,7 +42,6 @@ export default function MemberDashboard({
     try {
       await Promise.all([
         loadSavingsData(member.id),
-        loadLoanData(member.id),
         loadRecentTransactions(chama.id),
         loadGroupHealth(chama.id)
       ]);
@@ -55,7 +50,6 @@ export default function MemberDashboard({
       setError('Failed to load dashboard data');
     } finally {
       setLoadingSavings(false);
-      setLoadingLoans(false);
       setLoadingTransactions(false);
       setLoadingHealth(false);
     }
@@ -83,9 +77,6 @@ export default function MemberDashboard({
   useEffect(() => {
     if (initialMetrics) {
       setTotalSavings(initialMetrics.totalSaved);
-      setActiveLoans(initialMetrics.activeLoans);
-      setLoanData(initialMetrics.loans);
-      setRepaymentRate(initialMetrics.repaymentRate);
     }
   }, [initialMetrics]);
 
@@ -166,28 +157,6 @@ export default function MemberDashboard({
     setChartData(chartDataFormatted);
   }
 
-  async function loadLoanData(membershipId: string) {
-    const { data: allLoans, error } = await supabase
-      .from('loans_v2')
-      .select('*')
-      .eq('membership_id', membershipId);
-      
-    if (error) throw error;
-    
-    const active = allLoans?.filter(l => l.status === 'active' || l.status === 'overdue') || [];
-    setActiveLoans(active.length);
-    setLoanData(active);
-
-    if (!allLoans || allLoans.length === 0) {
-      setRepaymentRate(null);
-      return;
-    }
-    
-    const repaid = allLoans.filter(l => l.status === 'repaid').length;
-    const rate = Math.round((repaid / allLoans.length) * 100);
-    setRepaymentRate(rate);
-  }
-
   async function loadRecentTransactions(chamaId: string) {
     const { data, error } = await supabase
       .from('transactions_v2')
@@ -219,7 +188,6 @@ export default function MemberDashboard({
 
   const retry = () => {
     setLoadingSavings(true);
-    setLoadingLoans(true);
     setLoadingTransactions(true);
     setLoadingHealth(true);
     setError('');
@@ -273,7 +241,7 @@ export default function MemberDashboard({
       </div>
 
       {/* ROW 1: Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 mb-6">
         
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex justify-between items-start mb-4">
@@ -286,26 +254,6 @@ export default function MemberDashboard({
           <p className="text-[10px] text-[var(--text-muted)] mt-2 leading-tight">
             SmartChama does not hold money. This is a record only.
           </p>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="flex justify-between items-start mb-4">
-            <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">ACTIVE LOANS</div>
-            <span className="material-symbols-outlined text-gray-300 dark:text-[#5a6e5a]">payments</span>
-          </div>
-          <div className="text-[22px] md:text-[32px] text-[var(--text-main)] font-geist font-bold leading-tight">
-            {loadingLoans ? <div className="h-8 w-12 bg-gray-200 dark:bg-[#2d3d2d] animate-pulse rounded"></div> : activeLoans}
-          </div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="flex justify-between items-start mb-4">
-            <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">REPAYMENT RATE</div>
-            <span className="material-symbols-outlined text-gray-300 dark:text-[#5a6e5a]">percent</span>
-          </div>
-          <div className="text-[22px] md:text-[32px] text-[var(--text-main)] font-geist font-bold leading-tight">
-            {loadingLoans ? <div className="h-8 w-16 bg-gray-200 dark:bg-[#2d3d2d] animate-pulse rounded"></div> : (repaymentRate !== null ? `${repaymentRate}%` : <span className="text-body-sm text-gray-400 dark:text-[#5a6e5a] font-normal tracking-normal">No loans yet</span>)}
-          </div>
         </div>
 
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
@@ -401,7 +349,7 @@ export default function MemberDashboard({
                               </span>
                             ) : (
                               <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-transparent text-[var(--brand-green)]">
-                                {tx.type}
+                                {String(tx.type) === 'loan_repayment' ? 'repayment' : String(tx.type).startsWith('loan') ? 'payout' : tx.type}
                               </span>
                             )}
                           </div>
@@ -437,7 +385,7 @@ export default function MemberDashboard({
                             </td>
                             <td className="py-4">
                               <span className="inline-block bg-transparent text-[var(--brand-green)] border border-[var(--border)] text-[var(--brand-green)] px-2 py-1 rounded text-xs font-semibold capitalize">
-                                {tx.type}
+                                {String(tx.type) === 'loan_repayment' ? 'repayment' : String(tx.type).startsWith('loan') ? 'payout' : tx.type}
                               </span>
                             </td>
                             <td className={`py-4 text-right text-body-sm font-bold font-mono ${amountColor} whitespace-nowrap`}>
@@ -490,16 +438,7 @@ export default function MemberDashboard({
                 <div>
                   <div className="flex justify-between text-xs mb-1 font-semibold text-[var(--text-muted)]">
                     <span>Contributions</span>
-                    <span>40/40</span>
-                  </div>
-                  <div className="h-2 w-full bg-gray-100 dark:bg-[#1a2218] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#22C55E] w-full"></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1 font-semibold text-[var(--text-muted)]">
-                    <span>Loan Repayment</span>
-                    <span>30/30</span>
+                    <span>55/55</span>
                   </div>
                   <div className="h-2 w-full bg-gray-100 dark:bg-[#1a2218] rounded-full overflow-hidden">
                     <div className="h-full bg-[#22C55E] w-full"></div>
@@ -508,7 +447,7 @@ export default function MemberDashboard({
                 <div>
                   <div className="flex justify-between text-xs mb-1 font-semibold text-[var(--text-muted)]">
                     <span>Tenure</span>
-                    <span>20/20</span>
+                    <span>25/25</span>
                   </div>
                   <div className="h-2 w-full bg-gray-100 dark:bg-[#1a2218] rounded-full overflow-hidden">
                     <div className="h-full bg-[#22C55E] w-full"></div>
@@ -517,7 +456,7 @@ export default function MemberDashboard({
                 <div>
                   <div className="flex justify-between text-xs mb-1 font-semibold text-[var(--text-muted)]">
                     <span>Participation Streak</span>
-                    <span>10/10</span>
+                    <span>20/20</span>
                   </div>
                   <div className="h-2 w-full bg-gray-100 dark:bg-[#1a2218] rounded-full overflow-hidden">
                     <div className="h-full bg-[#22C55E] w-full"></div>

@@ -52,10 +52,6 @@ export default function AdminMembersPage() {
           contributions:contributions_v2 (
             amount, 
             status
-          ),
-          loans:loans_v2 (
-            amount, 
-            status
           )
         `)
         .eq('chama_id', group.id)

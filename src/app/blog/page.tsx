@@ -13,14 +13,14 @@ export default function BlogPage() {
       category: "SAVINGS",
       date: "May 2025",
       title: "How to run a chama that lasts more than two years",
-      preview: "Most chamas dissolve within 18 months. The reasons are almost always the same: poor record keeping, disputes over loan repayments, and lack of clear rules. Here is what successful groups do differently...",
+      preview: "Most chamas dissolve within 18 months. The reasons are almost always the same: poor record keeping, disputes over who has paid, and lack of clear rules. Here is what successful groups do differently...",
       link: "/blog"
     },
     {
-      category: "LOANS",
+      category: "GROUP RULES",
       date: "April 2025",
-      title: "Setting fair interest rates for internal chama loans",
-      preview: "One of the most common sources of conflict in savings groups is loan interest. Charge too little and the group loses value. Charge too much and members resent the system. Here is how to find the right rate...",
+      title: "Setting fair penalties for late contributions",
+      preview: "One of the most common sources of conflict in savings groups is late payment. Set the penalty too low and nobody takes it seriously. Set it too high and members resent the system. Here is how to find the right balance...",
       link: "/blog"
     },
     {

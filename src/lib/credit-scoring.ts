@@ -9,18 +9,11 @@ export interface MemberCreditScore {
   score: number; // 0-850 (like FICO)
   grade: 'A+' | 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D' | 'F';
   factors: {
-    paymentHistory: number; // 35% weight
-    contributionConsistency: number; // 30% weight
-    loanRepayment: number; // 25% weight
-    accountAge: number; // 10% weight
+    paymentHistory: number; // 45% weight
+    contributionConsistency: number; // 40% weight
+    accountAge: number; // 15% weight
   };
   insights: string[];
-  loanEligibility: {
-    eligible: boolean;
-    maxLoanAmount: number;
-    recommendedAmount: number;
-    interestRate: number;
-  };
 }
 
 export interface ChamaCreditScore {
@@ -33,7 +26,6 @@ export interface ChamaCreditScore {
     averageMemberScore: number;
     totalSavings: number;
     activeMembers: number;
-    defaultRate: number; // %
     growthRate: number; // %
   };
   riskLevel: 'Very Low' | 'Low' | 'Medium' | 'High' | 'Very High';
@@ -49,31 +41,26 @@ export function calculateMemberCreditScore(memberData: {
   memberName: string;
   joinedDate: string;
   transactions: any[];
-  loans: any[];
   totalContributions: number;
   missedPayments: number;
   expectedPayments: number;
 }): MemberCreditScore {
-  const { transactions, loans, joinedDate, missedPayments, expectedPayments } = memberData;
+  const { transactions, joinedDate, missedPayments, expectedPayments } = memberData;
 
-  // 1. Payment History (35% weight) - Most important factor
+  // 1. Payment History (45% weight) - Most important factor
   const paymentHistoryScore = calculatePaymentHistory(missedPayments, expectedPayments);
 
-  // 2. Contribution Consistency (30% weight)
+  // 2. Contribution Consistency (40% weight)
   const consistencyScore = calculateConsistency(transactions);
 
-  // 3. Loan Repayment (25% weight)
-  const loanRepaymentScore = calculateLoanRepayment(loans);
-
-  // 4. Account Age (10% weight)
+  // 3. Account Age (15% weight)
   const accountAgeScore = calculateAccountAge(joinedDate);
 
   // Weighted average
   const rawScore = 
-    (paymentHistoryScore * 0.35) +
-    (consistencyScore * 0.30) +
-    (loanRepaymentScore * 0.25) +
-    (accountAgeScore * 0.10);
+    (paymentHistoryScore * 0.45) +
+    (consistencyScore * 0.40) +
+    (accountAgeScore * 0.15);
 
   // Scale to 300-850 range (like FICO)
   const score = Math.round(300 + (rawScore * 5.5));
@@ -85,13 +72,9 @@ export function calculateMemberCreditScore(memberData: {
   const insights = generateMemberInsights({
     paymentHistoryScore,
     consistencyScore,
-    loanRepaymentScore,
     accountAgeScore,
     score
   });
-
-  // Calculate loan eligibility
-  const loanEligibility = calculateLoanEligibility(score, memberData.totalContributions);
 
   return {
     memberId: memberData.memberId,
@@ -101,11 +84,9 @@ export function calculateMemberCreditScore(memberData: {
     factors: {
       paymentHistory: Math.round(paymentHistoryScore),
       contributionConsistency: Math.round(consistencyScore),
-      loanRepayment: Math.round(loanRepaymentScore),
       accountAge: Math.round(accountAgeScore)
     },
-    insights,
-    loanEligibility
+    insights
   };
 }
 
@@ -131,13 +112,6 @@ export function calculateChamaCreditScore(chamaData: {
   const memberScores = members.map(m => m.creditScore || 500);
   const averageMemberScore = memberScores.reduce((a, b) => a + b, 0) / memberScores.length;
 
-  // Calculate default rate
-  const loansWithDefaults = transactions.filter(t => 
-    t.transaction_type === 'loan' && t.status === 'defaulted'
-  ).length;
-  const totalLoans = transactions.filter(t => t.transaction_type === 'loan').length;
-  const defaultRate = totalLoans > 0 ? (loansWithDefaults / totalLoans) * 100 : 0;
-
   // Calculate growth rate (last 3 months vs previous 3 months)
   const now = new Date();
   const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
@@ -162,7 +136,6 @@ export function calculateChamaCreditScore(chamaData: {
   const retentionScore = memberRetention * 2; // Max 200
   const memberScoreContribution = (averageMemberScore / 850) * 300; // Max 300
   const savingsScore = Math.min((totalSavings / 1000000) * 200, 200); // Max 200 at 1M
-  const defaultPenalty = defaultRate * -5; // Penalty for defaults
   const growthBonus = Math.min(growthRate * 2, 100); // Max 100 bonus
   const ageBonus = calculateChamaAgeBonus(createdDate); // Max 200
 
@@ -170,7 +143,6 @@ export function calculateChamaCreditScore(chamaData: {
     retentionScore +
     memberScoreContribution +
     savingsScore +
-    defaultPenalty +
     growthBonus +
     ageBonus;
 
@@ -180,20 +152,19 @@ export function calculateChamaCreditScore(chamaData: {
   const rating = getChamaRating(score);
 
   // Determine risk level
-  const riskLevel = getRiskLevel(score, defaultRate);
+  const riskLevel = getRiskLevel(score);
 
   // Generate insights
   const insights = generateChamaInsights({
     score,
     memberRetention,
     averageMemberScore,
-    defaultRate,
     growthRate,
     totalSavings
   });
 
   // Determine investment readiness
-  const investmentReadiness = score >= 700 && defaultRate < 5 && memberRetention > 80;
+  const investmentReadiness = score >= 700 && memberRetention > 80;
 
   return {
     chamaId: chamaData.chamaId,
@@ -205,7 +176,6 @@ export function calculateChamaCreditScore(chamaData: {
       averageMemberScore: Math.round(averageMemberScore),
       totalSavings,
       activeMembers,
-      defaultRate: Math.round(defaultRate * 10) / 10,
       growthRate: Math.round(growthRate * 10) / 10
     },
     riskLevel,
@@ -258,20 +228,6 @@ function calculateConsistency(transactions: any[]): number {
   return (consistencyScore + timeConsistency) / 2;
 }
 
-function calculateLoanRepayment(loans: any[]): number {
-  if (loans.length === 0) return 100; // No loans = perfect score
-
-  const completedLoans = loans.filter(l => l.status === 'completed' || l.status === 'repaid');
-  const defaultedLoans = loans.filter(l => l.status === 'defaulted');
-  const lateLoans = loans.filter(l => l.status === 'late');
-
-  const repaymentRate = (completedLoans.length / loans.length) * 100;
-  const defaultPenalty = (defaultedLoans.length / loans.length) * 50;
-  const latePenalty = (lateLoans.length / loans.length) * 25;
-
-  return Math.max(0, repaymentRate - defaultPenalty - latePenalty);
-}
-
 function calculateAccountAge(joinedDate: string): number {
   const joined = new Date(joinedDate);
   const now = new Date();
@@ -314,58 +270,26 @@ function getChamaRating(score: number): ChamaCreditScore['rating'] {
   return 'D';
 }
 
-function getRiskLevel(score: number, defaultRate: number): ChamaCreditScore['riskLevel'] {
-  if (score >= 800 && defaultRate < 2) return 'Very Low';
-  if (score >= 700 && defaultRate < 5) return 'Low';
-  if (score >= 600 && defaultRate < 10) return 'Medium';
-  if (score >= 500 && defaultRate < 15) return 'High';
+function getRiskLevel(score: number): ChamaCreditScore['riskLevel'] {
+  if (score >= 800) return 'Very Low';
+  if (score >= 700) return 'Low';
+  if (score >= 600) return 'Medium';
+  if (score >= 500) return 'High';
   return 'Very High';
-}
-
-function calculateLoanEligibility(score: number, totalContributions: number) {
-  const eligible = score >= 550; // Minimum score for loan eligibility
-  
-  // Base multiplier on credit score
-  let multiplier = 1;
-  if (score >= 800) multiplier = 5;
-  else if (score >= 740) multiplier = 4;
-  else if (score >= 670) multiplier = 3;
-  else if (score >= 620) multiplier = 2.5;
-  else if (score >= 580) multiplier = 2;
-  else if (score >= 550) multiplier = 1.5;
-
-  const maxLoanAmount = totalContributions * multiplier;
-  const recommendedAmount = maxLoanAmount * 0.7; // Conservative recommendation
-
-  // Interest rate based on score
-  let interestRate = 15; // Base rate
-  if (score >= 800) interestRate = 5;
-  else if (score >= 740) interestRate = 7;
-  else if (score >= 670) interestRate = 9;
-  else if (score >= 620) interestRate = 11;
-  else if (score >= 580) interestRate = 13;
-
-  return {
-    eligible,
-    maxLoanAmount: Math.round(maxLoanAmount),
-    recommendedAmount: Math.round(recommendedAmount),
-    interestRate
-  };
 }
 
 function generateMemberInsights(factors: {
   paymentHistoryScore: number;
   consistencyScore: number;
-  loanRepaymentScore: number;
   accountAgeScore: number;
   score: number;
 }): string[] {
   const insights: string[] = [];
 
   if (factors.score >= 800) {
-    insights.push('Excellent credit! You qualify for the best loan rates.');
+    insights.push('Excellent standing! You are one of the most reliable members in your group.');
   } else if (factors.score >= 670) {
-    insights.push('Good credit standing. You have strong borrowing power.');
+    insights.push('Good standing. Keep contributing on time.');
   } else if (factors.score >= 580) {
     insights.push('Fair credit. Focus on consistent payments to improve.');
   } else {
@@ -380,10 +304,6 @@ function generateMemberInsights(factors: {
     insights.push('Contribution amounts vary significantly. Try to maintain consistency.');
   }
 
-  if (factors.loanRepaymentScore < 90 && factors.loanRepaymentScore > 0) {
-    insights.push('Loan repayment history affects your score. Pay on time.');
-  }
-
   if (factors.accountAgeScore < 50) {
     insights.push('New member. Your score will improve with time and activity.');
   }
@@ -395,7 +315,6 @@ function generateChamaInsights(metrics: {
   score: number;
   memberRetention: number;
   averageMemberScore: number;
-  defaultRate: number;
   growthRate: number;
   totalSavings: number;
 }): string[] {
@@ -408,15 +327,11 @@ function generateChamaInsights(metrics: {
   } else if (metrics.score >= 600) {
     insights.push('Moderate health. Focus on member engagement and retention.');
   } else {
-    insights.push('Chama needs attention. Address defaults and member activity.');
+    insights.push('Chama needs attention. Address missed contributions and member activity.');
   }
 
   if (metrics.memberRetention < 80) {
     insights.push('Member retention is low. Improve engagement and benefits.');
-  }
-
-  if (metrics.defaultRate > 10) {
-    insights.push('High default rate. Implement stricter loan approval criteria.');
   }
 
   if (metrics.growthRate > 20) {

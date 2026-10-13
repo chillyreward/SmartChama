@@ -26,11 +26,11 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            SmartChama provides a digital platform for informal savings groups to manage contributions, loans, and financial records. Our services include:
+            SmartChama provides a digital platform for informal savings groups to manage contributions, payouts, and financial records. Our services include:
           </p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Digital contribution tracking via M-Pesa integration</li>
-            <li>Internal loan management and repayment tracking</li>
+            <li>Merry-go-round, welfare fund and penalty tracking</li>
             <li>Credit Score calculation based on financial behaviour</li>
             <li>Group wallet management</li>
             <li>Transaction recording and reporting</li>
@@ -68,8 +68,7 @@ export default function TermsPage() {
           </p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Inviting and managing group members</li>
-            <li>Setting and enforcing group rules including contribution amounts, due dates, and loan policies</li>
-            <li>Approving or declining loan requests</li>
+            <li>Setting and enforcing group rules including contribution amounts, due dates, and penalties</li>
             <li>Maintaining accurate group records</li>
             <li>Ensuring the group operates in accordance with these terms</li>
           </ul>
@@ -96,17 +95,14 @@ export default function TermsPage() {
       )
     },
     {
-      title: "6. Loans",
+      title: "6. Group Funds",
       content: (
         <>
           <p>
-            SmartChama facilitates internal lending between members of a savings group. All loan decisions, including approval, amounts, interest rates, and repayment terms, are made by the group's administrators, not by SmartChama.
+            Your group's money is held in the group's own M-Pesa, bank or SACCO accounts. SmartChama does not hold members' money and does not provide credit of any kind.
           </p>
           <p>
-            SmartChama is not a lender. We do not provide, guarantee, or underwrite any loan. We provide tools to record and track loan agreements that are made between group members.
-          </p>
-          <p>
-            Members who take loans from their group and fail to repay them may have their Credit Score reduced. Persistent non-repayment may result in the member being flagged or removed from the group by the administrator.
+            We provide tools to record contributions, merry-go-round payouts, welfare support and penalties agreed by the group. All decisions about how the group uses its money are made by the group's administrators, not by SmartChama.
           </p>
         </>
       )
@@ -116,7 +112,7 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            SmartChama calculates a Credit Score for each member based on their contribution consistency, loan repayment behaviour, group tenure, and participation rate. This score is an indication of financial reliability within the group context.
+            SmartChama calculates a Credit Score for each member based on their contribution consistency, contribution streak, group tenure, and participation rate. This score is an indication of financial reliability within the group context.
           </p>
           <p>
             Credit Scores are not a credit rating and are not regulated by the Central Bank of Kenya or any financial authority. They are an internal metric provided for informational purposes.
@@ -135,7 +131,7 @@ export default function TermsPage() {
             SmartChama collects and processes personal data as described in our Privacy Policy. By using SmartChama, you consent to this processing.
           </p>
           <p>
-            Your contribution and loan records are visible to the administrators of your savings group. Other group members can see contribution statuses but cannot see individual loan details unless they are also administrators.
+            Your contribution records are visible to the administrators of your savings group. Other group members can see contribution statuses.
           </p>
           <p>
             You may request a copy of your data or request deletion of your account at any time by contacting <a href="mailto:privacy@smartchama.co.ke" className="text-[#006e2f] hover:underline">privacy@smartchama.co.ke</a>. Note that contribution and transaction records that form part of a group's financial history cannot be deleted as they affect other members' records.
@@ -177,7 +173,7 @@ export default function TermsPage() {
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Losses arising from M-Pesa transaction failures</li>
             <li>Disputes between group members</li>
-            <li>Decisions made by group administrators regarding loans or member management</li>
+            <li>Decisions made by group administrators regarding payouts or member management</li>
             <li>Loss of data caused by events outside our control</li>
             <li>Any indirect or consequential losses arising from use of the platform</li>
           </ul>

@@ -173,7 +173,7 @@ export default function CareersPage() {
             <div className="bg-[#FAFAFA] border border-[#E5E7EB] rounded-xl p-8">
               <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-4">Meaningful work</h3>
               <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                Every line of code you write helps a real person manage their savings, access a loan, or prove their financial identity for the first time. That is not a small thing.
+                Every line of code you write helps a real person manage their savings, plan a group goal, or prove their financial identity for the first time. That is not a small thing.
               </p>
             </div>
 

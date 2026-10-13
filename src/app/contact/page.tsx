@@ -18,7 +18,7 @@ export default function ContactPage() {
     },
     {
       q: "What is a CREDIT SCORE?",
-      a: "Your CREDIT SCORE is a number between 0 and 100 that reflects your financial reliability within your savings group. It is calculated from four factors: how consistently you contribute, how reliably you repay loans, how long you have been in the group, and your overall participation rate. A higher score can help you access larger loans from your group and, with your permission, demonstrate your creditworthiness to formal lenders."
+      a: "Your CREDIT SCORE is a number between 0 and 100 that reflects your financial reliability within your savings group. It is calculated from four factors: how consistently you contribute, your contribution streak, how long you have been in the group, and your overall participation rate. With your permission, a strong score can demonstrate your financial discipline to banks and SACCOs."
     },
     {
       q: "Can I use SmartChama on a feature phone?",
@@ -33,16 +33,12 @@ export default function ContactPage() {
       a: "SmartChama sends automated payment reminders via SMS three days before the contribution due date, on the due date, and three days after. If a member is still unpaid after the grace period, they are marked as late in the system. Admins can apply penalties according to the group rules. The member's CREDIT SCORE is also affected by late or missed payments."
     },
     {
-      q: "How does the loan system work?",
-      a: "A member requests a loan through their dashboard. They specify the amount, purpose, and repayment period. Group admins receive a notification and can approve or decline the request. The member's CREDIT SCORE and savings history are shown to admins to help them make the decision. Once approved, the loan is recorded in the system and repayments are tracked automatically."
-    },
-    {
       q: "Can we share our financial record with a bank or SACCO?",
       a: "Yes, but only if you choose to. SmartChama has a consent-based lender visibility feature. When you turn it on, vetted financial institutions can view your contribution history and CREDIT SCORE. You can turn this off at any time. No data is shared without your explicit permission."
     },
     {
       q: "What does SmartChama cost?",
-      a: "SmartChama has a free plan that supports groups of up to 20 members with full contribution tracking, loan management, and M-Pesa integration. Larger groups and advanced features are available on our Growth plan at KSh 999 per month. Enterprise pricing is available for organisations managing multiple groups. See our pricing page for full details."
+      a: "SmartChama has a free plan that supports groups of up to 20 members with full contribution tracking, merry-go-round schedules, and M-Pesa integration. Larger groups and advanced features are available on our Growth plan at KSh 999 per month. Enterprise pricing is available for organisations managing multiple groups. See our pricing page for full details."
     },
     {
       q: "How do I invite members to my group?",
@@ -87,7 +83,7 @@ export default function ContactPage() {
                 <div>
                   <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">Member support</div>
                   <a href="mailto:support@smartchama.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">support@smartchama.co.ke</a>
-                  <p className="text-body-sm text-[#60645f] leading-relaxed">For help with your account, contributions, or loans. We respond within 4 hours on business days.</p>
+                  <p className="text-body-sm text-[#60645f] leading-relaxed">For help with your account, contributions, or payments. We respond within 4 hours on business days.</p>
                 </div>
               </div>
 

@@ -110,7 +110,7 @@ export default function AdminTransactionsPage() {
   useEffect(() => {
     let res = transactions;
     if (filter === 'Incoming') res = res.filter(t => ['contribution', 'repayment', 'penalty', 'interest', 'deposit'].includes(t.type));
-    else if (filter === 'Outgoing') res = res.filter(t => ['loan_disbursement', 'withdrawal'].includes(t.type));
+    else if (filter === 'Outgoing') res = res.filter(t => ['withdrawal'].includes(t.type));
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -241,7 +241,7 @@ export default function AdminTransactionsPage() {
                             {isIncoming ? 'arrow_downward' : 'arrow_upward'}
                           </span>
                           <span className="text-sm font-semibold text-[var(--text-main)] capitalize">
-                            {tx.type.replace('_', ' ')}
+                            {(tx.type === 'loan_repayment' ? 'repayment' : tx.type.startsWith('loan') ? 'payout' : tx.type).replace('_', ' ')}
                           </span>
                         </div>
                       </td>
@@ -298,7 +298,7 @@ export default function AdminTransactionsPage() {
                           {isIncoming ? 'arrow_downward' : 'arrow_upward'}
                         </span>
                         <span className="font-semibold text-sm text-[var(--text-main)] capitalize">
-                          {tx.type.replace('_', ' ')}
+                          {(tx.type === 'loan_repayment' ? 'repayment' : tx.type.startsWith('loan') ? 'payout' : tx.type).replace('_', ' ')}
                         </span>
                       </div>
                       <div className="text-[11px] text-[var(--text-muted)] mt-0.5">
@@ -432,7 +432,7 @@ export default function AdminTransactionsPage() {
               </div>
               <div className="flex justify-between py-4">
                 <span className="text-sm text-[var(--text-muted)]">Type</span>
-                <span className="text-sm text-[var(--text-main)] capitalize font-semibold">{selectedTransaction.type.replace('_', ' ')}</span>
+                <span className="text-sm text-[var(--text-main)] capitalize font-semibold">{(selectedTransaction.type === 'loan_repayment' ? 'repayment' : selectedTransaction.type.startsWith('loan') ? 'payout' : selectedTransaction.type).replace('_', ' ')}</span>
               </div>
               <div className="flex justify-between py-4">
                 <span className="text-sm text-[var(--text-muted)]">Description</span>

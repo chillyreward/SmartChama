@@ -9,7 +9,7 @@ interface NotificationType {
   profile_id: string
   title: string
   message: string
-  type: 'contribution' | 'loan_approved' | 'loan_request' | 'new_member' | 'announcement' | 'reminder'
+  type: 'contribution' | 'new_member' | 'announcement' | 'reminder'
   read: boolean
   created_at: string
 }
@@ -18,7 +18,7 @@ export default function NotificationsPage() {
   const { session } = useAuth()
   const [notifications, setNotifications] = useState<NotificationType[]>([])
   const [filteredNotifications, setFilteredNotifications] = useState<NotificationType[]>([])
-  const [activeTab, setActiveTab] = useState<'All' | 'Unread' | 'Contributions' | 'Loans' | 'Group'>('All')
+  const [activeTab, setActiveTab] = useState<'All' | 'Unread' | 'Contributions' | 'Group'>('All')
   const [loading, setLoading] = useState(true)
 
   const fetchNotifications = async () => {
@@ -69,8 +69,6 @@ export default function NotificationsPage() {
       setFilteredNotifications(notifications.filter(n => !n.read))
     } else if (activeTab === 'Contributions') {
       setFilteredNotifications(notifications.filter(n => n.type === 'contribution'))
-    } else if (activeTab === 'Loans') {
-      setFilteredNotifications(notifications.filter(n => n.type === 'loan_approved' || n.type === 'loan_request'))
     } else if (activeTab === 'Group') {
       setFilteredNotifications(notifications.filter(n => n.type === 'new_member' || n.type === 'announcement' || n.type === 'reminder'))
     }
@@ -94,10 +92,6 @@ export default function NotificationsPage() {
     switch (type) {
       case 'contribution':
         return { icon: 'payments', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30' }
-      case 'loan_approved':
-        return { icon: 'check_circle', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30' }
-      case 'loan_request':
-        return { icon: 'account_balance', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30' }
       case 'new_member':
         return { icon: 'person_add', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30' }
       case 'announcement':
@@ -122,13 +116,13 @@ export default function NotificationsPage() {
           Notifications
         </h1>
         <p className="text-[14px] text-[var(--text-muted)] mt-1">
-          Updates on contributions, loan applications, and activity in your savings group.
+          Updates on contributions and activity in your savings group.
         </p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-[var(--border)] pb-3 mb-6 overflow-x-auto scrollbar-hide">
-        {(['All', 'Unread', 'Contributions', 'Loans', 'Group'] as const).map(tab => (
+        {(['All', 'Unread', 'Contributions', 'Group'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -158,7 +152,7 @@ export default function NotificationsPage() {
             No notifications yet
           </h2>
           <p className="text-[14px] text-[#60645f] dark:text-gray-400 max-w-sm">
-            Notifications about your contributions, loans, and group activity will appear here.
+            Notifications about your contributions and group activity will appear here.
           </p>
         </div>
       ) : (

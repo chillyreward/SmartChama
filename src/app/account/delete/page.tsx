@@ -47,8 +47,8 @@ export default function DeleteAccountPage() {
         <section className="space-y-3 text-[15px]" style={{ color: 'var(--text-secondary)' }}>
           <p>You can delete your account in the SmartChama Android app (Profile → Delete account) or on this page.</p>
           <p><strong style={{ color: 'var(--text-primary)' }}>What we delete:</strong> your name, phone number, email, national ID, county, occupation, photo, notification token, your chat messages and notifications. You will no longer be able to sign in.</p>
-          <p><strong style={{ color: 'var(--text-primary)' }}>What we keep:</strong> records of contributions, loans, repayments and other group transactions. Your chama needs them for its accounts, and we must keep financial records by law. They stay attached to an anonymous &ldquo;Former member&rdquo;.</p>
-          <p><strong style={{ color: 'var(--text-primary)' }}>Before you can delete:</strong> repay any loan, settle any unpaid penalty, and if you are the only official of a group with other members, hand your role to someone else.</p>
+          <p><strong style={{ color: 'var(--text-primary)' }}>What we keep:</strong> records of contributions, penalties and other group transactions. Your chama needs them for its accounts, and we must keep financial records by law. They stay attached to an anonymous &ldquo;Former member&rdquo;.</p>
+          <p><strong style={{ color: 'var(--text-primary)' }}>Before you can delete:</strong> settle any unpaid penalty, and if you are the only official of a group with other members, hand your role to someone else.</p>
         </section>
 
         <div className="rounded-2xl border p-6 space-y-4" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>

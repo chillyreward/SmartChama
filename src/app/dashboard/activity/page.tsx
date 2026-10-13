@@ -31,24 +31,6 @@ export default function GroupActivityPage() {
           .order('created_at', { ascending: false })
           .limit(20);
           
-        // Fetch recent loans
-        const { data: loans } = await supabase
-          .from('loans_v2')
-          .select(`
-            id, 
-            amount, 
-            status, 
-            created_at, 
-            membership:chama_memberships (
-              profile:profiles (
-                full_name
-              )
-            )
-          `)
-          .eq('chama_id', group.id)
-          .order('created_at', { ascending: false })
-          .limit(20);
-          
         // Fetch members joined
         const { data: newMembers } = await supabase
           .from('chama_memberships')
@@ -78,18 +60,6 @@ export default function GroupActivityPage() {
           })));
         }
         
-        if (loans) {
-          combined.push(...loans.map((l: any) => ({
-            id: `l-${l.id}`,
-            type: 'loan',
-            title: `Loan ${l.status === 'active' ? 'Approved' : 'Requested'}`,
-            description: `${l.membership?.profile?.full_name ?? 'Someone'} ${l.status === 'active' ? 'received a loan of' : 'requested a loan of'} KSh ${l.amount}`,
-            date: new Date(l.created_at),
-            icon: 'account_balance',
-            color: 'text-blue-500',
-            bg: 'bg-blue-500/10'
-          })));
-        }
         
         if (newMembers) {
           combined.push(...newMembers.map((m: any) => ({

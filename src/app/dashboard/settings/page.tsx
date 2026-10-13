@@ -36,7 +36,6 @@ export default function SettingsPage() {
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({
     contribution_reminders: true,
     late_payment_alerts: true,
-    loan_notifications: true,
     monthly_report: true,
     new_member_joins: true,
     whatsapp_notifications: false,
@@ -373,7 +372,6 @@ export default function SettingsPage() {
                 {[
                   { key: 'contribution_reminders', label: 'Contribution Reminders', desc: 'Alerts when monthly contributions are due.' },
                   { key: 'late_payment_alerts', label: 'Late Payment Alerts', desc: 'Reminders if contributions are overdue.' },
-                  { key: 'loan_notifications', label: 'Loan Status Alerts', desc: 'Updates on your loan requests and approvals.' },
                   { key: 'monthly_report', label: 'Monthly Financial Report', desc: 'Receive details on group balances.' },
                   { key: 'new_member_joins', label: 'New Member Joins', desc: 'Notifications when someone joins the chama.' },
                   { key: 'whatsapp_notifications', label: 'WhatsApp Alerts', desc: 'Send core notifications directly to your WhatsApp.' },

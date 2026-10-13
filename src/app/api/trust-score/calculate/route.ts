@@ -59,14 +59,6 @@ export async function POST(request: Request) {
 
     if (contErr) throw contErr
 
-    // Fetch all loans for this membership
-    const { data: loans, error: loanErr } = await supabase
-      .from('loans_v2')
-      .select('status')
-      .eq('membership_id', membership_id)
-
-    if (loanErr) throw loanErr
-
     // Calculations
     const joinedAt = new Date(membership.joined_at)
     const now = new Date()
@@ -99,16 +91,10 @@ export async function POST(request: Request) {
 
     // on_time_rate = confirmed_months / months_active (capped at 1)
     const on_time_rate = Math.min(confirmed_months / months_active, 1)
-    const contribution_score = on_time_rate * 40
-
-    // Loans repayment
-    const repaid = loans?.filter(l => l.status === 'repaid').length || 0
-    const total_loans = loans?.length || 0
-    const repayment_rate = total_loans > 0 ? repaid / total_loans : 1
-    const repayment_score = repayment_rate * 30
+    const contribution_score = on_time_rate * 55
 
     // Tenure
-    const tenure_score = Math.min(months_active / 24, 1) * 20
+    const tenure_score = Math.min(months_active / 24, 1) * 25
 
     // Streak Calculation (consecutive months contributed up to current month)
     let streak = 0
@@ -125,11 +111,10 @@ export async function POST(request: Request) {
     }
     
     const streak_capped = Math.min(streak, 12)
-    const participation_score = (streak_capped / 12) * 10
+    const participation_score = (streak_capped / 12) * 20
 
     const trust_score = Math.round(
       contribution_score +
-      repayment_score +
       tenure_score +
       participation_score
     )

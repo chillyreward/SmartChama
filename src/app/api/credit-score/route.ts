@@ -52,7 +52,6 @@ export async function GET(req: Request) {
         .filter(t => t.type === 'contribution' && t.status === 'confirmed')
         .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
-      const loans = (transactions || []).filter(t => t.type === 'loan');
       const missedPayments = (transactions || []).filter(t => t.status === 'failed').length;
 
       const joinedDate = new Date(member.created_at || Date.now());
@@ -66,7 +65,6 @@ export async function GET(req: Request) {
         memberName: (member.profiles as any)?.full_name || 'Member',
         joinedDate: member.created_at,
         transactions: transactions || [],
-        loans,
         totalContributions,
         missedPayments,
         expectedPayments

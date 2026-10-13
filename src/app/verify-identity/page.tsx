@@ -43,7 +43,7 @@ function VerifyIdentity() {
         <header className="space-y-2">
           <h1 className="text-[28px] font-bold">Verify your identity</h1>
           <p className="text-[15px] text-[#4F5A53] dark:text-[#8FA196]">
-            Your group is ready to use. Before money can leave it (loan payouts, withdrawals and investments), we need
+            Your group is ready to use. Before money can leave it (withdrawals and investments), we need
             to confirm who you are. It takes about two minutes.
           </p>
         </header>
@@ -51,7 +51,7 @@ function VerifyIdentity() {
         {status === null ? (
           <p className="text-[14px] text-[#4F5A53] dark:text-[#8FA196]">Loading…</p>
         ) : shown === 'verified' ? (
-          <Result tone="good" title="You're verified" body={outcome?.message ?? 'Loans, withdrawals and investments are unlocked for your group.'} next={next} />
+          <Result tone="good" title="You're verified" body={outcome?.message ?? 'Withdrawals and investments are unlocked for your group.'} next={next} />
         ) : shown === 'review' && !outcome ? (
           <Result tone="wait" title="We're checking your documents" body="A SmartChama team member is reviewing your submission, usually within one working day. You can keep using your group meanwhile." next={next} />
         ) : outcome?.status === 'review' ? (

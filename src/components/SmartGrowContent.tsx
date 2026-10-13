@@ -38,7 +38,7 @@ const SEED_PRODUCTS = [
     name: "Chama Sacco Share Capital", provider: "Various Licensed SACCOs", type: "sacco",
     min_amount: 10000, expected_return_min: 8.0, expected_return_max: 12.0,
     risk_level: "medium", liquidity_days: 365,
-    description: "Invest in share capital of a licensed SACCO. Earn dividends annually and access larger loan facilities as a group shareholder. Regulated by SASRA.",
+    description: "Invest in share capital of a licensed SACCO. Earn dividends annually and access SACCO services as a group shareholder. Regulated by SASRA.",
     regulatory_body: "SASRA", is_active: true
   }
 ];

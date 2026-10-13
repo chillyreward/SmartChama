@@ -146,8 +146,6 @@ export default function TransactionsPage() {
       return false;
     }
     if (filter === "Contributions" && txn.type !== "contribution") return false;
-    if (filter === "Loans" && txn.type !== "loan") return false;
-    if (filter === "Repayments" && txn.type !== "repayment") return false;
     if (filter === "Penalties" && txn.type !== "penalty") return false;
     if (filter === "Withdrawals" && txn.type !== "withdrawal") return false;
     return true;
@@ -284,7 +282,7 @@ export default function TransactionsPage() {
         </div>
         
         <div className="flex flex-wrap gap-2">
-          {["All", "Contributions", "Loans", "Repayments", "Penalties", "Withdrawals"].map((f) => (
+          {["All", "Contributions", "Penalties", "Withdrawals"].map((f) => (
             <button 
               key={f}
               onClick={() => setFilter(f)}
@@ -323,7 +321,7 @@ export default function TransactionsPage() {
                   </div>
                   <div className="text-right">
                     <span className={`rounded px-2.5 py-0.5 text-xs font-semibold capitalize ${getTypeStyle(txn.type)}`}>
-                      {txn.type}
+                      {String(txn.type) === 'loan_repayment' ? 'repayment' : String(txn.type).startsWith('loan') ? 'payout' : txn.type}
                     </span>
                   </div>
                 </div>
@@ -385,13 +383,13 @@ export default function TransactionsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`rounded px-2.5 py-0.5 text-xs font-semibold capitalize ${getTypeStyle(txn.type)}`}>
-                        {txn.type}
+                        {String(txn.type) === 'loan_repayment' ? 'repayment' : String(txn.type).startsWith('loan') ? 'payout' : txn.type}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-[var(--text-main)] whitespace-nowrap">
                       {txn.type === 'contribution' ? 'Monthly contribution' : 
-                       txn.type === 'loan' ? 'Loan disbursement' : 
-                       txn.type === 'repayment' ? 'Loan repayment' : 
+                       txn.type === 'loan' ? 'Payout' : 
+                       txn.type === 'repayment' ? 'Repayment' : 
                        txn.type === 'withdrawal' ? 'Group withdrawal' : 'System generated'}
                     </td>
                     <td className="px-6 py-4 text-sm text-[var(--text-muted)] font-mono whitespace-nowrap">{txn.ref}</td>

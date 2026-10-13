@@ -137,7 +137,7 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Ask about loans, savings, or group rules..."
+            placeholder="Ask about savings, contributions, or group rules..."
             className="w-full rounded-full pl-6 pr-24 py-4 outline-none focus:border-[#22C55E] transition-all"
             style={{
               backgroundColor: 'var(--bg-input)',

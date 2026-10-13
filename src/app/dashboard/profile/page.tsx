@@ -28,7 +28,6 @@ export default function ProfilePage() {
   // Lender visibility & Financial identity states
   const [lenderVisibility, setLenderVisibility] = useState(false)
   const [totalContributed, setTotalContributed] = useState(0)
-  const [repaymentRate, setRepaymentRate] = useState(100)
   const [joinDateStr, setJoinDateStr] = useState('')
 
   const getInitials = (name: string) => {
@@ -77,20 +76,7 @@ export default function ProfilePage() {
         setTotalContributed(sum)
       }
 
-      // 3. Fetch repayment rate from loans_v2
-      const { data: loans, error: loanErr } = await supabase
-        .from('loans_v2')
-        .select('status')
-        .eq('membership_id', member.id)
-
-      if (!loanErr && loans && loans.length > 0) {
-        const repaid = loans.filter(l => l.status === 'repaid').length
-        setRepaymentRate(Math.round((repaid / loans.length) * 100))
-      } else {
-        setRepaymentRate(100)
-      }
-
-      // 4. Joined date
+      // 3. Joined date
       if (member.joined_at) {
         setJoinDateStr(new Date(member.joined_at).toLocaleDateString('en-KE', {
           year: 'numeric', month: 'long', day: 'numeric'
@@ -238,7 +224,6 @@ Member Since: ${joinDateStr}
 
 Total Contributed: KSh ${totalContributed.toLocaleString()}
 CREDIT SCORE: ${member?.trust_score ?? 60}/100
-Repayment Rate: ${repaymentRate}%
 Contribution Streak: ${member?.contribution_streak ?? 0} months
 
 This record is verified by SmartChama Technologies Ltd.
@@ -497,8 +482,8 @@ This record is verified by SmartChama Technologies Ltd.
                     <div className="text-[16px] font-bold text-[#161d16] dark:text-white mt-1">KSh {totalContributed.toLocaleString()}</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] p-4 rounded-xl">
-                    <span className="text-[11px] text-[#60645f] dark:text-gray-400 uppercase font-semibold">Repayment Rate</span>
-                    <div className="text-[16px] font-bold text-[#161d16] dark:text-white mt-1">{repaymentRate}%</div>
+                    <span className="text-[11px] text-[#60645f] dark:text-gray-400 uppercase font-semibold">Member Since</span>
+                    <div className="text-[16px] font-bold text-[#161d16] dark:text-white mt-1">{joinDateStr || '—'}</div>
                   </div>
                   <div className="bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] p-4 rounded-xl">
                     <span className="text-[11px] text-[#60645f] dark:text-gray-400 uppercase font-semibold">Credit Score</span>
@@ -528,7 +513,7 @@ This record is verified by SmartChama Technologies Ltd.
                       )}
                     </h3>
                     <p className="text-[13px] text-[#60645f] dark:text-gray-400 mt-1 max-w-md">
-                      Let third-party micro-lenders view your payment history and CREDIT SCORE to offer tailored business loans.
+                      Let third-party micro-lenders view your payment history and CREDIT SCORE to offer tailored financial products.
                     </p>
                   </div>
                   <div

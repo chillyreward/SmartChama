@@ -71,7 +71,6 @@ export const translations = {
     totalGroups: "Total Groups",
     totalMembers: "Total Members",
     monthlyContributions: "Monthly Contributions",
-    activeLoans: "Active Loans",
     
     // Common
     loading: "Loading...",
@@ -149,7 +148,6 @@ export const translations = {
     totalGroups: "Vikundi Vyote",
     totalMembers: "Wanachama Wote",
     monthlyContributions: "Michango ya Kila Mwezi",
-    activeLoans: "Mikopo Inayoendelea",
     
     // Common
     loading: "Inapakia...",
@@ -227,7 +225,6 @@ export const translations = {
     totalGroups: "Groups Zote",
     totalMembers: "Members Wote",
     monthlyContributions: "Contributions za Kila Month",
-    activeLoans: "Loans Active",
     
     // Common
     loading: "Inapakia...",
@@ -305,7 +302,6 @@ export const translations = {
     totalGroups: "Ikundi Ciothe",
     totalMembers: "Andũ Othe",
     monthlyContributions: "Mĩhaka ya Mweri",
-    activeLoans: "Ngwatanĩro Irĩa Irĩ Wĩra",
     
     // Common
     loading: "Nĩkũrarutaga...",

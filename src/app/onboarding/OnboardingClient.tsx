@@ -284,7 +284,7 @@ export default function OnboardingClient() {
           <p className="text-[18px] text-gray-400 mt-4 max-w-sm leading-relaxed">
             {step === 1 
               ? "We need a few details to create your verifiable financial identity." 
-              : "Create your Chama to start recording contributions, tracking loans, and building trust."}
+              : "Create your Chama to start recording contributions, running your merry-go-round, and building trust."}
           </p>
           
           <div className="flex gap-2 mt-12">

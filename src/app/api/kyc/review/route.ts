@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     type: 'kyc_' + decision,
     title: decision === 'verified' ? 'Identity verified' : 'Identity check not approved',
     message: decision === 'verified'
-      ? 'Your identity is verified. Loans, withdrawals and investments are unlocked for your group.'
+      ? 'Your identity is verified. Withdrawals and investments are unlocked for your group.'
       : `We couldn't verify your identity: ${String(reason).trim()}. Please submit again.`,
   })
 

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     default: 'SmartChama',
     template: '%s | SmartChama'
   },
-  description: 'Digital savings and loan management for African savings groups.',
+  description: 'Digital savings management for African savings groups.',
   alternates: {
     canonical: 'https://smartchama.vercel.app',
   },
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: 'SmartChama',
     title: 'SmartChama',
-    description: 'Digital savings and loan management for African savings groups.'
+    description: 'Digital savings management for African savings groups.'
   },
   icons: {
     icon: [

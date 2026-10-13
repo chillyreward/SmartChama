@@ -350,7 +350,7 @@ function MyChamasContent() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#006e2f] mt-0.5">•</span>
-                <span><strong className="text-on-surface">Manage Members:</strong> View member activity, approve loans, and distribute dividends</span>
+                <span><strong className="text-on-surface">Manage Members:</strong> View member activity, confirm contributions, and distribute dividends</span>
               </li>
             </ul>
           </div>
@@ -546,7 +546,7 @@ function MyChamasContent() {
                   ))}
                 </div>
                 <p className="text-xs text-secondary mt-2 ml-1">
-                  Define rules like contribution amounts, meeting schedules, loan policies, etc.
+                  Define rules like contribution amounts, meeting schedules, penalties, etc.
                 </p>
               </div>
 
@@ -893,10 +893,6 @@ function MyChamasContent() {
                         </li>
                         <li className="flex items-center gap-2">
                           <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
-                          <span>2% on loan disbursements</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
                           <span>0.5% on withdrawals</span>
                         </li>
                         <li className="flex items-center gap-2">
@@ -930,7 +926,7 @@ function MyChamasContent() {
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-[#006e2f]" />
-                          <span>Reduced transaction fees (1% deposits, 1.5% loans)</span>
+                          <span>Reduced transaction fees (1% deposits)</span>
                         </li>
                       </ul>
                       <button 

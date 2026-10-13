@@ -16,7 +16,7 @@ export default function SecurityPage() {
     {
       icon: "link",
       title: "Blockchain verification",
-      desc: "Critical financial records including contribution confirmations and loan disbursements are anchored to a blockchain. This creates a cryptographic proof that cannot be altered after the fact. Every record has a transaction hash that can be independently verified."
+      desc: "Critical financial records including contribution confirmations and payouts are anchored to a blockchain. This creates a cryptographic proof that cannot be altered after the fact. Every record has a transaction hash that can be independently verified."
     },
     {
       icon: "lock",
@@ -31,12 +31,12 @@ export default function SecurityPage() {
     {
       icon: "manage_accounts",
       title: "Access controls",
-      desc: "Admin access requires separate authentication from member access. Critical admin actions such as loan approvals, member removal, and wallet withdrawals require multi-admin approval. All admin actions are logged in a permanent audit trail."
+      desc: "Admin access requires separate authentication from member access. Critical admin actions such as payout approvals, member removal, and wallet withdrawals require multi-admin approval. All admin actions are logged in a permanent audit trail."
     },
     {
       icon: "notifications_active",
       title: "Real-time alerts",
-      desc: "You receive an SMS notification for every transaction on your account. If a contribution is recorded, a loan is approved, or any change is made to your account, you are notified immediately. If you receive a notification for something you did not do, contact support@smartchama.co.ke immediately."
+      desc: "You receive an SMS notification for every transaction on your account. If a contribution is recorded, a payout is made, or any change is made to your account, you are notified immediately. If you receive a notification for something you did not do, contact support@smartchama.co.ke immediately."
     }
   ];
 

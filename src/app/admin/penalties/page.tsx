@@ -260,7 +260,6 @@ export default function AdminPenaltiesPage() {
                   className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]">
                   <option value="late_contribution">Late Contribution</option>
                   <option value="missed_meeting">Missed Meeting</option>
-                  <option value="loan_default">Loan Default</option>
                   <option value="custom">Custom Violation</option>
                 </select>
               </div>

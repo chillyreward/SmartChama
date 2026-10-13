@@ -72,17 +72,13 @@ export default function AdminDashboard() {
             } catch(e) {}
           }
 
-          const [txResult, contribResult, loansResult, walletResult] = await Promise.all([
+          const [txResult, contribResult, walletResult] = await Promise.all([
             supabase.from('transactions_v2').select('*').eq('chama_id', chamaData.id).order('created_at', { ascending: false }).limit(10),
             supabase.from('contributions_v2').select('amount, status, created_at, membership_id, mpesa_receipt').eq('chama_id', chamaData.id).eq('status', 'confirmed').order('created_at', { ascending: false }).limit(20),
-            supabase.from('loans_v2').select('id, status, amount, created_at, membership_id, chama_memberships(profiles(full_name))').eq('chama_id', chamaData.id).order('created_at', { ascending: false }).limit(20),
             supabase.from('wallets').select('balance').eq('chama_id', chamaData.id).maybeSingle(),
           ])
 
           const totalContribs = (contribResult.data || []).reduce((s: number, c: any) => s + (Number(c.amount) || 0), 0)
-          const repaidLoans = (loansResult.data || []).filter((l: any) => l.status === 'repaid').length
-          const totalLoans = (loansResult.data || []).length
-          const activeLoans = (loansResult.data || []).filter((l: any) => l.status === 'active').length
 
           setState({
             loading: false,
@@ -100,13 +96,11 @@ export default function AdminDashboard() {
             metrics: {
               totalSavings: totalContribs,
               memberCount: 0,
-              activeLoanCount: activeLoans,
-              collectionRate: totalLoans > 0 ? Math.round((repaidLoans / totalLoans) * 100) : 100,
+              collectionRate: 0,
               avgTrust: 100,
               walletBalance: (walletResult.data as any)?.balance || 0,
               members: [],
               contributions: contribResult.data || [],
-              loans: loansResult.data || [],
               wallet: { balance: (walletResult.data as any)?.balance || 0 }
             },
             transactions: txResult.data || []
@@ -140,7 +134,7 @@ export default function AdminDashboard() {
       }
 
       // Load secondary data in parallel
-      const [txResult, contribResult, loansResult] = await Promise.all([
+      const [txResult, contribResult] = await Promise.all([
         supabase
           .from('transactions_v2')
           .select('*')
@@ -153,13 +147,6 @@ export default function AdminDashboard() {
           .select('amount, status, created_at, membership_id, mpesa_receipt')
           .eq('chama_id', chama.id)
           .eq('status', 'confirmed')
-          .order('created_at', { ascending: false })
-          .limit(20),
-
-        supabase
-          .from('loans_v2')
-          .select('id, status, amount, created_at, membership_id, chama_memberships(profiles(full_name))')
-          .eq('chama_id', chama.id)
           .order('created_at', { ascending: false })
           .limit(20)
       ])
@@ -182,22 +169,24 @@ export default function AdminDashboard() {
       const totalTrust = members.reduce((sum: number, m: any) => sum + (m.trust_score || 0), 0) || 0
       const avgTrust = members.length > 0 ? Math.round(totalTrust / members.length) : 100
 
-      // Calculate collection rate
-      const repaidLoans = loansResult.data?.filter((l: any) => l.status === 'repaid').length || 0
-      const totalLoans = loansResult.data?.length || 0
-      const collectionRate = totalLoans > 0 ? Math.round((repaidLoans / totalLoans) * 100) : 100
+      // Collection rate: share of members with a confirmed contribution this month
+      const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      const paidThisMonth = new Set(
+        (contribResult.data || [])
+          .filter((c: any) => new Date(c.created_at) >= monthStart)
+          .map((c: any) => c.membership_id)
+      ).size
+      const collectionRate = members.length > 0 ? Math.round((paidThisMonth / members.length) * 100) : 0
 
       // Format metrics expected by AdminDashboardClient
       const formattedMetrics = {
         totalSavings: stats.total_contributions || 0,
         memberCount: stats.member_count || 0,
-        activeLoanCount: stats.active_loans || 0,
         collectionRate,
         avgTrust,
         walletBalance: baseMetrics.wallet_balance || 0,
         members,
         contributions: contribResult.data || [],
-        loans: loansResult.data || [],
         wallet: { balance: baseMetrics.wallet_balance || 0 }
       }
 

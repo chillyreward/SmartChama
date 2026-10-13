@@ -6,7 +6,7 @@ export const responses: {
   // GREETINGS
   {
     triggers: ['hi', 'hello', 'hey', 'hujambo', 'habari'],
-    answer: 'Hello! Welcome to SmartChama. I can help you with contributions, loans, credit scores, invites, and more. What would you like to know?'
+    answer: 'Hello! Welcome to SmartChama. I can help you with contributions, credit scores, invites, and more. What would you like to know?'
   },
   {
     triggers: ['good morning', 'good afternoon', 'good evening'],
@@ -24,7 +24,7 @@ export const responses: {
   // WHAT IS SMARTCHAMA
   {
     triggers: ['what is smartchama', 'what does smartchama do', 'tell me about smartchama', 'about smartchama'],
-    answer: 'SmartChama is a digital platform for savings groups in Kenya. It helps chamas track contributions, manage loans, and build verified financial records. Your group manages its own money through M-Pesa, and SmartChama keeps the records clear and honest for everyone.'
+    answer: 'SmartChama is a digital platform for savings groups in Kenya. It helps chamas track contributions, run merry-go-rounds, and build verified financial records. Your group manages its own money through M-Pesa, and SmartChama keeps the records clear and honest for everyone.'
   },
   {
     triggers: ['is smartchama a bank', 'do you hold money', 'is my money safe with you'],
@@ -57,36 +57,20 @@ export const responses: {
     answer: 'You can see all your past contributions on the Contributions page in your dashboard. Each entry shows the date, amount, M-Pesa receipt number, and status. You can also export your contribution history as a PDF statement at any time.'
   },
   
-  // LOANS
+  // BORROWING
   {
-    triggers: ['how to get loan', 'request loan', 'apply loan', 'how do loans work', 'loan request'],
-    answer: 'To request a loan: 1) Go to the Loans page in your dashboard. 2) Click "Request Loan". 3) Enter the amount you need and the reason. 4) Submit the request. Your group admin will review and approve or decline it. You need a minimum credit score (set by your admin) to be eligible. Loans are paid from your group\'s pool and must be repaid with interest as agreed.'
+    triggers: ['how to get loan', 'request loan', 'apply loan', 'how do loans work', 'loan request', 'borrow', 'how much can i borrow'],
+    answer: 'SmartChama does not offer borrowing. It helps your group save together: track contributions, run your merry-go-round, manage a welfare fund and keep honest records. For credit, talk to a licensed bank or SACCO. With your permission, your SmartChama contribution record can help show your financial discipline.'
   },
-  {
-    triggers: ['loan interest', 'interest rate', 'how much interest'],
-    answer: 'Your group\'s loan interest rate is set by your admin. The typical rate is 10% per month, but this varies by group. You can see the interest rate on the loan request screen. The total amount you need to repay is calculated automatically before you submit your request.'
-  },
-  {
-    triggers: ['loan repayment', 'how to repay', 'pay back loan', 'repay my loan'],
-    answer: 'To repay a loan, go to the Loans page and click on your active loan. Click "Make Repayment". You will receive an M-Pesa prompt for the repayment amount. Every repayment is recorded and improves your credit score. You can make partial repayments or pay the full amount at once.'
-  },
-  {
-    triggers: ['loan declined', 'loan rejected', 'why was my loan rejected'],
-    answer: 'A loan can be declined if: 1) Your credit score is below the group minimum. 2) The group does not have enough funds. 3) Your admin decided against it. 4) You already have an unpaid loan. Contact your admin for the specific reason. Focus on contributing on time to improve your credit score and future eligibility.'
-  },
-  {
-    triggers: ['maximum loan', 'how much can i borrow', 'loan limit'],
-    answer: 'Your maximum loan amount is calculated as a multiple of your total savings. For example, if your group allows 3x loans and you have saved KSh 20,000, you can borrow up to KSh 60,000. Your admin sets the maximum multiplier in group settings.'
-  },
-  
+
   // credit score
   {
     triggers: ['Credit Score', 'what is credit score', 'how is credit score calculated', 'credit score meaning'],
-    answer: 'Your credit score is a number from 0 to 100 that shows how financially reliable you are in your group. It is calculated from: Contribution consistency (40%) - paying on time every month. Loan repayment (30%) - repaying loans fully and on time. Group tenure (20%) - how long you have been a member. Participation (10%) - your overall engagement. A higher score means bigger loans and, with your permission, can be shared with banks and SACCOs.'
+    answer: 'Your credit score is a number from 0 to 100 that shows how financially reliable you are in your group. It is calculated from: Contribution consistency (55%) - paying on time every month. Group tenure (25%) - how long you have been a member. Participation streak (20%) - contributing every cycle without a break. With your permission, your score can be shared with banks and SACCOs.'
   },
   {
     triggers: ['improve credit score', 'how to increase credit score', 'low credit score'],
-    answer: 'To improve your credit score: 1) Pay your contribution on time every month. 2) Repay any loans on time and in full. 3) Stay in the group longer. 4) Do not miss any contribution cycles. Consistency is the most important factor. A missed or late payment reduces your score significantly.'
+    answer: 'To improve your credit score: 1) Pay your contribution on time every month. 2) Stay in the group longer. 3) Do not miss any contribution cycles. Consistency is the most important factor. A missed or late payment reduces your score significantly.'
   },
   {
     triggers: ['credit score 0', 'why is my score zero', 'new member score'],
@@ -164,7 +148,7 @@ export const responses: {
   // NOTIFICATIONS
   {
     triggers: ['notifications', 'alerts', 'how do i get notified', 'reminders'],
-    answer: 'SmartChama sends you notifications for: contribution reminders 3 days before due date, payment confirmations, loan approvals, new member joins, withdrawal alerts, and monthly reports. You can manage your notification preferences in Settings under the Notifications tab.'
+    answer: 'SmartChama sends you notifications for: contribution reminders 3 days before due date, payment confirmations, new member joins, withdrawal alerts, and monthly reports. You can manage your notification preferences in Settings under the Notifications tab.'
   },
   
   // FRAUD AND SECURITY
@@ -190,12 +174,12 @@ export const responses: {
   // WALLET
   {
     triggers: ['wallet', 'group wallet', 'what is wallet', 'wallet balance'],
-    answer: 'The Wallet page shows your group\'s financial overview: total recorded contributions, funds currently out as loans, invested amounts in SmartGrow, and the emergency reserve. These numbers are calculated from verified M-Pesa transactions. The actual money is held in your admin\'s M-Pesa account.'
+    answer: 'The Wallet page shows your group\'s financial overview: total recorded contributions, invested amounts in SmartGrow, and the emergency reserve. These numbers are calculated from verified M-Pesa transactions. The actual money is held in your admin\'s M-Pesa account.'
   },
   
   // DEFAULT
   {
     triggers: ['default'],
-    answer: 'I am not sure about that one. Try asking about contributions, loans, credit scores, invites, M-Pesa, SmartGrow, or account settings. You can also reach us at support@smartchama.co.ke for anything I cannot answer.'
+    answer: 'I am not sure about that one. Try asking about contributions, credit scores, invites, M-Pesa, SmartGrow, or account settings. You can also reach us at support@smartchama.co.ke for anything I cannot answer.'
   }
 ]

@@ -12,10 +12,9 @@ export default function AdminAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState<'30days' | '3months' | '12months'>('12months');
 
-  const [rawLoans, setRawLoans] = useState<any[]>([]);
   const [rawContribs, setRawContribs] = useState<any[]>([]);
 
-  const [loanHealth, setLoanHealth] = useState<any[]>([]);
+  const [statusBreakdown, setStatusBreakdown] = useState<any[]>([]);
   const [contributionStats, setContributionStats] = useState({ total: 0, late: 0, confirmed: 0 });
   const [topMembers, setTopMembers] = useState<any[]>([]);
   
@@ -25,14 +24,6 @@ export default function AdminAnalyticsPage() {
     if (!adminMember || !group) return;
     try {
       setLoading(true);
-
-      // Fetch Loans
-      const { data: loans, error: loanErr } = await supabase
-        .from('loans_v2')
-        .select('status, amount, created_at')
-        .eq('chama_id', group.id);
-
-      if (loanErr) throw loanErr;
 
       // Fetch Contributions
       const { data: contribs, error: contribErr } = await supabase
@@ -52,7 +43,6 @@ export default function AdminAnalyticsPage() {
       
       if (contribErr) throw contribErr;
 
-      setRawLoans(loans || []);
       setRawContribs(contribs || []);
 
     } catch (err) {
@@ -78,20 +68,19 @@ export default function AdminAnalyticsPage() {
       filterDate.setFullYear(today.getFullYear() - 1);
     }
 
-    const filteredLoans = rawLoans.filter(l => new Date(l.created_at) >= filterDate);
     const filteredContribs = rawContribs.filter(c => new Date(c.created_at) >= filterDate);
 
-    const lHealth = { active: 0, overdue: 0, repaid: 0 };
-    filteredLoans.forEach(l => {
-      if (l.status === 'active' || l.status === 'approved') lHealth.active += Number(l.amount);
-      if (l.status === 'overdue' || l.status === 'defaulted') lHealth.overdue += Number(l.amount);
-      if (l.status === 'repaid') lHealth.repaid += Number(l.amount);
+    const byStatus = { confirmed: 0, late: 0, pending: 0 };
+    filteredContribs.forEach((c: any) => {
+      if (c.status === 'confirmed') byStatus.confirmed += Number(c.amount);
+      else if (c.status === 'late') byStatus.late += Number(c.amount);
+      else if (c.status === 'pending') byStatus.pending += Number(c.amount);
     });
 
-    setLoanHealth([
-      { name: 'Healthy (Active)', value: lHealth.active, color: '#3B82F6' },
-      { name: 'Overdue (Risk)', value: lHealth.overdue, color: '#EF4444' },
-      { name: 'Repaid', value: lHealth.repaid, color: '#22C55E' }
+    setStatusBreakdown([
+      { name: 'Confirmed', value: byStatus.confirmed, color: '#22C55E' },
+      { name: 'Pending', value: byStatus.pending, color: '#3B82F6' },
+      { name: 'Late', value: byStatus.late, color: '#EF4444' }
     ]);
 
     let total = 0, late = 0, confirmed = 0;
@@ -117,7 +106,7 @@ export default function AdminAnalyticsPage() {
     const sortedMembers = Object.values(memberTotals).sort((a, b) => b.total - a.total).slice(0, 5);
     setTopMembers(sortedMembers);
 
-  }, [rawLoans, rawContribs, dateFilter]);
+  }, [rawContribs, dateFilter]);
 
   if (loading) {
     return <PageSkeleton />;
@@ -188,15 +177,15 @@ export default function AdminAnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* LOAN BOOK HEALTH */}
+        {/* CONTRIBUTION STATUS */}
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 flex flex-col">
-          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Loan Book Health</h2>
+          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Contributions by Status</h2>
           <div className="flex-1 flex flex-col md:flex-row items-center">
             <div className="w-full md:w-1/2 h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={loanHealth}
+                    data={statusBreakdown}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -206,7 +195,7 @@ export default function AdminAnalyticsPage() {
                     stroke="none"
                     isAnimationActive={false}
                   >
-                    {loanHealth.map((entry, index) => (
+                    {statusBreakdown.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -218,7 +207,7 @@ export default function AdminAnalyticsPage() {
               </ResponsiveContainer>
             </div>
             <div className="w-full md:w-1/2 flex flex-col gap-4 mt-6 md:mt-0">
-              {loanHealth.map((item, idx) => (
+              {statusBreakdown.map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>

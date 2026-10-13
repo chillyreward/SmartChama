@@ -20,7 +20,6 @@ export default function WalletPage() {
     inThisMonth: 0,
     outThisMonth: 0,
     savingsPool: 0,
-    activeLoansTotal: 0,
     emergencyFund: 0,
   });
 
@@ -91,7 +90,6 @@ export default function WalletPage() {
         }
       });
 
-      const activeLoansTotal = wData?.loans_disbursed || 0;
       const emergencyFund = wData?.emergency_reserve || 0;
       const savingsPool = wData?.savings_pool || 0;
 
@@ -100,7 +98,6 @@ export default function WalletPage() {
         inThisMonth,
         outThisMonth,
         savingsPool,
-        activeLoansTotal,
         emergencyFund
       });
 
@@ -205,9 +202,8 @@ export default function WalletPage() {
     );
   }
 
-  const totalAssets = walletStats.balance + walletStats.activeLoansTotal;
+  const totalAssets = walletStats.balance;
   const savingsPct = totalAssets > 0 ? Math.round((walletStats.savingsPool / totalAssets) * 100) : 0;
-  const loansPct = totalAssets > 0 ? Math.round((walletStats.activeLoansTotal / totalAssets) * 100) : 0;
   const emergencyPct = totalAssets > 0 ? Math.round((walletStats.emergencyFund / totalAssets) * 100) : 0;
 
   const chamaName = group?.name || 'Group';
@@ -299,11 +295,11 @@ export default function WalletPage() {
       </div>
 
       {/* WALLET BREAKDOWN */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
         <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">SAVINGS POOL</div>
           <div className="text-[18px] md:text-2xl font-bold text-[var(--text-main)] mb-1 font-geist">KSh {formatCurrency(walletStats.savingsPool)}</div>
-          <div className="text-xs text-[var(--text-muted)] mb-5">Available to lend</div>
+          <div className="text-xs text-[var(--text-muted)] mb-5">Members' pooled savings</div>
           <div className="bg-gray-100 dark:bg-[#1a2218] h-2 rounded-full w-full overflow-hidden">
             <div className="bg-[#22C55E] h-full rounded-full transition-all" style={{ width: `${savingsPct}%` }}></div>
           </div>
@@ -311,16 +307,6 @@ export default function WalletPage() {
         </div>
 
         <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">ACTIVE LOANS</div>
-          <div className="text-[18px] md:text-2xl font-bold text-[var(--text-main)] mb-1 font-geist">KSh {formatCurrency(walletStats.activeLoansTotal)}</div>
-          <div className="text-xs text-[var(--text-muted)] mb-5">Currently disbursed</div>
-          <div className="bg-gray-100 dark:bg-[#1a2218] h-2 rounded-full w-full overflow-hidden">
-            <div className="bg-blue-400 h-full rounded-full transition-all" style={{ width: `${loansPct}%` }}></div>
-          </div>
-          <div className="text-[10px] font-bold text-blue-500 mt-3 uppercase tracking-wider">{loansPct}% of assets</div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 last:col-span-2 md:last:col-span-1">
           <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">EMERGENCY FUND</div>
           <div className="text-[18px] md:text-2xl font-bold text-[var(--text-main)] mb-1 font-geist">KSh {formatCurrency(walletStats.emergencyFund)}</div>
           <div className="text-xs text-[var(--text-muted)] mb-5">Reserved fund</div>

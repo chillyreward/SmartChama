@@ -7,7 +7,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { signOut } from '@/lib/auth-helpers';
 import GroupSwitcher from '@/components/GroupSwitcher';
 import { 
-  LayoutDashboard, Users, Landmark, Wallet, 
+  LayoutDashboard, Users, Wallet, 
   Receipt, Award, TrendingUp, LineChart, Settings, 
   Megaphone, Shield, LogOut, Coins, RefreshCw, Heart, ShieldAlert
 } from 'lucide-react';
@@ -29,7 +29,6 @@ export function Sidebar({ variant }: SidebarProps) {
     { name: "Merry-Go-Round", href: "/admin/merry-go-round", icon: RefreshCw },
     { name: "Welfare Fund", href: "/admin/welfare", icon: Heart },
     { name: "Penalties", href: "/admin/penalties", icon: ShieldAlert },
-    { name: "Loans", href: "/admin/loans", icon: Landmark },
     { name: "Wallet", href: "/admin/wallet", icon: Wallet },
     { name: "Transactions", href: "/admin/transactions", icon: Receipt },
     { name: "Trust Scores", href: "/admin/trust-scores", icon: Award },
@@ -47,7 +46,6 @@ export function Sidebar({ variant }: SidebarProps) {
     { name: "Merry-Go-Round", href: "/dashboard/merry-go-round", icon: RefreshCw },
     { name: "Welfare", href: "/dashboard/welfare", icon: Heart },
     { name: "Penalties", href: "/dashboard/penalties", icon: ShieldAlert },
-    { name: "Loans", href: "/dashboard/loans", icon: Landmark },
     { name: "Members", href: "/dashboard/members", icon: Users },
     { name: "Wallet", href: "/dashboard/wallet", icon: Wallet },
     { name: "Transactions", href: "/dashboard/transactions", icon: Receipt },

@@ -1,7 +1,7 @@
 {
   "name": "SmartChama",
   "short_name": "SmartChama",
-  "description": "Digital savings and loan management for African savings groups",
+  "description": "Digital savings management for African savings groups",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -64,18 +64,6 @@
       "short_name": "Contribute",
       "description": "Make a contribution",
       "url": "/dashboard/contributions",
-      "icons": [
-        {
-          "src": "/web-app-manifest-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Loans",
-      "short_name": "Loans",
-      "description": "View your loans",
-      "url": "/dashboard/loans",
       "icons": [
         {
           "src": "/web-app-manifest-192x192.png",

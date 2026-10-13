@@ -29,8 +29,8 @@ const STEPS: Step[] = [
     hamsterPose: "think",
   },
   {
-    title: "Issue & Track Loans",
-    body: "Members apply for internal loans from the group wallet. Repayments are tracked automatically, and trust scores grow with each payment.",
+    title: "Run Your Merry-Go-Round",
+    body: "Set the payout order and record each member's turn. Every payment is tracked automatically, and trust scores grow with each contribution.",
     icon: "🏦",
     hamsterPose: "run",
   },

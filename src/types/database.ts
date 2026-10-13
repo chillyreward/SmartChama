@@ -28,10 +28,6 @@ export interface Chama {
   status: 'active' | 'suspended' | 'dissolved';
   created_by?: string;
   created_at?: string;
-  loan_interest_rate?: number;
-  max_loan_multiplier?: number;
-  min_trust_score_for_loan?: number;
-  max_repayment_months?: number;
   county?: string;
   contribution_due_day?: number;
   grace_period_days?: number;
@@ -54,23 +50,10 @@ export interface Transaction {
   id: string;
   chama_id: string;
   membership_id: string;
-  type: 'contribution' | 'loan_disbursement' | 'loan_repayment' | 'withdrawal' | 'penalty';
+  type: 'contribution' | 'withdrawal' | 'penalty';
   amount: number;
   reference?: string;
   status: 'pending' | 'confirmed' | 'failed';
-  created_at: string;
-}
-
-export interface Loan {
-  id: string;
-  membership_id: string;
-  chama_id: string;
-  amount: number;
-  interest_rate: number;
-  status: 'pending' | 'approved' | 'active' | 'repaid' | 'overdue' | 'defaulted';
-  approved_by?: string;
-  approved_at?: string;
-  due_date: string;
   created_at: string;
 }
 

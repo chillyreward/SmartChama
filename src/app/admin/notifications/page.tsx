@@ -93,10 +93,6 @@ export default function AdminNotificationsPage() {
     switch (type) {
       case 'contribution':
         return { icon: 'payments', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30' }
-      case 'loan_approved':
-        return { icon: 'check_circle', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30' }
-      case 'loan_request':
-        return { icon: 'account_balance', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30' }
       case 'new_member':
         return { icon: 'person_add', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30' }
       case 'announcement':

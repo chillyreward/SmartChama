@@ -230,9 +230,9 @@ export default function AdminWalletPage() {
         </div>
         <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5">
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">LOANS DISBURSED</div>
+            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">SAVINGS POOL</div>
             <div className="text-lg md:text-xl font-bold text-white font-mono">
-              KSh {formatCurrency(wallet?.loans_disbursed || 0)}
+              KSh {formatCurrency(wallet?.savings_pool || 0)}
             </div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5">
@@ -387,7 +387,7 @@ export default function AdminWalletPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm font-semibold text-[var(--text-main)] capitalize">
-                            {log.type.replace('_', ' ')}
+                            {(log.type === 'loan_repayment' ? 'repayment' : log.type.startsWith('loan') ? 'payout' : log.type).replace('_', ' ')}
                           </div>
                           {log.chama_memberships?.profiles?.full_name && (
                             <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a] mt-0.5">{log.chama_memberships.profiles.full_name}</div>
@@ -414,7 +414,7 @@ export default function AdminWalletPage() {
                     <div key={log.id} className="py-3 first:pt-0 last:pb-0 flex justify-between items-center">
                       <div>
                         <div className="text-sm font-semibold text-[var(--text-main)] capitalize">
-                          {log.type.replace('_', ' ')}
+                          {(log.type === 'loan_repayment' ? 'repayment' : log.type.startsWith('loan') ? 'payout' : log.type).replace('_', ' ')}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[10px] text-[var(--text-muted)]">

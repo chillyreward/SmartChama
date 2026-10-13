@@ -38,7 +38,6 @@ const flagTypeLabels: Record<string, string> = {
   fake_contribution: 'Fake Contribution',
   suspicious_reversal: 'Suspicious Reversal',
   abnormal_withdrawal: 'Abnormal Withdrawal',
-  loan_stacking: 'Loan Stacking',
   ghost_member: 'Ghost Member',
   admin_self_dealing: 'Admin Self-Dealing',
   unusual_pattern: 'Unusual Pattern',
@@ -126,7 +125,7 @@ export default function FraudDetectionPage() {
           </div>
           <h2 className="text-[18px] font-bold mb-2">No scan run yet</h2>
           <p className="text-[14px] text-[var(--text-muted)] max-w-md mx-auto mb-6">
-            The AI will analyse your group's transactions, contributions, loans, and member behaviour for fraud patterns — including duplicates, fake contributions, suspicious reversals, and abnormal withdrawals.
+            The AI will analyse your group's transactions, contributions, and member behaviour for fraud patterns — including duplicates, fake contributions, suspicious reversals, and abnormal withdrawals.
           </p>
           <button onClick={runScan} disabled={!group}
             className="bg-[#22C55E] text-white px-6 py-3 rounded-xl text-[14px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50">
@@ -142,7 +141,7 @@ export default function FraudDetectionPage() {
             <span className="material-symbols-outlined text-[32px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
           </div>
           <h2 className="text-[18px] font-bold mb-2">AI is scanning your group...</h2>
-          <p className="text-[14px] text-[var(--text-muted)]">Checking transactions, contributions, loans, and member patterns</p>
+          <p className="text-[14px] text-[var(--text-muted)]">Checking transactions, contributions, and member patterns</p>
         </div>
       )}
 

@@ -134,7 +134,7 @@ export async function POST(request: Request) {
   }
 
   const messages: Record<string, string> = {
-    verified: 'Your identity is verified. Loans, withdrawals and investments are now unlocked for your group.',
+    verified: 'Your identity is verified. Withdrawals and investments are now unlocked for your group.',
     review: 'Thanks. A SmartChama team member will check your documents, usually within one working day.',
     rejected: rejectionReason!,
   }

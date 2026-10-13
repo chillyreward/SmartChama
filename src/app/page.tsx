@@ -39,7 +39,7 @@ export default function LandingPage() {
             </h1>
             
             <p className="text-[16px] md:text-[19px] text-[var(--text-secondary)] max-w-sm lg:max-w-2xl leading-relaxed mb-6">
-              Automate M-Pesa contribution tracking, issue instant internal loans, manage Merry-Go-Round rotation schedules, and build a verifiable financial identity for your group.
+              Automate M-Pesa contribution tracking, manage Merry-Go-Round rotation schedules, run a welfare fund, and build a verifiable financial identity for your group.
             </p>
 
             {/* Two clear auth paths */}
@@ -192,7 +192,7 @@ export default function LandingPage() {
                 {[
                   "Manual ledger entries in notebooks vulnerable to damage or loss.",
                   "Endless WhatsApp messages chasing late contribution payments.",
-                  "Unrecorded verbal loan agreements leading to disputes.",
+                  "Disputes over who has paid and who is next in the rotation.",
                   "Zero credit history built despite years of disciplined savings."
                 ].map((text, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-gray-300 text-sm md:text-base">
@@ -213,7 +213,7 @@ export default function LandingPage() {
                 {[
                   "Digital, tamper-proof cloud ledger backed up in real-time.",
                   "Automated M-Pesa STK push prompts & payment confirmations.",
-                  "Transparent loan requests, 5% interest calculator, and repayment schedules.",
+                  "Transparent merry-go-round rotations, welfare fund and penalty tracking.",
                   "Dynamic AI Trust Scores that build a verifiable credit passport."
                 ].map((text, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-gray-200 text-sm md:text-base">
@@ -248,14 +248,14 @@ export default function LandingPage() {
                 badge: 'M-Pesa Native'
               },
               {
-                title: 'Internal Group Loans',
-                desc: 'Request loans, calculate interest, and track repayments with automated credit limits.',
-                img: '/images/loan_approval.jpg',
-                badge: '5% Interest Rate'
+                title: 'Merry-Go-Round Rotation',
+                desc: 'Set the payout order, track whose turn it is, and record every payout automatically.',
+                img: '/images/group_members.jpg',
+                badge: 'Fair Rotation'
               },
               {
                 title: 'Member Trust Scores',
-                desc: 'AI-calculated credit scores based on contribution timeliness and repayment history.',
+                desc: 'AI-calculated credit scores based on contribution timeliness and consistency.',
                 img: '/images/group_members.jpg',
                 badge: 'AI Scoring'
               },
@@ -330,7 +330,7 @@ export default function LandingPage() {
             {[
               { num: '01', title: 'Create Your Group', desc: 'Register your Chama, invite members with a 6-character code.' },
               { num: '02', title: 'Contribute via M-Pesa', desc: 'Members pay via M-Pesa STK push. Receipts logged automatically.' },
-              { num: '03', title: 'Access Group Loans', desc: 'Borrow up to 5x your credit limit at transparent group rates.' },
+              { num: '03', title: 'Run Your Rotation', desc: 'Track merry-go-round payouts and welfare support transparently.' },
               { num: '04', title: 'Build Credit History', desc: 'Generate PDF financial statements and build verifiable credit.' }
             ].map((step, i) => (
               <div key={i} className="bg-[var(--bg-page)] border border-[var(--border)] p-6 rounded-2xl flex flex-col items-center">
@@ -401,7 +401,7 @@ export default function LandingPage() {
                 <li className="flex items-center gap-2">✓ Unlimited group members</li>
                 <li className="flex items-center gap-2">✓ M-Pesa STK Push Integration</li>
                 <li className="flex items-center gap-2">✓ Automated SMS & Push Alerts</li>
-                <li className="flex items-center gap-2">✓ Loan approvals & interest engine</li>
+                <li className="flex items-center gap-2">✓ Merry-go-round & welfare tracking</li>
               </ul>
               
               <Link href="/signup?plan=pro" className="w-full text-center bg-[#22C55E] text-white py-3 rounded-xl font-bold hover:bg-[#16a34a] transition-colors shadow-md">

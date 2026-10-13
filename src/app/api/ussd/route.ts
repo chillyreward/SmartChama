@@ -4,8 +4,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { internalHeaders } from '@/lib/api-guard';
 
 // Africa's Talking doesn't sign USSD requests, and phoneNumber comes from the
-// POST body, so without this anyone could claim an official's number and
-// approve loans. Register the callback as /api/ussd?secret=USSD_WEBHOOK_SECRET.
+// POST body, so without this anyone could claim a member's number and
+// read their group's balance. Register the callback as /api/ussd?secret=USSD_WEBHOOK_SECRET.
 function ussdSecretOk(req: Request): boolean {
   const expected = process.env.USSD_WEBHOOK_SECRET;
   if (!expected) return process.env.NODE_ENV !== 'production';
@@ -65,9 +65,7 @@ export async function POST(req: Request) {
     if (text === '') {
       response = `CON Welcome to SmartChama, ${firstName}
 1. Check Balance
-2. Make Contribution
-3. Request Loan
-4. Approve Loan (Admin)`;
+2. Make Contribution`;
     } 
     else if (parts[0] === '1') {
       const { data: wallet } = await supabase
@@ -101,103 +99,6 @@ export async function POST(req: Request) {
             chama_id: summary.chama_id
           })
         }).catch(err => console.error('USSD STK Trigger error:', err));
-      }
-    }
-    else if (parts[0] === '3') {
-      if (parts.length === 1) {
-        response = `CON Enter amount to borrow (KSh):`;
-      } else if (parts.length === 2) {
-        response = `CON Enter duration in months:`;
-      } else if (parts.length === 3) {
-        const amount = parts[1];
-        const duration = parts[2];
-        if (!/^\d{1,7}$/.test(amount) || Number(amount) < 1 || !/^\d{1,2}$/.test(duration) || Number(duration) < 1 || Number(duration) > 24) {
-          return new NextResponse('END Invalid amount or duration.', { headers: { 'Content-Type': 'text/plain' } });
-        }
-        
-        await supabase.from('loans_v2').insert({
-          chama_id: summary.chama_id,
-          membership_id: summary.membership_id,
-          amount: Number(amount),
-          interest_rate: 1.0, // Default interest rate
-          repayment_months: Number(duration),
-          status: 'pending',
-          due_date: new Date(Date.now() + Number(duration) * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-        });
-        
-        response = `END Loan request for KSh ${amount} over ${duration} months submitted for approval.`;
-      }
-    }
-    else if (parts[0] === '4') {
-      // Check admin status
-      const { data: membership } = await supabase
-        .from('chama_memberships')
-        .select('role')
-        .eq('id', summary.membership_id)
-        .single();
-
-      const adminRoles = ['admin', 'chairlady', 'treasurer', 'secretary'];
-      if (!membership || !adminRoles.includes(membership.role)) {
-        response = `END You do not have permission to approve loans.`;
-      } else {
-        if (parts.length === 1) {
-          const { data: pendingLoans } = await supabase
-            .from('loans_v2')
-            .select(`
-              id, amount, 
-              chama_memberships (
-                profiles (
-                  full_name
-                )
-              )
-            `)
-            .eq('chama_id', summary.chama_id)
-            .eq('status', 'pending')
-            .limit(3);
-            
-          if (!pendingLoans || pendingLoans.length === 0) {
-            response = `END No pending loans.`;
-          } else {
-            let textRes = `CON Pending Loans:\n`;
-            pendingLoans.forEach((l: any, index: number) => {
-               const borrowerName = l.chama_memberships?.profiles?.full_name || 'Member';
-               textRes += `${index + 1}. ${borrowerName} (KSh ${l.amount})\n`;
-            });
-            response = textRes;
-          }
-        } else {
-          const loanIndex = Number(parts[1]) - 1;
-          const { data: pendingLoans } = await supabase
-            .from('loans_v2')
-            .select('id, amount')
-            .eq('chama_id', summary.chama_id)
-            .eq('status', 'pending')
-            .limit(3);
-            
-          if (pendingLoans && pendingLoans[loanIndex]) {
-            const loanToApprove = pendingLoans[loanIndex];
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
-            // Invoke safe approval transaction endpoint
-            const approveRes = await fetch(`${appUrl}/api/loans/approve`, {
-              method: 'POST',
-              headers: internalHeaders(),
-              body: JSON.stringify({
-                loanId: loanToApprove.id,
-                adminId: profile?.id
-              })
-            });
-
-            if (approveRes.ok) {
-              response = `END Loan approved successfully.`;
-            } else {
-              const errData = await approveRes.json();
-              response = `END Approval failed: ${errData.error || 'Check balance'}`;
-            }
-          } else {
-            response = `END Invalid loan selection.`;
-          }
-        }
       }
     }
     else {

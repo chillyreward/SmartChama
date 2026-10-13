@@ -18,9 +18,9 @@ const adminTabs = [
     label: 'Members'
   },
   {
-    href: '/admin/loans',
-    icon: 'account_balance',
-    label: 'Loans'
+    href: '/admin/wallet',
+    icon: 'account_balance_wallet',
+    label: 'Wallet'
   },
   {
     href: '/admin/contributions',
@@ -115,7 +115,7 @@ export function MobileAdminTabBar() {
             {/* Grid of all other nav items */}
             <div className="grid grid-cols-4 gap-1 px-4 pb-6">
               {[
-                { href: '/admin/wallet', icon: 'account_balance_wallet', label: 'Wallet' },
+                { href: '/admin/merry-go-round', icon: 'autorenew', label: 'Rotation' },
                 { href: '/admin/transactions', icon: 'receipt_long', label: 'History' },
                 { href: '/admin/trust-scores', icon: 'verified', label: 'Credit' },
                 { href: '/admin/fraud', icon: 'gpp_bad', label: 'Fraud AI' },

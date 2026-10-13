@@ -53,18 +53,6 @@ export default function MembersPage() {
         savingsMap[c.membership_id] = (savingsMap[c.membership_id] || 0) + Number(c.amount);
       });
 
-      // Fetch loans
-      const { data: loansData } = await supabase
-        .from('loans_v2')
-        .select('membership_id, amount, status')
-        .eq('chama_id', group.id);
-
-      const loansMap: Record<string, any[]> = {};
-      loansData?.forEach(l => {
-        if (!loansMap[l.membership_id]) loansMap[l.membership_id] = [];
-        loansMap[l.membership_id].push(l);
-      });
-
       const today = new Date();
       let activeCount = 0;
       let newCount = 0;
@@ -104,8 +92,7 @@ export default function MembersPage() {
           totalSaved,
           status,
           colorClass: colors[idx % colors.length],
-          roleClass,
-          loans: loansMap[m.id] || []
+          roleClass
         };
       });
 
@@ -546,26 +533,6 @@ export default function MembersPage() {
               <div>
                 <div className="text-sm font-semibold text-[var(--text-main)] mb-0.5">{selectedMember.contribution_streak || 0} consecutive months</div>
                 <div className="text-xs text-[var(--text-muted)]">Maintaining a steady saving habit</div>
-              </div>
-            </div>
-
-            {/* Loan history */}
-            <div className="mb-8">
-              <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Loan History</div>
-              <div className="flex flex-col gap-2">
-                <div className="text-sm text-[var(--text-main)] flex items-center justify-between">
-                  <span>{selectedMember.loans?.length || 0} loans taken</span>
-                  <span className="material-symbols-outlined text-[var(--brand-green)] text-sm">info</span>
-                </div>
-                {selectedMember.loans?.some((l: any) => l.status === 'overdue') ? (
-                  <div className="inline-block self-start bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded px-2.5 py-0.5 text-xs font-semibold mt-1">
-                    Default Risk
-                  </div>
-                ) : (
-                  <div className="inline-block self-start bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176] rounded px-2.5 py-0.5 text-xs font-semibold mt-1">
-                    Good standing
-                  </div>
-                )}
               </div>
             </div>
 

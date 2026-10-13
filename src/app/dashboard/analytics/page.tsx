@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 
 export default function AnalyticsPage() {
   const { member, group, isLoading: authLoading } = useAuth();
@@ -14,19 +14,15 @@ export default function AnalyticsPage() {
 
   const [rawTxData, setRawTxData] = useState<any[]>([]);
   const [rawMembersData, setRawMembersData] = useState<any[]>([]);
-  const [rawLoansData, setRawLoansData] = useState<any[]>([]);
 
   const [stats, setStats] = useState({
     totalSaved: 0,
-    loansIssued: 0,
-    loansCount: 0,
     avgContributionRate: 0,
     groupTrustScore: 0,
   });
 
   const [savingsGrowthData, setSavingsGrowthData] = useState<any[]>([]);
   const [collectionRateData, setCollectionRateData] = useState<any[]>([]);
-  const [loanPerformanceData, setLoanPerformanceData] = useState<any[]>([]);
   const [memberStatusData, setMemberStatusData] = useState<any[]>([]);
   const [healthScore, setHealthScore] = useState(85);
   const [totalMembers, setTotalMembers] = useState(0);
@@ -59,16 +55,8 @@ export default function AnalyticsPage() {
 
       if (memErr) throw memErr;
 
-      const { data: loansData, error: loanErr } = await supabase
-        .from('loans_v2')
-        .select('*')
-        .eq('chama_id', member.chama_id);
-
-      if (loanErr) throw loanErr;
-
       setRawTxData(txData || []);
       setRawMembersData(membershipsData || []);
-      setRawLoansData(loansData || []);
 
     } catch (err: any) {
       console.error(err);
@@ -99,7 +87,6 @@ export default function AnalyticsPage() {
     }
 
     const filteredTx = rawTxData.filter(tx => new Date(tx.created_at) >= filterDate);
-    const filteredLoans = rawLoansData.filter(l => new Date(l.created_at) >= filterDate);
 
     setTotalMembers(rawMembersData.length);
 
@@ -134,37 +121,6 @@ export default function AnalyticsPage() {
     const savingsGrowth = Object.keys(monthlySavingsMap).map(month => ({
       month,
       amount: monthlySavingsMap[month]
-    }));
-
-    const loansCount = filteredLoans.length;
-    const loansIssued = filteredLoans.reduce((sum, l) => sum + Number(l.amount), 0);
-
-    const monthlyLoanMap: Record<string, { issued: number, repaid: number }> = {};
-    for (let i = monthsCount - 1; i >= 0; i--) {
-      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      monthlyLoanMap[d.toLocaleString('default', { month: 'short' })] = { issued: 0, repaid: 0 };
-    }
-
-    filteredLoans.forEach(l => {
-      const issuedMonth = new Date(l.created_at).toLocaleString('default', { month: 'short' });
-      if (monthlyLoanMap[issuedMonth]) {
-        monthlyLoanMap[issuedMonth].issued += Number(l.amount);
-      }
-    });
-
-    filteredTx.forEach(tx => {
-      if (tx.type === 'loan_repayment') {
-        const repaidMonth = new Date(tx.created_at).toLocaleString('default', { month: 'short' });
-        if (monthlyLoanMap[repaidMonth]) {
-          monthlyLoanMap[repaidMonth].repaid += Number(tx.amount);
-        }
-      }
-    });
-
-    const loanPerformance = Object.keys(monthlyLoanMap).map(month => ({
-      month,
-      issued: monthlyLoanMap[month].issued,
-      repaid: monthlyLoanMap[month].repaid
     }));
 
     const avgTrust = rawMembersData.length > 0 
@@ -203,19 +159,16 @@ export default function AnalyticsPage() {
 
     setStats({
       totalSaved,
-      loansIssued,
-      loansCount,
       avgContributionRate: avgContribRate,
       groupTrustScore: avgTrust
     });
 
     setSavingsGrowthData(savingsGrowth);
     setCollectionRateData(collectionRate);
-    setLoanPerformanceData(loanPerformance);
     setMemberStatusData(memberStatus.some(m => m.value > 0) ? memberStatus : [{ name: 'Unpaid', value: 1, color: '#FCA5A5' }]); 
     setHealthScore(avgTrust + 5 > 100 ? 100 : avgTrust + 5);
 
-  }, [rawTxData, rawMembersData, rawLoansData, dateFilter]);
+  }, [rawTxData, rawMembersData, dateFilter]);
 
   if (authLoading || loading) {
     return (
@@ -324,9 +277,9 @@ export default function AnalyticsPage() {
 
         {/* Card 2 */}
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">LOANS ISSUED</div>
-          <div className="text-[20px] md:text-3xl font-bold text-[var(--text-main)] font-geist mb-2">KSh {formatCurrency(stats.loansIssued)}</div>
-          <div className="text-[11px] md:text-[12px] text-[var(--text-muted)]">{stats.loansCount} loans total</div>
+          <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">MEMBERS</div>
+          <div className="text-[20px] md:text-3xl font-bold text-[var(--text-main)] font-geist mb-2">{totalMembers}</div>
+          <div className="text-[11px] md:text-[12px] text-[var(--text-muted)]">in this group</div>
         </div>
 
         {/* Card 3 */}
@@ -397,39 +350,9 @@ export default function AnalyticsPage() {
       </div>
 
       {/* CHART ROW 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 mb-8">
         
-        {/* Left: Loan Performance */}
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
-          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Loans issued vs repaid (6 Mo)</h2>
-          <div className="flex items-center gap-6 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#22C55E]"></div>
-              <span className="text-sm text-[var(--text-muted)]">Repaid</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#9CA3AF] dark:bg-[#5a6e5a]"></div>
-              <span className="text-sm text-[var(--text-muted)]">Issued</span>
-            </div>
-          </div>
-          <div className="h-[200px] md:h-48 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={loanPerformanceData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dx={-10} tickFormatter={(val) => `${(val/1000)}k`} />
-                <Tooltip 
-                  formatter={(value: any, name: any) => [`KSh ${value.toLocaleString()}`, name === 'repaid' ? 'Repaid' : 'Issued']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
-                />
-                <Line type="monotone" dataKey="issued" stroke="#9CA3AF" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: '#9CA3AF' }} isAnimationActive={false} />
-                <Line type="monotone" dataKey="repaid" stroke="#22C55E" strokeWidth={2} dot={{ r: 4, fill: '#22C55E' }} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Right: Member Activity Breakdown */}
+        {/* Member Activity Breakdown */}
         <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 flex flex-col items-center shadow-sm hover:shadow-md transition-all duration-200">
           <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6 w-full text-left text-[16px] md:text-xl">Member contribution status — this month</h2>
           <div className="h-[200px] w-full relative mb-6">
@@ -509,10 +432,9 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mb-8">
           {[
             { label: 'Participation Rate', value: `${Math.round(totalMembers > 0 ? (memberStatusData.find(m => m.name === 'Paid')?.value || 0) / totalMembers * 100 : 0)}%` },
-            { label: 'Repayment Consistency', value: `${stats.loansIssued > 0 ? 88 : 100}%` },
             { label: 'Contribution Regularity', value: `${stats.avgContributionRate}%` },
             { label: 'Member Trust', value: `${stats.groupTrustScore}%` },
           ].map((stat, i) => (

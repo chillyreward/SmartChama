@@ -5,7 +5,7 @@ import { sendSms } from '@/lib/sms';
 
 // Daily Vercel cron (Authorization: Bearer CRON_SECRET). Drains queued side
 // effects so request handlers never make internal HTTP loopbacks.
-// Events: contribution_confirmed, loan_approved, send_sms.
+// Events: contribution_confirmed, send_sms.
 
 export async function GET(request: Request) {
   if (!isInternalRequest(request)) return forbidden();
@@ -55,22 +55,6 @@ export async function GET(request: Request) {
           const chamaName = (membership?.chamas_v2 as any)?.name || 'your group';
           if (phone) {
             await sendSms(phone, `SmartChama: Your KSh ${amount} contribution to ${chamaName} is confirmed. Receipt: ${receipt}.`);
-          }
-        } else if (event.event_type === 'loan_approved') {
-          const { phone, amount, group_name } = payload;
-          if (phone) {
-            await sendSms(phone, `SmartChama: Your loan of KSh ${amount} from ${group_name || 'your group'} has been approved and will be disbursed shortly.`);
-          }
-        } else if (event.event_type === 'loan_repayment_confirmed') {
-          const { membership_id, amount, receipt } = payload;
-          const { data: m } = await supabase
-            .from('chama_memberships')
-            .select('profiles(phone_number), chamas_v2(name)')
-            .eq('id', membership_id)
-            .maybeSingle();
-          const phone = (m?.profiles as any)?.phone_number;
-          if (phone) {
-            await sendSms(phone, `SmartChama: Loan repayment of KSh ${amount} to ${(m?.chamas_v2 as any)?.name || 'your group'} received. Receipt: ${receipt}.`);
           }
         } else if (event.event_type === 'send_sms') {
           const { phone, message } = payload;

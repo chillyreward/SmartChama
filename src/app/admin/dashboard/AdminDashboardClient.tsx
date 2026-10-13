@@ -28,14 +28,11 @@ export default function AdminDashboardPage({
   const [metrics, setMetrics] = useState({
     totalSavings: initialMetrics ? initialMetrics.totalSavings : 0,
     memberCount: initialMetrics ? initialMetrics.memberCount : 0,
-    activeLoanCount: initialMetrics ? initialMetrics.activeLoanCount : 0,
     collectionRate: initialMetrics ? initialMetrics.collectionRate : 0,
     avgTrust: initialMetrics ? initialMetrics.avgTrust : 0
   });
 
   const [pendingActions, setPendingActions] = useState({
-    loans: [] as any[],
-    overdue: [] as any[],
     late: [] as any[]
   });
 
@@ -53,7 +50,6 @@ export default function AdminDashboardPage({
       setMetrics({
         totalSavings: initialMetrics.totalSavings,
         memberCount: initialMetrics.memberCount,
-        activeLoanCount: initialMetrics.activeLoanCount,
         collectionRate: initialMetrics.collectionRate,
         avgTrust: initialMetrics.avgTrust
       });
@@ -91,12 +87,6 @@ export default function AdminDashboardPage({
         setChartData(chartDataFormatted);
       }
 
-      if (initialMetrics.loans) {
-        const pending = initialMetrics.loans.filter((l: any) => l.status === 'pending');
-        const overdue = initialMetrics.loans.filter((l: any) => l.status === 'overdue');
-        const late = initialMetrics.loans.filter((l: any) => l.status === 'late');
-        setPendingActions({ loans: pending, overdue, late });
-      }
     }
   }, [initialMetrics]);
 
@@ -137,14 +127,6 @@ export default function AdminDashboardPage({
             showToast('New contribution received!');
           }
         )
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'loans_v2', filter: `chama_id=eq.${chama.id}` },
-          (payload) => {
-            loadPendingActions(chama.id).catch(e => console.error(e));
-            showToast('New loan request submitted!');
-          }
-        )
         .subscribe();
 
       return () => {
@@ -183,14 +165,6 @@ export default function AdminDashboardPage({
           loadGroupMetrics(chama.id).catch(e => console.error(e));
           loadTopContributors(chama.id).catch(e => console.error(e));
           showToast('New contribution received!');
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'loans_v2', filter: `chama_id=eq.${chama.id}` },
-        (payload) => {
-          loadPendingActions(chama.id).catch(e => console.error(e));
-          showToast('New loan request submitted!');
         }
       )
       .subscribe();
@@ -236,23 +210,20 @@ export default function AdminDashboardPage({
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-    const [contribsRes, membersCountRes, loansCountRes, thisMonthRes, membersRes] = await Promise.all([
+    const [contribsRes, membersCountRes, thisMonthRes, membersRes] = await Promise.all([
       supabase.from('contributions_v2').select('amount').eq('chama_id', chamaId).eq('status', 'confirmed'),
       supabase.from('chama_memberships').select('*', { count: 'exact' }).eq('chama_id', chamaId).eq('status', 'active'),
-      supabase.from('loans_v2').select('*', { count: 'exact' }).eq('chama_id', chamaId).in('status', ['active', 'overdue']),
       supabase.from('contributions_v2').select('membership_id, amount, status').eq('chama_id', chamaId).gte('created_at', firstDay),
       supabase.from('chama_memberships').select('trust_score').eq('chama_id', chamaId)
     ]);
 
     if (contribsRes.error) throw contribsRes.error;
     if (membersCountRes.error) throw membersCountRes.error;
-    if (loansCountRes.error) throw loansCountRes.error;
     if (thisMonthRes.error) throw thisMonthRes.error;
     if (membersRes.error) throw membersRes.error;
 
     const totalSavings = contribsRes.data?.reduce((sum, c) => sum + c.amount, 0) || 0;
     const memberCount = membersCountRes.count || 0;
-    const activeLoanCount = loansCountRes.count || 0;
 
     const paidCount = new Set(
       thisMonthRes.data?.filter(c => c.status === 'confirmed').map(c => c.membership_id)
@@ -269,37 +240,20 @@ export default function AdminDashboardPage({
     setMetrics({
       totalSavings,
       memberCount,
-      activeLoanCount,
       collectionRate,
       avgTrust
     });
   }
 
   async function loadPendingActions(chamaId: string) {
-    const [pendingLoans, overdueLoans, lateContributors] = await Promise.all([
-      supabase.from('loans_v2')
-        .select('id, amount, chama_memberships(profiles(full_name))')
-        .eq('chama_id', chamaId)
-        .eq('status', 'pending'),
-      
-      supabase.from('loans_v2')
-        .select('id, amount, chama_memberships(profiles(full_name))')
-        .eq('chama_id', chamaId)
-        .eq('status', 'overdue'),
-      
-      supabase.from('contributions_v2')
-        .select('membership_id, chama_memberships(profiles(full_name))')
-        .eq('chama_id', chamaId)
-        .eq('status', 'late')
-    ]);
-    
-    if (pendingLoans.error) throw pendingLoans.error;
-    if (overdueLoans.error) throw overdueLoans.error;
+    const lateContributors = await supabase.from('contributions_v2')
+      .select('membership_id, chama_memberships(profiles(full_name))')
+      .eq('chama_id', chamaId)
+      .eq('status', 'late');
+
     if (lateContributors.error) throw lateContributors.error;
-    
+
     setPendingActions({
-      loans: pendingLoans.data || [],
-      overdue: overdueLoans.data || [],
       late: lateContributors.data || []
     });
   }
@@ -398,12 +352,12 @@ export default function AdminDashboardPage({
           Admin Overview
         </h1>
         <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">
-          {chama?.name || 'Group'} · Manage savings, loans, and system compliance status.
+          {chama?.name || 'Group'} · Manage savings, members, and system compliance status.
         </p>
       </div>
       
       {/* METRICS */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">TOTAL SAVINGS</div>
           <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">KSh {formatCurrency(metrics.totalSavings)}</div>
@@ -414,11 +368,6 @@ export default function AdminDashboardPage({
           <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">{metrics.memberCount}</div>
         </div>
 
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-red-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">ACTIVE LOANS</div>
-          <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">{metrics.activeLoanCount}</div>
-        </div>
-
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-amber-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">COLLECTION RATE</div>
           <div className={`text-[20px] md:text-[28px] font-geist font-bold ${getCollectionColor(metrics.collectionRate)}`}>
@@ -427,7 +376,7 @@ export default function AdminDashboardPage({
           <div className="text-xs text-[var(--text-muted)] mt-1">This month</div>
         </div>
 
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between col-span-2 md:col-span-2 lg:col-span-1">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
           <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">GROUP Credit Score</div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[#22C55E] text-[24px] md:text-[28px]">verified</span>
@@ -481,24 +430,6 @@ export default function AdminDashboardPage({
           </h2>
           
           <div className="flex flex-col gap-3">
-            {pendingActions.loans.length > 0 && (
-              <div className="flex items-center justify-between p-3 bg-transparent border border-[var(--border)] rounded-xl">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-orange-550">pending_actions</span>
-                  <span className="text-sm font-semibold text-[var(--text-main)]">{pendingActions.loans.length} loan requests pending</span>
-                </div>
-              </div>
-            )}
-
-            {pendingActions.overdue.length > 0 && (
-              <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-xl text-red-800 dark:text-red-400">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined">event_busy</span>
-                  <span className="text-sm font-semibold">{pendingActions.overdue.length} members overdue on loans</span>
-                </div>
-              </div>
-            )}
-
             {pendingActions.late.length > 0 && (
               <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-xl text-orange-800 dark:text-orange-400">
                 <div className="flex items-center gap-3">
@@ -508,7 +439,7 @@ export default function AdminDashboardPage({
               </div>
             )}
 
-            {pendingActions.loans.length === 0 && pendingActions.overdue.length === 0 && pendingActions.late.length === 0 && (
+            {pendingActions.late.length === 0 && (
               <div className="flex flex-col items-center justify-center py-6 text-center">
                 <span className="material-symbols-outlined text-[#22C55E] text-4xl mb-2">check_circle</span>
                 <span className="text-body-sm text-[var(--text-main)] font-medium">All clear!</span>

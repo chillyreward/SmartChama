@@ -33,13 +33,13 @@ export default function AboutPage() {
             <h2 className="text-[36px] font-geist font-bold text-[#161d16] mb-8">Our Mission</h2>
             <div className="space-y-6 text-[18px] font-inter text-[#3d4a3d] leading-relaxed">
               <p>
-                SmartChama exists to modernize informal savings groups across Africa. We believe that the trust built inside a chama — the consistency of showing up every month, repaying loans on time, supporting fellow members — is one of the most valuable financial assets a person can have. We are making that asset visible.
+                SmartChama exists to modernize informal savings groups across Africa. We believe that the trust built inside a chama — the consistency of showing up every month, paying your share on time, supporting fellow members — is one of the most valuable financial assets a person can have. We are making that asset visible.
               </p>
               <p>
-                Our platform digitizes the entire lifecycle of a savings group. From the first contribution to the final loan repayment, every transaction is recorded, verified, and stored in a tamper-proof ledger. This creates something powerful: a verifiable financial history for people who have never had one.
+                Our platform digitizes the entire lifecycle of a savings group. From the first contribution to the final payout, every transaction is recorded, verified, and stored in a tamper-proof ledger. This creates something powerful: a verifiable financial history for people who have never had one.
               </p>
               <p>
-                We are not just building a savings app. We are building financial identity infrastructure for underserved communities. When a SmartChama member applies for a loan at a bank or SACCO, they can show their contribution record as proof of financial discipline. That changes everything.
+                We are not just building a savings app. We are building financial identity infrastructure for underserved communities. When a SmartChama member approaches a bank or SACCO, they can show their contribution record as proof of financial discipline. That changes everything.
               </p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function AboutPage() {
             </div>
             <div className="bg-[#FAFAFA] border border-[#E5E7EB] rounded-xl p-8">
               <div className="text-display-lg font-geist font-bold text-[#006e2f] mb-2">94%</div>
-              <div className="text-body-sm text-[#60645f]">Average loan repayment rate</div>
+              <div className="text-body-sm text-[#60645f]">Average on-time contribution rate</div>
             </div>
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-3">Verbal agreements fail</h3>
               <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                Loan terms agreed verbally are forgotten or disputed. Interest calculations done by hand contain errors. When members disagree, there is no record to refer to. Relationships break down and groups dissolve.
+                Payments recorded in notebooks get lost or disputed. Totals worked out by hand contain errors. When members disagree, there is no record to refer to. Relationships break down and groups dissolve.
               </p>
             </div>
 
@@ -146,7 +146,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-2">AI trust scoring</h3>
                 <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                  Our algorithm analyses contribution consistency, loan repayment behaviour, group tenure, and participation rate to generate a CREDIT SCORE for every member. This score is the beginning of a financial identity.
+                  Our algorithm analyses contribution consistency, contribution streak, group tenure, and participation rate to generate a CREDIT SCORE for every member. This score is the beginning of a financial identity.
                 </p>
               </div>
             </div>

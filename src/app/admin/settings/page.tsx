@@ -28,10 +28,6 @@ export default function AdminSettingsPage() {
   const [contributionDueDay, setContributionDueDay] = useState(1);
   const [gracePeriodDays, setGracePeriodDays] = useState(3);
   const [latePenaltyAmount, setLatePenaltyAmount] = useState(100);
-  const [maxLoanMultiplier, setMaxLoanMultiplier] = useState(2);
-  const [loanInterestRate, setLoanInterestRate] = useState(10);
-  const [maxRepaymentMonths, setMaxRepaymentMonths] = useState(3);
-  const [minTrustScoreForLoan, setMinTrustScoreForLoan] = useState(60);
 
   // --- Payment Configuration States ---
   const [paymentType, setPaymentType] = useState<'till' | 'paybill' | 'phone'>('till');
@@ -66,10 +62,6 @@ export default function AdminSettingsPage() {
       setContributionDueDay(Number(group.contribution_due_day || 1));
       setGracePeriodDays(Number(group.grace_period_days || 3));
       setLatePenaltyAmount(Number(group.late_penalty_amount || 0));
-      setMaxLoanMultiplier(Number(group.max_loan_multiplier || 2));
-      setLoanInterestRate(Number(group.loan_interest_rate || 10));
-      setMaxRepaymentMonths(Number(group.max_repayment_months || 3));
-      setMinTrustScoreForLoan(Number(group.min_trust_score_for_loan || 60));
 
       // 2. Load payment config
       const { data: payConfig } = await supabase
@@ -129,10 +121,6 @@ export default function AdminSettingsPage() {
           contribution_due_day: Number(contributionDueDay),
           grace_period_days: Number(gracePeriodDays),
           late_penalty_amount: Number(latePenaltyAmount),
-          max_loan_multiplier: Number(maxLoanMultiplier),
-          loan_interest_rate: Number(loanInterestRate),
-          max_repayment_months: Number(maxRepaymentMonths),
-          min_trust_score_for_loan: Number(minTrustScoreForLoan),
           updated_at: new Date().toISOString()
         })
         .eq('id', group.id);
@@ -350,56 +338,6 @@ export default function AdminSettingsPage() {
                     className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Max Loan Multiplier</label>
-                  <select
-                    value={maxLoanMultiplier}
-                    onChange={e => setMaxLoanMultiplier(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  >
-                    <option value="1">1x Member Savings</option>
-                    <option value="2">2x Member Savings</option>
-                    <option value="3">3x Member Savings</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Loan Interest Rate (%)</label>
-                  <input
-                    type="number"
-                    value={loanInterestRate}
-                    onChange={e => setLoanInterestRate(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Max Repayment (Months)</label>
-                  <select
-                    value={maxRepaymentMonths}
-                    onChange={e => setMaxRepaymentMonths(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                      <option key={m} value={m}>{m} Month{m > 1 ? 's' : ''}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-3">
-                  Minimum CREDIT SCORE for Loan Approval ({minTrustScoreForLoan})
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={minTrustScoreForLoan}
-                  onChange={e => setMinTrustScoreForLoan(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
-                />
               </div>
 
               <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">

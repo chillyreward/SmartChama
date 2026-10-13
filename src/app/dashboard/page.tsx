@@ -132,12 +132,9 @@ export default function Dashboard() {
 
     const formattedMetrics = {
       totalSaved: metrics.total_saved || 0,
-      activeLoans: 0,
-      repaymentRate: null,
       trustScore: membership.trust_score || 0,
       walletBalance: metrics.wallet_balance || 0,
       contributions: contribResult.data || [],
-      loans: [],
       wallet: { balance: metrics.wallet_balance || 0 }
     }
 

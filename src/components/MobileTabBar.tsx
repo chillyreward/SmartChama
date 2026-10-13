@@ -18,9 +18,9 @@ const memberTabs = [
     label: 'Contribute'
   },
   {
-    href: '/dashboard/loans',
-    icon: 'account_balance',
-    label: 'Loans'
+    href: '/dashboard/savings',
+    icon: 'savings',
+    label: 'Savings'
   },
   {
     href: '/dashboard/wallet',
@@ -115,7 +115,7 @@ export function MobileTabBar() {
             {/* Grid of all other nav items */}
             <div className="grid grid-cols-4 gap-1 px-4 pb-6">
               {[
-                { href: '/dashboard/savings', icon: 'savings', label: 'Savings' },
+                { href: '/dashboard/merry-go-round', icon: 'autorenew', label: 'Rotation' },
                 { href: '/dashboard/members', icon: 'group', label: 'Members' },
                 { href: '/dashboard/transactions', icon: 'receipt_long', label: 'History' },
                 { href: '/dashboard/smartgrow', icon: 'trending_up', label: 'SmartGrow' },

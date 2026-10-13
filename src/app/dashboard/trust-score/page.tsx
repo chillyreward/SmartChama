@@ -19,10 +19,9 @@ export default function TrustScorePage() {
   const streak = member?.contribution_streak ?? 0
 
   // Calculate scores out of maximums
-  const contributionScore = Math.round((score * 0.4))
-  const repaymentScore = Math.round((score * 0.3))
-  const tenureScore = Math.round((score * 0.2))
-  const participationScore = Math.round((score * 0.1))
+  const contributionScore = Math.round((score * 0.55))
+  const tenureScore = Math.round((score * 0.25))
+  const participationScore = Math.round((score * 0.2))
 
   const getStatusLabel = (val: number) => {
     if (val < 40) return { label: 'Limited', color: 'text-red-500 bg-red-50 dark:bg-red-950/20' }
@@ -144,7 +143,7 @@ export default function TrustScorePage() {
             Chama Credit Standing
           </h2>
           <p className="text-[14px] text-[var(--text-muted)] leading-relaxed max-w-md">
-            Your score is computed in real-time based on contribution streak, loan repayment punctuality, group tenure, and active participation.
+            Your score is computed in real-time based on on-time contributions, contribution streak, group tenure, and active participation.
           </p>
           <div className="flex gap-4 justify-center md:justify-start pt-2">
             <div className="bg-gray-50 dark:bg-[#1a2218] px-4 py-2 rounded-lg border border-[var(--border)]">
@@ -163,12 +162,12 @@ export default function TrustScorePage() {
       <h3 className="text-[16px] font-bold text-[var(--text-main)] mb-4 font-geist">
         CREDIT SCORE Breakdown
       </h3>
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
         <div className="card-bg border border-[var(--border)] p-3 md:p-4 rounded-2xl shadow-xs">
           <span className="material-symbols-outlined text-[#22C55E] text-[24px]">payments</span>
           <h4 className="text-[13px] font-bold text-[var(--text-main)] mt-2">Contributions</h4>
           <div className="text-[18px] font-extrabold text-[var(--brand-green)] font-mono mt-1">
-            {contributionScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 40</span>
+            {contributionScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 55</span>
           </div>
           <p className="text-[11px] text-[var(--text-muted)] mt-2 leading-relaxed">
             Based on monthly contributions paid on time.
@@ -176,21 +175,10 @@ export default function TrustScorePage() {
         </div>
 
         <div className="card-bg border border-[var(--border)] p-3 md:p-4 rounded-2xl shadow-xs">
-          <span className="material-symbols-outlined text-[#22C55E] text-[24px]">account_balance</span>
-          <h4 className="text-[13px] font-bold text-[var(--text-main)] mt-2">Repayment Rate</h4>
-          <div className="text-[18px] font-extrabold text-[var(--brand-green)] font-mono mt-1">
-            {repaymentScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 30</span>
-          </div>
-          <p className="text-[11px] text-[var(--text-muted)] mt-2 leading-relaxed">
-            Based on loan repayments punctuality.
-          </p>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] p-3 md:p-4 rounded-2xl shadow-xs">
           <span className="material-symbols-outlined text-[#22C55E] text-[24px]">calendar_today</span>
           <h4 className="text-[13px] font-bold text-[var(--text-main)] mt-2">Group Tenure</h4>
           <div className="text-[18px] font-extrabold text-[var(--brand-green)] font-mono mt-1">
-            {tenureScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 20</span>
+            {tenureScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 25</span>
           </div>
           <p className="text-[11px] text-[var(--text-muted)] mt-2 leading-relaxed">
             Increases with the duration of your membership.
@@ -201,7 +189,7 @@ export default function TrustScorePage() {
           <span className="material-symbols-outlined text-[#22C55E] text-[24px]">military_tech</span>
           <h4 className="text-[13px] font-bold text-[var(--text-main)] mt-2">Participation</h4>
           <div className="text-[18px] font-extrabold text-[var(--brand-green)] font-mono mt-1">
-            {participationScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 10</span>
+            {participationScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 20</span>
           </div>
           <p className="text-[11px] text-[var(--text-muted)] mt-2 leading-relaxed">
             Earned by continuous contribution streak.
@@ -253,19 +241,19 @@ export default function TrustScorePage() {
           <div className="space-y-3">
             <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[#2d3d2d] pb-2">
               <span className="text-[var(--text-muted)]">0-39: Limited</span>
-              <span className="text-red-500 font-semibold font-mono">Loans unavailable</span>
+              <span className="text-red-500 font-semibold font-mono">Building your record</span>
             </div>
             <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[#2d3d2d] pb-2">
               <span className="text-[var(--text-muted)]">40-59: Fair</span>
-              <span className="text-amber-500 font-semibold font-mono">Small loans available</span>
+              <span className="text-amber-500 font-semibold font-mono">Reliable member</span>
             </div>
             <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[#2d3d2d] pb-2">
               <span className="text-[var(--text-muted)]">60-79: Good</span>
-              <span className="text-blue-500 font-semibold font-mono">Standard loans</span>
+              <span className="text-blue-500 font-semibold font-mono">Trusted member</span>
             </div>
             <div className="flex justify-between items-center text-[13px] pb-1">
               <span className="text-[var(--text-muted)]">80-100: Excellent</span>
-              <span className="text-green-500 font-semibold font-mono">Max loans & visibility</span>
+              <span className="text-green-500 font-semibold font-mono">Top standing & visibility</span>
             </div>
           </div>
         </div>
@@ -278,19 +266,15 @@ export default function TrustScorePage() {
           <ul className="text-[13px] text-[var(--text-muted)] space-y-3">
             <li className="flex items-start gap-2">
               <span className="material-symbols-outlined text-green-500 text-[18px] shrink-0">check_circle</span>
-              <span>Pay your contribution on time every month — <strong>worth 40%</strong></span>
+              <span>Pay your contribution on time every month — <strong>worth 55%</strong></span>
             </li>
             <li className="flex items-start gap-2">
               <span className="material-symbols-outlined text-green-500 text-[18px] shrink-0">check_circle</span>
-              <span>Repay loans in full and on time — <strong>worth 30%</strong></span>
+              <span>Stay in the group longer — <strong>worth 25%</strong></span>
             </li>
             <li className="flex items-start gap-2">
               <span className="material-symbols-outlined text-green-500 text-[18px] shrink-0">check_circle</span>
-              <span>Stay in the group longer — <strong>worth 20%</strong></span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="material-symbols-outlined text-green-500 text-[18px] shrink-0">check_circle</span>
-              <span>Maintain an unbroken contribution streak — <strong>worth 10%</strong></span>
+              <span>Maintain an unbroken contribution streak — <strong>worth 20%</strong></span>
             </li>
           </ul>
         </div>

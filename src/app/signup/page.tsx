@@ -281,7 +281,7 @@ function SignupForm() {
             <p className="text-[15px] text-[#4F5A53] dark:text-[#8FA196]">
               {postStep === 'phone'
                 ? "We'll text you a code. Your number is used for M-Pesa prompts, SMS sign-in and USSD."
-                : 'Add your ID number, a photo of your national ID or passport, and a live selfie. Loan payouts, withdrawals and investments unlock once you are verified.'}
+                : 'Add your ID number, a photo of your national ID or passport, and a live selfie. Withdrawals and investments unlock once you are verified.'}
             </p>
           </div>
 
@@ -369,7 +369,7 @@ function SignupForm() {
                 Verify your identity
               </button>
               <p className="mt-3 text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
-                Needed before loans, withdrawals or investments: your ID or passport and a selfie.
+                Needed before withdrawals or investments: your ID or passport and a selfie.
               </p>
             </>
           )}
