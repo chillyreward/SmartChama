@@ -20,12 +20,13 @@ export default function AdminContributionsPage() {
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [recordMemberId, setRecordMemberId] = useState("");
   const [recordAmount, setRecordAmount] = useState("");
-  const [recordMethod, setRecordMethod] = useState("M-Pesa");
+  const [recordMethod, setRecordMethod] = useState<'cash' | 'bank'>('cash');
+  const [recordSaving, setRecordSaving] = useState(false);
   const [recordReference, setRecordReference] = useState("");
-  const [recordDate, setRecordDate] = useState(new Date().toISOString().split('T')[0]);
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Nairobi' });
+  const [recordDate, setRecordDate] = useState(today);
 
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editContribution, setEditContribution] = useState<any>(null);
+  const memberName = (c: any) => c.membership?.profile?.full_name || 'Member';
 
   const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
 
@@ -34,13 +35,18 @@ export default function AdminContributionsPage() {
     try {
       setLoading(true);
       
-      const { data: memData } = await supabase.from('members').select('id, full_name').eq('group_id', group.id);
-      setMembers(memData || []);
+      const { data: memData } = await supabase
+        .from('chama_memberships')
+        .select('id, profile_id, profile:profiles(full_name)')
+        .eq('chama_id', group.id)
+        .eq('status', 'active');
+      setMembers((memData || []).map((m: any) => ({ id: m.id, profile_id: m.profile_id, full_name: m.profile?.full_name || 'Member' }))
+        .sort((a: any, b: any) => a.full_name.localeCompare(b.full_name)));
 
       const { data: contribData } = await supabase
-        .from('contributions')
-        .select('*, members(full_name)')
-        .eq('group_id', group.id)
+        .from('contributions_v2')
+        .select('*, membership:chama_memberships(profile:profiles(full_name))')
+        .eq('chama_id', group.id)
         .order('created_at', { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
       
@@ -57,60 +63,31 @@ export default function AdminContributionsPage() {
     fetchData();
   }, [adminMember, group, page]);
 
+  // Cash and bank payments are booked by record_cash_contribution (wallet,
+  // ledger, transaction, audit log, confirmation SMS). M-Pesa payments are
+  // recorded automatically when Safaricom confirms them.
   const handleRecord = async () => {
+    setRecordSaving(true);
     try {
-      const { error } = await supabase.from('contributions').insert({
-        member_id: recordMemberId,
-        group_id: group?.id,
-        amount: Number(recordAmount),
-        payment_method: recordMethod,
-        reference: recordReference,
-        status: 'confirmed',
-        created_at: new Date(recordDate).toISOString()
+      const { data, error } = await supabase.rpc('record_cash_contribution', {
+        p_membership_id: recordMemberId,
+        p_amount: Number(recordAmount),
+        p_method: recordMethod,
+        p_reference: recordReference.trim() || null,
+        p_paid_on: recordDate || null
       });
       if (error) throw error;
-      
+      if (!data?.success) throw new Error(data?.error || 'Could not record the contribution');
+
       setToastMsg("Contribution recorded!");
       setTimeout(() => setToastMsg(""), 3000);
       setShowRecordModal(false);
+      setRecordMemberId(""); setRecordAmount(""); setRecordReference(""); setRecordDate(today);
       fetchData();
     } catch (err: any) {
       alert("Error recording contribution: " + err.message);
-    }
-  };
-
-  const handleEdit = async () => {
-    if (!editContribution) return;
-    try {
-      const { error } = await supabase.from('contributions')
-        .update({
-          amount: editContribution.amount,
-          status: editContribution.status,
-          reference: editContribution.reference
-        }).eq('id', editContribution.id);
-      if (error) throw error;
-      
-      setToastMsg("Contribution updated!");
-      setTimeout(() => setToastMsg(""), 3000);
-      setShowEditModal(false);
-      fetchData();
-    } catch (err: any) {
-      alert("Error updating contribution: " + err.message);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    const confirmation = prompt('Type "DELETE" to confirm deletion of this contribution record:');
-    if (confirmation === 'DELETE') {
-      try {
-        const { error } = await supabase.from('contributions').delete().eq('id', id);
-        if (error) throw error;
-        setToastMsg("Contribution deleted");
-        setTimeout(() => setToastMsg(""), 3000);
-        fetchData();
-      } catch (err: any) {
-        alert("Error deleting: " + err.message);
-      }
+    } finally {
+      setRecordSaving(false);
     }
   };
 
@@ -118,7 +95,7 @@ export default function AdminContributionsPage() {
     const headers = ['Date', 'Member', 'Amount (KSh)', 'Method', 'Reference', 'Status'];
     const rows = contributions.map(c => [
       new Date(c.created_at || c.date).toLocaleDateString('en-KE'),
-      c.members?.full_name || 'Member',
+      memberName(c),
       Number(c.amount || 0).toLocaleString('en-KE'),
       c.payment_method || c.method || 'M-Pesa',
       c.mpesa_receipt || c.reference || 'N/A',
@@ -131,7 +108,7 @@ export default function AdminContributionsPage() {
     const headers = ['Date', 'Member', 'Amount (KSh)', 'Method', 'Reference', 'Status'];
     const rows = contributions.map(c => [
       new Date(c.created_at || c.date).toLocaleDateString('en-KE'),
-      c.members?.full_name || 'Member',
+      memberName(c),
       Number(c.amount || 0),
       c.payment_method || c.method || 'M-Pesa',
       c.mpesa_receipt || c.reference || 'N/A',
@@ -142,24 +119,23 @@ export default function AdminContributionsPage() {
 
   const handleBulkRemind = async () => {
     try {
-      const lateContribs = contributions.filter(c => c.status === 'late' || c.status === 'pending');
-      const uniqueMembers = Array.from(new Set(lateContribs.map(c => c.member_id)));
+      const lateMemberships = new Set(contributions.filter(c => c.status === 'late' || c.status === 'pending').map(c => c.membership_id));
+      const targets = members.filter(m => lateMemberships.has(m.id) && m.profile_id);
 
-      if (uniqueMembers.length === 0) {
+      if (targets.length === 0) {
         alert("No members are currently late or pending.");
         return;
       }
 
-      const notifications = uniqueMembers.map(memberId => ({
-        group_id: group?.id,
-        member_id: memberId,
-        type: 'contribution_reminder',
-        message: `Your contribution is due. Please make a payment.`,
-        read: false
-      }));
-
-      await supabase.from('notifications').insert(notifications);
-      setToastMsg(`Reminders sent to ${uniqueMembers.length} members!`);
+      const { error } = await supabase.from('notifications').insert(targets.map(m => ({
+        profile_id: m.profile_id,
+        chama_id: group?.id,
+        type: 'reminder',
+        title: 'Contribution reminder',
+        message: `Your contribution to ${group?.name || 'the group'} is due. Please make a payment.`
+      })));
+      if (error) throw error;
+      setToastMsg(`Reminders sent to ${targets.length} member${targets.length === 1 ? '' : 's'}!`);
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err: any) {
       alert("Error sending reminders: " + err.message);
@@ -232,13 +208,12 @@ export default function AdminContributionsPage() {
                 <th className="px-6 py-4">METHOD</th>
                 <th className="px-6 py-4">REFERENCE</th>
                 <th className="px-6 py-4">STATUS</th>
-                <th className="px-6 py-4 text-right">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
               {contributions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
+                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
                     No contributions found for this group.
                   </td>
                 </tr>
@@ -249,7 +224,7 @@ export default function AdminContributionsPage() {
                       {new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-[var(--text-main)] whitespace-nowrap">
-                      {c.members?.full_name || 'Unknown'}
+                      {memberName(c)}
                     </td>
                     <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)] whitespace-nowrap">
                       KSh {formatCurrency(Number(c.amount))}
@@ -267,22 +242,6 @@ export default function AdminContributionsPage() {
                       }`}>
                         {c.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          onClick={() => { setEditContribution({...c}); setShowEditModal(true); }}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f2a1f] text-[var(--text-muted)] hover:text-[#161d16] dark:hover:text-[#E8F0E4] transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">edit</span>
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(c.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))
@@ -303,7 +262,7 @@ export default function AdminContributionsPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="font-semibold text-[var(--text-main)] text-sm">
-                      {c.members?.full_name || 'Unknown'}
+                      {memberName(c)}
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
                       {new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -327,20 +286,6 @@ export default function AdminContributionsPage() {
                   <div>
                     <span className="font-medium">Method:</span> {c.payment_method || '—'}
                     {c.reference && <span className="ml-3"><span className="font-medium">Ref:</span> <span className="font-mono">{c.reference}</span></span>}
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => { setEditContribution({...c}); setShowEditModal(true); }}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-[#1f2a1f] text-[var(--text-muted)] hover:text-[#161d16] dark:hover:text-[#E8F0E4] transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">edit</span>
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(c.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/20 text-red-500 hover:bg-red-100 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">delete</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -376,7 +321,8 @@ export default function AdminContributionsPage() {
       {showRecordModal && (
         <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
           <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-md shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Record Contribution</h2>
+            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-2">Record Cash or Bank Payment</h2>
+            <p className="text-[13px] text-[var(--text-muted)] mb-6">M-Pesa payments are recorded automatically once Safaricom confirms them.</p>
             
             <div className="space-y-4">
               <div>
@@ -403,12 +349,11 @@ export default function AdminContributionsPage() {
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Payment Method</label>
                 <select 
                   value={recordMethod} 
-                  onChange={e => setRecordMethod(e.target.value)} 
+                  onChange={e => setRecordMethod(e.target.value as 'cash' | 'bank')} 
                   className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-[#22C55E]"
                 >
-                  <option value="M-Pesa">M-Pesa</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="Cash">Cash</option>
+                  <option value="cash">Cash</option>
+                  <option value="bank">Bank transfer</option>
                 </select>
               </div>
               <div>
@@ -423,7 +368,8 @@ export default function AdminContributionsPage() {
               <div>
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Date</label>
                 <input 
-                  type="date" 
+                  type="date"
+                  max={today}
                   value={recordDate} 
                   onChange={e => setRecordDate(e.target.value)} 
                   className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
@@ -433,54 +379,7 @@ export default function AdminContributionsPage() {
  
             <div className="flex gap-3 mt-8">
               <button onClick={() => setShowRecordModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
-              <button onClick={handleRecord} disabled={!recordMemberId || !recordAmount} className="flex-1 bg-[#22C55E] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Save Record</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* EDIT MODAL */}
-      {showEditModal && editContribution && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Edit Contribution</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
-                <input 
-                  type="number" 
-                  value={editContribution.amount} 
-                  onChange={e => setEditContribution({...editContribution, amount: e.target.value})} 
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" 
-                />
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Status</label>
-                <select 
-                  value={editContribution.status} 
-                  onChange={e => setEditContribution({...editContribution, status: e.target.value})} 
-                  className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-[#22C55E]"
-                >
-                  <option value="confirmed">Confirmed</option>
-                  <option value="pending">Pending</option>
-                  <option value="late">Late</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reference Code</label>
-                <input 
-                  type="text" 
-                  value={editContribution.reference || ''} 
-                  onChange={e => setEditContribution({...editContribution, reference: e.target.value})} 
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E] font-mono" 
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowEditModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
-              <button onClick={handleEdit} className="flex-1 bg-[#22C55E] text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Update</button>
+              <button onClick={handleRecord} disabled={!recordMemberId || !recordAmount || recordSaving} className="flex-1 bg-[#22C55E] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">{recordSaving ? 'Saving...' : 'Save Record'}</button>
             </div>
           </div>
         </div>

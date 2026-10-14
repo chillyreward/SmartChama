@@ -9,6 +9,8 @@ import { addDays, cycleStart, nextDueDate, prettyDate, todayNairobi, type GroupS
 // and in-app notification. Skips groups that contribute every day, members
 // who already paid this cycle, and members who turned reminders off.
 // contribution_reminders records each send, so a re-run never repeats one.
+// ?dry=1 (still needs the cron secret) reports who would be reminded and
+// sends or records nothing.
 
 type Kind = 'three_days' | 'due_today';
 type MemberRow = {
@@ -21,6 +23,8 @@ export async function GET(request: Request) {
   if (!isInternalRequest(request)) return forbidden();
 
   const supabase = getSupabaseAdmin();
+  const dry = new URL(request.url).searchParams.get('dry') === '1';
+  const preview: { group: string; due: string; kind: Kind; members: number }[] = [];
   const today = todayNairobi();
   const inThree = addDays(today, 3);
   const summary = { groups_checked: 0, groups_due: 0, reminders_sent: 0, sms_sent: 0, skipped_paid: 0, errors: 0 };
@@ -73,6 +77,10 @@ export async function GET(request: Request) {
           return m.profiles?.notification_prefs?.contribution_reminders !== false;
         });
         if (!toRemind.length) continue;
+        if (dry) {
+          preview.push({ group: chama.name, due, kind, members: toRemind.length });
+          continue;
+        }
 
         // Claim each (member, due date, kind) first; only newly claimed rows are sent
         const { data: claimed, error: claimError } = await supabase
@@ -112,7 +120,7 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({ date: today, ...summary });
+    return NextResponse.json(dry ? { date: today, dry: true, ...summary, would_remind: preview } : { date: today, ...summary });
   } catch (error) {
     console.error('Reminder run failed:', error);
     return NextResponse.json({ error: 'Reminder run failed', ...summary }, { status: 500 });

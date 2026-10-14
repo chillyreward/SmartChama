@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api-auth';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { ADMIN_ROLES, getChamaMembership } from '@/lib/api-guard';
 
 export async function GET(request: Request) {
   try {
@@ -19,18 +20,21 @@ export async function GET(request: Request) {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from('contributions_v2')
-      .select('id, status, amount, mpesa_receipt_number, created_at, failed_reason')
+      .select('id, status, amount, mpesa_receipt, created_at, failed_reason, chama_id, chama_memberships(profile_id)')
       .eq('id', contributionId)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    // Only the member who paid, or an official of that group, may see it
+    const payer = (data?.chama_memberships as any)?.profile_id;
+    const allowed = data && (payer === user.id || (await getChamaMembership(supabase, user.id, data.chama_id, ADMIN_ROLES)));
+    if (error || !data || !allowed) {
       return NextResponse.json({ error: 'Contribution not found' }, { status: 404 });
     }
 
     return NextResponse.json({
       status: data.status, // 'pending' | 'confirmed' | 'failed'
       amount: data.amount,
-      receipt: data.mpesa_receipt_number,
+      receipt: data.mpesa_receipt,
       failedReason: data.failed_reason
     });
   } catch (error: any) {

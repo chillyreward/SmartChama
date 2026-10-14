@@ -2624,5 +2624,103 @@ ALTER TABLE contribution_reminders ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON contribution_reminders FROM anon, authenticated;
 
 -- ============================================================
+-- PART 14: OFFICIALS RECORD CASH / BANK CONTRIBUTIONS
+-- ============================================================
+-- Part 9 rightly stopped officials inserting confirmed contributions straight
+-- from the browser, but left no way to record a member's cash or bank
+-- payment. This books one the same way a confirmed M-Pesa payment is booked:
+-- contribution row, wallet, transaction, ledger, audit log, confirmation SMS.
+
+CREATE OR REPLACE FUNCTION record_cash_contribution(
+  p_membership_id UUID,
+  p_amount NUMERIC,
+  p_method TEXT DEFAULT 'cash',
+  p_reference TEXT DEFAULT NULL,
+  p_paid_on DATE DEFAULT NULL
+) RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  v_member chama_memberships%ROWTYPE;
+  v_id UUID;
+  v_when TIMESTAMPTZ;
+BEGIN
+  SELECT * INTO v_member FROM chama_memberships WHERE id = p_membership_id;
+  IF NOT FOUND OR NOT check_is_chama_admin(v_member.chama_id, auth.uid()) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Only officials of this group can record contributions');
+  END IF;
+  IF v_member.status <> 'active' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'This member is not active in the group');
+  END IF;
+  IF p_amount IS NULL OR p_amount <= 0 OR p_amount > 10000000 THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Enter a valid amount');
+  END IF;
+  IF p_method NOT IN ('cash', 'bank') THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Payment method must be cash or bank');
+  END IF;
+  IF p_paid_on IS NOT NULL AND (p_paid_on > (now() AT TIME ZONE 'Africa/Nairobi')::date OR p_paid_on < (now() AT TIME ZONE 'Africa/Nairobi')::date - 90) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'The payment date must be within the last 90 days');
+  END IF;
+
+  -- Midday Kenya time on the paid date, so it lands on that day in reports
+  v_when := CASE WHEN p_paid_on IS NULL THEN now() ELSE (p_paid_on + time '12:00') AT TIME ZONE 'Africa/Nairobi' END;
+
+  INSERT INTO contributions_v2 (membership_id, chama_id, amount, payment_method, reference, status, recorded_by, created_at, confirmed_at)
+  VALUES (p_membership_id, v_member.chama_id, p_amount, p_method, left(p_reference, 100), 'confirmed', auth.uid(), v_when, now())
+  RETURNING id INTO v_id;
+
+  PERFORM increment_wallet_balance_safe(v_member.chama_id, p_amount);
+
+  INSERT INTO transactions_v2 (chama_id, membership_id, type, amount, reference, description, status, created_by)
+  VALUES (v_member.chama_id, p_membership_id, 'contribution', p_amount, left(p_reference, 100),
+          initcap(p_method) || ' contribution recorded by an official', 'confirmed', auth.uid());
+
+  PERFORM record_ledger_transaction(v_member.chama_id, 'external_cash', 'chama_pool', p_membership_id, p_amount,
+          initcap(p_method) || ' contribution');
+
+  INSERT INTO audit_log (chama_id, actor_id, action, target_type, target_id, details)
+  VALUES (v_member.chama_id, auth.uid(), 'record_contribution', 'contribution', v_id,
+          jsonb_build_object('amount', p_amount, 'method', p_method, 'reference', p_reference, 'membership_id', p_membership_id));
+
+  INSERT INTO outbox (event_type, payload)
+  VALUES ('contribution_confirmed', jsonb_build_object('membership_id', p_membership_id, 'chama_id', v_member.chama_id,
+          'amount', p_amount, 'receipt', coalesce(p_reference, initcap(p_method))));
+
+  RETURN jsonb_build_object('success', true, 'contribution_id', v_id);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION record_cash_contribution(UUID, NUMERIC, TEXT, TEXT, DATE) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION record_cash_contribution(UUID, NUMERIC, TEXT, TEXT, DATE) TO authenticated;
+
+-- Announcements officials post to their group (the admin page used a table
+-- that never existed). Members read; officials post and remove.
+CREATE TABLE IF NOT EXISTS announcements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chama_id UUID NOT NULL REFERENCES chamas_v2(id) ON DELETE CASCADE,
+  author_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  title TEXT NOT NULL CHECK (char_length(title) BETWEEN 1 AND 120),
+  message TEXT NOT NULL CHECK (char_length(message) BETWEEN 1 AND 2000),
+  is_important BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_announcements_chama ON announcements(chama_id, created_at DESC);
+ALTER TABLE announcements ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON announcements FROM anon;
+
+DROP POLICY IF EXISTS "members_read_announcements" ON announcements;
+CREATE POLICY "members_read_announcements" ON announcements FOR SELECT TO authenticated USING (
+  check_is_chama_member(chama_id, auth.uid())
+);
+DROP POLICY IF EXISTS "officials_post_announcements" ON announcements;
+CREATE POLICY "officials_post_announcements" ON announcements FOR INSERT TO authenticated WITH CHECK (
+  author_id = auth.uid() AND check_is_chama_admin(chama_id, auth.uid())
+);
+DROP POLICY IF EXISTS "officials_remove_announcements" ON announcements;
+CREATE POLICY "officials_remove_announcements" ON announcements FOR DELETE TO authenticated USING (
+  check_is_chama_admin(chama_id, auth.uid())
+);
+
+-- ============================================================
 -- DONE.
 -- ============================================================

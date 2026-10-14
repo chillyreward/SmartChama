@@ -21,8 +21,8 @@ export default function AdminAnnouncementsPage() {
       setLoading(true);
       const { data } = await supabase
         .from('announcements')
-        .select('*, members(full_name)')
-        .eq('group_id', group.id)
+        .select('*, author:profiles(full_name)')
+        .eq('chama_id', group.id)
         .order('created_at', { ascending: false });
       
       setAnnouncements(data || []);
@@ -39,27 +39,33 @@ export default function AdminAnnouncementsPage() {
 
   const handleSend = async () => {
     try {
-      await supabase.from('announcements').insert({
-        group_id: group?.id,
-        author_id: adminMember?.id,
-        title,
-        message,
-        is_important: isImportant,
-        created_at: new Date().toISOString()
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !group?.id) throw new Error('Please sign in again.');
+      const { error } = await supabase.from('announcements').insert({
+        chama_id: group.id,
+        author_id: user.id,
+        title: title.trim(),
+        message: message.trim(),
+        is_important: isImportant
       });
+      if (error) throw error;
 
-      // Insert global notifications for all members
-      const { data: members } = await supabase.from('members').select('id').eq('group_id', group?.id).eq('status', 'active');
-      if (members) {
-        const notifs = members.map(m => ({
-          group_id: group?.id,
-          member_id: m.id,
+      // In-app notification for every active member
+      const { data: members } = await supabase
+        .from('chama_memberships')
+        .select('profile_id')
+        .eq('chama_id', group.id)
+        .eq('status', 'active');
+      const notifs = (members || [])
+        .filter(m => m.profile_id)
+        .map(m => ({
+          profile_id: m.profile_id,
+          chama_id: group.id,
           type: 'announcement',
-          message: `New announcement: ${title}`,
-          read: false
+          title: isImportant ? `Important: ${title.trim()}` : title.trim(),
+          message: message.trim().slice(0, 300)
         }));
-        await supabase.from('notifications').insert(notifs);
-      }
+      if (notifs.length) await supabase.from('notifications').insert(notifs);
 
       setToastMsg("Announcement sent to all members!");
       setTimeout(() => setToastMsg(""), 3000);
@@ -68,15 +74,16 @@ export default function AdminAnnouncementsPage() {
       setMessage("");
       setIsImportant(false);
       fetchData();
-    } catch (err) {
-      alert("Error sending announcement");
+    } catch (err: any) {
+      alert("Error sending announcement: " + (err?.message || 'please try again'));
     }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm("Delete this announcement?")) {
       try {
-        await supabase.from('announcements').delete().eq('id', id);
+        const { error } = await supabase.from('announcements').delete().eq('id', id);
+        if (error) throw error;
         fetchData();
       } catch (err) {
         alert("Error deleting");
@@ -156,9 +163,9 @@ export default function AdminAnnouncementsPage() {
               
               <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)] text-xs text-[var(--text-muted)]">
                 <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] shadow-sm">
-                  {ann.members?.full_name ? ann.members.full_name.charAt(0) : 'A'}
+                  {ann.author?.full_name ? ann.author.full_name.charAt(0) : 'A'}
                 </div>
-                <span>Posted by <span className="font-semibold text-[var(--text-main)]">{ann.members?.full_name || 'Admin'}</span></span>
+                <span>Posted by <span className="font-semibold text-[var(--text-main)]">{ann.author?.full_name || 'Admin'}</span></span>
                 <span>•</span>
                 <span>{new Date(ann.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
               </div>

@@ -72,10 +72,6 @@
       "schedule": "0 0 * * *"
     },
     {
-      "path": "/api/smartgrow/close-expired",
-      "schedule": "30 0 * * *"
-    },
-    {
       "path": "/api/ussd/refresh-view",
       "schedule": "0 1 * * *"
     },

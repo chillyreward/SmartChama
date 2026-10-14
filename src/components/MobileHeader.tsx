@@ -32,7 +32,7 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
       supabase
         .from('notifications')
         .select('id', { count: 'exact', head: true })
-        .eq('group_id', group.id)
+        .eq('chama_id', group.id)
         .eq('read', false)
         .then(({ count }) => {
           setUnreadCount(count || 0);
@@ -43,12 +43,12 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
         .channel('mobile_header_notifications')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'notifications', filter: `group_id=eq.${group.id}` },
+          { event: '*', schema: 'public', table: 'notifications', filter: `chama_id=eq.${group.id}` },
           () => {
             supabase
               .from('notifications')
               .select('id', { count: 'exact', head: true })
-              .eq('group_id', group.id)
+              .eq('chama_id', group.id)
               .eq('read', false)
               .then(({ count }) => setUnreadCount(count || 0));
           }

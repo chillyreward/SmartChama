@@ -18,26 +18,6 @@ export default function ChatPage() {
     }
   }, [messages]);
 
-  // --- VOICE FUNCTION (11Labs) ---
-  const playVoice = async (text: string) => {
-    try {
-      const response = await fetch("/api/voice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-
-      if (!response.ok) throw new Error("Audio generation failed");
-
-      // Convert the response to a playable audio blob
-      const blob = await response.blob();
-      const audio = new Audio(URL.createObjectURL(blob));
-      audio.play();
-    } catch (error) {
-      console.error("Voice Playback Error:", error);
-    }
-  };
-
   // --- SEND MESSAGE FUNCTION ---
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -64,7 +44,6 @@ export default function ChatPage() {
         setMessages(prev => [...prev, aiMsg]);
         
         // 4. Speak the response!
-        playVoice(data.reply); 
       }
     } catch (error) {
       console.error("Chat Error:", error);

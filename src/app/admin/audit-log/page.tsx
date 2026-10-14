@@ -12,49 +12,58 @@ export default function AdminAuditLogPage() {
   useEffect(() => {
     if (!adminMember || !group) return;
 
+    // Official actions from audit_log (written by the database functions:
+    // deposits, recorded contributions, withdrawals, KYC, ...) merged with
+    // the group activity feed (schedule changes, announcements, joins).
+    const describe = (action: string, d: any) => {
+      const amount = d?.amount != null ? `KSh ${Number(d.amount).toLocaleString('en-KE')}` : '';
+      switch (action) {
+        case 'record_contribution': return `Recorded a ${d?.method || 'cash'} contribution of ${amount}`;
+        case 'manual_deposit': return `Recorded a deposit of ${amount}`;
+        default: return amount ? `${action.replace(/_/g, ' ')} · ${amount}` : action.replace(/_/g, ' ');
+      }
+    };
+
     const fetchData = async () => {
       try {
         setLoading(true);
-        // We use transactions table as a proxy for audit logs where recorded_by is set,
-        // or any specific audit table if it existed.
-        const { data, error } = await supabase
-          .from('transactions')
-          .select('*, members!transactions_recorded_by_fkey(full_name)')
-          .eq('group_id', group.id)
-          .not('recorded_by', 'is', null)
-          .order('created_at', { ascending: false });
-        
-        // If the fkey alias fails, fallback to standard transactions. 
-        // We'll just map it to look like an audit log.
-        if (error) {
-           const { data: fallbackData } = await supabase
-            .from('transactions')
-            .select('*')
-            .eq('group_id', group.id)
-            .not('recorded_by', 'is', null)
-            .order('created_at', { ascending: false });
-           
-           // fetch member names manually for fallback
-           if (fallbackData && fallbackData.length > 0) {
-             const adminIds = Array.from(new Set(fallbackData.map(l => l.recorded_by)));
-             const { data: admins } = await supabase.from('members').select('id, full_name').in('id', adminIds);
-             
-             const mapped = fallbackData.map(l => ({
-               ...l,
-               admin_name: admins?.find(a => a.id === l.recorded_by)?.full_name || 'Unknown Admin'
-             }));
-             setLogs(mapped);
-           } else {
-             setLogs([]);
-           }
-        } else {
-          const mapped = data?.map(l => ({
-            ...l,
-            admin_name: l.members?.full_name || 'Unknown Admin'
-          })) || [];
-          setLogs(mapped);
-        }
+        const [audit, activity] = await Promise.all([
+          supabase
+            .from('audit_log')
+            .select('id, action, details, created_at, actor:profiles(full_name)')
+            .eq('chama_id', group.id)
+            .order('created_at', { ascending: false })
+            .limit(200),
+          supabase
+            .from('group_activity')
+            .select('id, event_type, description, created_at')
+            .eq('chama_id', group.id)
+            .order('created_at', { ascending: false })
+            .limit(200),
+        ]);
 
+        const rows = [
+          ...(audit.data || []).map((l: any) => ({
+            id: l.id,
+            created_at: l.created_at,
+            admin_name: l.actor?.full_name || 'Official',
+            type: l.action,
+            notes: describe(l.action, l.details),
+            amount: Number(l.details?.amount || 0),
+            reference: l.details?.reference || null,
+          })),
+          ...(activity.data || []).map((a: any) => ({
+            id: a.id,
+            created_at: a.created_at,
+            admin_name: 'Group',
+            type: a.event_type,
+            notes: a.description,
+            amount: 0,
+            reference: null,
+          })),
+        ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        setLogs(rows);
       } catch (err) {
         console.error(err);
       } finally {
@@ -137,7 +146,7 @@ export default function AdminAuditLogPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold capitalize bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-[var(--text-muted)]">
-                        {log.type?.replace('_', ' ') || 'SYSTEM ACTION'}
+                        {log.type?.replace(/_/g, ' ') || 'SYSTEM ACTION'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-[var(--text-main)] max-w-md font-medium">
@@ -173,7 +182,7 @@ export default function AdminAuditLogPage() {
                       <span className="text-sm font-semibold text-[var(--text-main)]">{log.admin_name}</span>
                     </div>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold capitalize bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-[var(--text-muted)]">
-                      {log.type?.replace('_', ' ') || 'SYSTEM ACTION'}
+                      {log.type?.replace(/_/g, ' ') || 'SYSTEM ACTION'}
                     </span>
                   </div>
                   

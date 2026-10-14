@@ -148,8 +148,7 @@ export default function AdminSettingsPage() {
           paybill_number: paymentType === 'paybill' ? paybillNumber : null,
           account_number: paymentType === 'paybill' ? accountNumber : null,
           phone_number: paymentType === 'phone' ? phoneNumber : null,
-          account_name: accountName,
-          updated_at: new Date().toISOString()
+          account_name: accountName
         }, { onConflict: 'chama_id' });
 
       if (error) throw error;

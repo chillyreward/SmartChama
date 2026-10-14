@@ -43,13 +43,11 @@ export default function TrustScorePage() {
       if (!member?.id) return
       try {
         setLoadingHistory(true)
-        const { data, error } = await supabase
-          .from('audit_log')
-          .select('created_at, details')
-          .eq('profile_id', member.user_id)
-          .order('created_at', { ascending: true })
-          .limit(20)
-
+        // Score changes aren't stored anywhere yet (the audit log is for
+        // officials and has no per-member score entries), so there is no
+        // history to chart; the page shows its empty state.
+        const data: { created_at: string; details: unknown }[] = []
+        const error = null
         if (!error && data) {
           const parsed = data
             .map(d => {
