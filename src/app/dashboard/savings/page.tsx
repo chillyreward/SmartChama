@@ -92,7 +92,7 @@ export default function SavingsPage() {
       <div className="print-only font-inter text-black bg-white p-8 w-full max-w-[800px] mx-auto">
         <div className="flex justify-between items-start border-b-2 border-green-600 pb-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-green-700">SmartChama Financial Statement</h1>
+            <h1 className="text-2xl font-bold text-green-700">Akibora Financial Statement</h1>
             <p className="text-sm text-gray-500 mt-1">Generated on {new Date().toLocaleDateString('en-KE', { dateStyle: 'long' })}</p>
           </div>
           <div className="text-right">
@@ -146,7 +146,7 @@ export default function SavingsPage() {
         </table>
 
         <div className="mt-12 text-center text-xs text-gray-450 border-t pt-4">
-          Thank you for being a valued member of {chamaName}. Powered by SmartChama.
+          Thank you for being a valued member of {chamaName}. Powered by Akibora.
         </div>
       </div>
 

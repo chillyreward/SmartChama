@@ -241,9 +241,9 @@ export default function WalletPage() {
       <div className="bg-[#EDF6EA] dark:bg-[#1a2a1a] border border-[#22C55E]/30 rounded-xl p-4 mb-6 flex gap-3 items-start shadow-sm">
         <span className="material-symbols-outlined text-[#006e2f] dark:text-[#4ae176] shrink-0 mt-0.5">info</span>
         <div>
-          <h3 className="text-sm font-bold text-[#006e2f] dark:text-[#4ae176] mb-1">How SmartChama tracks money</h3>
+          <h3 className="text-sm font-bold text-[#006e2f] dark:text-[#4ae176] mb-1">How Akibora tracks money</h3>
           <p className="text-xs text-[#006e2f]/80 dark:text-[#4ae176]/80 leading-relaxed">
-            SmartChama is a ledger app. We <strong>DO NOT</strong> hold money. The balances shown here are records of money you have saved in your group's bank account or mobile money paybill.
+            Akibora is a ledger app. We <strong>DO NOT</strong> hold money. The balances shown here are records of money you have saved in your group's bank account or mobile money paybill.
           </p>
         </div>
       </div>
@@ -256,7 +256,7 @@ export default function WalletPage() {
           <div className="text-[32px] md:text-[56px] font-geist font-bold text-white mt-2 leading-none">KSh {formatCurrency(walletStats.balance)}</div>
           <div className="text-body-sm text-gray-400 mt-3 flex items-center gap-1.5">
              <span className="material-symbols-outlined text-[16px]">security</span>
-             SmartChama does not hold money. This is a record only.
+             Akibora does not hold money. This is a record only.
           </div>
           
           <div className="flex flex-wrap gap-3 mt-8">

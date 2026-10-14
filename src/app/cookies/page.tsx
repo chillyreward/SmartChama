@@ -2,8 +2,8 @@ import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
 export const metadata = {
-  title: "Cookie Policy | SmartChama",
-  description: "Cookie Policy for using the SmartChama platform.",
+  title: "Cookie Policy | Akibora",
+  description: "Cookie Policy for using the Akibora platform.",
 };
 
 export default function CookiePage() {
@@ -63,7 +63,7 @@ export default function CookiePage() {
       title: "3. Essential cookies",
       content: (
         <p>
-          These cookies are required for SmartChama to function. Without them you cannot log in or use the platform. They cannot be disabled.
+          These cookies are required for Akibora to function. Without them you cannot log in or use the platform. They cannot be disabled.
         </p>
       )
     },
@@ -88,7 +88,7 @@ export default function CookiePage() {
             <li><strong>Firefox:</strong> Settings, Privacy and Security</li>
           </ul>
           <p>
-            Note that disabling essential cookies will prevent you from using SmartChama.
+            Note that disabling essential cookies will prevent you from using Akibora.
           </p>
         </>
       )

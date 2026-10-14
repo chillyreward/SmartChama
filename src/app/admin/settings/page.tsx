@@ -403,7 +403,7 @@ export default function AdminSettingsPage() {
                     required
                     value={accountName}
                     onChange={e => setAccountName(e.target.value)}
-                    placeholder="e.g. SmartChama Group Custody Account"
+                    placeholder="e.g. Akibora Group Custody Account"
                     className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
                   />
                   <p className="text-[11px] text-[var(--text-muted)] mt-1">This verifies to members that they are depositing to the correct group custody wallet.</p>

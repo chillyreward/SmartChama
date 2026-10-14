@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     .eq('id', user.id)
   if (error) {
     if (error.code === '23505') {
-      return NextResponse.json({ error: 'That number is already linked to another SmartChama account.' }, { status: 409 })
+      return NextResponse.json({ error: 'That number is already linked to another Akibora account.' }, { status: 409 })
     }
     console.error('phone verify update failed:', error.message)
     return NextResponse.json({ error: 'Could not save your number. Please try again.' }, { status: 500 })

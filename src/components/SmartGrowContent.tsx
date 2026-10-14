@@ -142,7 +142,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           body: JSON.stringify({
             phone: member.profile.phone_number,
             chama_id: chama.id,
-            message: `SmartChama: Your group has invested KSh ${amount} in ${selectedProduct.name} (${selectedProduct.provider}). Track in your SmartGrow dashboard.`
+            message: `Akibora: Your group has invested KSh ${amount} in ${selectedProduct.name} (${selectedProduct.provider}). Track in your SmartGrow dashboard.`
           })
         }).catch(console.error);
       }
@@ -228,7 +228,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           <div className="text-label-caps text-[#22C55E] tracking-widest mb-3 md:mb-4">SMARTGROW</div>
           <h1 className="text-[28px] md:text-[36px] font-geist font-bold text-white mb-4 leading-tight">Grow your group's idle funds.</h1>
           <p className="text-[14px] md:text-[16px] text-gray-400 leading-relaxed mb-6">
-            SmartChama partners with regulated Kenyan investment providers to help your group put idle funds to work. All products are licensed by the Capital Markets Authority or Central Bank of Kenya.
+            Akibora partners with regulated Kenyan investment providers to help your group put idle funds to work. All products are licensed by the Capital Markets Authority or Central Bank of Kenya.
           </p>
           <button 
             onClick={() => {

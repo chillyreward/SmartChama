@@ -89,11 +89,11 @@ export async function POST(request: Request) {
     let whatsappUrl: string | null = null;
     let note = 'Invite created. Share code manually: ' + inviteCode;
 
-    const chamaNameStr = chama?.name || 'SmartChama';
+    const chamaNameStr = chama?.name || 'Akibora';
     const inviterStr = admin?.full_name || 'An Admin';
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
     const link = appUrl ? ` ${appUrl}/signup?token=${inviteCode}` : '';
-    const messageText = `You have been invited by ${inviterStr} to join ${chamaNameStr} on SmartChama. Use invite code: ${inviteCode} to register.${link} Expires in 48 hours.`;
+    const messageText = `You have been invited by ${inviterStr} to join ${chamaNameStr} on Akibora. Use invite code: ${inviteCode} to register.${link} Expires in 48 hours.`;
 
     if (formattedPhone && viaWhatsApp) {
       whatsappUrl = `https://wa.me/${formattedPhone.replace(/\D/g, '')}?text=${encodeURIComponent(messageText)}`;

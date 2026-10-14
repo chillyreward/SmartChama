@@ -264,14 +264,14 @@ export default function OnboardingClient() {
             <div className="flex items-center gap-3">
               <Image
                 src="/logo.png"
-                alt="SmartChama"
+                alt="Akibora"
                 width={48}
                 height={48}
                 className="h-12 w-12 object-contain brightness-0 invert"
                 priority
               />
               <span className="text-[22px] font-bold text-white tracking-tight">
-                SmartChama
+                Akibora
               </span>
             </div>
           </Link>
@@ -294,7 +294,7 @@ export default function OnboardingClient() {
         </div>
 
         <div className="text-body-sm text-gray-500 relative z-10">
-          SmartChama Technologies Ltd
+          Akibora Technologies Ltd
         </div>
       </div>
 

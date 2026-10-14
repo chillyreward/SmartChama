@@ -1,5 +1,5 @@
 /**
- * Credit Scoring System for SmartChama
+ * Credit Scoring System for Akibora
  * Analyzes member and chama financial behavior to generate credit scores
  */
 

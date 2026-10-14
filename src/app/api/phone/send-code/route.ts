@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     .eq('phone_number', phone)
     .maybeSingle()
   if (owner && owner.id !== user.id) {
-    return NextResponse.json({ error: 'That number is already linked to another SmartChama account.' }, { status: 409 })
+    return NextResponse.json({ error: 'That number is already linked to another Akibora account.' }, { status: 409 })
   }
   if (owner && owner.id === user.id) {
     return NextResponse.json({ error: 'That number is already verified on your account.' }, { status: 409 })
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not send a code. Please try again.' }, { status: 500 })
   }
 
-  const sent = await sendSms(phone, `Your SmartChama code to confirm this phone number is ${code}. It expires in 5 minutes. Do not share it.`)
+  const sent = await sendSms(phone, `Your Akibora code to confirm this phone number is ${code}. It expires in 5 minutes. Do not share it.`)
   if (!sent.success) {
     return NextResponse.json({ error: 'We could not send the SMS. Check the number and try again.' }, { status: 502 })
   }

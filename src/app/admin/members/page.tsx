@@ -242,7 +242,7 @@ export default function AdminMembersPage() {
         m.status,
         Number(m.totalSaved || 0).toLocaleString('en-KE')
       ]);
-      exportToPDF('Members Roster Report', group?.name || 'SmartChama', headers, rows, 'members_roster');
+      exportToPDF('Members Roster Report', group?.name || 'Akibora', headers, rows, 'members_roster');
     } catch (err) {
       console.error('PDF export error:', err);
     } finally {
@@ -260,7 +260,7 @@ export default function AdminMembersPage() {
       m.status,
       Number(m.totalSaved || 0)
     ]);
-    exportToExcel('Members Roster Report', group?.name || 'SmartChama', headers, rows, 'members_roster');
+    exportToExcel('Members Roster Report', group?.name || 'Akibora', headers, rows, 'members_roster');
   };
 
   const getInitials = (name: string) => {
@@ -314,7 +314,7 @@ export default function AdminMembersPage() {
               Chama Members
             </h1>
             <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">
-              {group?.name || "SmartChama"} · {totalCount} total registered members.
+              {group?.name || "Akibora"} · {totalCount} total registered members.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">

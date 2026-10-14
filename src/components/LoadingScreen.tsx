@@ -81,7 +81,7 @@ export default function LoadingScreen({
       <div className="flex flex-col items-center gap-4">
         <Image
           src="/favicon.svg"
-          alt="SmartChama"
+          alt="Akibora"
           width={64}
           height={64}
           className="h-16 w-16 object-contain"
@@ -92,7 +92,7 @@ export default function LoadingScreen({
           style={{ 
             color: 'var(--text-primary, #0A0A0A)' 
           }}>
-          SmartChama
+          Akibora
         </span>
       </div>
 

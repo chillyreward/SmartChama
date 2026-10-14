@@ -35,7 +35,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
   };
 
   const handleShareWhatsApp = () => {
-    const message = `Join our Chama "${chamaName}" on SmartChama! Use invite code: ${groupCode} or click: ${joinUrl}`;
+    const message = `Join our Chama "${chamaName}" on Akibora! Use invite code: ${groupCode} or click: ${joinUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 

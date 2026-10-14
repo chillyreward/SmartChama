@@ -34,7 +34,7 @@ export default function SupportPage() {
 
   const faqs = [
     { q: "How is my Chama CREDIT SCORE calculated?", a: "Your CREDIT SCORE is a weighted index calculated from your timely contributions (100% weight for M-Pesa automated receipts, 50% weight for manual cash confirmations), your contribution streak and how long you have been in the group." },
-    { q: "Can I belong to multiple Chamas on SmartChama?", a: "Yes, SmartChama supports multi-chama membership. You can switch between active groups using the Group Switcher in the top portal navigation." },
+    { q: "Can I belong to multiple Chamas on Akibora?", a: "Yes, Akibora supports multi-chama membership. You can switch between active groups using the Group Switcher in the top portal navigation." },
     { q: "What is the Withdrawal Consent system?", a: "To prevent admin self-dealing, any withdrawal request initiated by a chama admin must be voted on and approved by a majority of active members before the funds can be released." },
     { q: "How do I deposit funds into my Chama?", a: "Click on 'New Contribution' from your dashboard sidebar or navigate to the Wallet page, enter the amount, and initiate an M-Pesa STK push contribution." }
   ];
@@ -53,7 +53,7 @@ export default function SupportPage() {
           Help & Support Center
         </h1>
         <p className="text-[14px] text-[var(--text-muted)] mt-1">
-          Find answers to common questions or reach out to the SmartChama customer support desk.
+          Find answers to common questions or reach out to the Akibora customer support desk.
         </p>
       </div>
 
@@ -91,8 +91,8 @@ export default function SupportPage() {
                 <div>
                   <h4 className="text-sm font-bold text-[var(--text-main)]">Email Address</h4>
                   <p className="text-xs text-[var(--text-muted)] mt-1">We respond within 4 hours</p>
-                  <a href="mailto:support@smartchama.co.ke" className="text-sm font-semibold text-[#22C55E] hover:underline mt-1 block">
-                    support@smartchama.co.ke
+                  <a href="mailto:support@akibora.co.ke" className="text-sm font-semibold text-[#22C55E] hover:underline mt-1 block">
+                    support@akibora.co.ke
                   </a>
                 </div>
               </div>

@@ -13,7 +13,7 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
   const { member, group } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const chamaName = group?.name || 'SmartChama Group';
+  const chamaName = group?.name || 'Akibora Group';
   const fullName = member?.full_name || '';
 
   const getInitials = (name: string) => {
@@ -67,7 +67,7 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
       <div className="flex items-center gap-2">
         <Image
           src="/logo.png"
-          alt="SmartChama Logo"
+          alt="Akibora Logo"
           width={32}
           height={32}
           className="h-8 w-8 object-contain"
@@ -75,7 +75,7 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
         <div>
           <div className="flex items-center gap-1.5">
             <p className="text-[15px] font-bold leading-tight text-[var(--text-main)]">
-              SmartChama
+              Akibora
             </p>
             {isAdmin && (
               <span className="text-[9px] font-extrabold tracking-wider bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-red-400 px-1.5 py-0.5 rounded border border-red-200/50 dark:border-red-900/30 uppercase shrink-0">

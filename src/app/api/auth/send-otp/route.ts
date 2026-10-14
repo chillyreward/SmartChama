@@ -64,7 +64,7 @@ export async function POST(request: Request) {
           body: new URLSearchParams({
             username: process.env.AFRICASTALKING_USERNAME,
             to: phone,
-            message: `Your SmartChama verification code is ${code}. Valid for 5 minutes. Do not share this code with anyone.`,
+            message: `Your Akibora verification code is ${code}. Valid for 5 minutes. Do not share this code with anyone.`,
             from: process.env.AFRICASTALKING_SENDER_ID || ''
           })
         });

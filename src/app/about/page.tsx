@@ -3,7 +3,7 @@ import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
 export const metadata = {
-  title: "About Us | SmartChama",
+  title: "About Us | Akibora",
   description: "We are building the financial infrastructure Africa deserves. Learn about our mission to modernize informal savings groups.",
 };
 
@@ -21,7 +21,7 @@ export default function AboutPage() {
             infrastructure Africa deserves.
           </h1>
           <p className="text-body-lg text-gray-400 max-w-2xl mx-auto mt-6">
-            SmartChama started with a simple observation. Millions of Kenyan families save together every month in informal groups called chamas. They are disciplined. They are consistent. They are creditworthy. But they have no way to prove it.
+            Akibora started with a simple observation. Millions of Kenyan families save together every month in informal groups called chamas. They are disciplined. They are consistent. They are creditworthy. But they have no way to prove it.
           </p>
         </div>
       </section>
@@ -33,13 +33,13 @@ export default function AboutPage() {
             <h2 className="text-[36px] font-geist font-bold text-[#161d16] mb-8">Our Mission</h2>
             <div className="space-y-6 text-[18px] font-inter text-[#3d4a3d] leading-relaxed">
               <p>
-                SmartChama exists to modernize informal savings groups across Africa. We believe that the trust built inside a chama — the consistency of showing up every month, paying your share on time, supporting fellow members — is one of the most valuable financial assets a person can have. We are making that asset visible.
+                Akibora exists to modernize informal savings groups across Africa. We believe that the trust built inside a chama — the consistency of showing up every month, paying your share on time, supporting fellow members — is one of the most valuable financial assets a person can have. We are making that asset visible.
               </p>
               <p>
                 Our platform digitizes the entire lifecycle of a savings group. From the first contribution to the final payout, every transaction is recorded, verified, and stored in a tamper-proof ledger. This creates something powerful: a verifiable financial history for people who have never had one.
               </p>
               <p>
-                We are not just building a savings app. We are building financial identity infrastructure for underserved communities. When a SmartChama member approaches a bank or SACCO, they can show their contribution record as proof of financial discipline. That changes everything.
+                We are not just building a savings app. We are building financial identity infrastructure for underserved communities. When an Akibora member approaches a bank or SACCO, they can show their contribution record as proof of financial discipline. That changes everything.
               </p>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function AboutPage() {
       {/* HOW WE ARE DIFFERENT */}
       <section className="bg-white py-24 px-6 border-b border-[#E5E7EB]">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-[36px] font-geist font-bold text-[#161d16] mb-16 text-center">What SmartChama does differently</h2>
+          <h2 className="text-[36px] font-geist font-bold text-[#161d16] mb-16 text-center">What Akibora does differently</h2>
 
           <div className="grid md:grid-cols-2 gap-x-12 gap-y-12">
             <div className="flex gap-4">
@@ -126,7 +126,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-2">Append-only ledger</h3>
                 <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                  Every transaction recorded on SmartChama is permanent and tamper-proof. Records cannot be edited or deleted. This creates an audit trail that both members and administrators can trust completely.
+                  Every transaction recorded on Akibora is permanent and tamper-proof. Records cannot be edited or deleted. This creates an audit trail that both members and administrators can trust completely.
                 </p>
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-2">Consent-based lender visibility</h3>
                 <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                  Members choose whether to share their SmartChama record with banks or SACCOs. When they do, lenders see a verified history of financial discipline. This opens doors that were previously closed.
+                  Members choose whether to share their Akibora record with banks or SACCOs. When they do, lenders see a verified history of financial discipline. This opens doors that were previously closed.
                 </p>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-2">Built for Africa</h3>
                 <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                  SmartChama is designed specifically for the Kenyan and broader African context. We support M-Pesa, Swahili language options, USSD for feature phones, and pricing in Kenya Shillings.
+                  Akibora is designed specifically for the Kenyan and broader African context. We support M-Pesa, Swahili language options, USSD for feature phones, and pricing in Kenya Shillings.
                 </p>
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function AboutPage() {
           <h2 className="text-[36px] font-geist font-bold text-white mb-8">Built in Nairobi</h2>
           <div className="space-y-6 text-[18px] text-gray-400 leading-relaxed mb-10">
             <p>
-              SmartChama is built by a team that grew up watching their parents save in chamas. We understand this world because we are part of it.
+              Akibora is built by a team that grew up watching their parents save in chamas. We understand this world because we are part of it.
             </p>
             <p>
               We are based in Nairobi, Kenya. We are hiring. If you believe in financial inclusion and want to build something that matters, we want to hear from you.
@@ -218,7 +218,7 @@ export default function AboutPage() {
             <div className="bg-[#FAFAFA] border border-[#E5E7EB] rounded-xl p-8">
               <h3 className="text-headline-sm font-geist font-bold text-[#161d16] mb-4">Community is the product</h3>
               <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                We do not serve individuals. We serve groups. The strength of SmartChama is the collective. Our job is to make that collective stronger, more organised, and more powerful.
+                We do not serve individuals. We serve groups. The strength of Akibora is the collective. Our job is to make that collective stronger, more organised, and more powerful.
               </p>
             </div>
 

@@ -14,7 +14,7 @@ export function ChatBot() {
     {
       id: 0,
       from: 'bot',
-      text: 'Hello! I am the SmartChama AI Assistant. I can help you with contributions, credit scores, group management, and M-Pesa payments. What would you like to know?',
+      text: 'Hello! I am the Akibora AI Assistant. I can help you with contributions, credit scores, group management, and M-Pesa payments. What would you like to know?',
       time: new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
     }
   ])
@@ -92,7 +92,7 @@ export function ChatBot() {
       <button
         onClick={() => setOpen(!open)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#22C55E] text-white shadow-xl shadow-green-500/30 flex items-center justify-center hover:bg-[#16A34A] hover:scale-105 active:scale-95 transition-all duration-200"
-        aria-label="Open SmartChama AI Assistant">
+        aria-label="Open Akibora AI Assistant">
         {open ? (
           <span className="material-symbols-outlined text-[28px]">close</span>
         ) : (
@@ -114,8 +114,8 @@ export function ChatBot() {
               </span>
             </div>
             <div className="flex-1 text-left">
-              <p className="text-white font-semibold text-[15px] leading-tight">SmartChama Assistant</p>
-              <p className="text-white/70 text-[12px] leading-none mt-0.5">Powered by AI · SmartChama only</p>
+              <p className="text-white font-semibold text-[15px] leading-tight">Akibora Assistant</p>
+              <p className="text-white/70 text-[12px] leading-none mt-0.5">Powered by AI · Akibora only</p>
             </div>
             <button onClick={() => setOpen(false)} className="text-white/80 hover:text-white">
               <span className="material-symbols-outlined text-[22px]">close</span>
@@ -193,7 +193,7 @@ export function ChatBot() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleSend() }}
-              placeholder="Ask about SmartChama..."
+              placeholder="Ask about Akibora..."
               className="flex-1 px-4 py-2.5 rounded-xl text-[14px] focus:outline-none focus:border-[#22C55E] border"
               style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
             />

@@ -218,7 +218,7 @@ export default function AdminSmartGrowPage() {
                 {selectedInvest.description}
                 <br /><br />
                 By proceeding, you agree to the Terms & Conditions set by {selectedInvest.partner}. 
-                SmartChama acts as an intermediary platform.
+                Akibora acts as an intermediary platform.
               </p>
 
               <div className="bg-surface-container-low border border-[#E5E7EB] p-4 rounded-xl flex gap-3 mb-8">

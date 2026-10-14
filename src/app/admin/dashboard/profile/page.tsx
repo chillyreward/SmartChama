@@ -46,7 +46,7 @@ export default function ProfilePage() {
         // Set default values if admin not found
         setProfile({
           name: user.user_metadata?.full_name || "Admin User",
-          email: user.email || "admin@smartchama.com",
+          email: user.email || "admin@akibora.co.ke",
           phone: user.user_metadata?.phone_number || "+254712345678",
           location: "Nairobi, Kenya",
           joined: new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -54,7 +54,7 @@ export default function ProfilePage() {
       } else if (adminData) {
         setProfile({
           name: adminData.full_name || user.user_metadata?.full_name || "Admin User",
-          email: adminData.email || user.email || "admin@smartchama.com",
+          email: adminData.email || user.email || "admin@akibora.co.ke",
           phone: adminData.phone_number || "+254712345678",
           location: "Nairobi, Kenya",
           joined: adminData.created_at 

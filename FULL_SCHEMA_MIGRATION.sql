@@ -1,5 +1,5 @@
 -- ============================================================
--- SMARTCHAMA FULL SCHEMA MIGRATION  (single source of truth)
+-- AKIBORA FULL SCHEMA MIGRATION  (single source of truth)
 -- Supabase project: ewigxollsudiyqucajqv
 -- Go to: Supabase Dashboard → SQL Editor → paste & run.
 -- Idempotent: safe to re-run after edits.
@@ -2300,7 +2300,7 @@ ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_kyc_status_check;
 ALTER TABLE profiles ADD CONSTRAINT profiles_kyc_status_check
   CHECK (kyc_status IN ('none', 'review', 'verified', 'rejected'));
 
--- SmartChama staff who review identity checks
+-- Akibora staff who review identity checks
 CREATE TABLE IF NOT EXISTS platform_admins (
   profile_id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT now()

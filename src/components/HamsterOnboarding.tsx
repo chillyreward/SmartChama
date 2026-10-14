@@ -11,8 +11,8 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    title: "Karibu SmartChama! 👋",
-    body: "I'm Hammy, your SmartChama guide. Let me show you how to manage your chama savings in under 2 minutes.",
+    title: "Karibu Akibora! 👋",
+    body: "I'm Hammy, your Akibora guide. Let me show you how to manage your chama savings in under 2 minutes.",
     icon: "🐹",
     hamsterPose: "wave",
   },
@@ -24,7 +24,7 @@ const STEPS: Step[] = [
   },
   {
     title: "Collect Contributions via M-Pesa",
-    body: "SmartChama sends an M-Pesa STK Push directly to each member's phone. Payments are recorded automatically — no manual tracking.",
+    body: "Akibora sends an M-Pesa STK Push directly to each member's phone. Payments are recorded automatically — no manual tracking.",
     icon: "💚",
     hamsterPose: "think",
   },
@@ -250,7 +250,7 @@ export default function HamsterOnboarding() {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="SmartChama onboarding tutorial"
+        aria-label="Akibora onboarding tutorial"
         className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       >
         <div

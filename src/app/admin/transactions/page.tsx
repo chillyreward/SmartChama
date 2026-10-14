@@ -33,7 +33,7 @@ export default function AdminTransactionsPage() {
       t.status || 'confirmed',
       Number(t.amount || 0).toLocaleString('en-KE')
     ]);
-    exportToPDF('Financial Ledger Report', group?.name || 'SmartChama', headers, rows, 'transactions_report');
+    exportToPDF('Financial Ledger Report', group?.name || 'Akibora', headers, rows, 'transactions_report');
   };
 
   const handleExportExcel = () => {
@@ -47,7 +47,7 @@ export default function AdminTransactionsPage() {
       t.status || 'confirmed',
       Number(t.amount || 0)
     ]);
-    exportToExcel('Financial Ledger Report', group?.name || 'SmartChama', headers, rows, 'transactions_report');
+    exportToExcel('Financial Ledger Report', group?.name || 'Akibora', headers, rows, 'transactions_report');
   };
 
   const handleExportCSV = () => {

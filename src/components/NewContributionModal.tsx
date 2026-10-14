@@ -203,7 +203,7 @@ export function NewContributionModal({
                     {paymentConfig.payment_type === 'till' && `Till No: ${paymentConfig.till_number}`}
                     {paymentConfig.payment_type === 'paybill' && `Paybill: ${paymentConfig.paybill_number} (Acct: ${paymentConfig.account_number})`}
                     {paymentConfig.payment_type === 'phone' && `M-Pesa: ${paymentConfig.phone_number}`}
-                    . SmartChama does not hold or escrow these funds.
+                    . Akibora does not hold or escrow these funds.
                   </p>
                 </div>
               </div>
@@ -215,7 +215,7 @@ export function NewContributionModal({
                 <div>
                   <p className="font-semibold text-amber-800 dark:text-amber-400 text-left">Direct Custody Warning</p>
                   <p className="mt-1 text-amber-700 dark:text-amber-500 leading-normal text-left">
-                    Funds go directly to the group administrator's custody. SmartChama does not hold or escrow these funds.
+                    Funds go directly to the group administrator's custody. Akibora does not hold or escrow these funds.
                   </p>
                 </div>
               </div>

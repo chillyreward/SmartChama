@@ -16,7 +16,7 @@ export async function exportToPDF(
 
   doc.setFontSize(10);
   doc.setTextColor(96, 100, 95);
-  doc.text(`Chama: ${chamaName || 'SmartChama Group'}`, 14, 27);
+  doc.text(`Chama: ${chamaName || 'Akibora Group'}`, 14, 27);
   doc.text(`Generated: ${new Date().toLocaleDateString('en-KE', { dateStyle: 'full' })}`, 14, 33);
 
   // Table
@@ -26,7 +26,7 @@ export async function exportToPDF(
     startY: 38,
     theme: 'grid',
     headStyles: {
-      fillColor: [34, 197, 94], // #22C55E SmartChama Green
+      fillColor: [34, 197, 94], // #22C55E Akibora Green
       textColor: [255, 255, 255],
       fontStyle: 'bold'
     },
@@ -65,7 +65,7 @@ export async function exportToExcel(
 
   const metaRows = [
     [title],
-    [`Chama: ${chamaName || 'SmartChama Group'}`],
+    [`Chama: ${chamaName || 'Akibora Group'}`],
     [`Generated: ${new Date().toLocaleDateString('en-KE', { dateStyle: 'full' })}`],
     []
   ];

@@ -5,7 +5,7 @@ export const translations = {
     // Header
     growTogether: "Grow Together",
     tagline: "The future of group savings",
-    welcome: "Welcome to SmartChama",
+    welcome: "Welcome to Akibora",
     subtitle: "Next-gen fintech for African group savings",
     
     // Tabs
@@ -82,7 +82,7 @@ export const translations = {
     // Header (Swahili)
     growTogether: "Kukua Pamoja",
     tagline: "Mustakabali wa akiba za kikundi",
-    welcome: "Karibu SmartChama",
+    welcome: "Karibu Akibora",
     subtitle: "Teknolojia ya kifedha ya kizazi kipya kwa akiba za kikundi cha Afrika",
     
     // Tabs
@@ -159,7 +159,7 @@ export const translations = {
     // Header (Sheng)
     growTogether: "Tukuwe Pamoja",
     tagline: "Future ya group savings",
-    welcome: "Karibu kwa SmartChama",
+    welcome: "Karibu kwa Akibora",
     subtitle: "Next-gen fintech ya group savings za Afrika",
     
     // Tabs
@@ -236,7 +236,7 @@ export const translations = {
     // Header (Kikuyu)
     growTogether: "Tũkũre Hamwe",
     tagline: "Mustakabali wa kũigana kwa gĩkundi",
-    welcome: "Wega ũũkĩte SmartChama",
+    welcome: "Wega ũũkĩte Akibora",
     subtitle: "Fintech ya rũgano rũrũ nĩ ũndũ wa kũigana kwa ikundi cia Afrika",
     
     // Tabs

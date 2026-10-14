@@ -11,20 +11,20 @@ export default function LandingFooter() {
               <div className="flex items-center gap-3 mb-4">
                 <Image
                   src="/logo.png"
-                  alt="SmartChama"
+                  alt="Akibora"
                   width={48}
                   height={48}
                   className="h-12 w-auto object-contain brightness-0 invert"
                   priority
                 />
                 <span className="text-[20px] font-bold text-white tracking-tight">
-                  SmartChama
+                  Akibora
                 </span>
               </div>
             </Link>
             <p className="text-body-sm text-gray-400 mb-6">Financial infrastructure for community wealth.</p>
             <div className="flex gap-4">
-              <a href="mailto:hello@smartchama.co.ke" className="text-gray-400 hover:text-white transition-colors" aria-label="Email us">
+              <a href="mailto:hello@akibora.co.ke" className="text-gray-400 hover:text-white transition-colors" aria-label="Email us">
                 <span className="material-symbols-outlined">mail</span>
               </a>
             </div>
@@ -62,10 +62,10 @@ export default function LandingFooter() {
         
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-body-sm text-gray-500 text-center md:text-left">
-            © 2026 SmartChama Technologies Ltd. Built in Nairobi, Kenya.
+            © 2026 Akibora Technologies Ltd. Built in Nairobi, Kenya.
           </div>
           <div className="text-body-sm text-gray-500">
-            A product of SmartChama Technologies Ltd.
+            A product of Akibora Technologies Ltd.
           </div>
         </div>
       </div>

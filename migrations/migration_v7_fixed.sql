@@ -1,5 +1,5 @@
 -- ============================================================================
--- SmartChama Migration v7 (FIXED): Consolidated Missing Tables, RPCs, & Storage Buckets
+-- Akibora Migration v7 (FIXED): Consolidated Missing Tables, RPCs, & Storage Buckets
 -- ============================================================================
 -- Run this corrected script in your Supabase SQL Editor.
 -- Fixes:

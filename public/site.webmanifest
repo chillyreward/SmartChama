@@ -1,6 +1,6 @@
 {
-  "name": "SmartChama",
-  "short_name": "SmartChama",
+  "name": "Akibora",
+  "short_name": "Akibora",
   "description": "Digital savings management for African savings groups",
   "start_url": "/",
   "scope": "/",
@@ -23,7 +23,7 @@
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "SmartChama Dashboard"
+      "label": "Akibora Dashboard"
     }
   ],
   "icons": [

@@ -258,7 +258,7 @@ export default function MemberDashboard({
             {loadingSavings ? <div className="h-8 w-32 bg-gray-200 dark:bg-[#2d3d2d] animate-pulse rounded"></div> : `KSh ${formatCurrency(totalSavings)}`}
           </div>
           <p className="text-[10px] text-[var(--text-muted)] mt-2 leading-tight">
-            SmartChama does not hold money. This is a record only.
+            Akibora does not hold money. This is a record only.
           </p>
         </div>
 

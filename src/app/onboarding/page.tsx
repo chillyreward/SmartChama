@@ -457,7 +457,7 @@ export default function OnboardingPage() {
         gap-2 mb-10">
         <img 
           src="/favicon.svg"
-          alt="SmartChama"
+          alt="Akibora"
           className="h-10 w-10 
             object-contain"
         />
@@ -467,7 +467,7 @@ export default function OnboardingPage() {
           style={{ 
             color: 'var(--text-primary)' 
           }}>
-          SmartChama
+          Akibora
         </span>
       </div>
 
@@ -529,7 +529,7 @@ export default function OnboardingPage() {
                 color: 
                   'var(--text-primary)' 
               }}>
-              Welcome to SmartChama
+              Welcome to Akibora
             </h1>
             <p 
               className="text-center 

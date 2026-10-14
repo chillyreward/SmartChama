@@ -241,7 +241,7 @@ export default function KycVerification({ onDone }: { onDone?: (outcome: KycOutc
       <label className="flex items-start gap-3 text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-4 h-4 accent-[#22C55E]" />
         <span>
-          I agree that SmartChama may use my ID document and selfie to confirm my identity, including an automated
+          I agree that Akibora may use my ID document and selfie to confirm my identity, including an automated
           comparison of my face with my ID photo. They are stored privately and used only for verification and fraud
           prevention, as described in the <a href="/privacy" target="_blank" className="text-[#22C55E] underline">privacy policy</a>.
         </span>

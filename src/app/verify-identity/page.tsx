@@ -53,7 +53,7 @@ function VerifyIdentity() {
         ) : shown === 'verified' ? (
           <Result tone="good" title="You're verified" body={outcome?.message ?? 'Withdrawals and investments are unlocked for your group.'} next={next} />
         ) : shown === 'review' && !outcome ? (
-          <Result tone="wait" title="We're checking your documents" body="A SmartChama team member is reviewing your submission, usually within one working day. You can keep using your group meanwhile." next={next} />
+          <Result tone="wait" title="We're checking your documents" body="An Akibora team member is reviewing your submission, usually within one working day. You can keep using your group meanwhile." next={next} />
         ) : outcome?.status === 'review' ? (
           <Result tone="wait" title="Submitted" body={outcome.message} next={next} />
         ) : (

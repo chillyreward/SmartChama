@@ -1,4 +1,4 @@
--- SmartChama Welfare & Penalties Migration
+-- Akibora Welfare & Penalties Migration
 -- Run this in your Supabase SQL Editor
 
 -- Member Penalties / Fines

@@ -395,12 +395,12 @@ function SignupForm() {
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/favicon.svg"
-            alt="SmartChama"
+            alt="Akibora"
             width={28} height={28}
             className="h-7 w-7 object-contain"
           />
           <span className="font-bold text-[17px]">
-            SmartChama
+            Akibora
           </span>
         </Link>
         <Link href="/login" className="text-[14px] font-medium text-[#22C55E]">

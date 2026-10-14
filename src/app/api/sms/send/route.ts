@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/api-auth';
 import { formatKenyanPhone, sendSms } from '@/lib/sms';
 
 // Without a check this route sends any text, to any number, under the
-// SmartChama sender name: free phishing for anyone, billed to us.
+// Akibora sender name: free phishing for anyone, billed to us.
 // Allowed callers:
 //  - other API routes (internal secret)
 //  - a signed-in chama official messaging a member of that same chama

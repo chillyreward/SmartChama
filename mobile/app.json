@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "SmartChama",
+    "name": "Akibora",
     "slug": "smartchama",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "smartchama",
+    "scheme": "akibora",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -15,11 +15,11 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.smartchama.app",
+      "bundleIdentifier": "com.akibora.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "SmartChama uses the camera to scan QR codes for group invites.",
-        "NSPhotoLibraryUsageDescription": "SmartChama needs access to save QR codes and receipts."
+        "NSCameraUsageDescription": "Akibora uses the camera to scan QR codes for group invites.",
+        "NSPhotoLibraryUsageDescription": "Akibora needs access to save QR codes and receipts."
       }
     },
     "android": {
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0B0F0C"
       },
-      "package": "com.smartchama.app",
+      "package": "com.akibora.app",
       "versionCode": 1,
       "permissions": ["CAMERA", "INTERNET", "VIBRATE"]
     },

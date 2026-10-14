@@ -45,7 +45,7 @@ async function validate(admin: ReturnType<typeof getSupabaseAdmin>, b: Body) {
     admin.from('profile_private').select('profile_id').eq('national_id', nationalId).limit(1),
     admin.rpc('preview_join_code', { p_code: joinCode }),
   ])
-  if (phoneOwner) return { error: 'This phone number already has a SmartChama account. Sign in instead.', status: 409 }
+  if (phoneOwner) return { error: 'This phone number already has an Akibora account. Sign in instead.', status: 409 }
   if (idOwner?.length) return { error: 'This ID number is already registered. Sign in, or contact support if this is a mistake.', status: 409 }
   if (!preview?.valid) {
     const messages: Record<string, string> = {
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     })
     if (error) return bad('Could not send a code. Please try again.', 500)
 
-    const sent = await sendSms(v.phone, `Your SmartChama sign-up code is ${code}. It expires in 5 minutes. Do not share it.`)
+    const sent = await sendSms(v.phone, `Your Akibora sign-up code is ${code}. It expires in 5 minutes. Do not share it.`)
     if (!sent.success) return bad('We could not send the SMS. Check the number and try again.', 502)
     if (sent.simulated) {
       if (process.env.NODE_ENV === 'production') return bad('SMS is not set up yet. Please try again later.', 503)
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
   })
   if (createError || !created.user) {
     const taken = /already|registered|exists/i.test(createError?.message || '')
-    return bad(taken ? 'This phone number already has a SmartChama account. Sign in instead.' : 'Could not create your account. Please try again.', taken ? 409 : 500)
+    return bad(taken ? 'This phone number already has an Akibora account. Sign in instead.' : 'Could not create your account. Please try again.', taken ? 409 : 500)
   }
   const userId = created.user.id
 
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
     .eq('id', userId)
   if (profileError) {
     await admin.auth.admin.deleteUser(userId)
-    return bad(profileError.code === '23505' ? 'This phone number already has a SmartChama account. Sign in instead.' : 'Could not create your account. Please try again.', 409)
+    return bad(profileError.code === '23505' ? 'This phone number already has an Akibora account. Sign in instead.' : 'Could not create your account. Please try again.', 409)
   }
   await admin.from('profile_private').upsert(
     { profile_id: userId, national_id: v.nationalId, updated_at: new Date().toISOString() },

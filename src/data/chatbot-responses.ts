@@ -6,11 +6,11 @@ export const responses: {
   // GREETINGS
   {
     triggers: ['hi', 'hello', 'hey', 'hujambo', 'habari'],
-    answer: 'Hello! Welcome to SmartChama. I can help you with contributions, credit scores, invites, and more. What would you like to know?'
+    answer: 'Hello! Welcome to Akibora. I can help you with contributions, credit scores, invites, and more. What would you like to know?'
   },
   {
     triggers: ['good morning', 'good afternoon', 'good evening'],
-    answer: 'Hello! How can I help you with SmartChama today?'
+    answer: 'Hello! How can I help you with Akibora today?'
   },
   {
     triggers: ['thanks', 'thank you', 'asante'],
@@ -21,28 +21,28 @@ export const responses: {
     answer: 'Goodbye! Come back anytime if you have questions.'
   },
   
-  // WHAT IS SMARTCHAMA
+  // WHAT IS AKIBORA
   {
-    triggers: ['what is smartchama', 'what does smartchama do', 'tell me about smartchama', 'about smartchama'],
-    answer: 'SmartChama is a digital platform for savings groups in Kenya. It helps chamas track contributions, run merry-go-rounds, and build verified financial records. Your group manages its own money through M-Pesa, and SmartChama keeps the records clear and honest for everyone.'
+    triggers: ['what is akibora', 'what does akibora do', 'tell me about akibora', 'about akibora'],
+    answer: 'Akibora is a digital platform for savings groups in Kenya. It helps chamas track contributions, run merry-go-rounds, and build verified financial records. Your group manages its own money through M-Pesa, and Akibora keeps the records clear and honest for everyone.'
   },
   {
-    triggers: ['is smartchama a bank', 'do you hold money', 'is my money safe with you'],
-    answer: 'SmartChama is not a bank. We do not hold your money. When you contribute, the money goes directly to your group admin\'s M-Pesa Till or Paybill number. SmartChama only tracks and records the transactions. Your admin is responsible for the group funds.'
+    triggers: ['is akibora a bank', 'do you hold money', 'is my money safe with you'],
+    answer: 'Akibora is not a bank. We do not hold your money. When you contribute, the money goes directly to your group admin\'s M-Pesa Till or Paybill number. Akibora only tracks and records the transactions. Your admin is responsible for the group funds.'
   },
   {
     triggers: ['how much does it cost', 'pricing', 'free', 'subscription', 'how to pay'],
-    answer: 'SmartChama has a free plan for groups of up to 20 members. The Growth plan costs KSh 999 per month and supports up to 100 members with advanced features. Enterprise pricing is available for larger organisations. Only the group admin pays the subscription, not individual members.'
+    answer: 'Akibora has a free plan for groups of up to 20 members. The Growth plan costs KSh 999 per month and supports up to 100 members with advanced features. Enterprise pricing is available for larger organisations. Only the group admin pays the subscription, not individual members.'
   },
   
   // CONTRIBUTIONS
   {
     triggers: ['how to contribute', 'how to pay', 'make payment', 'how do i send money', 'contribute'],
-    answer: 'To make a contribution: 1) Go to your dashboard and click "New Contribution". 2) Your phone number and the contribution amount will be pre-filled. 3) Click "Send M-Pesa Request". 4) You will receive an M-Pesa prompt on your phone. 5) Enter your M-Pesa PIN to complete the payment. The money goes to your admin\'s Till/Paybill number, and SmartChama records it automatically.'
+    answer: 'To make a contribution: 1) Go to your dashboard and click "New Contribution". 2) Your phone number and the contribution amount will be pre-filled. 3) Click "Send M-Pesa Request". 4) You will receive an M-Pesa prompt on your phone. 5) Enter your M-Pesa PIN to complete the payment. The money goes to your admin\'s Till/Paybill number, and Akibora records it automatically.'
   },
   {
     triggers: ['where does money go', 'who receives money', 'where does my payment go'],
-    answer: 'Your contribution goes directly to your group admin\'s M-Pesa Till Number or Paybill. SmartChama does not receive or hold the money. You can see your admin\'s Till/Paybill number on the contribution screen before you pay, so you always know where your money is going.'
+    answer: 'Your contribution goes directly to your group admin\'s M-Pesa Till Number or Paybill. Akibora does not receive or hold the money. You can see your admin\'s Till/Paybill number on the contribution screen before you pay, so you always know where your money is going.'
   },
   {
     triggers: ['contribution not showing', 'payment not recorded', 'i paid but it shows pending'],
@@ -50,7 +50,7 @@ export const responses: {
   },
   {
     triggers: ['monthly contribution', 'when to pay', 'due date', 'contribution deadline'],
-    answer: 'Your group\'s contribution amount and due date are set by your admin. You can see your next due date on your dashboard. SmartChama will send you a reminder 3 days before the due date. Late payments may attract a penalty as set in your group rules.'
+    answer: 'Your group\'s contribution amount and due date are set by your admin. You can see your next due date on your dashboard. Akibora will send you a reminder 3 days before the due date. Late payments may attract a penalty as set in your group rules.'
   },
   {
     triggers: ['contribution history', 'past contributions', 'my payments'],
@@ -60,7 +60,7 @@ export const responses: {
   // BORROWING
   {
     triggers: ['how to get loan', 'request loan', 'apply loan', 'how do loans work', 'loan request', 'borrow', 'how much can i borrow'],
-    answer: 'SmartChama does not offer borrowing. It helps your group save together: track contributions, run your merry-go-round, manage a welfare fund and keep honest records. For credit, talk to a licensed bank or SACCO. With your permission, your SmartChama contribution record can help show your financial discipline.'
+    answer: 'Akibora does not offer borrowing. It helps your group save together: track contributions, run your merry-go-round, manage a welfare fund and keep honest records. For credit, talk to a licensed bank or SACCO. With your permission, your Akibora contribution record can help show your financial discipline.'
   },
 
   // credit score
@@ -80,7 +80,7 @@ export const responses: {
   // INVITES AND MEMBERSHIP
   {
     triggers: ['how to join', 'join a group', 'invite code', 'how do i get invited'],
-    answer: 'To join a SmartChama group, you need an invite from the group admin. The admin will send you an SMS or WhatsApp message with an invitation code. Use the code when signing up at SmartChama. You cannot join a group without an invite code.'
+    answer: 'To join an Akibora group, you need an invite from the group admin. The admin will send you an SMS or WhatsApp message with an invitation code. Use the code when signing up at Akibora. You cannot join a group without an invite code.'
   },
   {
     triggers: ['how to invite member', 'add member', 'invite someone', 'admin invite'],
@@ -88,13 +88,13 @@ export const responses: {
   },
   {
     triggers: ['can i join multiple groups', 'multiple chamas', 'join two groups'],
-    answer: 'Yes, you can be a member of multiple SmartChama groups. Each group is separate. When you log in, if you belong to more than one group, you will see a screen to choose which group to view. You can switch between groups at any time from the top navigation.'
+    answer: 'Yes, you can be a member of multiple Akibora groups. Each group is separate. When you log in, if you belong to more than one group, you will see a screen to choose which group to view. You can switch between groups at any time from the top navigation.'
   },
   
   // ACCOUNT AND SECURITY
   {
     triggers: ['forgot password', 'reset password', 'cannot login', 'login problem'],
-    answer: 'If you have forgotten your password, go to the login page and click "Forgot password?". Enter your email address and you will receive a password reset link. Click the link in the email and set a new password. If you do not receive the email, check your spam folder or contact support@smartchama.co.ke'
+    answer: 'If you have forgotten your password, go to the login page and click "Forgot password?". Enter your email address and you will receive a password reset link. Click the link in the email and set a new password. If you do not receive the email, check your spam folder or contact support@akibora.co.ke'
   },
   {
     triggers: ['change password', 'update password', 'how to change my password'],
@@ -102,17 +102,17 @@ export const responses: {
   },
   {
     triggers: ['delete account', 'close account', 'remove my account'],
-    answer: 'To delete your account, contact support@smartchama.co.ke. Note that your contribution and transaction records may be retained as part of the group\'s financial history even after your account is removed, since they affect other members\' records.'
+    answer: 'To delete your account, contact support@akibora.co.ke. Note that your contribution and transaction records may be retained as part of the group\'s financial history even after your account is removed, since they affect other members\' records.'
   },
   
   // M-PESA
   {
     triggers: ['mpesa not working', 'stk push not coming', 'no mpesa prompt', 'mpesa failed'],
-    answer: 'If you are not receiving the M-Pesa prompt: 1) Make sure your phone number in your profile matches your registered M-Pesa number. 2) Check that your M-Pesa is active and not suspended. 3) Ensure you have enough M-Pesa balance. 4) Wait 30 seconds and try again. 5) If the problem continues, contact your admin or support@smartchama.co.ke'
+    answer: 'If you are not receiving the M-Pesa prompt: 1) Make sure your phone number in your profile matches your registered M-Pesa number. 2) Check that your M-Pesa is active and not suspended. 3) Ensure you have enough M-Pesa balance. 4) Wait 30 seconds and try again. 5) If the problem continues, contact your admin or support@akibora.co.ke'
   },
   {
     triggers: ['what is paybill', 'what is till number', 'paybill number'],
-    answer: 'Your group admin uses a Till Number or Paybill as the destination for your contributions. When you make a contribution, the M-Pesa prompt will automatically use your admin\'s registered Till/Paybill. The money goes directly to the admin\'s M-Pesa account. SmartChama records the transaction for everyone to see.'
+    answer: 'Your group admin uses a Till Number or Paybill as the destination for your contributions. When you make a contribution, the M-Pesa prompt will automatically use your admin\'s registered Till/Paybill. The money goes directly to the admin\'s M-Pesa account. Akibora records the transaction for everyone to see.'
   },
   
   // SMARTGROW
@@ -134,41 +134,41 @@ export const responses: {
   // ADMIN QUESTIONS
   {
     triggers: ['how to create group', 'create chama', 'start a group'],
-    answer: 'To create a group: 1) Create a SmartChama account. 2) On the onboarding screen, choose "Create a new group". 3) Enter your group name, contribution amount, and frequency. 4) Set up your Till/Paybill number for receiving contributions. 5) You are now the admin. Invite members from the Members page or Settings.'
+    answer: 'To create a group: 1) Create an Akibora account. 2) On the onboarding screen, choose "Create a new group". 3) Enter your group name, contribution amount, and frequency. 4) Set up your Till/Paybill number for receiving contributions. 5) You are now the admin. Invite members from the Members page or Settings.'
   },
   {
     triggers: ['admin withdrawal', 'how to withdraw', 'take money from group', 'group withdrawal'],
-    answer: 'Admins can record a withdrawal in the Wallet page. However, every withdrawal requires a confirmation notice that is visible to all group members. Members can see all withdrawals in real time on the Transactions page. SmartChama cannot stop a withdrawal but makes it fully transparent so all members can see if money is being taken without consent.'
+    answer: 'Admins can record a withdrawal in the Wallet page. However, every withdrawal requires a confirmation notice that is visible to all group members. Members can see all withdrawals in real time on the Transactions page. Akibora cannot stop a withdrawal but makes it fully transparent so all members can see if money is being taken without consent.'
   },
   {
     triggers: ['how many admins', 'can there be two admins', 'admin roles'],
-    answer: 'Each SmartChama group has one primary admin (the Chairperson) who created the group. The admin can assign secondary roles like Treasurer and Secretary to other members. However, only the primary admin pays the subscription and has full control. There is only one main admin per group.'
+    answer: 'Each Akibora group has one primary admin (the Chairperson) who created the group. The admin can assign secondary roles like Treasurer and Secretary to other members. However, only the primary admin pays the subscription and has full control. There is only one main admin per group.'
   },
   
   // NOTIFICATIONS
   {
     triggers: ['notifications', 'alerts', 'how do i get notified', 'reminders'],
-    answer: 'SmartChama sends you notifications for: contribution reminders 3 days before due date, payment confirmations, new member joins, withdrawal alerts, and monthly reports. You can manage your notification preferences in Settings under the Notifications tab.'
+    answer: 'Akibora sends you notifications for: contribution reminders 3 days before due date, payment confirmations, new member joins, withdrawal alerts, and monthly reports. You can manage your notification preferences in Settings under the Notifications tab.'
   },
   
   // FRAUD AND SECURITY
   {
     triggers: ['is this safe', 'security', 'is my data safe', 'fraud'],
-    answer: 'SmartChama uses bank-grade security: 256-bit encryption for all data, secure Supabase database with row-level security, blockchain-anchored transaction records that cannot be altered, and your M-Pesa PIN is never stored by us. All transactions are recorded and visible to group members for transparency.'
+    answer: 'Akibora uses bank-grade security: 256-bit encryption for all data, secure Supabase database with row-level security, blockchain-anchored transaction records that cannot be altered, and your M-Pesa PIN is never stored by us. All transactions are recorded and visible to group members for transparency.'
   },
   {
     triggers: ['fake account', 'scam', 'fake chama', 'suspicious activity'],
-    answer: 'SmartChama has fraud protection built in: 1) Credit Scores only build from verified M-Pesa receipts, not self-reported data. 2) Groups with suspicious patterns (one person, multiple chamas, same phone numbers) are flagged automatically. 3) All transactions are recorded and cannot be altered. If you suspect fraud, contact support@smartchama.co.ke immediately.'
+    answer: 'Akibora has fraud protection built in: 1) Credit Scores only build from verified M-Pesa receipts, not self-reported data. 2) Groups with suspicious patterns (one person, multiple chamas, same phone numbers) are flagged automatically. 3) All transactions are recorded and cannot be altered. If you suspect fraud, contact support@akibora.co.ke immediately.'
   },
   
   // SUPPORT
   {
     triggers: ['contact support', 'help', 'support', 'i need help', 'customer care'],
-    answer: 'You can reach SmartChama support at: Email: support@smartchama.co.ke | Visit the Support page from the sidebar (click Support above the logout button). We respond within 1 business day. For urgent M-Pesa issues, also check with your group admin.'
+    answer: 'You can reach Akibora support at: Email: support@akibora.co.ke | Visit the Support page from the sidebar (click Support above the logout button). We respond within 1 business day. For urgent M-Pesa issues, also check with your group admin.'
   },
   {
     triggers: ['report bug', 'something is not working', 'error', 'bug', 'problem with app'],
-    answer: 'Sorry about that. Please email support@smartchama.co.ke with a description of the problem and what you were trying to do. If you can include a screenshot, that helps us fix it faster. You can also use the feedback form on the Support page.'
+    answer: 'Sorry about that. Please email support@akibora.co.ke with a description of the problem and what you were trying to do. If you can include a screenshot, that helps us fix it faster. You can also use the feedback form on the Support page.'
   },
   
   // WALLET
@@ -180,6 +180,6 @@ export const responses: {
   // DEFAULT
   {
     triggers: ['default'],
-    answer: 'I am not sure about that one. Try asking about contributions, credit scores, invites, M-Pesa, SmartGrow, or account settings. You can also reach us at support@smartchama.co.ke for anything I cannot answer.'
+    answer: 'I am not sure about that one. Try asking about contributions, credit scores, invites, M-Pesa, SmartGrow, or account settings. You can also reach us at support@akibora.co.ke for anything I cannot answer.'
   }
 ]

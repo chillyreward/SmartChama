@@ -82,14 +82,14 @@ export function InstallPrompt() {
       <div className="flex items-start gap-3 pr-6">
         <Image
           src="/favicon.svg"
-          alt="SmartChama"
+          alt="Akibora"
           width={40}
           height={40}
           className="h-10 w-10 object-contain flex-shrink-0"
         />
         <div>
           <p className="text-[15px] font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-            Install SmartChama
+            Install Akibora
           </p>
           <p className="text-[13px] mb-3" style={{ color: 'var(--text-secondary)' }}>
             {platform === 'ios'

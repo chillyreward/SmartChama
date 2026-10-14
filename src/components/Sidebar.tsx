@@ -73,13 +73,13 @@ export function Sidebar({ variant }: SidebarProps) {
         <div className="flex items-center gap-2.5">
           <Image
             src="/logo.png"
-            alt="SmartChama"
+            alt="Akibora"
             width={32}
             height={32}
             className="h-8 w-8 object-contain"
           />
           <span className="text-[17px] font-bold tracking-tight font-geist text-[#22C55E]">
-            SmartChama
+            Akibora
           </span>
           {variant === 'admin' && (
             <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300">

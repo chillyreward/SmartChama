@@ -5,7 +5,7 @@ import { Send, Mic, Bot, User, Sparkles } from "lucide-react";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Jambo! I am your SmartChama Advisor. I can help you analyze your savings or suggest investment groups. What's on your mind?" }
+    { role: "assistant", content: "Jambo! I am your Akibora Advisor. I can help you analyze your savings or suggest investment groups. What's on your mind?" }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);

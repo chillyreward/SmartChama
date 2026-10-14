@@ -2,8 +2,8 @@ import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
 export const metadata = {
-  title: "Terms of Service | SmartChama",
-  description: "Terms of Service for using the SmartChama platform.",
+  title: "Terms of Service | Akibora",
+  description: "Terms of Service for using the Akibora platform.",
 };
 
 export default function TermsPage() {
@@ -13,7 +13,7 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            By accessing SmartChama through our website, mobile application, or USSD interface, you confirm that you are at least 18 years of age, that you have the legal capacity to enter into a binding agreement, and that you agree to comply with these terms.
+            By accessing Akibora through our website, mobile application, or USSD interface, you confirm that you are at least 18 years of age, that you have the legal capacity to enter into a binding agreement, and that you agree to comply with these terms.
           </p>
           <p>
             If you are registering a savings group on behalf of other members, you confirm that you have the authority to do so and that you will communicate these terms to all members of your group.
@@ -26,7 +26,7 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            SmartChama provides a digital platform for informal savings groups to manage contributions, payouts, and financial records. Our services include:
+            Akibora provides a digital platform for informal savings groups to manage contributions, payouts, and financial records. Our services include:
           </p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Digital contribution tracking via M-Pesa integration</li>
@@ -38,7 +38,7 @@ export default function TermsPage() {
             <li>Financial identity records for qualifying members</li>
           </ul>
           <p>
-            SmartChama is a financial management platform. We are not a bank, a lending institution, or a regulated financial services provider. We facilitate the management of group finances but do not hold, guarantee, or insure funds.
+            Akibora is a financial management platform. We are not a bank, a lending institution, or a regulated financial services provider. We facilitate the management of group finances but do not hold, guarantee, or insure funds.
           </p>
         </>
       )
@@ -48,13 +48,13 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            To use SmartChama, you must create an account with a valid phone number and email address. You are responsible for maintaining the confidentiality of your login credentials. You must not share your password with anyone, including other members of your group.
+            To use Akibora, you must create an account with a valid phone number and email address. You are responsible for maintaining the confidentiality of your login credentials. You must not share your password with anyone, including other members of your group.
           </p>
           <p>
-            You must provide accurate and truthful information during registration. SmartChama reserves the right to suspend or terminate accounts where false information has been provided.
+            You must provide accurate and truthful information during registration. Akibora reserves the right to suspend or terminate accounts where false information has been provided.
           </p>
           <p>
-            Each person may only hold one account on SmartChama. Creating multiple accounts to circumvent group rules or platform policies is strictly prohibited.
+            Each person may only hold one account on Akibora. Creating multiple accounts to circumvent group rules or platform policies is strictly prohibited.
           </p>
         </>
       )
@@ -64,7 +64,7 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            The person who creates a group on SmartChama is designated as the Chairlady or Administrator. This person is responsible for:
+            The person who creates a group on Akibora is designated as the Chairlady or Administrator. This person is responsible for:
           </p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Inviting and managing group members</li>
@@ -73,7 +73,7 @@ export default function TermsPage() {
             <li>Ensuring the group operates in accordance with these terms</li>
           </ul>
           <p>
-            SmartChama provides tools for group administration but is not responsible for the internal governance decisions of any savings group. Disputes between group members are the responsibility of the group to resolve.
+            Akibora provides tools for group administration but is not responsible for the internal governance decisions of any savings group. Disputes between group members are the responsibility of the group to resolve.
           </p>
         </>
       )
@@ -83,10 +83,10 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            All contributions made through SmartChama are processed via Safaricom M-Pesa. By initiating a contribution, you authorise SmartChama to trigger an M-Pesa payment request to your registered phone number.
+            All contributions made through Akibora are processed via Safaricom M-Pesa. By initiating a contribution, you authorise Akibora to trigger an M-Pesa payment request to your registered phone number.
           </p>
           <p>
-            SmartChama does not store your M-Pesa PIN or any payment credentials. Payment processing is handled entirely by Safaricom. SmartChama records the confirmation of payment but is not responsible for any M-Pesa transaction failures, delays, or errors caused by Safaricom's systems.
+            Akibora does not store your M-Pesa PIN or any payment credentials. Payment processing is handled entirely by Safaricom. Akibora records the confirmation of payment but is not responsible for any M-Pesa transaction failures, delays, or errors caused by Safaricom's systems.
           </p>
           <p>
             All contribution records are stored permanently and cannot be deleted once confirmed. This is by design to ensure the integrity of the group's financial history.
@@ -99,10 +99,10 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            Your group's money is held in the group's own M-Pesa, bank or SACCO accounts. SmartChama does not hold members' money and does not provide credit of any kind.
+            Your group's money is held in the group's own M-Pesa, bank or SACCO accounts. Akibora does not hold members' money and does not provide credit of any kind.
           </p>
           <p>
-            We provide tools to record contributions, merry-go-round payouts, welfare support and penalties agreed by the group. All decisions about how the group uses its money are made by the group's administrators, not by SmartChama.
+            We provide tools to record contributions, merry-go-round payouts, welfare support and penalties agreed by the group. All decisions about how the group uses its money are made by the group's administrators, not by Akibora.
           </p>
         </>
       )
@@ -112,13 +112,13 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            SmartChama calculates a Credit Score for each member based on their contribution consistency, contribution streak, group tenure, and participation rate. This score is an indication of financial reliability within the group context.
+            Akibora calculates a Credit Score for each member based on their contribution consistency, contribution streak, group tenure, and participation rate. This score is an indication of financial reliability within the group context.
           </p>
           <p>
             Credit Scores are not a credit rating and are not regulated by the Central Bank of Kenya or any financial authority. They are an internal metric provided for informational purposes.
           </p>
           <p>
-            Members may choose to share their Credit Score and contribution history with third-party financial institutions through SmartChama's consent-based lender visibility feature. SmartChama does not guarantee that any lender will extend credit based on this information.
+            Members may choose to share their Credit Score and contribution history with third-party financial institutions through Akibora's consent-based lender visibility feature. Akibora does not guarantee that any lender will extend credit based on this information.
           </p>
         </>
       )
@@ -128,13 +128,13 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            SmartChama collects and processes personal data as described in our Privacy Policy. By using SmartChama, you consent to this processing.
+            Akibora collects and processes personal data as described in our Privacy Policy. By using Akibora, you consent to this processing.
           </p>
           <p>
             Your contribution records are visible to the administrators of your savings group. Other group members can see contribution statuses.
           </p>
           <p>
-            You may request a copy of your data or request deletion of your account at any time by contacting <a href="mailto:privacy@smartchama.co.ke" className="text-[#006e2f] hover:underline">privacy@smartchama.co.ke</a>. Note that contribution and transaction records that form part of a group's financial history cannot be deleted as they affect other members' records.
+            You may request a copy of your data or request deletion of your account at any time by contacting <a href="mailto:privacy@akibora.co.ke" className="text-[#006e2f] hover:underline">privacy@akibora.co.ke</a>. Note that contribution and transaction records that form part of a group's financial history cannot be deleted as they affect other members' records.
           </p>
         </>
       )
@@ -144,7 +144,7 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            You must not use SmartChama to:
+            You must not use Akibora to:
           </p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Record fraudulent contributions or transactions</li>
@@ -165,10 +165,10 @@ export default function TermsPage() {
       content: (
         <>
           <p>
-            SmartChama provides its platform on an as-is basis. We do not guarantee that the service will be available at all times or that it will be error-free.
+            Akibora provides its platform on an as-is basis. We do not guarantee that the service will be available at all times or that it will be error-free.
           </p>
           <p>
-            SmartChama is not liable for:
+            Akibora is not liable for:
           </p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Losses arising from M-Pesa transaction failures</li>
@@ -178,10 +178,10 @@ export default function TermsPage() {
             <li>Any indirect or consequential losses arising from use of the platform</li>
           </ul>
           <p>
-            Our total liability to any user shall not exceed the amount paid by that user to SmartChama in the 12 months preceding the event giving rise to the claim.
+            Our total liability to any user shall not exceed the amount paid by that user to Akibora in the 12 months preceding the event giving rise to the claim.
           </p>
           <p className="mt-6">
-            For questions about these terms, contact <a href="mailto:legal@smartchama.co.ke" className="text-[#006e2f] hover:underline">legal@smartchama.co.ke</a>
+            For questions about these terms, contact <a href="mailto:legal@akibora.co.ke" className="text-[#006e2f] hover:underline">legal@akibora.co.ke</a>
           </p>
         </>
       )
@@ -198,7 +198,7 @@ export default function TermsPage() {
           <p className="text-body-sm text-[#60645f] mb-10">Last updated: June 2025</p>
 
           <p className="text-[18px] text-[#3d4a3d] leading-relaxed mb-12">
-            These Terms of Service govern your use of SmartChama, operated by SmartChama Technologies Ltd, a company registered in Kenya. By creating an account or using our platform, you agree to these terms in full. Please read them carefully before proceeding.
+            These Terms of Service govern your use of Akibora, operated by Akibora Technologies Ltd, a company registered in Kenya. By creating an account or using our platform, you agree to these terms in full. Please read them carefully before proceeding.
           </p>
 
           <div className="space-y-12">

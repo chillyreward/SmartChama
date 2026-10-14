@@ -124,7 +124,7 @@ export default function AdminContributionsPage() {
       c.mpesa_receipt || c.reference || 'N/A',
       c.status || 'confirmed'
     ]);
-    exportToPDF('Contributions Report', group?.name || 'SmartChama', headers, rows, 'contributions_report');
+    exportToPDF('Contributions Report', group?.name || 'Akibora', headers, rows, 'contributions_report');
   };
 
   const handleExportExcel = () => {
@@ -137,7 +137,7 @@ export default function AdminContributionsPage() {
       c.mpesa_receipt || c.reference || 'N/A',
       c.status || 'confirmed'
     ]);
-    exportToExcel('Contributions Report', group?.name || 'SmartChama', headers, rows, 'contributions_report');
+    exportToExcel('Contributions Report', group?.name || 'Akibora', headers, rows, 'contributions_report');
   };
 
   const handleBulkRemind = async () => {

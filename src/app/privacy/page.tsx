@@ -2,8 +2,8 @@ import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
 export const metadata = {
-  title: "Privacy Policy | SmartChama",
-  description: "Privacy Policy for using the SmartChama platform.",
+  title: "Privacy Policy | Akibora",
+  description: "Privacy Policy for using the Akibora platform.",
 };
 
 export default function PrivacyPage() {
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
         <>
           <p className="mb-2">We use your data to:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Provide and operate the SmartChama platform</li>
+            <li>Provide and operate the Akibora platform</li>
             <li>Record and verify your contributions</li>
             <li>Calculate your Credit Score</li>
             <li>Send you payment reminders and confirmations via SMS</li>
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
           </ul>
 
           <p className="mt-6">
-            SmartChama staff can access your data only when needed to provide support or investigate a reported issue.
+            Akibora staff can access your data only when needed to provide support or investigate a reported issue.
           </p>
 
           <p className="font-bold text-[#161d16] mt-6 mb-2">Third parties:</p>
@@ -117,7 +117,7 @@ export default function PrivacyPage() {
             <li>Request a machine-readable export of your data</li>
           </ul>
           <p>
-            To exercise any of these rights, contact <a href="mailto:privacy@smartchama.co.ke" className="text-[#006e2f] hover:underline">privacy@smartchama.co.ke</a>. We will respond within 14 days.
+            To exercise any of these rights, contact <a href="mailto:privacy@akibora.co.ke" className="text-[#006e2f] hover:underline">privacy@akibora.co.ke</a>. We will respond within 14 days.
           </p>
         </>
       )
@@ -127,7 +127,7 @@ export default function PrivacyPage() {
       content: (
         <>
           <p>
-            SmartChama uses essential cookies to keep you logged in and maintain your session. We use analytics cookies to understand how the platform is used so we can improve it. You can manage cookie preferences in your browser settings. See our Cookie Policy for full details.
+            Akibora uses essential cookies to keep you logged in and maintain your session. We use analytics cookies to understand how the platform is used so we can improve it. You can manage cookie preferences in your browser settings. See our Cookie Policy for full details.
           </p>
         </>
       )
@@ -155,7 +155,7 @@ export default function PrivacyPage() {
             document, and a live selfie.
           </p>
           <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>We compare your selfie with the photo on your document using an automated face-comparison service (Amazon Web Services Rekognition) acting on our behalf. If the result is unclear, a SmartChama team member checks the images.</li>
+            <li>We compare your selfie with the photo on your document using an automated face-comparison service (Amazon Web Services Rekognition) acting on our behalf. If the result is unclear, an Akibora team member checks the images.</li>
             <li>The images are kept in private storage that only our verification system and authorised staff can open. They are not shown to other members of your group.</li>
             <li>We use them only to confirm your identity and prevent fraud. We keep them for as long as you run a group and as long as the law requires afterwards, then delete them.</li>
             <li>You can ask us to delete them by contacting us (see below); your group's payouts will then be locked again.</li>
@@ -169,10 +169,10 @@ export default function PrivacyPage() {
         <>
           <p className="mb-2">
             For privacy questions or to exercise your rights, contact:<br/>
-            <a href="mailto:privacy@smartchama.co.ke" className="text-[#006e2f] hover:underline">privacy@smartchama.co.ke</a>
+            <a href="mailto:privacy@akibora.co.ke" className="text-[#006e2f] hover:underline">privacy@akibora.co.ke</a>
           </p>
           <p className="mt-6 text-[#60645f]">
-            SmartChama Technologies Ltd<br/>
+            Akibora Technologies Ltd<br/>
             Nairobi, Kenya
           </p>
         </>
@@ -190,7 +190,7 @@ export default function PrivacyPage() {
           <p className="text-body-sm text-[#60645f] mb-10">Last updated: June 2025</p>
 
           <p className="text-[18px] text-[#3d4a3d] leading-relaxed mb-12">
-            SmartChama Technologies Ltd is committed to protecting your privacy. This policy explains what data we collect, how we use it, and what rights you have over it.
+            Akibora Technologies Ltd is committed to protecting your privacy. This policy explains what data we collect, how we use it, and what rights you have over it.
           </p>
 
           <div className="space-y-12">

@@ -1,8 +1,8 @@
 -- ============================================================================
--- SmartChama Migration v7: Consolidated Missing Tables, RPCs, & Storage Buckets
+-- Akibora Migration v7: Consolidated Missing Tables, RPCs, & Storage Buckets
 -- ============================================================================
 -- Run this script in the Supabase SQL Editor to ensure all tables, functions,
--- RLS policies, and storage buckets used by SmartChama are present.
+-- RLS policies, and storage buckets used by Akibora are present.
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------

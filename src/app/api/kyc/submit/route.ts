@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     .in('status', ['verified', 'review'])
     .limit(1)
   if (reused?.length) {
-    return NextResponse.json({ error: 'This document is already linked to another SmartChama account.' }, { status: 409 })
+    return NextResponse.json({ error: 'This document is already linked to another Akibora account.' }, { status: 409 })
   }
 
   const download = async (path: string) => {
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
 
   const messages: Record<string, string> = {
     verified: 'Your identity is verified. Withdrawals and investments are now unlocked for your group.',
-    review: 'Thanks. A SmartChama team member will check your documents, usually within one working day.',
+    review: 'Thanks. An Akibora team member will check your documents, usually within one working day.',
     rejected: rejectionReason!,
   }
   return NextResponse.json({ status, message: messages[status] })

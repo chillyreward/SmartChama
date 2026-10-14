@@ -67,7 +67,7 @@ export async function POST(req: Request) {
           event_type: 'send_sms',
           payload: {
             phone: inviteePhone,
-            message: `You've been invited to join ${chamaData?.name || 'a group'} on SmartChama! Join code: ${tokenCode}`
+            message: `You've been invited to join ${chamaData?.name || 'a group'} on Akibora! Join code: ${tokenCode}`
           }
         });
       } catch (smsErr) {

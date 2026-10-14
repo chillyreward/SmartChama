@@ -97,7 +97,7 @@ export async function GET(request: Request) {
           notifications.push({ profile_id: m.profile_id, chama_id: chama.id, type: 'reminder', title, message });
           const phone = m.profiles?.phone_number;
           if (phone && m.profiles?.notification_prefs?.sms_notifications !== false) {
-            const result = await sendSms(phone, `SmartChama: ${message} Pay via the app or M-Pesa.`);
+            const result = await sendSms(phone, `Akibora: ${message} Pay via the app or M-Pesa.`);
             if (result.success && !result.simulated) summary.sms_sent++;
           }
           summary.reminders_sent++;

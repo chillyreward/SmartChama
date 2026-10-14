@@ -9,7 +9,7 @@ export default function NotFound() {
         <div className="flex justify-center mb-6">
           <Image
             src="/logo.png"
-            alt="SmartChama"
+            alt="Akibora"
             width={44}
             height={44}
             className="h-11 w-11 object-contain"

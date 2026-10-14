@@ -143,14 +143,14 @@ export default function LoginPage() {
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/favicon.svg"
-            alt="SmartChama"
+            alt="Akibora"
             width={28} height={28}
             className="h-7 w-7 object-contain"
           />
           <span 
             className="font-bold text-[17px]"
             style={{ color: 'var(--text-primary)' }}>
-            SmartChama
+            Akibora
           </span>
         </Link>
         <ThemeToggle />
@@ -284,7 +284,7 @@ export default function LoginPage() {
       <div 
         className="text-center py-6 text-[12px]"
         style={{ color: 'var(--text-secondary)', borderTop: '1px solid var(--border)' }}>
-        SmartChama Technologies Ltd. Nairobi, Kenya.
+        Akibora Technologies Ltd. Nairobi, Kenya.
       </div>
     </div>
   )

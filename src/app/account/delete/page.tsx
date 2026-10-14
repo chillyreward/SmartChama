@@ -42,10 +42,10 @@ export default function DeleteAccountPage() {
   return (
     <main className="min-h-screen px-4 py-12" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
       <div className="max-w-xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Delete your SmartChama account</h1>
+        <h1 className="text-3xl font-bold">Delete your Akibora account</h1>
 
         <section className="space-y-3 text-[15px]" style={{ color: 'var(--text-secondary)' }}>
-          <p>You can delete your account in the SmartChama Android app (Profile → Delete account) or on this page.</p>
+          <p>You can delete your account in the Akibora Android app (Profile → Delete account) or on this page.</p>
           <p><strong style={{ color: 'var(--text-primary)' }}>What we delete:</strong> your name, phone number, email, national ID, county, occupation, photo, notification token, your chat messages and notifications. You will no longer be able to sign in.</p>
           <p><strong style={{ color: 'var(--text-primary)' }}>What we keep:</strong> records of contributions, penalties and other group transactions. Your chama needs them for its accounts, and we must keep financial records by law. They stay attached to an anonymous &ldquo;Former member&rdquo;.</p>
           <p><strong style={{ color: 'var(--text-primary)' }}>Before you can delete:</strong> settle any unpaid penalty, and if you are the only official of a group with other members, hand your role to someone else.</p>
@@ -60,7 +60,7 @@ export default function DeleteAccountPage() {
             <>
               <p>Sign in first, then come back to this page to delete your account.</p>
               <Link href="/login?redirect=/account/delete" className="inline-block px-5 py-3 rounded-xl bg-[#22C55E] text-white font-semibold">Sign in</Link>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Can&apos;t sign in? Email privacy@smartchama.co.ke from the address on your account and we will delete it within 30 days.</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Can&apos;t sign in? Email privacy@akibora.co.ke from the address on your account and we will delete it within 30 days.</p>
             </>
           ) : (
             <>

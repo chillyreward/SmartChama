@@ -1,4 +1,4 @@
--- SmartChama Merry-Go-Round Migration
+-- Akibora Merry-Go-Round Migration
 -- Run this in your Supabase SQL Editor
 
 CREATE TABLE IF NOT EXISTS merry_go_round_cycles (

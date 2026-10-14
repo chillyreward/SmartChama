@@ -191,7 +191,7 @@ export default function AdminTrustScoresPage() {
           <h1 className="text-[26px] font-bold tracking-tight">AI Credit Scores</h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[16px] text-[#22C55E]">smart_toy</span>
-            Powered by SmartChama AI · GPT-4o
+            Powered by Akibora AI · GPT-4o
           </p>
         </div>
         <div className="flex gap-3">

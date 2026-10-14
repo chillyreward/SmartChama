@@ -91,14 +91,14 @@ export default function SelectGroupClient() {
         <div className="flex items-center gap-3 justify-center mb-8">
           <Image
             src="/logo.png"
-            alt="SmartChama"
+            alt="Akibora"
             width={48}
             height={48}
             className="h-12 w-12 object-contain"
             priority
           />
           <span className="text-[24px] font-bold tracking-tight text-[#161d16] dark:text-[#E8F0E4]">
-            SmartChama
+            Akibora
           </span>
         </div>
 

@@ -930,7 +930,7 @@ function MyChamasContent() {
                         </li>
                       </ul>
                       <button 
-                        onClick={() => alert('Upgrade to Pro\n\nContact us to upgrade your chama to Pro:\n\n Email: pro@smartchama.com\n WhatsApp: +254 XXX XXX XXX\n\nOr visit our pricing page for more details.')}
+                        onClick={() => alert('Upgrade to Pro\n\nContact us to upgrade your chama to Pro:\n\n Email: pro@akibora.co.ke\n WhatsApp: +254 XXX XXX XXX\n\nOr visit our pricing page for more details.')}
                         className="w-full bg-[#006e2f] hover:bg-[#006e2f] text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
                       >
                         <Crown className="w-5 h-5" />
@@ -997,7 +997,7 @@ function MyChamasContent() {
                   </button>
                   <button
                     onClick={() => {
-                      const message = `Join our chama "${inviteChama.name}" on SmartChama!\n\n${inviteLink}`;
+                      const message = `Join our chama "${inviteChama.name}" on Akibora!\n\n${inviteLink}`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
                     }}
                     className="bg-[#006e2f] hover:bg-[#006e2f] text-white font-medium py-3 rounded-xl transition-all"

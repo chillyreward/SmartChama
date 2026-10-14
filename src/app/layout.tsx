@@ -24,8 +24,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'SmartChama',
-    template: '%s | SmartChama'
+    default: 'Akibora',
+    template: '%s | Akibora'
   },
   description: 'Digital savings management for African savings groups.',
   alternates: {
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'SmartChama',
+    title: 'Akibora',
     startupImage: [
       '/web-app-manifest-512x512.png'
     ]
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'SmartChama',
-    title: 'SmartChama',
+    siteName: 'Akibora',
+    title: 'Akibora',
     description: 'Digital savings management for African savings groups.'
   },
   icons: {
@@ -107,7 +107,7 @@ export default function RootLayout({
         />
         <meta 
           name="apple-mobile-web-app-title" 
-          content="SmartChama" 
+          content="Akibora" 
         />
 
         {/* Microsoft tiles */}

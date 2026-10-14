@@ -54,7 +54,7 @@ export async function GET(request: Request) {
           const phone = (membership?.profiles as any)?.phone_number;
           const chamaName = (membership?.chamas_v2 as any)?.name || 'your group';
           if (phone) {
-            await sendSms(phone, `SmartChama: Your KSh ${amount} contribution to ${chamaName} is confirmed. Receipt: ${receipt}.`);
+            await sendSms(phone, `Akibora: Your KSh ${amount} contribution to ${chamaName} is confirmed. Receipt: ${receipt}.`);
           }
         } else if (event.event_type === 'send_sms') {
           const { phone, message } = payload;

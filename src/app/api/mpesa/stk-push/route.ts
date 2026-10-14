@@ -171,7 +171,7 @@ export async function POST(request: Request) {
           PartyB: process.env.MPESA_BUSINESS_SHORT_CODE,
           PhoneNumber: formattedPhone,
           CallBackURL: callbackUrl(),
-          AccountReference: String(account_ref || 'SmartChama').slice(0, 12),
+          AccountReference: String(account_ref || 'Akibora').slice(0, 12),
           TransactionDesc: 'Chama Contribution'
         })
       }

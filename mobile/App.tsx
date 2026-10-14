@@ -21,7 +21,7 @@ export default function App() {
       {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorTitle}>Connection Error</Text>
-          <Text style={styles.errorMessage}>Unable to connect to SmartChama. Please check your network.</Text>
+          <Text style={styles.errorMessage}>Unable to connect to Akibora. Please check your network.</Text>
           <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
             <Text style={styles.retryText}>Retry</Text>
           </TouchableOpacity>
@@ -42,7 +42,7 @@ export default function App() {
           renderLoading={() => (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#22C55E" />
-              <Text style={styles.loadingText}>Loading SmartChama...</Text>
+              <Text style={styles.loadingText}>Loading Akibora...</Text>
             </View>
           )}
           allowsBackForwardNavigationGestures={true}

@@ -3,7 +3,7 @@ import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
 export const metadata = {
-  title: "Blog | SmartChama",
+  title: "Blog | Akibora",
   description: "Insights on community finance, savings culture, and financial inclusion across Kenya and Africa.",
 };
 
@@ -34,7 +34,7 @@ export default function BlogPage() {
       category: "FINANCIAL IDENTITY",
       date: "February 2025",
       title: "What is a trust score and why does it matter?",
-      preview: "Your SmartChama trust score is a number between 0 and 100 that represents your financial reliability within your group. But it is more than just a number. It is the beginning of a financial identity...",
+      preview: "Your Akibora trust score is a number between 0 and 100 that represents your financial reliability within your group. But it is more than just a number. It is the beginning of a financial identity...",
       link: "/blog"
     },
     {
@@ -60,7 +60,7 @@ export default function BlogPage() {
       {/* HERO */}
       <section className="bg-white border-b border-[#E5E7EB] py-16 px-6">
         <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h1 className="text-[48px] font-geist font-bold text-[var(--text-primary)] mb-4">SmartChama Blog</h1>
+          <h1 className="text-[48px] font-geist font-bold text-[var(--text-primary)] mb-4">Akibora Blog</h1>
           <p className="text-[18px] text-[#60645f] max-w-2xl">
             Insights on community finance, savings culture, and financial inclusion across Kenya and Africa.
           </p>
@@ -90,7 +90,7 @@ export default function BlogPage() {
                 A savings account shows a balance. A chama record shows behaviour. It shows that you showed up month after month, that you kept your commitment to your group even when times were difficult, and that your word means something.
               </p>
               <p>
-                This is why SmartChama was built. Not to replace the chama, but to make its record visible, verifiable, and useful beyond the group itself.
+                This is why Akibora was built. Not to replace the chama, but to make its record visible, verifiable, and useful beyond the group itself.
               </p>
             </div>
 

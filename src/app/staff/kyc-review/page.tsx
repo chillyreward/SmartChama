@@ -1,7 +1,7 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
 
-// SmartChama staff only (profiles listed in platform_admins). Shows identity
+// Akibora staff only (profiles listed in platform_admins). Shows identity
 // checks the automatic face match couldn't decide, with the ID photos and
 // selfie side by side. Image links expire after 10 minutes.
 
@@ -51,7 +51,7 @@ export default function KycReviewPage() {
   }
 
   if (denied) {
-    return <main className="min-h-screen p-8 text-[15px]">This page is for SmartChama staff only.</main>
+    return <main className="min-h-screen p-8 text-[15px]">This page is for Akibora staff only.</main>
   }
 
   return (

@@ -77,7 +77,7 @@ export default function SelectGroupPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-page)' }}>
       <Image
         src="/favicon.svg"
-        alt="SmartChama"
+        alt="Akibora"
         width={48} height={48}
         className="h-12 w-12 object-contain mb-6"
       />

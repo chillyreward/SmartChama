@@ -1,5 +1,5 @@
 # Public Assets
-This folder contains static assets served by SmartChama:
+This folder contains static assets served by Akibora:
 - favicon files
 - PWA manifest
 - offline.html

@@ -9,36 +9,36 @@ export default function ContactPage() {
 
   const faqs = [
     {
-      q: "How do I register my chama on SmartChama?",
+      q: "How do I register my chama on Akibora?",
       a: "Registering your group takes less than five minutes. Click Get Started on our homepage, create your account with your phone number and email, then follow the steps to create your group. You will set your group name, contribution amount, due date, and basic rules. Once your group is created, you can invite members using their phone numbers. They will receive an SMS with a link to join."
     },
     {
-      q: "Does SmartChama work with M-Pesa?",
-      a: "Yes. SmartChama is built around M-Pesa. When a member makes a contribution, they receive an M-Pesa STK push directly on their phone. They enter their PIN and the payment is confirmed automatically. The contribution appears in the group ledger within seconds. No manual recording is required."
+      q: "Does Akibora work with M-Pesa?",
+      a: "Yes. Akibora is built around M-Pesa. When a member makes a contribution, they receive an M-Pesa STK push directly on their phone. They enter their PIN and the payment is confirmed automatically. The contribution appears in the group ledger within seconds. No manual recording is required."
     },
     {
       q: "What is a CREDIT SCORE?",
       a: "Your CREDIT SCORE is a number between 0 and 100 that reflects your financial reliability within your savings group. It is calculated from four factors: how consistently you contribute, your contribution streak, how long you have been in the group, and your overall participation rate. With your permission, a strong score can demonstrate your financial discipline to banks and SACCOs."
     },
     {
-      q: "Can I use SmartChama on a feature phone?",
-      a: "Yes. SmartChama has a USSD interface that works on any phone including basic feature phones with no internet. Dial our USSD code, enter your group PIN, and you can check your balance, view upcoming contribution dates, and receive payment confirmations. The full dashboard is available on smartphones via our web app."
+      q: "Can I use Akibora on a feature phone?",
+      a: "Yes. Akibora has a USSD interface that works on any phone including basic feature phones with no internet. Dial our USSD code, enter your group PIN, and you can check your balance, view upcoming contribution dates, and receive payment confirmations. The full dashboard is available on smartphones via our web app."
     },
     {
-      q: "How secure is SmartChama?",
-      a: "SmartChama uses multiple layers of security. All data is encrypted in transit and at rest. Critical financial records are anchored to a blockchain, meaning they cannot be altered after the fact. We use Supabase for our database, which includes row-level security so each member can only see their own data. Admin access requires separate authentication. We do not store M-Pesa PINs or any payment credentials."
+      q: "How secure is Akibora?",
+      a: "Akibora uses multiple layers of security. All data is encrypted in transit and at rest. Critical financial records are anchored to a blockchain, meaning they cannot be altered after the fact. We use Supabase for our database, which includes row-level security so each member can only see their own data. Admin access requires separate authentication. We do not store M-Pesa PINs or any payment credentials."
     },
     {
       q: "What happens if someone does not pay?",
-      a: "SmartChama sends automated payment reminders via SMS three days before the contribution due date, on the due date, and three days after. If a member is still unpaid after the grace period, they are marked as late in the system. Admins can apply penalties according to the group rules. The member's CREDIT SCORE is also affected by late or missed payments."
+      a: "Akibora sends automated payment reminders via SMS three days before the contribution due date, on the due date, and three days after. If a member is still unpaid after the grace period, they are marked as late in the system. Admins can apply penalties according to the group rules. The member's CREDIT SCORE is also affected by late or missed payments."
     },
     {
       q: "Can we share our financial record with a bank or SACCO?",
-      a: "Yes, but only if you choose to. SmartChama has a consent-based lender visibility feature. When you turn it on, vetted financial institutions can view your contribution history and CREDIT SCORE. You can turn this off at any time. No data is shared without your explicit permission."
+      a: "Yes, but only if you choose to. Akibora has a consent-based lender visibility feature. When you turn it on, vetted financial institutions can view your contribution history and CREDIT SCORE. You can turn this off at any time. No data is shared without your explicit permission."
     },
     {
-      q: "What does SmartChama cost?",
-      a: "SmartChama has a free plan that supports groups of up to 20 members with full contribution tracking, merry-go-round schedules, and M-Pesa integration. Larger groups and advanced features are available on our Growth plan at KSh 999 per month. Enterprise pricing is available for organisations managing multiple groups. See our pricing page for full details."
+      q: "What does Akibora cost?",
+      a: "Akibora has a free plan that supports groups of up to 20 members with full contribution tracking, merry-go-round schedules, and M-Pesa integration. Larger groups and advanced features are available on our Growth plan at KSh 999 per month. Enterprise pricing is available for organisations managing multiple groups. See our pricing page for full details."
     },
     {
       q: "How do I invite members to my group?",
@@ -73,7 +73,7 @@ export default function ContactPage() {
                 <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">mail</span>
                 <div>
                   <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">General enquiries</div>
-                  <a href="mailto:hello@smartchama.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">hello@smartchama.co.ke</a>
+                  <a href="mailto:hello@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">hello@akibora.co.ke</a>
                   <p className="text-body-sm text-[#60645f] leading-relaxed">For questions about the platform, pricing, and getting started.</p>
                 </div>
               </div>
@@ -82,7 +82,7 @@ export default function ContactPage() {
                 <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">support_agent</span>
                 <div>
                   <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">Member support</div>
-                  <a href="mailto:support@smartchama.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">support@smartchama.co.ke</a>
+                  <a href="mailto:support@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">support@akibora.co.ke</a>
                   <p className="text-body-sm text-[#60645f] leading-relaxed">For help with your account, contributions, or payments. We respond within 4 hours on business days.</p>
                 </div>
               </div>
@@ -91,8 +91,8 @@ export default function ContactPage() {
                 <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">handshake</span>
                 <div>
                   <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">Partnerships</div>
-                  <a href="mailto:partners@smartchama.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">partners@smartchama.co.ke</a>
-                  <p className="text-body-sm text-[#60645f] leading-relaxed">For banks, SACCOs, and financial institutions interested in accessing SmartChama financial identity data.</p>
+                  <a href="mailto:partners@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">partners@akibora.co.ke</a>
+                  <p className="text-body-sm text-[#60645f] leading-relaxed">For banks, SACCOs, and financial institutions interested in accessing Akibora financial identity data.</p>
                 </div>
               </div>
 
@@ -100,7 +100,7 @@ export default function ContactPage() {
                 <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">code</span>
                 <div>
                   <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">Developer enquiries</div>
-                  <a href="mailto:dev@smartchama.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">dev@smartchama.co.ke</a>
+                  <a href="mailto:dev@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">dev@akibora.co.ke</a>
                   <p className="text-body-sm text-[#60645f] leading-relaxed">For API access, integrations, and technical partnerships.</p>
                 </div>
               </div>

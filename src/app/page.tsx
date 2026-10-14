@@ -113,7 +113,7 @@ export default function LandingPage() {
             <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[var(--border)] bg-[var(--bg-card)] group transition-all duration-500">
               <Image
                 src="/images/hero_dashboard.jpg"
-                alt="SmartChama Group Dashboard Interface"
+                alt="Akibora Group Dashboard Interface"
                 width={800}
                 height={500}
                 className="w-full h-auto object-cover rounded-2xl"
@@ -177,7 +177,7 @@ export default function LandingPage() {
               <span className="text-emerald-400">using paper notebooks and WhatsApp.</span>
             </h2>
             <p className="text-gray-400 text-base md:text-lg">
-              SmartChama replaces manual record-keeping with a secure, transparent digital platform.
+              Akibora replaces manual record-keeping with a secure, transparent digital platform.
             </p>
           </div>
           
@@ -203,11 +203,11 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* The SmartChama way */}
+            {/* The Akibora way */}
             <div className="bg-[#0E1410] border border-[#22C55E]/40 rounded-2xl p-8 hover:border-[#22C55E] transition-all duration-300 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <span className="w-8 h-8 rounded-full bg-[#22C55E]/20 text-[#22C55E] flex items-center justify-center font-bold text-lg">✓</span>
-                <h3 className="text-2xl font-bold font-geist text-[#22C55E]">The SmartChama Way</h3>
+                <h3 className="text-2xl font-bold font-geist text-[#22C55E]">The Akibora Way</h3>
               </div>
               <ul className="space-y-4">
                 {[
@@ -319,7 +319,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-[32px] sm:text-[44px] lg:text-[56px] font-bold font-geist text-[var(--text-primary)] tracking-tight mb-4">
-              How SmartChama Works
+              How Akibora Works
             </h2>
             <p className="text-base md:text-lg text-[var(--text-secondary)] max-w-xl mx-auto">
               Get your Chama digitalized in 4 simple steps. No bank visits required.

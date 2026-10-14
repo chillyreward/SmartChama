@@ -91,8 +91,8 @@ export default function AdminSupportPage() {
                 <div>
                   <h4 className="text-sm font-bold text-[var(--text-main)]">Priority Email</h4>
                   <p className="text-xs text-[var(--text-muted)] mt-1">Admin SLA response: 2 hours</p>
-                  <a href="mailto:support@smartchama.co.ke" className="text-sm font-semibold text-[#22C55E] hover:underline mt-1 block">
-                    support@smartchama.co.ke
+                  <a href="mailto:support@akibora.co.ke" className="text-sm font-semibold text-[#22C55E] hover:underline mt-1 block">
+                    support@akibora.co.ke
                   </a>
                 </div>
               </div>

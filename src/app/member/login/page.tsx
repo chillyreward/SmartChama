@@ -107,7 +107,7 @@ export default function MemberLogin() {
             <div className="w-10 h-10 bg-[#22C55E] rounded-lg flex items-center justify-center">
               <Wallet className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>SmartChama</span>
+            <span className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Akibora</span>
           </div>
           <LanguageSwitcher />
         </header>
@@ -208,7 +208,7 @@ export default function MemberLogin() {
 
         {/* Footer */}
         <footer className="p-6 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
-          © 2026 SmartChama. All rights reserved.
+          © 2026 Akibora. All rights reserved.
         </footer>
       </div>
 

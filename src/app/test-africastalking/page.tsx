@@ -5,7 +5,7 @@ import { Phone, MessageSquare, Loader2 } from "lucide-react";
 
 export default function TestAfricasTalkingPage() {
   const [phoneNumber, setPhoneNumber] = useState("+254");
-  const [smsMessage, setSmsMessage] = useState("Hello from SmartChama! This is a test message.");
+  const [smsMessage, setSmsMessage] = useState("Hello from Akibora! This is a test message.");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 

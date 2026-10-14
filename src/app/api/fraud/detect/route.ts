@@ -145,7 +145,7 @@ ${members.slice(0, 10).map(m => `- ${(m.profiles as any)?.full_name || 'Unknown'
       messages: [
         {
           role: 'system',
-          content: `You are SmartChama's AI fraud detection engine for Kenyan savings groups (chamas).
+          content: `You are Akibora's AI fraud detection engine for Kenyan savings groups (chamas).
 
 Analyze the group data for fraud patterns including:
 - Fake contributions (cash-only, no M-Pesa receipts)

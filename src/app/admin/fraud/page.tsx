@@ -94,7 +94,7 @@ export default function FraudDetectionPage() {
           <h1 className="text-[26px] font-bold tracking-tight">AI Fraud Detection</h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[16px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
-            Powered by SmartChama AI · Detects fraud before damage occurs
+            Powered by Akibora AI · Detects fraud before damage occurs
           </p>
         </div>
         <button

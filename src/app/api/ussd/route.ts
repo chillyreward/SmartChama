@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       .single();
 
     if (!summary) {
-      response = `END Phone number not registered to any active SmartChama group.`;
+      response = `END Phone number not registered to any active Akibora group.`;
       return new NextResponse(response, { headers: { 'Content-Type': 'text/plain' } });
     }
 
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     const parts = text.split('*');
 
     if (text === '') {
-      response = `CON Welcome to SmartChama, ${firstName}
+      response = `CON Welcome to Akibora, ${firstName}
 1. Check Balance
 2. Make Contribution`;
     } 

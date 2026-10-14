@@ -21,14 +21,14 @@ export default function LandingNav() {
           <div className="flex items-center gap-2">
             <Image
               src="/logo.png"
-              alt="SmartChama"
+              alt="Akibora"
               width={38}
               height={38}
               className="h-9 w-9 object-contain"
               priority
             />
             <span className="text-[18px] sm:text-[22px] font-bold tracking-tight text-[var(--text-main)] max-[400px]:hidden">
-              SmartChama
+              Akibora
             </span>
           </div>
         </Link>
@@ -123,13 +123,13 @@ export default function LandingNav() {
             <div className="flex items-center gap-3">
               <Image
                 src="/logo.png"
-                alt="SmartChama"
+                alt="Akibora"
                 width={40}
                 height={40}
                 className="h-10 w-10 object-contain"
               />
               <span className="text-[20px] font-bold tracking-tight text-[var(--text-main)]">
-                SmartChama
+                Akibora
               </span>
             </div>
           </Link>

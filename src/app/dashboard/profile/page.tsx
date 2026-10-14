@@ -214,26 +214,26 @@ export default function ProfilePage() {
     if (!member) return
 
     const report = `
-SmartChama Financial Identity Report
+Akibora Financial Identity Report
 Generated: ${new Date().toLocaleDateString('en-KE')}
 
 Name: ${fullName}
 Phone: ${phone}
-Group: ${group?.name || 'SmartChama Savings'}
+Group: ${group?.name || 'Akibora Savings'}
 Member Since: ${joinDateStr}
 
 Total Contributed: KSh ${totalContributed.toLocaleString()}
 CREDIT SCORE: ${member?.trust_score ?? 60}/100
 Contribution Streak: ${member?.contribution_streak ?? 0} months
 
-This record is verified by SmartChama Technologies Ltd.
+This record is verified by Akibora Technologies Ltd.
 `
 
     const blob = new Blob([report], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${fullName.toLowerCase().replace(/\s+/g, '-')}-smartchama-report.txt`
+    a.download = `${fullName.toLowerCase().replace(/\s+/g, '-')}-akibora-report.txt`
     a.click()
     URL.revokeObjectURL(url)
   }
