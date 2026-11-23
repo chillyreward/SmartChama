@@ -3,17 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { 
-  Lock, ArrowRight, ShieldCheck, Loader2, 
-  Eye, EyeOff, Crown, User
-} from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { PasswordInput } from "@/components/auth/PasswordInput";
+import { Button, Field, Notice, inputClass } from "@/components/ui";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
@@ -33,7 +31,7 @@ export default function AdminLoginPage() {
 
     // Validate email format
     if (!email.includes("@")) {
-      setError("Please enter a valid email address");
+      setError("Officials sign in with email. Use the email address on your account.");
       setLoading(false);
       return;
     }
@@ -55,7 +53,7 @@ export default function AdminLoginPage() {
           setAttempts(0);
           setError("Too many failed login attempts. Account locked for 60 seconds.");
         } else {
-          setError(`Invalid credentials. ${5 - newAttempts} attempts remaining.`);
+          setError(`Incorrect email or password (${5 - newAttempts} attempts remaining).`);
         }
         setLoading(false);
         return;
@@ -72,7 +70,7 @@ export default function AdminLoginPage() {
       if (memberError || !memberships || memberships.length === 0) {
         // Sign out user since they lack admin role
         await supabase.auth.signOut();
-        setError("Access denied. You do not have admin permissions in any Chama.");
+        setError("This account is not a chair, treasurer, secretary or admin in any active group. Members can sign in on the member page.");
         setLoading(false);
         return;
       }
@@ -89,160 +87,51 @@ export default function AdminLoginPage() {
       // Redirect to admin dashboard
       router.push(`/admin/dashboard`);
       
-    } catch (err: any) {
-      setError("An unexpected error occurred. Please try again.");
+    } catch {
+      setError("Could not sign in. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300"
-      style={{ backgroundColor: 'var(--bg-page)' }}
+    <AuthShell
+      aside="officials"
+      title="Officials sign in"
+      subtitle="For the people who run a group. You need an official role in at least one group."
+      footer={
+        <>
+          Not an official?{" "}
+          <Link href="/login" className="font-semibold text-brand underline-offset-4 hover:underline">
+            Member sign in
+          </Link>
+        </>
+      }
     >
-      {/* Background Gradients */}
-      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[var(--ak-solid)] via-emerald-500 to-[var(--ak-solid)]"></div>
-
-      <div className="w-full max-w-md relative z-10">
-        
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <div 
-            className="p-3 rounded-2xl shadow-xl transition-colors"
-            style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
-          >
-            <Crown className="w-8 h-8 text-[var(--ak-brand-ink)]" />
-          </div>
-        </div>
-
-        {/* The Card */}
-        <div 
-          className="rounded-[32px] p-8 shadow-2xl transition-colors"
-          style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
-        >
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center mb-8">
-              <div 
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
-                style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}
-              >
-                <Crown className="w-4 h-4 text-[var(--ak-brand-ink)]" />
-                <span className="text-xs font-bold text-[var(--ak-brand-ink)]">Admin Access</span>
-              </div>
-              <h1 
-                className="text-2xl font-bold mb-2 "
-                style={{ color: 'var(--text-primary)' }}
-              >
-                Chama Admin Login
-              </h1>
-              <p 
-                className="text-sm"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Sign in to manage your chama
-              </p>
-            </div>
-
-            {error && (
-              <div className="mb-6 p-4 rounded-xl text-sm" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B' }}>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label 
-                  className="block text-xs font-bold mb-2 ml-1"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Admin Email
-                </label>
-                <div className="relative">
-                  <input 
-                    type="email" 
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
-                    className="w-full rounded-xl px-4 py-4 outline-none focus:border-[var(--ak-brand-ink)] transition-all"
-                    style={{
-                      backgroundColor: 'var(--bg-input)',
-                      borderColor: 'var(--border)',
-                      borderWidth: '1px',
-                      color: 'var(--text-primary)'
-                    }}
-                  />
-                  <ShieldCheck className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                </div>
-              </div>
-
-              <div>
-                <label 
-                  className="block text-xs font-bold mb-2 ml-1"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <input 
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full rounded-xl px-4 py-4 outline-none focus:border-[var(--ak-brand-ink)] transition-all"
-                    style={{
-                      backgroundColor: 'var(--bg-input)',
-                      borderColor: 'var(--border)',
-                      borderWidth: '1px',
-                      color: 'var(--text-primary)'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full bg-[var(--ak-solid)] hover:bg-primary text-on-primary font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-              >
-                {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (
-                  <>
-                    <Crown className="w-4 h-4" />
-                    Admin Sign In 
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border)' }}>
-              <p className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Don't have an admin account? <Link href="/admin/signup" className="text-[var(--ak-brand-ink)] hover:underline font-bold">Create Chama</Link>
-              </p>
-              <p className="text-center text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-                Member login? <Link href="/login" className="text-[var(--ak-brand-ink)] hover:underline font-bold">Click here</Link>
-              </p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Footer */}
-        <p className="text-center text-xs mt-8 flex items-center justify-center gap-2" style={{ color: 'var(--text-muted)' }}>
-          <Lock className="w-3 h-3" /> Admin Portal - Secure Access
-        </p>
-
-      </div>
-    </div>
+      {error && <Notice tone="danger" className="mb-5">{error}</Notice>}
+      <form onSubmit={handleLogin} className="space-y-5">
+        <Field label="Email">
+          <input
+            type="email"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Password">
+          <PasswordInput autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </Field>
+        <Button type="submit" size="lg" variant="forest" disabled={loading} className="w-full">
+          {loading ? "Checking your role…" : "Sign in as an official"}
+        </Button>
+      </form>
+      <p className="mt-6 text-[14px] text-ink-3">
+        Starting a new group?{" "}
+        <Link href="/signup?role=admin" className="text-ink-2 font-medium underline underline-offset-4 hover:text-ink">Create an account first</Link>
+      </p>
+    </AuthShell>
   );
 }

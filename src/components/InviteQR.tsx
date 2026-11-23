@@ -44,7 +44,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
     <>
       <button
         onClick={() => setShowQR(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--ak-brand-ink)] transition-colors"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--bg-page)] border border-line text-sm font-semibold text-ink hover:border-brand transition-colors"
         type="button"
       >
         <MIcon name="qr_code_2"  className="text-[18px]" />
@@ -55,12 +55,12 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
       {showQR && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowQR(false)}>
           <div
-            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 max-w-sm w-full relative"
+            className="bg-[var(--bg-card)] border border-line rounded-[22px] p-6 max-w-sm w-full relative"
             onClick={e => e.stopPropagation()}
           >
             <button
               onClick={() => setShowQR(false)}
-              className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              className="absolute top-4 right-4 text-ink-3 hover:text-ink transition-colors"
               aria-label="Close"
               type="button"
             >
@@ -68,15 +68,15 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
             </button>
 
             <div className="text-center">
-              <h3 className="font-display font-normal text-[22px] text-[var(--text-primary)] mb-1">
+              <h3 className="font-display font-normal text-[22px] text-ink mb-1">
                 Invite to {chamaName}
               </h3>
-              <p className="text-sm text-[var(--text-secondary)] mb-4">
+              <p className="text-sm text-ink-2 mb-4">
                 Scan the QR code or share the invite link
               </p>
 
               {/* QR Code */}
-              <div className="bg-white p-4 rounded-xl inline-block mb-4 ">
+              <div className="bg-white p-4 rounded-[14px] inline-block mb-4 ">
                 <Image
                   src={qrUrl}
                   alt={`QR code to join ${chamaName}`}
@@ -88,9 +88,9 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
               </div>
 
               {/* Group Code */}
-              <div className="bg-[var(--bg-page)] border border-[var(--border)] rounded-lg p-3 mb-4">
-                <p className="text-xs text-[var(--text-secondary)] mb-1">Group Code</p>
-                <p className="text-2xl font-bold font-mono text-[var(--ak-brand-ink)] tracking-[0.3em]">
+              <div className="bg-[var(--bg-page)] border border-line rounded-lg p-3 mb-4">
+                <p className="text-xs text-ink-2 mb-1">Group Code</p>
+                <p className="text-2xl font-bold font-mono text-brand tracking-[0.3em]">
                   {groupCode}
                 </p>
               </div>
@@ -99,7 +99,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
               <div className="flex gap-2">
                 <button
                   onClick={handleCopyLink}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--ak-brand-ink)] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-[14px] border border-line text-sm font-semibold text-ink hover:border-brand transition-colors"
                   type="button"
                 >
                   <MIcon name={copied ? 'check_circle' : 'content_copy'}  className="text-[18px]" />
@@ -107,7 +107,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
                 </button>
                 <button
                   onClick={handleShareWhatsApp}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1da851] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-[14px] bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1da851] transition-colors"
                   type="button"
                 >
                   <MIcon name="share"  className="text-[18px]" />

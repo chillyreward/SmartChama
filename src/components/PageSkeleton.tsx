@@ -12,7 +12,7 @@ export default function PageSkeleton() {
       {/* Stats cards row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          <div key={i} className="rounded-[14px] p-5" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
             <div className="h-3 w-20 rounded mb-3" style={{ backgroundColor: 'var(--bg-subtle)' }} />
             <div className="h-7 w-28 rounded" style={{ backgroundColor: 'var(--bg-subtle)' }} />
           </div>
@@ -20,7 +20,7 @@ export default function PageSkeleton() {
       </div>
       
       {/* Table skeleton */}
-      <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+      <div className="rounded-[14px] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="h-4 w-32 rounded" style={{ backgroundColor: 'var(--bg-subtle)' }} />
         </div>

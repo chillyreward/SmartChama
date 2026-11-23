@@ -1,47 +1,24 @@
-'use client';
-
-import Image from 'next/image';
+import { ButtonLink, Logo } from '@/components/ui';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] flex items-center justify-center p-6 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
-      <div className="text-center max-w-md">
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/logo.png"
-            alt="Akibora"
-            width={44}
-            height={44}
-            className="h-11 w-11 object-contain"
-            priority
-          />
+    <div className="min-h-dvh bg-page text-ink flex flex-col">
+      <header className="px-5 sm:px-10 h-[72px] flex items-center">
+        <Logo size="sm" />
+      </header>
+      <main className="flex-1 flex items-center justify-center px-5 pb-16">
+        <div className="max-w-[460px]">
+          <p className="font-money text-[88px] leading-none text-brand">404</p>
+          <h1 className="font-display text-[36px] leading-tight tracking-[-0.02em] mt-4">This page isn&apos;t here</h1>
+          <p className="text-[16px] text-ink-2 mt-3 leading-relaxed">
+            The link may be old or mistyped. If someone sent it to you, ask them to check it.
+          </p>
+          <div className="flex flex-wrap gap-3 mt-8">
+            <ButtonLink href="/dashboard">Go to my group</ButtonLink>
+            <ButtonLink href="/" variant="outline">Akibora home</ButtonLink>
+          </div>
         </div>
-
-        <h1 className="text-[48px] font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] leading-none mb-2 font-geist">
-          404
-        </h1>
-        <h2 className="text-[20px] font-semibold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] mb-3">
-          Page not found
-        </h2>
-        <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] mb-8">
-          The page you are looking for does not exist or has been moved.
-        </p>
-
-        <div className="flex gap-3 justify-center">
-          <a 
-            href="/"
-            className="bg-[var(--ak-solid)] text-white px-6 py-3 rounded-lg text-[15px] font-semibold hover:bg-[var(--ak-solid)] transition-colors"
-          >
-            Go to Home
-          </a>
-          <a 
-            href="/dashboard"
-            className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] px-6 py-3 rounded-lg text-[15px] font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-colors"
-          >
-            Dashboard
-          </a>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -1,15 +1,17 @@
 'use client'
-import { MIcon } from '@/components/ui/MIcon';
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import PhoneVerification from '@/components/PhoneVerification'
 import KycVerification from '@/components/KycVerification'
 import MemberPhoneSignup, { MemberSignupResult } from '@/components/MemberPhoneSignup'
 import SocialSignIn from '@/components/SocialSignIn'
 import ContributionSchedulePicker, { ContributionSchedule, scheduleComplete, scheduleDates } from '@/components/ContributionSchedulePicker'
+import { AuthShell } from '@/components/auth/AuthShell'
+import { PasswordInput } from '@/components/auth/PasswordInput'
+import { Button, ButtonLink, Field, Notice, Panel, cn, inputClass } from '@/components/ui'
+import { Check, Copy, Hourglass, MailCheck } from 'lucide-react'
 
 
 function SignupForm() {
@@ -32,7 +34,7 @@ function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   // Step 2 — Admin: group details
   const [groupName, setGroupName] = useState('')
@@ -58,8 +60,7 @@ function SignupForm() {
 
   // Password strength
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
-  const strengthColors = ['', '#EF4444', '#F59E0B', '#3FA673']
-  const strengthLabels = ['', 'Weak', 'Good', 'Strong']
+  const strengthLabels = ['', 'Too short', 'Good', 'Strong']
 
   async function handleStep1() {
     setError('')
@@ -128,7 +129,7 @@ function SignupForm() {
       document.cookie = `active_chama_id=${chamaId}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`
       sessionStorage.setItem('active_chama_id', chamaId)
       localStorage.setItem('sc_last_chama_id', chamaId)
-    } catch (e) {}
+    } catch {}
   }
 
   async function handleAdminSignup() {
@@ -157,7 +158,7 @@ function SignupForm() {
       if (!account.hasSession) {
         try {
           localStorage.setItem('sc_pending_group', JSON.stringify(pendingGroup()))
-        } catch (e) {}
+        } catch {}
         setPendingConfirmation(true)
         setLoading(false)
         return
@@ -217,463 +218,262 @@ function SignupForm() {
 
   if (pendingApproval) {
     return (
-      <div 
-        className="min-h-screen flex flex-col justify-center items-center p-6"
-        style={{ backgroundColor: 'var(--bg-page)' }}
+      <AuthShell
+        aside="none"
+        title="Your request is in"
+        subtitle={<>The officials of <strong className="text-ink">{targetChamaName || 'the group'}</strong> need to approve you. You&apos;ll get a notification, and the group opens for you once they do.</>}
       >
-        <div 
-          className="w-full max-w-md rounded-2xl p-8 text-center transition-colors duration-300 shadow-xl"
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border)'
-          }}
-        >
-          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
-            <MIcon name="hourglass_top"  className="text-[36px]" />
-          </div>
-
-          <h1 className="text-2xl font-bold mb-2 font-geist" style={{ color: 'var(--text-primary)' }}>
-            Request Pending Approval
-          </h1>
-          <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-            Your request to join <span className="font-semibold text-[var(--ak-brand-ink)]">{targetChamaName}</span> has been sent to the group admin. You will be able to access the dashboard once approved.
-          </p>
-
-          <Link
-            href="/login"
-            className="w-full inline-block py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors border-0 text-center"
-          >
-            Return to Login
-          </Link>
-        </div>
-      </div>
+        <Panel tone="sage" className="flex gap-4 items-start">
+          <Hourglass className="shrink-0 mt-0.5" size={22} />
+          <p className="text-[15px] leading-relaxed">Officials usually approve people they know. If it is taking long, ask your chair or treasurer to check the Members page.</p>
+        </Panel>
+        <ButtonLink href="/login" size="lg" className="w-full mt-6">Back to sign in</ButtonLink>
+      </AuthShell>
     )
   }
 
-  // CONFIRM-EMAIL SCREEN — shown when Supabase requires email confirmation
+  // Shown when Supabase requires email confirmation
   if (pendingConfirmation) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
-        <div className="w-full max-w-md text-center">
-          <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] flex items-center justify-center mx-auto mb-6">
-            <MIcon name="mark_email_unread"  className="text-[40px] text-[var(--ak-brand-ink)]" />
-          </div>
-          <h1 className="text-[28px] font-bold mb-2">Confirm your email</h1>
-          <p className="text-[15px] mb-8 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-            We sent a link to <strong className="text-[var(--ak-text)] dark:text-white">{email.trim()}</strong>.
-            Open it to activate your account and we&apos;ll finish {isAdminSignup ? 'creating your group' : 'adding you to your group'}.
-          </p>
-          <Link href="/login" className="inline-block w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors">
-            Go to Sign In
-          </Link>
-        </div>
-      </div>
+      <AuthShell
+        aside="none"
+        title="Check your email"
+        subtitle={<>We sent a link to <strong className="text-ink">{email.trim()}</strong>. Open it to activate your account, and we&apos;ll finish {isAdminSignup ? 'creating your group' : 'adding you to your group'}.</>}
+      >
+        <Panel tone="sage" className="flex gap-4 items-start">
+          <MailCheck className="shrink-0 mt-0.5" size={22} />
+          <p className="text-[15px] leading-relaxed">The link can open on any device. Nothing there? Look in spam, or wait a minute before trying again.</p>
+        </Panel>
+        <ButtonLink href="/login" variant="outline" size="lg" className="w-full mt-6">Go to sign in</ButtonLink>
+      </AuthShell>
     )
   }
 
-  // STEPS 3–4 FOR ADMIN — phone and identity checks after the group exists
-  // (both need the new account to be signed in, so they come after creation)
+  // Steps 3 and 4 for officials: phone and identity, after the group exists
   if (postStep) {
     const finish = () => { setPostStep(null); setSuccess(true) }
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
-        <div className="w-full max-w-xl space-y-6 py-10">
-          <div className="space-y-1">
-            <p className="text-[12px] font-semibold uppercase tracking-widest text-[var(--ak-brand-ink)]">
-              Step {postStep === 'phone' ? 3 : 4} of 4 · {groupName} is created
-            </p>
-            <h1 className="text-[28px] font-bold">
-              {postStep === 'phone' ? 'Verify your phone number' : 'Verify your identity'}
-            </h1>
-            <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-              {postStep === 'phone'
-                ? "We'll text you a code. Your number is used for M-Pesa prompts, SMS sign-in and USSD."
-                : 'Add your ID number, a photo of your national ID or passport, and a live selfie. Withdrawals and investments unlock once you are verified.'}
-            </p>
-          </div>
-
-          {postStep === 'phone' ? (
-            <div className="rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-5 space-y-4">
-              <PhoneVerification
-                currentPhone={verifiedPhone || null}
-                onVerified={(p) => { setVerifiedPhone(p); setPostStep('identity') }}
-                label="M-Pesa phone number"
-              />
-            </div>
-          ) : kycMessage ? (
-            <div className="rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-6 space-y-4 text-center">
-              <p className="text-[15px]">{kycMessage}</p>
-              <button onClick={finish} className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white font-semibold">Continue</button>
-            </div>
-          ) : (
-            <KycVerification onDone={(o) => { if (o.status === 'rejected') return; setKycMessage(o.message) }} />
-          )}
-
-          <button
-            type="button"
-            onClick={() => (postStep === 'phone' ? setPostStep('identity') : finish())}
-            className="block mx-auto text-[14px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:underline"
-          >
-            {postStep === 'phone' ? 'Skip for now' : 'Do this later'}
-          </button>
-        </div>
-      </div>
+      <AuthShell
+        aside="none"
+        wide
+        title={postStep === 'phone' ? 'Verify your phone number' : 'Verify your identity'}
+        subtitle={postStep === 'phone'
+          ? "We'll text you a code. Your number is used for M-Pesa prompts, SMS sign-in and USSD."
+          : 'Your ID number, a photo of your national ID or passport, and a live selfie. Withdrawals and investments open once you are verified.'}
+      >
+        <StepDots step={postStep === 'phone' ? 3 : 4} total={4} note={`${groupName} is created`} />
+        {postStep === 'phone' ? (
+          <Panel>
+            <PhoneVerification
+              currentPhone={verifiedPhone || null}
+              onVerified={(p) => { setVerifiedPhone(p); setPostStep('identity') }}
+              label="M-Pesa phone number"
+            />
+          </Panel>
+        ) : kycMessage ? (
+          <Panel className="space-y-4">
+            <p className="text-[15px]">{kycMessage}</p>
+            <Button onClick={finish} size="lg" className="w-full">Continue</Button>
+          </Panel>
+        ) : (
+          <KycVerification onDone={(o) => { if (o.status === 'rejected') return; setKycMessage(o.message) }} />
+        )}
+        <button
+          type="button"
+          onClick={() => (postStep === 'phone' ? setPostStep('identity') : finish())}
+          className="block mx-auto mt-5 text-[14px] text-ink-2 underline underline-offset-4 hover:text-ink"
+        >
+          {postStep === 'phone' ? 'Skip for now' : 'Do this later'}
+        </button>
+      </AuthShell>
     )
   }
 
-  // SUCCESS SCREEN FOR ADMIN — shows the group code prominently
+  // Group created: show the code members use to join
   if (success && createdGroupCode) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
-        <div className="w-full max-w-md text-center">
-          
-          <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] flex items-center justify-center mx-auto mb-6">
-            <MIcon name="check_circle"  className="text-[40px] text-[var(--ak-brand-ink)]" />
-          </div>
-
-          <h1 className="text-[28px] font-bold mb-2">
-            Group Created!
-          </h1>
-          <p className="text-[15px] mb-8 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-            Share this code with your members so they can join <strong className="text-[var(--ak-text)] dark:text-white">{groupName}</strong>
-          </p>
-
-          {/* GROUP CODE DISPLAY */}
-          <div className="rounded-2xl p-8 mb-6 bg-white dark:bg-[var(--ak-page)] border-2 border-[var(--ak-brand-ink)]">
-            <p className="text-[12px] font-semibold uppercase tracking-widest mb-3 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-              Your Group Code
-            </p>
-            <p className="text-[52px] font-bold tracking-[0.2em] text-[var(--ak-brand-ink)] font-mono mb-3">
-              {createdGroupCode}
-            </p>
-            <p className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-              This code never expires. Save it and share it with your members.
-            </p>
-          </div>
-
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(createdGroupCode)
-              alert('Group code copied to clipboard!')
+      <AuthShell
+        aside="none"
+        title={`${groupName} is ready`}
+        subtitle="Share this code with your members. They type it when they sign up, and you approve each person."
+      >
+        <div className="rounded-[28px] bg-forest text-[#EEF4EF] p-8 text-center">
+          <p className="text-[14px] text-[#8FAA9B]">Group code</p>
+          <p className="font-mono text-[44px] sm:text-[52px] tracking-[0.14em] mt-2 text-mint">{createdGroupCode}</p>
+          <p className="text-[14px] text-[#C9DACF] mt-3">It doesn&apos;t expire. You can also send invite links from Group settings.</p>
+          <Button
+            variant="mint"
+            className="mt-6"
+            onClick={async () => {
+              try { await navigator.clipboard.writeText(createdGroupCode); setCopied(true) } catch {}
             }}
-            className="w-full py-3 rounded-xl border-2 border-[var(--ak-brand-ink)] text-[var(--ak-brand-ink)] font-semibold mb-3 hover:bg-[var(--ak-solid)] hover:text-white transition-all bg-transparent">
-            Copy Group Code
-          </button>
-
-          {kycMessage ? (
-            <button
-              onClick={() => router.push('/admin/dashboard')}
-              className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors border-0">
-              Go to Admin Dashboard
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={() => router.push('/verify-identity?next=/admin/dashboard')}
-                className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors border-0">
-                Verify your identity
-              </button>
-              <p className="mt-3 text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                Needed before withdrawals or investments: your ID or passport and a selfie.
-              </p>
-            </>
-          )}
-
+          >
+            {copied ? <><Check size={16} /> Copied</> : <><Copy size={16} /> Copy the code</>}
+          </Button>
         </div>
-      </div>
+
+        {kycMessage ? (
+          <Button size="lg" className="w-full mt-6" onClick={() => router.push('/admin/dashboard')}>Open your group</Button>
+        ) : (
+          <>
+            <Button size="lg" className="w-full mt-6" onClick={() => router.push('/verify-identity?next=/admin/dashboard')}>Verify your identity</Button>
+            <p className="mt-3 text-[14px] text-ink-3 text-center">Needed before withdrawals or investments.</p>
+            <button onClick={() => router.push('/admin/dashboard')} className="block mx-auto mt-4 text-[14px] text-ink-2 underline underline-offset-4 hover:text-ink">
+              Open the group first
+            </button>
+          </>
+        )}
+      </AuthShell>
+    )
+  }
+
+  const switcher = (
+    <div role="tablist" aria-label="What do you want to do?" className="grid grid-cols-2 p-1 rounded-full bg-surface-2 border border-line mb-8">
+      {[
+        { href: '/signup?role=member', label: 'Join a group', on: !isAdminSignup },
+        { href: '/signup?role=admin', label: 'Start a group', on: isAdminSignup },
+      ].map((t) => (
+        <Link
+          key={t.href}
+          href={t.href}
+          role="tab"
+          aria-selected={t.on}
+          className={cn(
+            'h-11 rounded-full flex items-center justify-center text-[15px] font-semibold transition-colors',
+            t.on ? 'bg-primary text-on-primary' : 'text-ink-2 hover:text-ink',
+          )}
+        >
+          {t.label}
+        </Link>
+      ))}
+    </div>
+  )
+
+  const signInFooter = (
+    <>
+      Already have an account?{' '}
+      <Link href="/login" className="font-semibold text-brand underline-offset-4 hover:underline">Sign in</Link>
+    </>
+  )
+
+  if (!isAdminSignup) {
+    return (
+      <AuthShell
+        title="Join your group"
+        subtitle="Sign up with your phone number. You need the group code your chair or treasurer shared."
+        footer={signInFooter}
+      >
+        {switcher}
+        <MemberPhoneSignup initialCode={groupCode} onDone={handleMemberDone} />
+        <div className="mt-5">
+          <SocialSignIn next={groupCode ? `/onboarding?code=${encodeURIComponent(groupCode)}` : '/onboarding'} />
+        </div>
+      </AuthShell>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
+    <AuthShell
+      aside="officials"
+      title={step === 1 ? 'Start a group' : 'Set up your group'}
+      subtitle={step === 1
+        ? 'You will be the first official. You can hand roles to others later.'
+        : 'Members join with the code you get at the end. You can change these rules later.'}
+      footer={signInFooter}
+    >
+      {switcher}
+      <StepDots step={step} total={4} />
 
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 h-14 border-b border-[var(--ak-line)] dark:border-[var(--ak-line)]">
-        <Link href="/" className="flex items-center gap-2">
-          <Image 
-            src="/favicon.svg"
-            alt="Akibora"
-            width={28} height={28}
-            className="h-7 w-7 object-contain"
-          />
-          <span className="font-bold text-[17px]">
-            Akibora
-          </span>
-        </Link>
-        <Link href="/login" className="text-[14px] font-medium text-[var(--ak-brand-ink)]">
-          Sign In
-        </Link>
-      </div>
+      {error && <Notice tone="danger" className="mb-5">{error}</Notice>}
 
-      {/* Role selector tabs */}
-      <div className="flex border-b border-[var(--ak-line)] dark:border-[var(--ak-line)]">
-        <Link
-          href="/signup?role=admin"
-          className="flex-1 py-3 text-center text-[14px] font-semibold transition-all"
-          style={{
-            backgroundColor: isAdminSignup ? 'rgba(34, 197, 94, 0.05)' : 'transparent',
-            color: isAdminSignup ? '#3FA673' : '#8FA196',
-            borderBottom: isAdminSignup ? '2px solid #22C55E' : '2px solid transparent'
-          }}>
-          Create a Group (Admin)
-        </Link>
-        <Link
-          href="/signup?role=member"
-          className="flex-1 py-3 text-center text-[14px] font-semibold transition-all"
-          style={{
-            backgroundColor: !isAdminSignup ? 'rgba(34, 197, 94, 0.05)' : 'transparent',
-            color: !isAdminSignup ? '#3FA673' : '#8FA196',
-            borderBottom: !isAdminSignup ? '2px solid #22C55E' : '2px solid transparent'
-          }}>
-          Join a Group (Member)
-        </Link>
-      </div>
-
-      <div className="flex items-start justify-center p-6 pt-10">
-        <div className="w-full max-w-md">
-
-          {!isAdminSignup && (
-            <>
-              <h1 className="text-[26px] font-bold mb-1">Join your chama</h1>
-              <p className="text-[14px] mb-6 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                Sign up with your phone number. You&apos;ll need the code from your group admin.
-              </p>
-              <MemberPhoneSignup initialCode={groupCode} onDone={handleMemberDone} />
-              {/* Social sign-up continues in onboarding (phone code, ID, group code) */}
-              <div className="mt-5">
-                <SocialSignIn next={groupCode ? `/onboarding?code=${encodeURIComponent(groupCode)}` : '/onboarding'} />
+      {step === 1 && (
+        <form onSubmit={(e) => { e.preventDefault(); handleStep1() }} className="space-y-5">
+          <Field label="Your full name">
+            <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Grace Wanjiku" autoComplete="name" className={inputClass} />
+          </Field>
+          <Field label="Email">
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" className={inputClass} />
+          </Field>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="new-password" className="text-[14px] font-medium">Password</label>
+            <PasswordInput id="new-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete="new-password" />
+            {password && (
+              <div className="flex items-center gap-3" aria-live="polite">
+                <div className="flex gap-1 flex-1" aria-hidden="true">
+                  {[1, 2, 3].map(i => (
+                    <span
+                      key={i}
+                      className={cn(
+                        'h-1.5 flex-1 rounded-[2px]',
+                        strength >= i ? (strength === 1 ? 'bg-danger' : strength === 2 ? 'bg-amber' : 'bg-mint') : 'bg-raised',
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className="text-[13px] text-ink-2 w-[70px] text-right">{password.length < 8 ? 'Too short' : strengthLabels[strength]}</span>
               </div>
-            </>
-          )}
-
-          {isAdminSignup && (<>
-          {/* Step indicator */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold bg-[var(--ak-solid)] text-white">
-              {step === 1 ? '1' : '✓'}
-            </div>
-            <div className="flex-1 h-0.5 bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" style={{ backgroundColor: step === 2 ? '#3FA673' : undefined }} />
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold"
-              style={{
-                backgroundColor: step === 2 ? '#3FA673' : 'var(--border)',
-                color: step === 2 ? 'white' : '#8FA196'
-              }}>
-              2
-            </div>
+            )}
           </div>
+          <Field label="Type it again" error={confirmPassword && confirmPassword !== password ? "The passwords don't match yet." : undefined}>
+            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} autoComplete="new-password" className={inputClass} />
+          </Field>
+          <Button type="submit" size="lg" className="w-full">Continue</Button>
+          <SocialSignIn next="/onboarding" disabled={loading} />
+        </form>
+      )}
 
-          <h1 className="text-[26px] font-bold mb-1">
-            {step === 1 
-              ? 'Create your account'
-              : isAdminSignup 
-                ? 'Set up your group'
-                : 'Enter your group code'}
-          </h1>
-          <p className="text-[14px] mb-6 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-            {step === 1 
-              ? isAdminSignup 
-                ? 'You will be creating a new chama as the admin.'
-                : 'You will be joining a group with your admin\'s code.'
-              : isAdminSignup
-                ? 'Members will use your group code to join.'
-                : 'Get the code from your group admin.'}
-          </p>
-
-          {error && (
-            <div className="rounded-xl p-4 mb-5 text-[14px] bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B]">
-              {error}
+      {step === 2 && (
+        <div className="space-y-5">
+          <Field label="Group name">
+            <input type="text" value={groupName} onChange={e => setGroupName(e.target.value)} placeholder="Tujenge Women Group" autoFocus className={inputClass} />
+          </Field>
+          <Field label="Each member contributes" hint="The amount for one contribution date.">
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[15px] text-ink-3">KSh</span>
+              <input type="number" inputMode="numeric" value={contributionAmount} onChange={e => setContributionAmount(e.target.value)} placeholder="5,000" min="1" className={cn(inputClass, 'pl-14')} />
             </div>
-          )}
-
-          {/* ═══ STEP 1 — Account Info ═══ */}
-          {step === 1 && (
-            <div className="space-y-4">
-              
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={e => setFullName(e.target.value)}
-                  placeholder="Grace Wanjiku"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Minimum 8 characters"
-                    autoComplete="new-password"
-                    className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-[var(--ak-text-3)] cursor-pointer">
-                    <MIcon name={showPassword ? 'visibility_off' : 'visibility'}  className="text-[20px]" />
-                  </button>
-                </div>
-                {password && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="flex gap-1 flex-1">
-                      {[1,2,3].map(i => (
-                        <div 
-                          key={i}
-                          className="h-1 flex-1 rounded-full transition-colors"
-                          style={{
-                            backgroundColor: strength >= i ? strengthColors[strength] : '#E5E7EB'
-                          }} 
-                        />
-                      ))}
-                    </div>
-                    <span className="text-[12px] font-medium" style={{ color: strengthColors[strength] }}>
-                      {strengthLabels[strength]}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="confirm-password" className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                  Confirm password
-                </label>
-                <input
-                  id="confirm-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Type the password again"
-                  autoComplete="new-password"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
-                />
-                {confirmPassword && confirmPassword !== password && (
-                  <p className="mt-1.5 text-[12px] text-red-500">Passwords don&apos;t match yet.</p>
-                )}
-              </div>
-
-              <button
-                onClick={handleStep1}
-                className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold mt-2 hover:bg-[var(--ak-solid)] transition-colors border-0">
-                Continue
-              </button>
-
-              {/* Google / Apple: only providers switched on in Supabase are shown */}
-              <SocialSignIn next="/onboarding" disabled={loading} />
-
-            </div>
-          )}
-
-          {/* ═══ STEP 2 ADMIN ═══ */}
-          {step === 2 && isAdminSignup && (
-            <div className="space-y-4">
-              
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                  Group Name
-                </label>
-                <input
-                  type="text"
-                  value={groupName}
-                  onChange={e => setGroupName(e.target.value)}
-                  placeholder="Nairobi Women Investment Group"
-                  autoFocus
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                  Contribution amount (KSh)
-                </label>
-                <div className="flex">
-                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                    KSh
-                  </div>
-                  <input
-                    type="number"
-                    value={contributionAmount}
-                    onChange={e => setContributionAmount(e.target.value)}
-                    placeholder="5000"
-                    min="1"
-                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <span className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-                  Contribution schedule
-                </span>
-                <ContributionSchedulePicker value={schedule} onChange={setSchedule} />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setStep(1)}
-                  className="px-6 py-3 rounded-xl border text-[15px] font-medium bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white">
-                  Back
-                </button>
-                <button
-                  onClick={handleAdminSignup}
-                  disabled={loading || !groupName.trim() || !contributionAmount || !scheduleComplete(schedule)}
-                  className="flex-1 py-3 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] disabled:opacity-50 transition-colors border-0">
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      Creating...
-                    </span>
-                  ) : 'Create Group'}
-                </button>
-              </div>
-
-            </div>
-          )}
-
-          </>)}
-
-          <p className="text-center text-[13px] mt-6 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
-            Already have an account?{' '}
-            <Link href="/login" className="font-semibold text-[var(--ak-brand-ink)] hover:underline">
-              Sign In
-            </Link>
-          </p>
-
+          </Field>
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-medium">When people contribute</span>
+            <ContributionSchedulePicker value={schedule} onChange={setSchedule} />
+          </div>
+          <div className="flex gap-3 pt-1">
+            <Button variant="outline" size="lg" onClick={() => setStep(1)}>Back</Button>
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={handleAdminSignup}
+              disabled={loading || !groupName.trim() || !contributionAmount || !scheduleComplete(schedule)}
+            >
+              {loading ? 'Creating the group…' : 'Create the group'}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
+    </AuthShell>
+  )
+}
+
+function StepDots({ step, total, note }: { step: number; total: number; note?: string }) {
+  const names = ['Account', 'Group', 'Phone', 'Identity']
+  return (
+    <div className="mb-7">
+      <ol className="flex gap-1.5" aria-label={`Step ${step} of ${total}`}>
+        {Array.from({ length: total }, (_, i) => (
+          <li key={i} className="flex-1">
+            <span className={cn('block h-1.5 rounded-[2px]', i < step ? 'bg-brand' : 'bg-raised')} />
+            <span className={cn('block text-[12px] mt-2', i + 1 === step ? 'text-ink font-medium' : 'text-ink-3')}>{names[i]}</span>
+          </li>
+        ))}
+      </ol>
+      {note && <p className="text-[14px] text-ink-2 mt-3">{note}</p>}
     </div>
   )
 }
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)]">
-        <div className="w-10 h-10 rounded-full border-4 border-[var(--ak-brand-ink)]/20 border-t-[var(--ak-brand-ink)] animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-dvh bg-page" />}>
       <SignupForm />
     </Suspense>
   )

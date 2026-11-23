@@ -27,8 +27,8 @@ export default function KycBanner({ creatorId }: { creatorId?: string | null }) 
       : 'Verify your identity to unlock withdrawals and investments for this group.'
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/30 px-4 py-3">
-      <p className="text-[14px] text-amber-900 dark:text-amber-200">{text}</p>
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[14px] bg-amber-soft px-4 py-3">
+      <p className="text-[14px] text-amber-ink">{text}</p>
       {status !== 'review' && (
         <Link href="/verify-identity?next=/admin/dashboard" className="shrink-0 px-4 py-2 rounded-lg bg-primary text-on-primary text-[14px] font-semibold">
           Verify now

@@ -69,7 +69,7 @@ export function InstallPrompt() {
 
   return (
     <div
-      className="fixed bottom-24 left-4 right-4 z-40 lg:left-auto lg:right-6 lg:bottom-8 lg:w-80 rounded-2xl p-4 shadow-2xl shadow-black/20 animate-slide-up"
+      className="fixed bottom-24 left-4 right-4 z-40 lg:left-auto lg:right-6 lg:bottom-8 lg:w-80 rounded-[22px] p-4 shadow-2xl shadow-black/20 animate-slide-up"
       style={{
         backgroundColor: 'var(--bg-card)',
         border: '2px solid #22C55E'
@@ -101,14 +101,14 @@ export function InstallPrompt() {
           {platform === 'android' && deferredPrompt && (
             <button
               onClick={handleInstall}
-              className="w-full py-2.5 rounded-xl text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 transition-colors"
+              className="w-full py-2.5 rounded-[14px] text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 transition-colors"
             >
               Install App
             </button>
           )}
 
           {platform === 'ios' && (
-            <div className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+            <div className="flex items-center gap-2 text-[13px]" style={{ color: 'var(--text-secondary)' }}>
               <MIcon name="ios_share"  className="text-[16px]" />
               Tap Share then Add to Home Screen
             </div>

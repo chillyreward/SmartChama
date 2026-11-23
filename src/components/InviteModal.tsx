@@ -86,7 +86,7 @@ export function InviteModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl p-6" style={cardStyle}>
+      <div className="relative z-10 w-full max-w-md rounded-[22px] p-6" style={cardStyle}>
 
         {/* FORM */}
         {step === 'form' && (
@@ -107,7 +107,7 @@ export function InviteModal({
                   <button
                     key={ch}
                     onClick={() => setChannel(ch)}
-                    className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all"
+                    className="flex flex-col items-center gap-2 p-3 rounded-[14px] border-2 transition-all"
                     style={{
                       borderColor: active ? cfg.color : 'var(--border)',
                       backgroundColor: active ? `${cfg.color}10` : 'var(--bg-subtle)'
@@ -116,17 +116,17 @@ export function InviteModal({
                     <span className="text-[13px] font-semibold" style={{ color: active ? cfg.color : 'var(--text-secondary)' }}>
                       {cfg.label}
                     </span>
-                    <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{cfg.desc}</span>
+                    <span className="text-[13px]" style={{ color: 'var(--text-muted)' }}>{cfg.desc}</span>
                   </button>
                 )
               })}
             </div>
 
             {/* Info banner */}
-            <div className="rounded-xl p-3 mb-5 flex gap-2"
+            <div className="rounded-[14px] p-3 mb-5 flex gap-2"
               style={{ backgroundColor: 'var(--bg-subtle)', borderLeft: `3px solid ${channelConfig[channel].color}` }}>
               <MIcon name={channel === 'whatsapp' ? 'chat' : 'sms'}  className="text-[16px] flex-shrink-0 mt-0.5" />
-              <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
                 {channel === 'whatsapp'
                   ? `WhatsApp opens with the invite code for ${chamaName} ready to send.`
                   : `An SMS with the invite code to join ${chamaName} will be sent to this number.`}
@@ -135,19 +135,19 @@ export function InviteModal({
 
             {/* Name */}
             <div className="mb-4">
-              <label className="block text-[11px] font-semibold mb-1.5"
+              <label className="block text-[13px] font-semibold mb-1.5"
                 style={{ color: 'var(--text-secondary)' }}>
                 Member Name <span style={{ color: 'var(--text-muted)' }}>(optional)</span>
               </label>
               <input type="text" value={name} onChange={e => setName(e.target.value)}
                 placeholder="Grace Wanjiku"
-                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[var(--ak-brand-ink)]"
+                className="w-full px-4 py-3 rounded-[14px] border text-[15px] focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30"
                 style={inputStyle} />
             </div>
 
             {/* Phone */}
             <div className="mb-6">
-              <label className="block text-[11px] font-semibold mb-1.5"
+              <label className="block text-[13px] font-semibold mb-1.5"
                 style={{ color: 'var(--text-secondary)' }}>
                 Phone Number
               </label>
@@ -167,17 +167,17 @@ export function InviteModal({
             </div>
 
             {error && (
-              <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[13px]">{error}</div>
+              <div className="mb-5 p-3 rounded-[14px] bg-red-50 border border-red-200 text-red-700 text-[13px]">{error}</div>
             )}
 
             <div className="flex gap-3">
               <button onClick={onClose}
-                className="flex-1 py-3 border rounded-xl text-[14px] font-semibold transition-colors"
+                className="flex-1 py-3 border rounded-[14px] text-[14px] font-semibold transition-colors"
                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
                 Cancel
               </button>
               <button onClick={handleSend} disabled={!phone.trim()}
-                className="flex-1 py-3 text-white rounded-xl text-[14px] font-semibold disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-3 text-white rounded-[14px] text-[14px] font-semibold disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 style={{ backgroundColor: channelConfig[channel].color }}>
                 <MIcon name={channel === 'whatsapp' ? 'chat' : 'sms'}  className="text-[18px]" />
                 Send via {channelConfig[channel].label}
@@ -227,7 +227,7 @@ export function InviteModal({
                 href={result.whatsapp_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 rounded-xl text-[14px] font-semibold text-white flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-[14px] text-[14px] font-semibold text-white flex items-center justify-center gap-2"
                 style={{ backgroundColor: channelConfig.whatsapp.color }}
               >
                 <MIcon name="chat"  className="text-[18px]" />
@@ -236,28 +236,28 @@ export function InviteModal({
             )}
 
             {/* Code */}
-            <div className="w-full rounded-xl p-4 flex flex-col items-center gap-2"
+            <div className="w-full rounded-[14px] p-4 flex flex-col items-center gap-2"
               style={{ backgroundColor: 'var(--bg-subtle)', border: '1px dashed var(--border)' }}>
-              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-[13px] font-semibold" style={{ color: 'var(--text-muted)' }}>
                 Invite Code
               </span>
               <span className="text-[28px] font-mono font-bold tracking-widest" style={{ color: channelConfig[channel].color }}>
                 {result?.code}
               </span>
               <button onClick={() => navigator.clipboard.writeText(result?.code || '')}
-                className="text-[12px] flex items-center gap-1 transition-colors hover:opacity-70"
+                className="text-[13px] flex items-center gap-1 transition-colors hover:opacity-70"
                 style={{ color: 'var(--text-muted)' }}>
                 <MIcon name="content_copy"  className="text-[14px]" />
                 Copy code
               </button>
             </div>
 
-            <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[13px]" style={{ color: 'var(--text-muted)' }}>
               Code expires in 48 hours · Single use
             </p>
 
             <button onClick={onClose}
-              className="w-full py-3 text-white rounded-xl text-[14px] font-semibold transition-colors"
+              className="w-full py-3 text-white rounded-[14px] text-[14px] font-semibold transition-colors"
               style={{ backgroundColor: channelConfig[channel].color }}>
               Done
             </button>

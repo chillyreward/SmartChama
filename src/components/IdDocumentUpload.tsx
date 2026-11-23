@@ -43,12 +43,12 @@ export default function IdDocumentUpload({
 
   return (
     <div className="space-y-2">
-      <label htmlFor="id-document" className="block text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>
+      <label htmlFor="id-document" className="block text-[13px] font-semibold" style={{ color: 'var(--text-secondary)' }}>
         {label}
       </label>
-      {preview && <img src={preview} alt="Your ID" className="w-full max-h-48 object-contain rounded-xl border" style={{ borderColor: 'var(--border)' }} />}
+      {preview && <img src={preview} alt="Your ID" className="w-full max-h-48 object-contain rounded-[14px] border" style={{ borderColor: 'var(--border)' }} />}
       {value && !preview && (
-        <p className="text-[13px] font-semibold text-[var(--ak-brand-ink)]">ID photo uploaded</p>
+        <p className="text-[13px] font-semibold text-brand">ID photo uploaded</p>
       )}
       <input
         id="id-document"
@@ -57,13 +57,13 @@ export default function IdDocumentUpload({
         capture="environment"
         disabled={busy}
         onChange={(e) => handleFile(e.target.files?.[0])}
-        className="block w-full text-[14px] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--ak-tint)] file:text-[var(--ak-brand-ink)] file:font-semibold"
+        className="block w-full text-[14px] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--ak-tint)] file:text-brand file:font-semibold"
         style={{ color: 'var(--text-secondary)' }}
       />
-      <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
+      <p className="text-[13px]" style={{ color: 'var(--text-muted)' }}>
         {busy ? 'Uploading…' : 'Lay the card flat in good light with all corners visible.'}
       </p>
-      {error && <p className="text-[13px] text-red-500" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-danger" role="alert">{error}</p>}
     </div>
   )
 }

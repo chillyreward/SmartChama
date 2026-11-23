@@ -18,9 +18,9 @@ export type MemberSignupResult = {
   message?: string
 }
 
-const label = 'block text-[11px] font-semibold mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]'
-const input = 'w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]'
-const primary = 'w-full py-3.5 rounded-xl bg-primary text-on-primary text-[16px] font-semibold hover:opacity-90 disabled:opacity-50 transition-colors'
+const label = 'block text-[13px] font-semibold mb-1.5 text-ink-2'
+const input = 'w-full px-4 py-3 rounded-[14px] border text-[15px] bg-surface border-line text-ink focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30'
+const primary = 'w-full py-3.5 rounded-[14px] bg-primary text-on-primary text-[16px] font-semibold hover:opacity-90 disabled:opacity-50 transition-colors'
 
 export default function MemberPhoneSignup({ initialCode = '', onDone }: { initialCode?: string; onDone: (r: MemberSignupResult) => void }) {
   const [fullName, setFullName] = useState('')
@@ -84,8 +84,8 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
     return (
       <div className="space-y-4">
         <div>
-          <p className="text-[15px] font-semibold text-[var(--ak-text)] dark:text-white">Enter the code we texted to {codeSentTo}</p>
-          {chamaName && <p className="text-[13px] mt-1 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">You&apos;re joining <strong>{chamaName}</strong>.</p>}
+          <p className="text-[15px] font-semibold text-ink">Enter the code we texted to {codeSentTo}</p>
+          {chamaName && <p className="text-[13px] mt-1 text-ink-2">You&apos;re joining <strong>{chamaName}</strong>.</p>}
         </div>
         <label htmlFor="signup-sms-code" className="sr-only">SMS code</label>
         <input
@@ -100,13 +100,13 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
           className={input + ' text-center text-[24px] font-mono tracking-[0.4em]'}
           autoFocus
         />
-        {error && <p className="text-[14px] text-red-500" role="alert">{error}</p>}
+        {error && <p className="text-[14px] text-danger" role="alert">{error}</p>}
         <button type="button" onClick={createAccount} disabled={busy || smsCode.length !== 6} className={primary}>
           {busy ? 'Creating your account…' : 'Create account'}
         </button>
         <div className="flex justify-between text-[13px]">
-          <button type="button" onClick={sendCode} disabled={busy} className="font-semibold text-[var(--ak-brand-ink)] hover:underline disabled:opacity-50">Resend code</button>
-          <button type="button" onClick={() => { setCodeSentTo(null); setError('') }} className="text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:underline">Change details</button>
+          <button type="button" onClick={sendCode} disabled={busy} className="font-semibold text-brand hover:underline disabled:opacity-50">Resend code</button>
+          <button type="button" onClick={() => { setCodeSentTo(null); setError('') }} className="text-ink-2 hover:underline">Change details</button>
         </div>
       </div>
     )
@@ -124,7 +124,7 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
       <div>
         <label htmlFor="m-phone" className={label}>Phone number</label>
         <input id="m-phone" type="tel" inputMode="tel" autoComplete="off" value={phone} onChange={(e) => setPhone(e.target.value)} className={input} />
-        <p className="text-[12px] mt-1.5 text-[var(--ak-text-3)]">You&apos;ll sign in with this number. We&apos;ll text a code to confirm it.</p>
+        <p className="text-[13px] mt-1.5 text-ink-3">You&apos;ll sign in with this number. We&apos;ll text a code to confirm it.</p>
       </div>
       <div>
         <label htmlFor="m-id" className={label}>National ID number</label>
@@ -139,13 +139,13 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
           autoComplete="off"
           className={input + ' font-mono tracking-[0.2em] uppercase'}
         />
-        <p className="text-[12px] mt-1.5 text-[var(--ak-text-3)]">From your group admin.</p>
+        <p className="text-[13px] mt-1.5 text-ink-3">From your group admin.</p>
       </div>
       <div>
         <label htmlFor="m-password" className={label}>Password</label>
         <div className="relative">
           <input id="m-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 8 characters" autoComplete="new-password" className={input + ' pr-12'} />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ak-text-3)]">
+          <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3">
             <MIcon name={showPassword ? 'visibility_off' : 'visibility'}  className="text-[20px]" />
           </button>
         </div>
@@ -153,13 +153,13 @@ export default function MemberPhoneSignup({ initialCode = '', onDone }: { initia
       <div>
         <label htmlFor="m-confirm" className={label}>Confirm password</label>
         <input id="m-confirm" type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" className={input} />
-        {confirmPassword && confirmPassword !== password && <p className="mt-1.5 text-[12px] text-red-500">Passwords don&apos;t match yet.</p>}
+        {confirmPassword && confirmPassword !== password && <p className="mt-1.5 text-[13px] text-danger">Passwords don&apos;t match yet.</p>}
       </div>
-      <label className="flex items-start gap-3 text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
+      <label className="flex items-start gap-3 text-[13px] text-ink-2">
         <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-1 w-4 h-4 accent-[var(--ak-solid)]" />
-        <span>I agree to the <a href="/terms" target="_blank" className="text-[var(--ak-brand-ink)] underline">Terms</a> and <a href="/privacy" target="_blank" className="text-[var(--ak-brand-ink)] underline">Privacy Policy</a>.</span>
+        <span>I agree to the <a href="/terms" target="_blank" className="text-brand underline">Terms</a> and <a href="/privacy" target="_blank" className="text-brand underline">Privacy Policy</a>.</span>
       </label>
-      {error && <p className="text-[14px] text-red-500" role="alert">{error}</p>}
+      {error && <p className="text-[14px] text-danger" role="alert">{error}</p>}
       <button type="button" onClick={sendCode} disabled={busy || !filled} className={primary}>
         {busy ? 'Checking…' : 'Send verification code'}
       </button>

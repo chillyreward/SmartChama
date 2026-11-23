@@ -1,11 +1,12 @@
 'use client'
-import { MIcon } from '@/components/ui/MIcon';
-import { useState, useEffect } 
-  from 'react'
-import { useRouter } 
-  from 'next/navigation'
-import { getSupabaseBrowser } 
-  from '@/lib/supabase-browser'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, Hourglass, Plus, Users } from 'lucide-react'
+import { getSupabaseBrowser } from '@/lib/supabase-browser'
+import { KENYA_COUNTIES } from '@/lib/counties'
+import { AuthShell } from '@/components/auth/AuthShell'
+import { Button, Field, Notice, Panel, cn, formatKsh, inputClass } from '@/components/ui'
 import PhoneVerification from '@/components/PhoneVerification'
 import ContributionSchedulePicker, { ContributionSchedule, scheduleComplete, scheduleDates, scheduleSummary, toScheduleMode } from '@/components/ContributionSchedulePicker'
 import { loadNationalId, loadIdDocumentPath } from '@/lib/private-profile'
@@ -62,10 +63,6 @@ export default function OnboardingPage() {
     useState('')
   // Every day, or specific dates picked on a calendar
   const [schedule, setSchedule] = useState<ContributionSchedule>({ mode: 'custom', dates: [] })
-  const [groupDescription, 
-    setGroupDescription] = useState('')
-  const [meetingDay, setMeetingDay] = 
-    useState('1')
 
   // JOIN FORM STATE
   const [inviteCode, setInviteCode] = 
@@ -392,9 +389,7 @@ export default function OnboardingPage() {
         localStorage.removeItem('sc_pending_join_code')
         setError('')
         setLoading(false)
-        alert(`Your request to join ${data.chamaName || 'the group'} has been sent. You'll get access once an admin approves it.`)
-        // Not /login: a signed-in user there bounces back through onboarding
-        router.push('/')
+        setPendingChamaName(data.chamaName || 'the group')
         return
       }
 
@@ -412,922 +407,183 @@ export default function OnboardingPage() {
     }
   }
 
-  // ═══ WAITING FOR APPROVAL ═══
+  // Joined with a group code and waiting for an official
   if (pendingChamaName) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-full max-w-md rounded-2xl p-8 text-center space-y-4" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <MIcon name="hourglass_top"  className="text-[44px] text-amber-500" />
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Waiting for approval</h1>
-          <p className="text-[15px]" style={{ color: 'var(--text-secondary)' }}>
-            Your request to join <strong>{pendingChamaName}</strong> has been sent to the group&apos;s officials.
-            You&apos;ll get access as soon as one of them approves it.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="w-full py-3 rounded-xl bg-[var(--ak-solid)] text-white font-semibold"
-          >
-            Check again
-          </button>
-          <button
-            onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}
-            className="w-full py-3 rounded-xl border text-[15px]"
-            style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-          >
-            Sign out
-          </button>
+      <AuthShell
+        aside="none"
+        title="Waiting for approval"
+        subtitle={<>Your request to join <strong className="text-ink">{pendingChamaName}</strong> is with the group&apos;s officials. The group opens for you as soon as one of them approves it.</>}
+      >
+        <Panel tone="sage" className="flex gap-4 items-start">
+          <Hourglass className="shrink-0 mt-0.5" size={22} />
+          <p className="text-[15px] leading-relaxed">If it is taking long, ask your chair or treasurer to open Members and look under Waiting.</p>
+        </Panel>
+        <div className="flex flex-col gap-3 mt-6">
+          <Button size="lg" onClick={() => window.location.reload()}>Check again</Button>
+          <Button size="lg" variant="outline" onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}>Sign out</Button>
         </div>
-      </div>
+      </AuthShell>
     )
   }
 
-  // ═══ THE UI ═══
+  const stepIndex = step === 0 ? 0 : step === 1 ? 1 : 2
+  const back = (to: Step) => (
+    <button onClick={() => { setError(''); setStep(to) }} className="inline-flex items-center gap-1.5 text-[14px] text-ink-2 hover:text-ink mb-6 -ml-1 px-1 py-1 rounded-md">
+      <ArrowLeft size={16} /> Back
+    </button>
+  )
+  const progress = (
+    <ol className="flex gap-1.5 mb-8" aria-label={`Step ${stepIndex + 1} of 3`}>
+      {['You', 'Your details', 'Your group'].map((name, i) => (
+        <li key={name} className="flex-1">
+          <span className={cn('block h-1.5 rounded-[2px]', i <= stepIndex ? 'bg-brand' : 'bg-raised')} />
+          <span className={cn('block text-[12px] mt-2', i === stepIndex ? 'text-ink font-medium' : 'text-ink-3')}>{name}</span>
+        </li>
+      ))}
+    </ol>
+  )
+  const errorBox = error ? <Notice tone="danger" className="mb-5">{error}</Notice> : null
 
-  return (
-    <div 
-      className="min-h-screen flex 
-        flex-col items-center 
-        justify-center p-4"
-      style={{ 
-        backgroundColor: 
-          'var(--bg-page)' 
-      }}>
+  if (!session) {
+    return <div className="min-h-dvh bg-page" aria-busy="true" />
+  }
 
-      {/* Logo */}
-      <div className="flex items-center 
-        gap-2 mb-10">
-        <img 
-          src="/favicon.svg"
-          alt="Akibora"
-          className="h-10 w-10 
-            object-contain"
-        />
-        <span 
-          className="text-[22px] 
-            font-bold"
-          style={{ 
-            color: 'var(--text-primary)' 
-          }}>
-          Akibora
-        </span>
-      </div>
-
-      <div 
-        className="w-full max-w-md 
-          rounded-2xl p-8"
-        style={{
-          backgroundColor: 
-            'var(--bg-card)',
-          border: '1px solid var(--border)'
-        }}>
-
-        {/* Progress dots */}
-        <div className="flex gap-2 
-          justify-center mb-8">
-          {[0, 1, 2].map(i => (
-            <div
-              key={i}
-              className="h-1.5 
-                rounded-full 
-                transition-all"
-              style={{
-                width: i === 
-                  (step === 0 ? 0 : 
-                   step === 1 ? 1 : 2)
-                  ? '24px' : '8px',
-                backgroundColor: 
-                  i <= (step === 0 ? 0 : 
-                        step === 1 ? 1 : 2)
-                  ? '#3FA673' 
-                  : 'var(--border)'
-              }}
-            />
+  // Step 0: start or join
+  if (step === 0) {
+    return (
+      <AuthShell title="What brings you here?" subtitle="You can belong to more than one group later.">
+        {progress}
+        {errorBox}
+        <div className="space-y-3">
+          {[
+            { icon: Users, title: 'Join my group', body: 'Someone in your group shared a code with you.', go: () => setStep('2B') },
+            { icon: Plus, title: 'Start a new group', body: 'You will be the first official and invite members.', go: () => setStep(fullName && phone ? '2A' : 1) },
+          ].map(({ icon: Icon, title, body, go }) => (
+            <button
+              key={title}
+              onClick={go}
+              className="w-full flex items-center gap-4 p-5 rounded-[22px] bg-surface border border-line text-left hover:border-line-strong hover:bg-surface-2 transition-colors"
+            >
+              <span className="w-12 h-12 rounded-full bg-sage text-forest flex items-center justify-center shrink-0"><Icon size={22} /></span>
+              <span>
+                <span className="block text-[17px] font-semibold">{title}</span>
+                <span className="block text-[14px] text-ink-2 mt-0.5">{body}</span>
+              </span>
+            </button>
           ))}
         </div>
+      </AuthShell>
+    )
+  }
 
-        {/* Error display */}
-        {error && (
-          <div 
-            className="rounded-xl p-4 
-              mb-5 text-[14px]"
-            style={{
-              backgroundColor: '#FEF2F2',
-              border: '1px solid #FECACA',
-              color: '#991B1B'
-            }}>
-            {error}
-          </div>
-        )}
+  // Step 1: profile
+  if (step === 1) {
+    return (
+      <AuthShell
+        wide
+        title="Your details"
+        subtitle="Officials see your name and phone number. Your ID number and photo stay private and are only used to confirm who you are."
+      >
+        {back(0)}
+        {progress}
+        {errorBox}
+        <div className="space-y-5">
+          <Field label="Full name, as on your ID">
+            <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Grace Wanjiku" autoComplete="name" className={inputClass} />
+          </Field>
 
-        {/* ═══ STEP 0: CHOOSE PATH ═══ */}
-        {step === 0 && (
-          <div>
-            <h1 
-              className="text-[28px] 
-                font-bold text-center 
-                mb-2"
-              style={{ 
-                color: 
-                  'var(--text-primary)' 
-              }}>
-              Welcome to Akibora
-            </h1>
-            <p 
-              className="text-center 
-                mb-8 text-[15px]"
-              style={{ 
-                color: 
-                  'var(--text-secondary)' 
-              }}>
-              What would you like to do?
-            </p>
+          {/* Required: used for sign-in, USSD and M-Pesa payment prompts */}
+          <PhoneVerification
+            currentPhone={phoneVerified ? phone : null}
+            verified={phoneVerified}
+            initialPhone={phoneVerified ? '' : phone}
+            onVerified={(p) => { setPhone(p); setPhoneVerified(true) }}
+            label="Phone number"
+          />
 
-            <div className="space-y-4">
-              <button
-                onClick={() => {
-                  if (fullName && phone) {
-                    setStep('2A')
-                  } else {
-                    setStep(1)
-                  }
-                }}
-                className="w-full p-5 
-                  rounded-2xl border-2 
-                  text-left transition-all
-                  hover:border-[var(--ak-brand-ink)]"
-                style={{
-                  borderColor: 
-                    'var(--border)',
-                  backgroundColor: 
-                    'var(--bg-card)'
-                }}>
-                <div className="flex 
-                  items-center gap-4">
-                  <div 
-                    className="w-12 h-12 
-                      rounded-xl flex 
-                      items-center 
-                      justify-center 
-                      flex-shrink-0"
-                    style={{ 
-                      backgroundColor: 
-                        '#F0FDF4' 
-                    }}>
-                    <MIcon name="add_circle" className="
-                      material-symbols-outlined 
-                      text-[24px] 
-                      text-[var(--ak-brand-ink)]" />
-                  </div>
-                  <div>
-                    <p 
-                      className="text-[16px] 
-                        font-semibold mb-0.5"
-                      style={{ 
-                        color: 
-                          'var(--text-primary)' 
-                      }}>
-                      Create a new group
-                    </p>
-                    <p 
-                      className="text-[13px]"
-                      style={{ 
-                        color: 
-                          'var(--text-secondary)' 
-                      }}>
-                      Start a new chama 
-                      and invite members
-                    </p>
-                  </div>
-                </div>
-              </button>
+          <Field label="County">
+            <select value={county} onChange={e => setCounty(e.target.value)} className={cn(inputClass, 'appearance-none', !county && 'text-ink-3')}>
+              <option value="" disabled>Choose your county</option>
+              {KENYA_COUNTIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
 
-              <button
-                onClick={() => setStep('2B')}
-                className="w-full p-5 
-                  rounded-2xl border-2 
-                  text-left transition-all
-                  hover:border-[var(--ak-brand-ink)]"
-                style={{
-                  borderColor: 
-                    'var(--border)',
-                  backgroundColor: 
-                    'var(--bg-card)'
-                }}>
-                <div className="flex 
-                  items-center gap-4">
-                  <div 
-                    className="w-12 h-12 
-                      rounded-xl flex 
-                      items-center 
-                      justify-center 
-                      flex-shrink-0"
-                    style={{ 
-                      backgroundColor: 
-                        '#F0FDF4' 
-                    }}>
-                    <MIcon name="group_add" className="
-                      material-symbols-outlined 
-                      text-[24px] 
-                      text-[var(--ak-brand-ink)]" />
-                  </div>
-                  <div>
-                    <p 
-                      className="text-[16px] 
-                        font-semibold mb-0.5"
-                      style={{ 
-                        color: 
-                          'var(--text-primary)' 
-                      }}>
-                      Join existing group
-                    </p>
-                    <p 
-                      className="text-[13px]"
-                      style={{ 
-                        color: 
-                          'var(--text-secondary)' 
-                      }}>
-                      Use an invite code 
-                      from your admin
-                    </p>
-                  </div>
-                </div>
-              </button>
+          <Field label="National ID number">
+            <input type="text" inputMode="numeric" value={nationalId} onChange={e => setNationalId(e.target.value)} placeholder="12345678" className={inputClass} />
+          </Field>
+
+          <IdDocumentUpload value={idDocumentPath} onUploaded={setIdDocumentPath} />
+        </div>
+        <Button size="lg" className="w-full mt-8" onClick={handleSaveProfile} disabled={loading}>
+          {loading ? 'Saving…' : 'Continue'}
+        </Button>
+      </AuthShell>
+    )
+  }
+
+  // Step 2A: start a group
+  if (step === '2A') {
+    const ready = !!groupName.trim() && Number(contributionAmount) > 0 && scheduleComplete(schedule)
+    return (
+      <AuthShell aside="officials" wide title="Start your group" subtitle="You will be the first official. You can give other people roles from Members later.">
+        {back(0)}
+        {progress}
+        {errorBox}
+        <div className="space-y-5">
+          <Field label="Group name">
+            <input type="text" value={groupName} onChange={e => setGroupName(e.target.value)} placeholder="Tujenge Women Group" className={inputClass} />
+          </Field>
+          <Field label="Each member contributes" hint="The amount for one contribution date.">
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[15px] text-ink-3">KSh</span>
+              <input type="number" inputMode="numeric" min="1" value={contributionAmount} onChange={e => setContributionAmount(e.target.value)} placeholder="5,000" className={cn(inputClass, 'pl-14')} />
             </div>
+          </Field>
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-medium">When people contribute</span>
+            <ContributionSchedulePicker value={schedule} onChange={setSchedule} />
           </div>
-        )}
+        </div>
 
-        {/* ═══ STEP 1: PROFILE ═══ */}
-        {step === 1 && (
-          <div>
-            <button
-              onClick={() => setStep(0)}
-              className="flex items-center 
-                gap-1 mb-6 text-[14px]"
-              style={{ 
-                color: 
-                  'var(--text-secondary)' 
-              }}>
-              <MIcon name="arrow_back" className="
-                material-symbols-outlined 
-                text-[18px]" />
-              Back
-            </button>
+        <Panel tone="sage" className="mt-6 text-[15px]">
+          <p className="font-semibold">Summary</p>
+          <p className="mt-1.5 leading-relaxed">
+            {groupName.trim() || 'Your group'}: {Number(contributionAmount) > 0 ? formatKsh(Number(contributionAmount)) : 'an amount'} per member,{' '}
+            {scheduleComplete(schedule) ? (schedule.mode === 'custom' ? `on ${scheduleSummary(schedule)}` : scheduleSummary(schedule)) : 'on dates you pick above'}.
+          </p>
+        </Panel>
 
-            <h1 
-              className="text-[24px] 
-                font-bold mb-2"
-              style={{ 
-                color: 
-                  'var(--text-primary)' 
-              }}>
-              Complete your profile
-            </h1>
-            <p 
-              className="text-[14px] mb-6"
-              style={{ 
-                color: 
-                  'var(--text-secondary)' 
-              }}>
-              This is used for your 
-              financial identity record.
-            </p>
+        <Button size="lg" className="w-full mt-6" onClick={handleCreateGroup} disabled={loading || !ready}>
+          {loading ? 'Creating the group…' : 'Create the group'}
+        </Button>
+      </AuthShell>
+    )
+  }
 
-            <div className="space-y-4">
-              
-              <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={e => 
-                    setFullName(
-                      e.target.value
-                    )}
-                  placeholder="Grace Wanjiku"
-                  className="w-full px-4 
-                    py-3 rounded-xl border 
-                    text-[15px]
-                    focus:outline-none 
-                    focus:border-[var(--ak-brand-ink)]"
-                  style={{
-                    backgroundColor: 
-                      'var(--bg-input)',
-                    borderColor: 
-                      'var(--border)',
-                    color: 
-                      'var(--text-primary)'
-                  }}
-                />
-              </div>
-
-              <div>
-                {/* Required: used for sign-in, USSD and M-Pesa payment prompts */}
-                <PhoneVerification
-                  currentPhone={phoneVerified ? phone : null}
-                  verified={phoneVerified}
-                  initialPhone={phoneVerified ? '' : phone}
-                  onVerified={(p) => { setPhone(p); setPhoneVerified(true) }}
-                  label="Phone number"
-                />
-              </div>
-
-              <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  County
-                </label>
-                {/* 
-                  CRITICAL FIX: 
-                  Use value + onChange 
-                  on a native select.
-                  Do NOT use a custom 
-                  dropdown component 
-                  here — the bug is 
-                  in custom select 
-                  components not 
-                  updating state.
-                */}
-                <select
-                  value={county}
-                  onChange={e => {
-                    setCounty(e.target.value)
-                  }}
-                  className="w-full px-4 
-                    py-3 rounded-xl border 
-                    text-[15px]
-                    focus:outline-none 
-                    focus:border-[var(--ak-brand-ink)]
-                    appearance-none"
-                  style={{
-                    backgroundColor: 
-                      'var(--bg-input)',
-                    borderColor: county 
-                      ? '#3FA673' 
-                      : 'var(--border)',
-                    color: county 
-                      ? 'var(--text-primary)' 
-                      : 'var(--text-muted)'
-                  }}>
-                  <option value="" 
-                    disabled>
-                    Select county
-                  </option>
-                  <option value="Nairobi">
-                    Nairobi
-                  </option>
-                  <option value="Mombasa">
-                    Mombasa
-                  </option>
-                  <option value="Kisumu">
-                    Kisumu
-                  </option>
-                  <option value="Nakuru">
-                    Nakuru
-                  </option>
-                  <option value="Eldoret">
-                    Eldoret
-                  </option>
-                  <option value="Kiambu">
-                    Kiambu
-                  </option>
-                  <option value="Machakos">
-                    Machakos
-                  </option>
-                  <option value="Kajiado">
-                    Kajiado
-                  </option>
-                  <option value="Nyeri">
-                    Nyeri
-                  </option>
-                  <option value="Meru">
-                    Meru
-                  </option>
-                  <option value="Other">
-                    Other
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  National ID Number
-                </label>
-                <input
-                  type="text"
-                  value={nationalId}
-                  onChange={e => 
-                    setNationalId(
-                      e.target.value
-                    )}
-                  placeholder="12345678"
-                  className="w-full px-4 
-                    py-3 rounded-xl border 
-                    text-[15px]
-                    focus:outline-none 
-                    focus:border-[var(--ak-brand-ink)]"
-                  style={{
-                    backgroundColor: 
-                      'var(--bg-input)',
-                    borderColor: 
-                      'var(--border)',
-                    color: 
-                      'var(--text-primary)'
-                  }}
-                />
-              </div>
-
-              <div>
-                <IdDocumentUpload value={idDocumentPath} onUploaded={setIdDocumentPath} />
-              </div>
-
-            </div>
-
-            <button
-              onClick={handleSaveProfile}
-              disabled={loading}
-              className="w-full mt-6 
-                py-4 rounded-xl 
-                text-[16px] font-semibold 
-                bg-[var(--ak-solid)] text-white
-                hover:bg-[var(--ak-solid)]
-                disabled:opacity-50
-                transition-colors">
-              {loading 
-                ? 'Saving...' 
-                : 'Continue'}
-            </button>
-          </div>
-        )}
-
-        {/* ═══ STEP 2A: CREATE GROUP ═══ */}
-        {step === '2A' && (
-          <div>
-            <button
-              onClick={() => setStep(0)}
-              className="flex items-center 
-                gap-1 mb-6 text-[14px]"
-              style={{ 
-                color: 
-                  'var(--text-secondary)' 
-              }}>
-              <MIcon name="arrow_back" className="
-                material-symbols-outlined 
-                text-[18px]" />
-              Back
-            </button>
-
-            <h1 
-              className="text-[24px] 
-                font-bold mb-2"
-              style={{ 
-                color: 
-                  'var(--text-primary)' 
-              }}>
-              Create your group
-            </h1>
-            <p 
-              className="text-[14px] mb-6"
-              style={{ 
-                color: 
-                  'var(--text-secondary)' 
-              }}>
-              You will be the admin 
-              (Chairlady/Chairman).
-            </p>
-
-            <div className="space-y-4">
-
-              <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  Group Name
-                </label>
-                <input
-                  type="text"
-                  value={groupName}
-                  onChange={e => 
-                    setGroupName(
-                      e.target.value
-                    )}
-                  placeholder="Nairobi Women Investment Group"
-                  className="w-full px-4 
-                    py-3 rounded-xl border 
-                    text-[15px]
-                    focus:outline-none 
-                    focus:border-[var(--ak-brand-ink)]"
-                  style={{
-                    backgroundColor: 
-                      'var(--bg-input)',
-                    borderColor: 
-                      groupName 
-                        ? '#3FA673' 
-                        : 'var(--border)',
-                    color: 
-                      'var(--text-primary)'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  Contribution amount (KSh)
-                </label>
-                <div className="flex">
-                  <div 
-                    className="flex 
-                      items-center px-3 
-                      rounded-l-xl border 
-                      border-r-0 
-                      text-[14px]"
-                    style={{
-                      backgroundColor: 
-                        'var(--bg-hover)',
-                      borderColor: 
-                        'var(--border)',
-                      color: 
-                        'var(--text-secondary)'
-                    }}>
-                    KSh
-                  </div>
-                  <input
-                    type="number"
-                    value={contributionAmount}
-                    onChange={e => {
-                      setContributionAmount(
-                        e.target.value
-                      )
-                    }}
-                    placeholder="5000"
-                    min="1"
-                    className="flex-1 
-                      px-4 py-3 
-                      rounded-r-xl border 
-                      text-[15px]
-                      focus:outline-none 
-                      focus:border-[var(--ak-brand-ink)]"
-                    style={{
-                      backgroundColor: 
-                        'var(--bg-input)',
-                      borderColor: 
-                        contributionAmount 
-                          ? '#3FA673' 
-                          : 'var(--border)',
-                      color: 
-                        'var(--text-primary)'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <span
-                  className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                  style={{ color: 'var(--text-secondary)' }}>
-                  Contribution schedule
-                </span>
-                <ContributionSchedulePicker value={schedule} onChange={setSchedule} />
-              </div>
-
-              <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  Meeting Day of Month
-                  <span 
-                    className="ml-1 
-                      normal-case 
-                      font-normal">
-                    (optional)
-                  </span>
-                </label>
-                <select
-                  value={meetingDay}
-                  onChange={e => 
-                    setMeetingDay(
-                      e.target.value
-                    )}
-                  className="w-full px-4 
-                    py-3 rounded-xl border 
-                    text-[15px]
-                    focus:outline-none 
-                    focus:border-[var(--ak-brand-ink)]
-                    appearance-none"
-                  style={{
-                    backgroundColor: 
-                      'var(--bg-input)',
-                    borderColor: 
-                      'var(--border)',
-                    color: 
-                      'var(--text-primary)'
-                  }}>
-                  {Array.from(
-                    { length: 28 }, 
-                    (_, i) => i + 1
-                  ).map(day => (
-                    <option 
-                      key={day} 
-                      value={day}>
-                      {day}{
-                        day === 1 ? 'st' 
-                        : day === 2 ? 'nd' 
-                        : day === 3 ? 'rd' 
-                        : 'th'
-                      } of every month
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label 
-                  className="block 
-                    text-[11px] 
-                    font-semibold 
-                    uppercase 
-                    tracking-wider 
-                    mb-1.5"
-                  style={{ 
-                    color: 
-                      'var(--text-secondary)' 
-                  }}>
-                  Group Description
-                  <span 
-                    className="ml-1 
-                      normal-case 
-                      font-normal">
-                    (optional)
-                  </span>
-                </label>
-                <textarea
-                  value={groupDescription}
-                  onChange={e => 
-                    setGroupDescription(
-                      e.target.value
-                    )}
-                  placeholder="Tell members what this group is about..."
-                  rows={3}
-                  className="w-full px-4 
-                    py-3 rounded-xl border 
-                    text-[15px] resize-none
-                    focus:outline-none 
-                    focus:border-[var(--ak-brand-ink)]"
-                  style={{
-                    backgroundColor: 
-                      'var(--bg-input)',
-                    borderColor: 
-                      'var(--border)',
-                    color: 
-                      'var(--text-primary)'
-                  }}
-                />
-              </div>
-
-            </div>
-
-            {/* Live field status — 
-                shows what is filled 
-                so admin can see 
-                exactly what is missing */}
-            <div 
-              className="mt-4 p-3 
-                rounded-xl text-[12px]"
-              style={{
-                backgroundColor: 
-                  'var(--bg-subtle)'
-              }}>
-              <div className="flex 
-                items-center gap-2 mb-1">
-                <span style={{ 
-                  color: groupName 
-                    ? '#3FA673' 
-                    : 'var(--text-muted)' 
-                }}>
-                  {groupName ? '✓' : '○'} 
-                  Group name
-                  {groupName && 
-                    `: ${groupName}`}
-                </span>
-              </div>
-              <div className="flex 
-                items-center gap-2 mb-1">
-                <span style={{ 
-                  color: 
-                    contributionAmount 
-                      ? '#3FA673' 
-                      : 'var(--text-muted)' 
-                }}>
-                  {contributionAmount 
-                    ? '✓' : '○'} 
-                  Amount
-                  {contributionAmount && 
-                    `: KSh ${contributionAmount}`}
-                </span>
-              </div>
-              <div className="flex 
-                items-center gap-2">
-                <span style={{
-                  color: scheduleComplete(schedule)
-                    ? '#3FA673'
-                    : 'var(--text-muted)'
-                }}>
-                  {scheduleComplete(schedule) ? '✓' : '○'}{' '}
-                  Schedule: {scheduleSummary(schedule)}
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleCreateGroup}
-              disabled={
-                loading || 
-                !groupName.trim() || 
-                !contributionAmount
-              }
-              className="w-full mt-6 
-                py-4 rounded-xl 
-                text-[16px] font-semibold 
-                bg-[var(--ak-solid)] text-white
-                hover:bg-[var(--ak-solid)]
-                disabled:opacity-50
-                disabled:cursor-not-allowed
-                transition-colors">
-              {loading ? (
-                <span className="flex 
-                  items-center 
-                  justify-center gap-2">
-                  <div className="w-4 
-                    h-4 rounded-full 
-                    border-2 
-                    border-white/30 
-                    border-t-white 
-                    animate-spin" />
-                  Creating group...
-                </span>
-              ) : 'Create Group'}
-            </button>
-          </div>
-        )}
-
-        {/* ═══ STEP 2B: JOIN GROUP ═══ */}
-        {step === '2B' && (
-          <div>
-            <button
-              onClick={() => setStep(0)}
-              className="flex items-center 
-                gap-1 mb-6 text-[14px]"
-              style={{ 
-                color: 
-                  'var(--text-secondary)' 
-              }}>
-              <MIcon name="arrow_back" className="
-                material-symbols-outlined 
-                text-[18px]" />
-              Back
-            </button>
-
-            <h1 
-              className="text-[24px] 
-                font-bold mb-2"
-              style={{ 
-                color: 
-                  'var(--text-primary)' 
-              }}>
-              Join a group
-            </h1>
-            <p 
-              className="text-[14px] mb-6"
-              style={{ 
-                color: 
-                  'var(--text-secondary)' 
-              }}>
-              Enter the invite code 
-              your admin sent you.
-            </p>
-
-            <div>
-              <label 
-                className="block 
-                  text-[11px] 
-                  font-semibold 
-                  uppercase 
-                  tracking-wider 
-                  mb-1.5"
-                style={{ 
-                  color: 
-                    'var(--text-secondary)' 
-                }}>
-                Invite Code
-              </label>
-              <input
-                type="text"
-                value={inviteCode}
-                onChange={e => 
-                  setInviteCode(
-                    e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9-]/g, '')
-                      .slice(0, 14)
-                  )}
-                placeholder="e.g. SC4829"
-                className="w-full px-4 
-                  py-4 rounded-xl border
-                  text-[24px] font-bold 
-                  font-mono tracking-[0.3em]
-                  text-center uppercase
-                  focus:outline-none 
-                  focus:border-[var(--ak-brand-ink)]"
-                style={{
-                  backgroundColor: 
-                    'var(--bg-input)',
-                  borderColor: 
-                    inviteCode 
-                      ? '#3FA673' 
-                      : 'var(--border)',
-                  color: 
-                    'var(--text-primary)'
-                }}
-              />
-            </div>
-
-            <button
-              onClick={handleJoinGroup}
-              disabled={
-                loading || 
-                !inviteCode.trim()
-              }
-              className="w-full mt-6 
-                py-4 rounded-xl 
-                text-[16px] font-semibold 
-                bg-[var(--ak-solid)] text-white
-                hover:bg-[var(--ak-solid)]
-                disabled:opacity-50
-                transition-colors">
-              {loading 
-                ? 'Joining...' 
-                : 'Join Group'}
-            </button>
-          </div>
-        )}
-
-      </div>
-    </div>
+  // Step 2B: join with a code
+  return (
+    <AuthShell title="Join your group" subtitle="Type the group code your chair or treasurer shared. An official approves each new member.">
+      {back(0)}
+      {progress}
+      {errorBox}
+      <Field label="Group code">
+        <input
+          type="text"
+          value={inviteCode}
+          onChange={e => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 14))}
+          placeholder="TUJ-7Q4K"
+          autoCapitalize="characters"
+          spellCheck={false}
+          className={cn(inputClass, 'h-16 text-center font-mono text-[26px] tracking-[0.18em] uppercase')}
+        />
+      </Field>
+      <Button size="lg" className="w-full mt-6" onClick={handleJoinGroup} disabled={loading || !inviteCode.trim()}>
+        {loading ? 'Sending your request…' : 'Join the group'}
+      </Button>
+      <p className="mt-6 text-[14px] text-ink-3">
+        No code? Ask an official in your group, or <Link href="/contact" className="underline underline-offset-4 text-ink-2 hover:text-ink">contact us</Link>.
+      </p>
+    </AuthShell>
   )
 }

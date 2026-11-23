@@ -1,125 +1,80 @@
-import LandingNav from "@/components/LandingNav";
-import LandingFooter from "@/components/LandingFooter";
+import Link from 'next/link';
+import { LegalPage } from '@/components/landing/LegalPage';
+import { TableWrap, tableClass } from '@/components/ui';
+import { SITE } from '@/lib/site';
 
 export const metadata = {
-  title: "Cookie Policy | Akibora",
-  description: "Cookie Policy for using the Akibora platform.",
+  title: 'Cookies | Akibora',
+  description: 'The cookies and browser storage Akibora uses, and why.',
 };
 
-export default function CookiePage() {
-  const sections = [
-    {
-      title: "1. What are cookies",
-      content: (
-        <p>
-          Cookies are small text files stored on your device when you visit a website. They help the website remember information about your visit.
-        </p>
-      )
-    },
-    {
-      title: "2. Cookies we use",
-      content: (
-        <div className="overflow-x-auto mt-4">
-          <table className="w-full border-collapse text-left border border-[var(--ak-line)]">
-            <thead className="bg-[var(--ak-surface-2)]">
-              <tr>
-                <th className="border-b border-[var(--ak-line)] p-4 text-[var(--text-primary)] font-bold">Name</th>
-                <th className="border-b border-[var(--ak-line)] p-4 text-[var(--text-primary)] font-bold">Purpose</th>
-                <th className="border-b border-[var(--ak-line)] p-4 text-[var(--text-primary)] font-bold">Duration</th>
-                <th className="border-b border-[var(--ak-line)] p-4 text-[var(--text-primary)] font-bold">Can you opt out</th>
-              </tr>
-            </thead>
-            <tbody className="text-[var(--ak-text-2)]">
-              <tr>
-                <td className="border-b border-[var(--ak-line)] p-4 font-mono text-sm">session_token</td>
-                <td className="border-b border-[var(--ak-line)] p-4">Keeps you logged in</td>
-                <td className="border-b border-[var(--ak-line)] p-4">Session</td>
-                <td className="border-b border-[var(--ak-line)] p-4 font-bold text-[var(--ak-brand-ink)]">No, essential</td>
-              </tr>
-              <tr>
-                <td className="border-b border-[var(--ak-line)] p-4 font-mono text-sm">preferences</td>
-                <td className="border-b border-[var(--ak-line)] p-4">Remembers your settings</td>
-                <td className="border-b border-[var(--ak-line)] p-4">1 year</td>
-                <td className="border-b border-[var(--ak-line)] p-4 font-bold text-[var(--ak-brand-ink)]">No, essential</td>
-              </tr>
-              <tr>
-                <td className="border-b border-[var(--ak-line)] p-4 font-mono text-sm">analytics</td>
-                <td className="border-b border-[var(--ak-line)] p-4">Understands how platform is used</td>
-                <td className="border-b border-[var(--ak-line)] p-4">90 days</td>
-                <td className="border-b border-[var(--ak-line)] p-4">Yes</td>
-              </tr>
-              <tr>
-                <td className="border-b border-[var(--ak-line)] p-4 font-mono text-sm">marketing</td>
-                <td className="border-b border-[var(--ak-line)] p-4">Not currently used</td>
-                <td className="border-b border-[var(--ak-line)] p-4">N/A</td>
-                <td className="border-b border-[var(--ak-line)] p-4">N/A</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )
-    },
-    {
-      title: "3. Essential cookies",
-      content: (
-        <p>
-          These cookies are required for Akibora to function. Without them you cannot log in or use the platform. They cannot be disabled.
-        </p>
-      )
-    },
-    {
-      title: "4. Analytics cookies",
-      content: (
-        <p>
-          We use analytics to understand which features members use most, where people have difficulty, and how to improve the platform. Analytics data is anonymised and not linked to your identity. You can opt out in your browser settings.
-        </p>
-      )
-    },
-    {
-      title: "5. Managing cookies",
-      content: (
-        <>
-          <p className="mb-4">
-            You can control cookies through your browser settings. Instructions:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 my-4 text-[var(--ak-text-2)]">
-            <li><strong>Chrome:</strong> Settings, Privacy and Security, Cookies</li>
-            <li><strong>Safari:</strong> Settings, Safari, Privacy</li>
-            <li><strong>Firefox:</strong> Settings, Privacy and Security</li>
-          </ul>
-          <p>
-            Note that disabling essential cookies will prevent you from using Akibora.
-          </p>
-        </>
-      )
-    }
-  ];
+// Keep this list in step with the code: every cookie and storage key Akibora sets.
+const ITEMS: [string, string, string, string][] = [
+  ['sb-…-auth-token', 'Cookie', 'Keeps you signed in. Set by Supabase, our sign-in provider.', 'Until you sign out'],
+  ['active_chama_id', 'Cookie', 'Which group you have open, so pages load the right one.', '30 days'],
+  ['theme', 'Browser storage', 'Light or dark mode.', 'Until you clear it'],
+  ['sc_last_chama_id', 'Browser storage', 'Opens the group you used last.', 'Until you clear it'],
+  ['sc_pending_group', 'Browser storage', 'Holds a new group’s details while you confirm your email.', 'Removed once the group is created'],
+  ['sc_pending_join_code', 'Browser storage', 'Holds a group code while you finish signing up.', 'Removed once you join'],
+  ['sc_hamster_seen_v1', 'Browser storage', 'Remembers that you have seen the welcome tour.', 'Until you clear it'],
+  ['ak_insight_hidden', 'Browser storage', 'Remembers that you hid a tip on your overview.', 'Until you clear it'],
+];
 
+export default function CookiesPage() {
   return (
-    <div className="min-h-screen bg-[var(--ak-surface-2)] flex flex-col font-inter text-on-surface">
-      <LandingNav />
-
-      <main className="flex-1 py-16 px-6">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-[40px] font-geist font-bold text-[var(--text-primary)] mb-2">Cookie Policy</h1>
-          <p className="text-body-sm text-[var(--ak-text-2)] mb-10">Last updated: June 2025</p>
-
-          <div className="space-y-12">
-            {sections.map((section, idx) => (
-              <section key={idx}>
-                <h2 className="text-[24px] font-geist font-bold text-[var(--text-primary)] mb-4">
-                  {section.title}
-                </h2>
-                <div className="text-[16px] text-[var(--ak-text-2)] leading-relaxed">
-                  {section.content}
-                </div>
-              </section>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      <LandingFooter />
-    </div>
+    <LegalPage
+      title="Cookies"
+      updated="23 November 2026"
+      intro={<p>Akibora only stores what it needs to keep you signed in and remember your choices. No advertising cookies, no analytics cookies, no tracking across other sites.</p>}
+      sections={[
+        {
+          id: 'list',
+          title: 'Everything we store',
+          body: (
+            <TableWrap>
+              <table className={tableClass}>
+                <thead>
+                  <tr><th>Name</th><th>Where</th><th>What it does</th><th>How long</th></tr>
+                </thead>
+                <tbody className="text-ink">
+                  {ITEMS.map(([name, where, what, howLong]) => (
+                    <tr key={name}>
+                      <td className="font-mono text-[13px] whitespace-nowrap">{name}</td>
+                      <td className="text-ink-2 whitespace-nowrap">{where}</td>
+                      <td>{what}</td>
+                      <td className="text-ink-2">{howLong}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </TableWrap>
+          ),
+        },
+        {
+          id: 'needed',
+          title: 'Why you can’t turn them off',
+          body: <p>Without the sign-in cookie you can&apos;t stay signed in, and without the group cookie pages don&apos;t know which group to show. The rest only remember small choices, and clearing them is harmless.</p>,
+        },
+        {
+          id: 'clear',
+          title: 'Clearing them',
+          body: (
+            <>
+              <p>Signing out removes the sign-in cookie. To clear everything, use your browser&apos;s settings:</p>
+              <ul>
+                <li><strong>Chrome:</strong> Settings, then Privacy and security, then Delete browsing data.</li>
+                <li><strong>Safari on iPhone:</strong> Settings, then Apps, then Safari, then Clear History and Website Data.</li>
+                <li><strong>Firefox:</strong> Settings, then Privacy and Security, then Cookies and Site Data.</li>
+              </ul>
+            </>
+          ),
+        },
+        {
+          id: 'more',
+          title: 'More',
+          body: <p>How we handle personal data is on the <Link href="/privacy">privacy page</Link>. Questions: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.</p>,
+        },
+      ]}
+    />
   );
 }

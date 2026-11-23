@@ -1,9 +1,11 @@
 'use client'
-import { MIcon } from '@/components/ui/MIcon';
+import { ChevronRight } from 'lucide-react'
+import { AuthShell } from '@/components/auth/AuthShell'
+import { Avatar, Chip, formatKsh } from '@/components/ui'
+import { ROLE_LABEL } from '@/components/shell/nav'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
-import Image from 'next/image'
 
 export default function SelectGroupPage() {
   const supabase = getSupabaseBrowser()
@@ -67,68 +69,38 @@ export default function SelectGroupPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-10 h-10 rounded-full border-4 border-[var(--ak-brand-ink)]/20 border-t-[var(--ak-brand-ink)] animate-spin" />
-      </div>
-    )
+    return <div className="min-h-dvh bg-page" aria-busy="true" />
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-page)' }}>
-      <Image
-        src="/favicon.svg"
-        alt="Akibora"
-        width={48} height={48}
-        className="h-12 w-12 object-contain mb-6"
-      />
-
-      <h1 className="text-[26px] font-bold text-center mb-2" style={{ color: 'var(--text-primary)' }}>
-        Choose a group
-      </h1>
-      <p className="text-[15px] text-center mb-8" style={{ color: 'var(--text-secondary)' }}>
-        You belong to multiple groups. Which would you like to open?
-      </p>
-
-      <div className="w-full max-w-sm space-y-3">
+    <AuthShell aside="none" title="Which group?" subtitle="You belong to more than one. You can switch any time from the group menu.">
+      <ul className="space-y-3">
         {memberships.map(m => {
           const chama = m.chamas_v2 as any
           const isSelecting = selecting === chama.id
-
           return (
-            <button
-              key={m.id}
-              onClick={() => selectGroup(m)}
-              disabled={selecting !== null}
-              className="w-full p-4 rounded-2xl border text-left transition-all hover:border-[var(--ak-brand-ink)] disabled:opacity-60"
-              style={{
-                backgroundColor: 'var(--bg-card)',
-                borderColor: isSelecting ? '#3FA673' : 'var(--border)'
-              }}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[16px] font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-                    {chama.name}
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[12px] px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bg-subtle)', color: 'var(--green)' }}>
-                      {m.role.charAt(0).toUpperCase() + m.role.slice(1)}
-                    </span>
-                    <span className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-                      KSh {chama.contribution_amount?.toLocaleString('en-KE')}/month
-                    </span>
-                  </div>
-                </div>
-                {isSelecting ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-[var(--ak-brand-ink)]/30 border-t-[var(--ak-brand-ink)] animate-spin" />
-                ) : (
-                  <MIcon name="chevron_right"  className="text-[20px]" style={{ color: 'var(--text-muted)' }} />
-                )}
-              </div>
-            </button>
+            <li key={m.id}>
+              <button
+                onClick={() => selectGroup(m)}
+                disabled={selecting !== null}
+                className="w-full flex items-center gap-4 p-4 rounded-[22px] bg-surface border border-line text-left hover:border-line-strong hover:bg-surface-2 transition-colors disabled:opacity-60"
+              >
+                <Avatar name={chama.name} size={48} tone="sage" />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[17px] font-semibold truncate">{chama.name}</span>
+                  <span className="flex items-center gap-2 mt-1 text-[14px] text-ink-2">
+                    <Chip kind="neutral">{(ROLE_LABEL as Record<string, string>)[m.role] ?? m.role}</Chip>
+                    {chama.contribution_amount ? <span>{formatKsh(chama.contribution_amount)} per contribution</span> : null}
+                  </span>
+                </span>
+                {isSelecting
+                  ? <span className="w-5 h-5 rounded-full border-2 border-line border-t-brand animate-spin" aria-label="Opening" />
+                  : <ChevronRight size={20} className="text-ink-3" />}
+              </button>
+            </li>
           )
         })}
-      </div>
-    </div>
+      </ul>
+    </AuthShell>
   )
 }

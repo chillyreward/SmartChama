@@ -39,6 +39,7 @@ export async function proxy(req: NextRequest) {
     pathname === '/admin/login' ||
     pathname === '/admin/signup' ||
     pathname === '/onboarding' ||
+    pathname === '/reset-password' ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||

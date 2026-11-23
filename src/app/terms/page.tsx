@@ -1,222 +1,166 @@
-import LandingNav from "@/components/LandingNav";
-import LandingFooter from "@/components/LandingFooter";
+import Link from 'next/link';
+import { LegalPage } from '@/components/landing/LegalPage';
+import { SITE } from '@/lib/site';
 
 export const metadata = {
-  title: "Terms of Service | Akibora",
-  description: "Terms of Service for using the Akibora platform.",
+  title: 'Terms | Akibora',
+  description: 'The terms for using Akibora.',
 };
 
+const mail = <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>;
+
 export default function TermsPage() {
-  const sections = [
-    {
-      title: "1. Acceptance of Terms",
-      content: (
-        <>
-          <p>
-            By accessing Akibora through our website, mobile application, or USSD interface, you confirm that you are at least 18 years of age, that you have the legal capacity to enter into a binding agreement, and that you agree to comply with these terms.
-          </p>
-          <p>
-            If you are registering a savings group on behalf of other members, you confirm that you have the authority to do so and that you will communicate these terms to all members of your group.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "2. Description of Service",
-      content: (
-        <>
-          <p>
-            Akibora provides a digital platform for informal savings groups to manage contributions, payouts, and financial records. Our services include:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Digital contribution tracking via M-Pesa integration</li>
-            <li>Merry-go-round, welfare fund and penalty tracking</li>
-            <li>Credit Score calculation based on financial behaviour</li>
-            <li>Group wallet management</li>
-            <li>Transaction recording and reporting</li>
-            <li>SMS and in-app notifications</li>
-            <li>Financial identity records for qualifying members</li>
-          </ul>
-          <p>
-            Akibora is a financial management platform. We are not a bank, a lending institution, or a regulated financial services provider. We facilitate the management of group finances but do not hold, guarantee, or insure funds.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "3. Account Registration",
-      content: (
-        <>
-          <p>
-            To use Akibora, you must create an account with a valid phone number and email address. You are responsible for maintaining the confidentiality of your login credentials. You must not share your password with anyone, including other members of your group.
-          </p>
-          <p>
-            You must provide accurate and truthful information during registration. Akibora reserves the right to suspend or terminate accounts where false information has been provided.
-          </p>
-          <p>
-            Each person may only hold one account on Akibora. Creating multiple accounts to circumvent group rules or platform policies is strictly prohibited.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "4. Group Administration",
-      content: (
-        <>
-          <p>
-            The person who creates a group on Akibora is designated as the Chairlady or Administrator. This person is responsible for:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Inviting and managing group members</li>
-            <li>Setting and enforcing group rules including contribution amounts, due dates, and penalties</li>
-            <li>Maintaining accurate group records</li>
-            <li>Ensuring the group operates in accordance with these terms</li>
-          </ul>
-          <p>
-            Akibora provides tools for group administration but is not responsible for the internal governance decisions of any savings group. Disputes between group members are the responsibility of the group to resolve.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "5. Contributions and Payments",
-      content: (
-        <>
-          <p>
-            All contributions made through Akibora are processed via Safaricom M-Pesa. By initiating a contribution, you authorise Akibora to trigger an M-Pesa payment request to your registered phone number.
-          </p>
-          <p>
-            Akibora does not store your M-Pesa PIN or any payment credentials. Payment processing is handled entirely by Safaricom. Akibora records the confirmation of payment but is not responsible for any M-Pesa transaction failures, delays, or errors caused by Safaricom's systems.
-          </p>
-          <p>
-            All contribution records are stored permanently and cannot be deleted once confirmed. This is by design to ensure the integrity of the group's financial history.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "6. Group Funds",
-      content: (
-        <>
-          <p>
-            Your group's money is held in the group's own M-Pesa, bank or SACCO accounts. Akibora does not hold members' money and does not provide credit of any kind.
-          </p>
-          <p>
-            We provide tools to record contributions, merry-go-round payouts, welfare support and penalties agreed by the group. All decisions about how the group uses its money are made by the group's administrators, not by Akibora.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "7. Credit Scores and Financial Identity",
-      content: (
-        <>
-          <p>
-            Akibora calculates a Credit Score for each member based on their contribution consistency, contribution streak, group tenure, and participation rate. This score is an indication of financial reliability within the group context.
-          </p>
-          <p>
-            Credit Scores are not a credit rating and are not regulated by the Central Bank of Kenya or any financial authority. They are an internal metric provided for informational purposes.
-          </p>
-          <p>
-            Members may choose to share their Credit Score and contribution history with third-party financial institutions through Akibora's consent-based lender visibility feature. Akibora does not guarantee that any lender will extend credit based on this information.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "8. Privacy and Data",
-      content: (
-        <>
-          <p>
-            Akibora collects and processes personal data as described in our Privacy Policy. By using Akibora, you consent to this processing.
-          </p>
-          <p>
-            Your contribution records are visible to the administrators of your savings group. Other group members can see contribution statuses.
-          </p>
-          <p>
-            You may request a copy of your data or request deletion of your account at any time by contacting <a href="mailto:privacy@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">privacy@akibora.co.ke</a>. Note that contribution and transaction records that form part of a group's financial history cannot be deleted as they affect other members' records.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "9. Acceptable Use",
-      content: (
-        <>
-          <p>
-            You must not use Akibora to:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Record fraudulent contributions or transactions</li>
-            <li>Create a savings group for the purpose of collecting funds without the intention to distribute them</li>
-            <li>Impersonate another person or group administrator</li>
-            <li>Attempt to access another member's account without authorisation</li>
-            <li>Use the platform to facilitate money laundering or any other illegal financial activity</li>
-            <li>Reverse engineer, copy, or redistribute any part of our platform or software</li>
-          </ul>
-          <p>
-            Violation of these terms may result in immediate account suspension and referral to relevant authorities.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "10. Limitation of Liability",
-      content: (
-        <>
-          <p>
-            Akibora provides its platform on an as-is basis. We do not guarantee that the service will be available at all times or that it will be error-free.
-          </p>
-          <p>
-            Akibora is not liable for:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Losses arising from M-Pesa transaction failures</li>
-            <li>Disputes between group members</li>
-            <li>Decisions made by group administrators regarding payouts or member management</li>
-            <li>Loss of data caused by events outside our control</li>
-            <li>Any indirect or consequential losses arising from use of the platform</li>
-          </ul>
-          <p>
-            Our total liability to any user shall not exceed the amount paid by that user to Akibora in the 12 months preceding the event giving rise to the claim.
-          </p>
-          <p className="mt-6">
-            For questions about these terms, contact <a href="mailto:legal@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">legal@akibora.co.ke</a>
-          </p>
-        </>
-      )
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-[var(--ak-surface-2)] flex flex-col font-inter text-on-surface">
-      <LandingNav />
-
-      <main className="flex-1 py-16 px-6">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-[40px] font-geist font-bold text-[var(--ak-text)] mb-2">Terms of Service</h1>
-          <p className="text-body-sm text-[var(--ak-text-2)] mb-10">Last updated: June 2025</p>
-
-          <p className="text-[18px] text-[var(--ak-text-2)] leading-relaxed mb-12">
-            These Terms of Service govern your use of Akibora, operated by Akibora Technologies Ltd, a company registered in Kenya. By creating an account or using our platform, you agree to these terms in full. Please read them carefully before proceeding.
-          </p>
-
-          <div className="space-y-12">
-            {sections.map((section, idx) => (
-              <section key={idx}>
-                <h2 className="text-[24px] font-geist font-bold text-[var(--ak-text)] mb-4">
-                  {section.title}
-                </h2>
-                <div className="text-[16px] text-[var(--ak-text-2)] leading-relaxed space-y-4">
-                  {section.content}
-                </div>
-              </section>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      <LandingFooter />
-    </div>
+    <LegalPage
+      title="Terms"
+      updated="23 November 2026"
+      intro={
+        <p>
+          These terms cover your use of Akibora on the web, in the app and by USSD. By creating an account or using
+          Akibora you agree to them. Akibora is in early access and has not launched publicly, so features and these
+          terms may change. If a change affects you, we&apos;ll say so in the app.
+        </p>
+      }
+      sections={[
+        {
+          id: 'who',
+          title: 'Who can use Akibora',
+          body: (
+            <>
+              <p>You must be 18 or older and able to agree to these terms.</p>
+              <p>If you start a group, you confirm you are allowed to set it up for its members and that you will tell them about these terms.</p>
+            </>
+          ),
+        },
+        {
+          id: 'what',
+          title: 'What Akibora does, and doesn’t',
+          body: (
+            <>
+              <p>Akibora is a record-keeping tool for savings groups. It helps you:</p>
+              <ul>
+                <li>Collect and record contributions by M-Pesa, and record cash payments.</li>
+                <li>Run a merry-go-round, a welfare fund and penalties.</li>
+                <li>Agree on withdrawals as a group.</li>
+                <li>Keep a shared, readable history of every transaction.</li>
+                <li>Send reminders by SMS and in the app.</li>
+                <li>Work out each member&apos;s trust score and download a credit passport.</li>
+              </ul>
+              <p>
+                <strong>Akibora is not a bank, a lender or a licensed financial provider.</strong> Your group&apos;s money stays in
+                the group&apos;s own M-Pesa, bank or SACCO accounts. We don&apos;t hold, guarantee or insure it, and we don&apos;t
+                lend money.
+              </p>
+            </>
+          ),
+        },
+        {
+          id: 'account',
+          title: 'Your account',
+          body: (
+            <>
+              <p>You need a working phone number. Keep your password to yourself, including from other members of your group.</p>
+              <p>Give true details when you sign up. We may suspend accounts set up with false details.</p>
+              <p>One account per person. Don&apos;t create extra accounts to get around a group&apos;s rules.</p>
+            </>
+          ),
+        },
+        {
+          id: 'officials',
+          title: 'Officials',
+          body: (
+            <>
+              <p>The person who starts a group is its first official. Officials (chair, treasurer, secretary, admin) are responsible for:</p>
+              <ul>
+                <li>Approving and managing members.</li>
+                <li>Setting the group&apos;s rules: contribution amounts, due dates, penalties.</li>
+                <li>Recording cash payments accurately.</li>
+                <li>Running the group in line with these terms.</li>
+              </ul>
+              <p>Akibora gives officials the tools, but the group decides how it is run. Disagreements between members are for the group to settle.</p>
+            </>
+          ),
+        },
+        {
+          id: 'payments',
+          title: 'Contributions and payments',
+          body: (
+            <>
+              <p>When you pay through Akibora, we ask M-Pesa to send a payment prompt to your phone. You approve it with your own PIN, which we never see.</p>
+              <p>Safaricom processes M-Pesa payments. We record the confirmation, but we aren&apos;t responsible for failures or delays on Safaricom&apos;s side.</p>
+              <p>Confirmed contributions can&apos;t be deleted. That keeps the group&apos;s history trustworthy for everyone in it.</p>
+            </>
+          ),
+        },
+        {
+          id: 'trust',
+          title: 'Trust scores and the credit passport',
+          body: (
+            <>
+              <p>
+                Each member&apos;s trust score comes from their own record in the group: how often they pay on time, how long
+                they have been a member, and their current run of on-time payments.
+              </p>
+              <p>
+                It is not a credit rating, and no financial regulator oversees it. Your credit passport is a PDF of your
+                record that you download and give to whoever you choose. We don&apos;t promise that any lender will accept it.
+              </p>
+            </>
+          ),
+        },
+        {
+          id: 'data',
+          title: 'Your data',
+          body: (
+            <p>
+              We handle personal data as the <Link href="/privacy">privacy page</Link> describes. Your officials see your
+              contribution history; other members see whether you have paid. You can ask for a copy of your data or delete
+              your account at any time, but records that are part of the group&apos;s shared history stay, without your
+              contact details.
+            </p>
+          ),
+        },
+        {
+          id: 'use',
+          title: 'What you must not do',
+          body: (
+            <>
+              <ul>
+                <li>Record false contributions or transactions.</li>
+                <li>Start a group to collect money you don&apos;t intend to pay back out.</li>
+                <li>Pretend to be another person or an official.</li>
+                <li>Get into someone else&apos;s account without permission.</li>
+                <li>Use Akibora for money laundering or anything else illegal.</li>
+                <li>Copy, reverse engineer or resell Akibora.</li>
+              </ul>
+              <p>We may suspend accounts that break these rules, and report illegal activity to the authorities.</p>
+            </>
+          ),
+        },
+        {
+          id: 'liability',
+          title: 'Limits on our responsibility',
+          body: (
+            <>
+              <p>Akibora is provided as it is. We work to keep it running and correct, but we can&apos;t promise it will always be available or free of errors.</p>
+              <p>We are not responsible for:</p>
+              <ul>
+                <li>Losses from M-Pesa failures.</li>
+                <li>Disagreements between members.</li>
+                <li>Decisions officials make about payouts or members.</li>
+                <li>Data lost through events outside our control.</li>
+                <li>Indirect losses from using Akibora.</li>
+              </ul>
+              <p>Our total responsibility to you is limited to what you paid Akibora in the 12 months before the problem.</p>
+            </>
+          ),
+        },
+        {
+          id: 'contact',
+          title: 'Contact',
+          body: <p>Questions about these terms: {mail}.</p>,
+        },
+      ]}
+    />
   );
 }

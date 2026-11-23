@@ -66,11 +66,11 @@ export default function ContributionScheduleSettings({ chamaId, onSaved }: { cha
   const next = current ? nextDueDate(current) : null
 
   return (
-    <section className="space-y-4 pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
+    <section className="space-y-4 pt-6 mt-6 border-t border-line">
       <div>
         <h2 className="font-display font-normal text-[22px] text-[var(--text-main)] ">Contribution schedule</h2>
         {current && (
-          <p className="text-[13px] text-[var(--text-muted)] mt-1">
+          <p className="text-[13px] text-ink-3 mt-1">
             Now: {describeSchedule(current)}
             {next ? ` · next due ${prettyDate(next)}` : ' · no upcoming date'}
           </p>
@@ -80,11 +80,11 @@ export default function ContributionScheduleSettings({ chamaId, onSaved }: { cha
       {current ? (
         <ContributionSchedulePicker value={value} onChange={setValue} />
       ) : (
-        <div className="h-40 rounded-xl bg-gray-100 dark:bg-[var(--ak-surface)] animate-pulse" />
+        <div className="h-40 rounded-[14px] bg-raised animate-pulse" />
       )}
 
       {message && (
-        <p className={`text-[13px] ${message.ok ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`} role={message.ok ? 'status' : 'alert'}>
+        <p className={`text-[13px] ${message.ok ? 'text-brand' : 'text-danger'}`} role={message.ok ? 'status' : 'alert'}>
           {message.text}
         </p>
       )}

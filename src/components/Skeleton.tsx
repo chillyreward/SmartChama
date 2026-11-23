@@ -2,7 +2,7 @@
 
 export function SkeletonCard() {
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 animate-pulse">
+    <div className="bg-[var(--bg-card)] border border-line rounded-[14px] p-6 animate-pulse">
       <div className="h-4 bg-[var(--border)] rounded w-1/3 mb-4" />
       <div className="h-8 bg-[var(--border)] rounded w-2/3 mb-2" />
       <div className="h-3 bg-[var(--border)] rounded w-1/2" />
@@ -12,10 +12,10 @@ export function SkeletonCard() {
 
 export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden animate-pulse">
-      <div className="h-12 bg-[var(--border)] border-b border-[var(--border)]" />
+    <div className="bg-[var(--bg-card)] border border-line rounded-[14px] overflow-hidden animate-pulse">
+      <div className="h-12 bg-[var(--border)] border-b border-line" />
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-14 border-b border-[var(--border)] flex items-center gap-4 px-4">
+        <div key={i} className="h-14 border-b border-line flex items-center gap-4 px-4">
           <div className="h-4 bg-[var(--border)] rounded w-1/4" />
           <div className="h-4 bg-[var(--border)] rounded w-1/6" />
           <div className="h-4 bg-[var(--border)] rounded w-1/5" />

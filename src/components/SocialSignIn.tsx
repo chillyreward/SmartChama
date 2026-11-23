@@ -61,18 +61,18 @@ export default function SocialSignIn({ next = '/dashboard', disabled = false }: 
     }
   }
 
-  const base = 'w-full flex items-center justify-center gap-3 py-3 rounded-xl border text-[15px] font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed'
+  const base = 'w-full flex items-center justify-center gap-3 py-3 rounded-[14px] border text-[15px] font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed'
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" />
-        <span className="text-[12px] font-medium text-[var(--ak-text-3)]">or</span>
-        <div className="flex-1 h-px bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" />
+        <div className="flex-1 h-px bg-line" />
+        <span className="text-[13px] font-medium text-ink-3">or</span>
+        <div className="flex-1 h-px bg-line" />
       </div>
       {enabled.includes('google') && (
         <button type="button" onClick={() => go('google')} disabled={disabled || !!busy}
-          className={`${base} hover:border-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white`}>
+          className={`${base} hover:border-brand bg-surface border-line text-ink`}>
           <GoogleIcon />
           {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
         </button>
@@ -84,7 +84,7 @@ export default function SocialSignIn({ next = '/dashboard', disabled = false }: 
           {busy === 'apple' ? 'Opening Apple…' : 'Continue with Apple'}
         </button>
       )}
-      {error && <p className="text-[13px] text-red-500" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-danger" role="alert">{error}</p>}
     </div>
   )
 }

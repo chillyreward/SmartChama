@@ -19,7 +19,7 @@ export function ChatBot() {
     {
       id: 0,
       from: 'bot',
-      text: 'Hello! I am the Akibora AI Assistant. I can help you with contributions, credit scores, group management, and M-Pesa payments. What would you like to know?',
+      text: 'Hello! I am the Akibora AI Assistant. I can help you with contributions, trust scores, group management, and M-Pesa payments. What would you like to know?',
       time: new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
     }
   ])
@@ -90,6 +90,10 @@ export function ChatBot() {
     'How do I invite members?',
     'Where does money go?'
   ]
+
+  // Keep sign-in, sign-up and setup screens free of the floating button
+  const hidden = ['/login', '/signup', '/admin/login', '/reset-password', '/onboarding', '/select-group', '/verify-identity'].some((p) => pathname === p || pathname.startsWith(p + '/'))
+  if (hidden) return null
 
   return (
     <>

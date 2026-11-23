@@ -1,13 +1,17 @@
 'use client'
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
+import { PublicPage } from '@/components/landing/PublicPage'
+import { Button, ButtonLink, Field, Notice, Panel, inputClass } from '@/components/ui'
+import { SITE } from '@/lib/site'
 
 // Public page linked from Google Play's "Delete account URL" field and from
 // the app. Explains what is deleted and lets a signed-in user delete.
 export default function DeleteAccountPage() {
   const supabase = getSupabaseBrowser()
-  const [email, setEmail] = useState<string | null>(null)
+  // Phone-only accounts may have no email, so track the sign-in separately
+  const [who, setWho] = useState<string | null>(null)
+  const [signedIn, setSignedIn] = useState(false)
   const [checking, setChecking] = useState(true)
   const [confirmText, setConfirmText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -16,7 +20,9 @@ export default function DeleteAccountPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null)
+      const u = data.user
+      setSignedIn(!!u)
+      setWho(u?.email || u?.phone || null)
       setChecking(false)
     })
   }, [supabase])
@@ -40,52 +46,53 @@ export default function DeleteAccountPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-12" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
-      <div className="max-w-xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Delete your Akibora account</h1>
+    <PublicPage
+      cta={false}
+      title="Delete your account"
+      intro="You can do it in the Akibora app (Profile, then Delete account) or on this page. It can't be undone."
+    >
+      <section className="max-w-[1280px] mx-auto px-5 sm:px-8 pb-24 grid lg:grid-cols-[1fr_440px] gap-10 items-start">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Panel>
+            <h2 className="font-display text-[24px]">What we delete</h2>
+            <p className="text-[16px] text-ink-2 mt-3 leading-relaxed">Your name, phone number, email, ID number, county, photo, notification settings, chat messages and notifications. You won&apos;t be able to sign in again.</p>
+          </Panel>
+          <Panel>
+            <h2 className="font-display text-[24px]">What stays</h2>
+            <p className="text-[16px] text-ink-2 mt-3 leading-relaxed">Contributions, penalties and other group records. Your group needs them for its accounts, and financial records must be kept by law. They show as &ldquo;Former member&rdquo;.</p>
+          </Panel>
+          <Panel tone="sage" className="sm:col-span-2">
+            <h2 className="font-display text-[24px]">Before you start</h2>
+            <p className="text-[16px] mt-3 leading-relaxed">Pay any unpaid penalty. If you are the only official of a group that has other members, give your role to someone else first.</p>
+          </Panel>
+        </div>
 
-        <section className="space-y-3 text-[15px]" style={{ color: 'var(--text-secondary)' }}>
-          <p>You can delete your account in the Akibora Android app (Profile → Delete account) or on this page.</p>
-          <p><strong style={{ color: 'var(--text-primary)' }}>What we delete:</strong> your name, phone number, email, national ID, county, occupation, photo, notification token, your chat messages and notifications. You will no longer be able to sign in.</p>
-          <p><strong style={{ color: 'var(--text-primary)' }}>What we keep:</strong> records of contributions, penalties and other group transactions. Your chama needs them for its accounts, and we must keep financial records by law. They stay attached to an anonymous &ldquo;Former member&rdquo;.</p>
-          <p><strong style={{ color: 'var(--text-primary)' }}>Before you can delete:</strong> settle any unpaid penalty, and if you are the only official of a group with other members, hand your role to someone else.</p>
-        </section>
-
-        <div className="rounded-2xl border p-6 space-y-4" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-card)' }}>
+        <Panel className="space-y-5">
           {checking ? (
-            <p>Checking your sign-in…</p>
+            <p className="text-ink-2" aria-busy="true">Checking your sign-in…</p>
           ) : done ? (
-            <p className="font-semibold">Your account has been deleted. You have been signed out.</p>
-          ) : !email ? (
+            <Notice tone="ok" title="Your account is deleted">You have been signed out.</Notice>
+          ) : !signedIn ? (
             <>
-              <p>Sign in first, then come back to this page to delete your account.</p>
-              <Link href="/login?redirect=/account/delete" className="inline-block px-5 py-3 rounded-xl bg-primary text-on-primary font-semibold">Sign in</Link>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Can&apos;t sign in? Email privacy@akibora.co.ke from the address on your account and we will delete it within 30 days.</p>
+              <p className="text-[16px]">Sign in first, then come back here.</p>
+              <ButtonLink href="/login?redirect=/account/delete" size="lg" className="w-full">Sign in</ButtonLink>
+              <p className="text-[14px] text-ink-3">
+                Can&apos;t sign in? Email <a className="underline underline-offset-4" href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a> from the email or phone number on your account and we&apos;ll handle it.
+              </p>
             </>
           ) : (
             <>
-              <p>Signed in as <strong>{email}</strong>. Type <strong>DELETE</strong> to confirm.</p>
-              <label htmlFor="confirm-delete" className="sr-only">Type DELETE to confirm</label>
-              <input
-                id="confirm-delete"
-                value={confirmText}
-                onChange={(e) => setConfirmText(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border bg-transparent"
-                style={{ borderColor: 'var(--border)' }}
-                autoComplete="off"
-              />
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <button
-                onClick={handleDelete}
-                disabled={busy || confirmText.trim() !== 'DELETE'}
-                className="w-full py-3 rounded-xl bg-red-600 text-white font-semibold disabled:opacity-50"
-              >
+              <p className="text-[16px]">Signed in as <strong>{who ?? 'your account'}</strong>.</p>
+              <Field label="Type DELETE to confirm" error={error || undefined}>
+                <input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} className={inputClass} autoComplete="off" autoCapitalize="characters" />
+              </Field>
+              <Button variant="danger" size="lg" className="w-full" onClick={handleDelete} disabled={busy || confirmText.trim() !== 'DELETE'}>
                 {busy ? 'Deleting…' : 'Delete my account'}
-              </button>
+              </Button>
             </>
           )}
-        </div>
-      </div>
-    </main>
+        </Panel>
+      </section>
+    </PublicPage>
   )
 }

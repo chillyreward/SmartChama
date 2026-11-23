@@ -147,7 +147,7 @@ export function MembersSettingsTab({
       <div className="space-y-4">
         {[1, 2, 3].map(i => (
           <div key={i}
-            className="h-16 rounded-xl animate-pulse"
+            className="h-16 rounded-[14px] animate-pulse"
             style={{
               backgroundColor: 'var(--bg-muted)'
             }}
@@ -163,7 +163,7 @@ export function MembersSettingsTab({
       {/* Toast notification */}
       {toast && (
         <div
-          className="fixed top-6 right-6 z-50 px-5 py-3 rounded-xl text-[14px] font-medium shadow-lg transition-all duration-300"
+          className="fixed top-6 right-6 z-50 px-5 py-3 rounded-[14px] text-[14px] font-medium shadow-lg transition-all duration-300"
           style={{
             backgroundColor: '#3FA673',
             color: 'white'
@@ -174,7 +174,7 @@ export function MembersSettingsTab({
 
       {/* ══ INVITE MEMBER CARD ══ */}
       <div
-        className="rounded-2xl p-6"
+        className="rounded-[22px] p-6"
         style={{
           backgroundColor: 'var(--bg-card)',
           border: '1px solid var(--border)'
@@ -205,7 +205,7 @@ export function MembersSettingsTab({
                 setInviteResult(null)
                 setInviteError('')
               }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-[14px] text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 transition-colors">
               <MIcon name="person_add"  className="text-[20px]" />
               Invite Member
             </button>
@@ -215,7 +215,7 @@ export function MembersSettingsTab({
         {/* Invite form */}
         {showInviteForm && (
           <div
-            className="rounded-xl p-5"
+            className="rounded-[14px] p-5"
             style={{
               backgroundColor: 'var(--bg-subtle)',
               border: '1px solid var(--border-strong)'
@@ -226,7 +226,7 @@ export function MembersSettingsTab({
               {/* Name field */}
               <div>
                 <label
-                  className="block text-[11px] font-semibold mb-1.5"
+                  className="block text-[13px] font-semibold mb-1.5"
                   style={{
                     color: 'var(--text-secondary)'
                   }}>
@@ -240,7 +240,7 @@ export function MembersSettingsTab({
                   value={inviteName}
                   onChange={e => setInviteName(e.target.value)}
                   placeholder="Grace Wanjiku"
-                  className="w-full px-4 py-2.5 rounded-xl border text-[14px] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
+                  className="w-full px-4 py-2.5 rounded-[14px] border text-[14px] focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30 focus:ring-1 focus:ring-brand"
                   style={{
                     backgroundColor: 'var(--bg-input)',
                     borderColor: 'var(--border)',
@@ -252,7 +252,7 @@ export function MembersSettingsTab({
               {/* Phone field */}
               <div>
                 <label
-                  className="block text-[11px] font-semibold mb-1.5"
+                  className="block text-[13px] font-semibold mb-1.5"
                   style={{ color: 'var(--text-secondary)' }}>
                   Phone Number
                 </label>
@@ -267,7 +267,7 @@ export function MembersSettingsTab({
                     onChange={e => setInvitePhone(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') handleSendInvite() }}
                     placeholder="712 345 678"
-                    className="flex-1 px-4 py-2.5 rounded-r-xl border text-[14px] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
+                    className="flex-1 px-4 py-2.5 rounded-r-xl border text-[14px] focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30 focus:ring-1 focus:ring-brand"
                     style={{
                       backgroundColor: 'var(--bg-input)',
                       borderColor: 'var(--border)',
@@ -276,14 +276,14 @@ export function MembersSettingsTab({
                     autoFocus
                   />
                 </div>
-                <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-[13px] mt-1" style={{ color: 'var(--text-muted)' }}>
                   The invite code is sent to this number by SMS
                 </p>
               </div>
             </div>
 
             {inviteError && (
-              <div className="rounded-xl p-3 mb-4 text-[13px]"
+              <div className="rounded-[14px] p-3 mb-4 text-[13px]"
                 style={{
                   backgroundColor: 'var(--red-bg)',
                   color: 'var(--red-text)',
@@ -302,7 +302,7 @@ export function MembersSettingsTab({
                   setInviteName('')
                   setInviteError('')
                 }}
-                className="px-5 py-2.5 rounded-xl border text-[14px] font-medium transition-colors"
+                className="px-5 py-2.5 rounded-[14px] border text-[14px] font-medium transition-colors"
                 style={{
                   borderColor: 'var(--border)',
                   color: 'var(--text-primary)',
@@ -313,7 +313,7 @@ export function MembersSettingsTab({
               <button
                 onClick={handleSendInvite}
                 disabled={sending || !invitePhone.trim()}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[14px] text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 {sending ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -334,15 +334,15 @@ export function MembersSettingsTab({
         {/* Show invite result (backup code) */}
         {inviteResult && (
           <div
-            className="rounded-xl p-5 mt-4"
+            className="rounded-[14px] p-5 mt-4"
             style={{
               backgroundColor: '#F0FDF4',
               border: '1px solid #BBF7D0'
             }}>
             <div className="flex items-start gap-3">
-              <MIcon name="check_circle"  className="text-[22px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5" />
+              <MIcon name="check_circle"  className="text-[22px] text-brand flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-[14px] font-semibold text-[var(--ak-brand-ink)] mb-1">
+                <p className="text-[14px] font-semibold text-brand mb-1">
                   {inviteResult.sms_sent ? 'SMS invite sent!' : 'Invite created'}
                 </p>
                 <p className="text-[13px] text-[#15803D]">
@@ -351,7 +351,7 @@ export function MembersSettingsTab({
                     : inviteResult.note || 'Share this invite code manually:'}
                 </p>
                 <div className="mt-3 flex items-center gap-3">
-                  <span className="text-[28px] font-bold tracking-widest text-[var(--ak-brand-ink)] font-mono">
+                  <span className="text-[28px] font-bold tracking-widest text-brand font-mono">
                     {inviteResult.code}
                   </span>
                   <button
@@ -360,12 +360,12 @@ export function MembersSettingsTab({
                       setToast('Code copied!')
                       setTimeout(() => setToast(''), 2000)
                     }}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-medium text-[var(--ak-brand-ink)] bg-white border border-[#BBF7D0] hover:bg-[var(--ak-tint)]">
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] font-medium text-brand bg-white border border-[#BBF7D0] hover:bg-[var(--ak-tint)]">
                     <MIcon name="content_copy"  className="text-[14px]" />
                     Copy
                   </button>
                 </div>
-                <p className="text-[11px] text-[#15803D] mt-2">
+                <p className="text-[13px] text-[#15803D] mt-2">
                   Valid for 48 hours. Member enters this code when signing up.
                 </p>
               </div>
@@ -377,7 +377,7 @@ export function MembersSettingsTab({
 
       {/* ══ CURRENT MEMBERS LIST ══ */}
       <div
-        className="rounded-2xl overflow-hidden"
+        className="rounded-[22px] overflow-hidden"
         style={{
           backgroundColor: 'var(--bg-card)',
           border: '1px solid var(--border)'
@@ -440,7 +440,7 @@ export function MembersSettingsTab({
                     {member.profiles?.full_name || 'Unknown'}
                   </p>
                   <p
-                    className="text-[12px]"
+                    className="text-[13px]"
                     style={{
                       color: 'var(--text-secondary)'
                     }}>
@@ -452,7 +452,7 @@ export function MembersSettingsTab({
               <div className="flex items-center gap-3">
                 {/* Role badge */}
                 <span
-                  className="px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                  className="px-2.5 py-1 rounded-full text-[13px] font-semibold"
                   style={{
                     backgroundColor: ['chairlady', 'admin'].includes(member.role)
                       ? 'var(--bg-subtle)'
@@ -516,7 +516,7 @@ export function MembersSettingsTab({
       {/* ══ PENDING INVITES ══ */}
       {invites.filter(i => i.status === 'pending').length > 0 && (
         <div
-          className="rounded-2xl overflow-hidden"
+          className="rounded-[22px] overflow-hidden"
           style={{
             backgroundColor: 'var(--bg-card)',
             border: '1px solid var(--border)'
@@ -570,14 +570,14 @@ export function MembersSettingsTab({
                         {invite.invited_name || 'Unknown name'}
                       </p>
                       <p
-                        className="text-[12px]"
+                        className="text-[13px]"
                         style={{
                           color: 'var(--text-secondary)'
                         }}>
                         {invite.invited_email}
                       </p>
                       <p
-                        className="text-[11px] mt-1"
+                        className="text-[13px] mt-1"
                         style={{
                           color: isExpired ? 'var(--red)' : 'var(--text-muted)'
                         }}>
@@ -596,7 +596,7 @@ export function MembersSettingsTab({
                           setToast('Code copied!')
                           setTimeout(() => setToast(''), 2000)
                         }}
-                        className="px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-colors"
+                        className="px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors"
                         style={{
                           borderColor: 'var(--border)',
                           color: 'var(--text-secondary)',
@@ -606,7 +606,7 @@ export function MembersSettingsTab({
                       </button>
                       <button
                         onClick={() => handleResendInvite(invite)}
-                        className="px-3 py-1.5 rounded-lg text-[12px] font-medium bg-primary text-on-primary hover:opacity-90 transition-colors">
+                        className="px-3 py-1.5 rounded-lg text-[13px] font-medium bg-primary text-on-primary hover:opacity-90 transition-colors">
                         Resend
                       </button>
                     </div>

@@ -1,214 +1,147 @@
-import LandingNav from "@/components/LandingNav";
-import LandingFooter from "@/components/LandingFooter";
+import Link from 'next/link';
+import { LegalPage } from '@/components/landing/LegalPage';
+import { SITE } from '@/lib/site';
 
 export const metadata = {
-  title: "Privacy Policy | Akibora",
-  description: "Privacy Policy for using the Akibora platform.",
+  title: 'Privacy | Akibora',
+  description: 'What Akibora collects, who can see it, and what you can ask us to do with it.',
 };
 
+const mail = <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>;
+
 export default function PrivacyPage() {
-  const sections = [
-    {
-      title: "1. What data we collect",
-      content: (
-        <>
-          <p className="font-bold text-[var(--ak-text)] mb-2">When you create an account:</p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Full name</li>
-            <li>Phone number (used for M-Pesa)</li>
-            <li>Email address</li>
-            <li>National ID number (for verification)</li>
-            <li>County and occupation</li>
-          </ul>
-
-          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">When you use the platform:</p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Contribution amounts and dates</li>
-            <li>Credit Score and its components</li>
-            <li>Login times and device information</li>
-            <li>SMS delivery records</li>
-          </ul>
-
-          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">From M-Pesa:</p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Payment confirmation details</li>
-            <li>M-Pesa receipt numbers</li>
-            <li>Transaction timestamps</li>
-          </ul>
-          <p>We do not collect or store your M-Pesa PIN.</p>
-        </>
-      )
-    },
-    {
-      title: "2. How we use your data",
-      content: (
-        <>
-          <p className="mb-2">We use your data to:</p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Provide and operate the Akibora platform</li>
-            <li>Record and verify your contributions</li>
-            <li>Calculate your Credit Score</li>
-            <li>Send you payment reminders and confirmations via SMS</li>
-            <li>Allow your group administrator to manage your membership</li>
-            <li>Generate financial identity reports at your request</li>
-            <li>Improve our platform and fix technical issues</li>
-            <li>Comply with legal obligations</li>
-          </ul>
-        </>
-      )
-    },
-    {
-      title: "3. Who can see your data",
-      content: (
-        <>
-          <p className="font-bold text-[var(--ak-text)] mb-2">Your group administrator can see:</p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Your contribution history and status</li>
-            <li>Your Credit Score</li>
-            <li>Your contact details</li>
-          </ul>
-
-          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">Other group members can see:</p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Whether you have paid your contribution</li>
-            <li>Your name and role in the group</li>
-          </ul>
-
-          <p className="mt-6">
-            Akibora staff can access your data only when needed to provide support or investigate a reported issue.
-          </p>
-
-          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">Third parties:</p>
-          <p className="mb-2">
-            We do not sell your data. We share data with third parties only in these circumstances:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Safaricom, to process M-Pesa payments</li>
-            <li>Africa's Talking, to send SMS messages</li>
-            <li>With your explicit consent, with financial institutions you choose to share your record with</li>
-          </ul>
-        </>
-      )
-    },
-    {
-      title: "4. Data storage and security",
-      content: (
-        <>
-          <p>
-            Your data is stored on Supabase infrastructure hosted in secure data centres. We use encryption in transit and at rest. Critical financial records are anchored to a blockchain for tamper-proof verification.
-          </p>
-          <p className="mt-4">
-            We implement row-level security so each user can only access data they are permitted to see. Admin access requires separate multi-factor authentication.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "5. Your rights",
-      content: (
-        <>
-          <p className="mb-2">You have the right to:</p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>Access a copy of all data we hold about you</li>
-            <li>Correct inaccurate personal data</li>
-            <li>Request deletion of your account and personal data</li>
-            <li>Withdraw consent for lender visibility at any time</li>
-            <li>Object to processing of your data in certain circumstances</li>
-            <li>Request a machine-readable export of your data</li>
-          </ul>
-          <p>
-            To exercise any of these rights, contact <a href="mailto:privacy@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">privacy@akibora.co.ke</a>. We will respond within 14 days.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "6. Cookies",
-      content: (
-        <>
-          <p>
-            Akibora uses essential cookies to keep you logged in and maintain your session. We use analytics cookies to understand how the platform is used so we can improve it. You can manage cookie preferences in your browser settings. See our Cookie Policy for full details.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "7. Data retention",
-      content: (
-        <>
-          <p>
-            We retain your personal data for as long as your account is active. Contribution and transaction records that form part of a group's ledger are retained permanently as they affect the integrity of the group's financial history.
-          </p>
-          <p className="mt-4">
-            If you delete your account, your personal details are removed but anonymised transaction records may be retained as part of the group's ledger.
-          </p>
-        </>
-      )
-    },
-    {
-      title: "8. Identity verification (group creators)",
-      content: (
-        <>
-          <p className="mb-2">
-            Before money can leave a group (withdrawals and investments), the person who created it must
-            verify their identity. With your consent we collect your national ID or passport number, photos of the
-            document, and a live selfie.
-          </p>
-          <ul className="list-disc pl-5 space-y-2 my-4">
-            <li>We compare your selfie with the photo on your document using an automated face-comparison service (Amazon Web Services Rekognition) acting on our behalf. If the result is unclear, an Akibora team member checks the images.</li>
-            <li>The images are kept in private storage that only our verification system and authorised staff can open. They are not shown to other members of your group.</li>
-            <li>We use them only to confirm your identity and prevent fraud. We keep them for as long as you run a group and as long as the law requires afterwards, then delete them.</li>
-            <li>You can ask us to delete them by contacting us (see below); your group's payouts will then be locked again.</li>
-          </ul>
-        </>
-      )
-    },
-    {
-      title: "9. Contact",
-      content: (
-        <>
-          <p className="mb-2">
-            For privacy questions or to exercise your rights, contact:<br/>
-            <a href="mailto:privacy@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">privacy@akibora.co.ke</a>
-          </p>
-          <p className="mt-6 text-[var(--ak-text-2)]">
-            Akibora Technologies Ltd<br/>
-            Nairobi, Kenya
-          </p>
-        </>
-      )
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-[var(--ak-surface-2)] flex flex-col font-inter text-on-surface">
-      <LandingNav />
-
-      <main className="flex-1 py-16 px-6">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-[40px] font-geist font-bold text-[var(--ak-text)] mb-2">Privacy Policy</h1>
-          <p className="text-body-sm text-[var(--ak-text-2)] mb-10">Last updated: June 2025</p>
-
-          <p className="text-[18px] text-[var(--ak-text-2)] leading-relaxed mb-12">
-            Akibora Technologies Ltd is committed to protecting your privacy. This policy explains what data we collect, how we use it, and what rights you have over it.
-          </p>
-
-          <div className="space-y-12">
-            {sections.map((section, idx) => (
-              <section key={idx}>
-                <h2 className="text-[24px] font-geist font-bold text-[var(--ak-text)] mb-4">
-                  {section.title}
-                </h2>
-                <div className="text-[16px] text-[var(--ak-text-2)] leading-relaxed">
-                  {section.content}
-                </div>
-              </section>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      <LandingFooter />
-    </div>
+    <LegalPage
+      title="Privacy"
+      updated="23 November 2026"
+      intro={
+        <p>
+          What Akibora collects, who can see it, and what you can ask us to do with it. Akibora is in early access and
+          has not launched publicly. If anything here is unclear, write to {mail}.
+        </p>
+      }
+      sections={[
+        {
+          id: 'collect',
+          title: 'What we collect',
+          body: (
+            <>
+              <p><strong>When you create an account:</strong> your full name, phone number, email address if you give one, county, and national ID number.</p>
+              <p><strong>When you use Akibora:</strong> the contributions, payouts, welfare claims, penalties and withdrawals recorded for your group; messages in your group chat; your trust score and how it was worked out; and when you sign in.</p>
+              <p><strong>From M-Pesa:</strong> the confirmation for each payment, including the M-Pesa receipt number and time. We never see or store your M-Pesa PIN.</p>
+              <p><strong>For identity checks:</strong> photos of your ID or passport and a live selfie. See Identity checks below.</p>
+            </>
+          ),
+        },
+        {
+          id: 'use',
+          title: 'How we use it',
+          body: (
+            <ul>
+              <li>To run your group&apos;s records: contributions, the merry-go-round, welfare, penalties and withdrawals.</li>
+              <li>To work out your trust score from your own payment history in the group.</li>
+              <li>To send reminders and confirmations by SMS and in the app.</li>
+              <li>To let your group&apos;s officials approve and manage members.</li>
+              <li>To make your credit passport PDF when you ask for one.</li>
+              <li>To find and fix problems with Akibora.</li>
+              <li>To meet legal duties.</li>
+            </ul>
+          ),
+        },
+        {
+          id: 'who-sees',
+          title: 'Who can see it',
+          body: (
+            <>
+              <p><strong>Your group&apos;s officials</strong> (chair, treasurer, secretary, admin) see your contribution history, trust score and contact details.</p>
+              <p><strong>Other members of your group</strong> see your name, your role, whether you have paid, and what you write in the group chat.</p>
+              <p><strong>The Akibora team</strong> looks at your data only to give support, review an identity check, or look into a problem you or your group reported.</p>
+              <p><strong>Nobody else, unless you choose.</strong> We don&apos;t sell data. The services below process it for us, only to do their part:</p>
+              <ul>
+                <li>Supabase, which hosts our database and sign-in.</li>
+                <li>Safaricom, to process M-Pesa payments.</li>
+                <li>Africa&apos;s Talking, to send SMS messages.</li>
+                <li>Amazon Web Services, to compare your selfie with your ID photo during an identity check.</li>
+              </ul>
+              <p>Your credit passport is a PDF you download yourself. You decide who gets it; Akibora doesn&apos;t send it to anyone.</p>
+            </>
+          ),
+        },
+        {
+          id: 'security',
+          title: 'How it is protected',
+          body: (
+            <p>
+              Connections to Akibora are encrypted. The database uses row-level security, so each person can only read what
+              their role in their own group allows. ID photos and selfies sit in private storage that only the
+              verification system and the people reviewing it can open. More on our{' '}
+              <Link href="/security">security page</Link>.
+            </p>
+          ),
+        },
+        {
+          id: 'kyc',
+          title: 'Identity checks',
+          body: (
+            <>
+              <p>
+                Before money can leave a group, through withdrawals or investments, the person who started it confirms who
+                they are. With your consent we collect your ID or passport number, photos of the document, and a live selfie.
+              </p>
+              <ul>
+                <li>An automated service (Amazon Web Services Rekognition) compares your selfie with the photo on your document for us. If the result is unclear, a person on the Akibora team looks at the images.</li>
+                <li>The images are never shown to other members of your group.</li>
+                <li>We use them only to confirm your identity and prevent fraud. We keep them while you run a group, and afterwards only as long as the law requires.</li>
+                <li>You can ask us to delete them. Your group&apos;s withdrawals and investments then lock again.</li>
+              </ul>
+            </>
+          ),
+        },
+        {
+          id: 'rights',
+          title: 'What you can ask us to do',
+          body: (
+            <>
+              <ul>
+                <li>Give you a copy of the data we hold about you, in a format a computer can read.</li>
+                <li>Correct details that are wrong.</li>
+                <li>Delete your account and personal details.</li>
+                <li>Stop using your data in a particular way.</li>
+              </ul>
+              <p>Write to {mail}. We aim to reply within 14 days. You can also start an account deletion from the <Link href="/account/delete">delete account page</Link>.</p>
+            </>
+          ),
+        },
+        {
+          id: 'retention',
+          title: 'How long we keep it',
+          body: (
+            <>
+              <p>We keep your personal details while your account is open.</p>
+              <p>
+                Contributions and payouts are part of your group&apos;s shared book, and other members rely on them. If you
+                delete your account we remove your personal details, but those records stay in the group&apos;s history
+                without your contact details.
+              </p>
+            </>
+          ),
+        },
+        {
+          id: 'cookies',
+          title: 'Cookies and storage',
+          body: (
+            <p>
+              We use cookies and your browser&apos;s storage to keep you signed in and remember which group you last opened.
+              We don&apos;t use advertising or analytics cookies. The full list is on the <Link href="/cookies">cookies page</Link>.
+            </p>
+          ),
+        },
+        {
+          id: 'contact',
+          title: 'Contact',
+          body: <p>Privacy questions and requests: {mail}. Akibora, Nairobi, Kenya.</p>,
+        },
+      ]}
+    />
   );
 }

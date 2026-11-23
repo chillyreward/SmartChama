@@ -5,7 +5,7 @@ import {
   Star, MessageSquare, LineChart, Clock, PiggyBank, RefreshCw, ReceiptText, HelpCircle, QrCode, BellRing, Medal, UserCog, LockOpen,
   Flame, Share, UserCheck, History, Siren, Pencil, MonitorSmartphone, Trash2, Copy, Construction, Check, Zap, ArrowUpRight, ArrowRight,
   Home, Wallet, Bell, Settings, LogOut, Heart, Lock, User, Circle, Calendar, Smartphone, Gavel, Scale, Vote, Landmark, CreditCard,
-  Fingerprint, Camera, Upload, KeyRound, Globe, Moon, Sun, Filter, MoreHorizontal, Gift, Handshake, Coins, Target, Award, type LucideIcon,
+  Fingerprint, Camera, Upload, KeyRound, Globe, Moon, Sun, Filter, MoreHorizontal, Gift, Handshake, Coins, Target, Award, WifiOff, Rocket, UserMinus, OctagonAlert, ChevronDown, BellOff, AlarmClock, type LucideIcon,
 } from 'lucide-react';
 import { cn } from './index';
 
@@ -31,6 +31,8 @@ const MAP: Record<string, LucideIcon> = {
   language: Globe, dark_mode: Moon, light_mode: Sun, filter_list: Filter, more_horiz: MoreHorizontal, redeem: Gift, monetization_on: Coins,
   paid: Coins, track_changes: Target, workspace_premium: Award, gpp_bad: ShieldCheck, block: X, grid_view: MoreHorizontal,
   settings_accessibility: User, chat_bubble: MessageCircle, group_work: Users,
+  whatsapp: MessageCircle, rocket_launch: Rocket, wifi_off: WifiOff, person_remove: UserMinus, dangerous: OctagonAlert,
+  expand_more: ChevronDown, analytics: BarChart3, notifications_off: BellOff, alarm: AlarmClock,
 };
 
 export function MIcon({ name, className, size, style }: { name?: string | null; className?: string; size?: number; style?: React.CSSProperties }) {
