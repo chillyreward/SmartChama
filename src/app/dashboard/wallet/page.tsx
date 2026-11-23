@@ -1,6 +1,7 @@
 'use client';
 /* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { toast } from '@/components/ui/Feedback';
 import { Button, Chip, EmptyState, Field, Modal, Money, Notice, PageHeader, Panel, PanelTitle, Skeleton, Ticks, cn, formatKsh, inputClass, type ChipKind } from '@/components/ui';
 
 import { useEffect, useState } from "react";
@@ -132,7 +133,7 @@ export default function WalletPage() {
 
       if (voteErr || !data?.success) {
         if (data?.error === 'already_voted') {
-          alert("You have already voted on this withdrawal request.");
+          toast('You have already voted on this request.', 'info');
         } else {
           throw new Error(data?.error || voteErr?.message);
         }
@@ -144,7 +145,7 @@ export default function WalletPage() {
       setTimeout(() => setToastMsg(""), 3000);
       fetchData();
     } catch (err: any) {
-      alert("Error voting: " + err.message);
+      toast(`Your vote was not recorded. ${err.message}`, 'danger');
     }
   };
 
@@ -152,12 +153,12 @@ export default function WalletPage() {
     if (!member || !group) return;
     const amountVal = parseFloat(withdrawalAmount);
     if (isNaN(amountVal) || amountVal <= 0) {
-      alert("Please enter a valid amount.");
+      toast('Enter an amount.', 'danger');
       return;
     }
 
     if (amountVal > walletStats.balance) {
-      alert("That is more than the group has recorded.");
+      toast('That is more than the group has recorded.', 'danger');
       return;
     }
 
@@ -174,7 +175,7 @@ export default function WalletPage() {
       });
 
     if (insertErr) {
-      alert("Failed to submit request: " + insertErr.message);
+      toast(`Could not send the request. ${insertErr.message}`, 'danger');
     } else {
       setWithdrawalAmount("");
       setWithdrawalReason("");

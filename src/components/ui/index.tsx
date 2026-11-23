@@ -19,11 +19,25 @@ export function RingMark({ size = 28, className }: { size?: number; className?: 
   );
 }
 
+/** The Akibora logo (the wallet mark carried over from SmartChama), on a light tile so it reads in dark mode too. */
+export function LogoMark({ size = 32, className }: { size?: number; className?: string }) {
+  return (
+    <span
+      className={cn('inline-flex items-center justify-center bg-white rounded-[28%] shrink-0 ring-1 ring-black/5', className)}
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo-mark.png" alt="" width={Math.round(size * 0.82)} height={Math.round(size * 0.82)} decoding="async" />
+    </span>
+  );
+}
+
 export function Logo({ href = '/', size = 'md', className }: { href?: string | null; size?: 'sm' | 'md' | 'lg'; className?: string }) {
-  const s = { sm: [22, 'text-[21px]'], md: [28, 'text-[26px]'], lg: [40, 'text-[40px]'] }[size] as [number, string];
+  const s = { sm: [30, 'text-[21px]'], md: [36, 'text-[26px]'], lg: [48, 'text-[40px]'] }[size] as [number, string];
   const inner = (
     <>
-      <RingMark size={s[0]} />
+      <LogoMark size={s[0]} />
       <span className={cn('font-display leading-none tracking-[-0.02em]', s[1])}>akibora</span>
     </>
   );

@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { after } from 'next/server';
+import { isDeliverable, layout, sendEmail } from '@/lib/email';
+import { SITE } from '@/lib/site';
 import { requireUser, formatKenyanPhone } from '@/lib/require-user';
 import { validateSchedule } from '@/lib/contribution-schedule';
 
@@ -131,6 +134,17 @@ export async function POST(request: Request) {
         is_verified: false
       });
       if (configError) console.error('Payment config Error:', configError);
+    }
+
+    // Email the new official their group code (skipped for phone-only accounts)
+    if (isDeliverable(user.email) && chamaData.group_code) {
+      const { html, text } = layout({
+        heading: `${chamaData.name} is ready`,
+        lines: ['Share this group code with your members. They type it when they sign up, and you approve each person.'],
+        code: chamaData.group_code,
+        button: { label: 'Open your group', url: `${SITE.url}/admin/dashboard` },
+      });
+      after(() => sendEmail(user.email!, `Your group code for ${chamaData.name}`, html, text).then(() => undefined));
     }
 
     return NextResponse.json({

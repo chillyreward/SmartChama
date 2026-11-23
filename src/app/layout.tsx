@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import dynamic from 'next/dynamic';
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { FeedbackHost } from "@/components/ui/Feedback";
 
 const ChatBot = dynamic(() => import('@/components/ChatBot').then(mod => ({ default: mod.ChatBot })));
 
@@ -136,6 +137,7 @@ export default function RootLayout({
             <ThemeProvider>
               {children}
               <ChatBot />
+              <FeedbackHost />
               <InstallPrompt />
               <OfflineBanner />
             </ThemeProvider>

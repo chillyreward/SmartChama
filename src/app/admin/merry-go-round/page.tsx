@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- untyped API rows */
 
 import { useState, useEffect } from 'react';
+import { ask } from '@/components/ui/Feedback';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
@@ -240,7 +241,7 @@ export default function AdminMerryGoRoundPage() {
                     {item.status === 'paid' ? (
                       <Chip kind="paid">Paid out</Chip>
                     ) : isCurrent ? (
-                      <Button size="sm" variant="forest" onClick={() => { if (confirm(`Mark round ${item.round_number} as paid out to ${nameOf(item)}? Only do this once the money has been sent.`)) handlePayout(item.round_number); }}>Mark paid out</Button>
+                      <Button size="sm" variant="forest" onClick={async () => { if (await ask(`Mark round ${item.round_number} as paid out to ${nameOf(item)}? Only do this once the money has been sent.`)) handlePayout(item.round_number); }}>Mark paid out</Button>
                     ) : null}
                   </li>
                 );

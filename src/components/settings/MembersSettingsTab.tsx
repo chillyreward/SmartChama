@@ -1,5 +1,6 @@
 ﻿'use client'
 import { MIcon } from '@/components/ui/MIcon';
+import { ask } from '@/components/ui/Feedback';
 import { useState, useEffect } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
@@ -18,6 +19,7 @@ export function MembersSettingsTab({
   const [loading, setLoading] = useState(true)
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [invitePhone, setInvitePhone] = useState('')
+  const [inviteEmail, setInviteEmail] = useState('')
   const [inviteName, setInviteName] = useState('')
   const [inviteChannel, setInviteChannel] = useState<'sms' | 'whatsapp'>('sms')
   const [sending, setSending] = useState(false)
@@ -61,8 +63,9 @@ export function MembersSettingsTab({
 
   async function handleSendInvite() {
     const digits = invitePhone.replace(/\D/g, '')
-    if (digits.length < 9) {
-      setInviteError('Please enter a valid phone number.')
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteEmail.trim())
+    if (digits.length < 9 && !emailOk) {
+      setInviteError('Enter a phone number, an email address, or both.')
       return
     }
 
@@ -74,7 +77,8 @@ export function MembersSettingsTab({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone: invitePhone.trim(),
+          phone: digits.length >= 9 ? invitePhone.trim() : null,
+          email: emailOk ? inviteEmail.trim() : null,
           name: inviteName.trim() || null,
           chama_id: chamaId,
           invited_by: adminId,
@@ -91,12 +95,15 @@ export function MembersSettingsTab({
       }
 
       setInviteResult(data)
+      // WhatsApp can't be sent from the server: open it with the message ready
+      if (data.whatsapp_url) window.open(data.whatsapp_url, '_blank', 'noopener')
       setInvitePhone('')
+      setInviteEmail('')
       setInviteName('')
       setShowInviteForm(false)
       setToast(
-        data.sms_sent
-          ? `${inviteChannel === 'whatsapp' ? 'WhatsApp' : 'SMS'} invite sent to ${invitePhone}`
+        data.sms_sent || data.email_sent
+          ? data.note
           : `Invite created. Share code: ${data.code}`
       )
       setTimeout(() => setToast(''), 4000)
@@ -125,7 +132,7 @@ export function MembersSettingsTab({
   async function handleRemoveMember(membership: any) {
     const name = membership.profiles?.full_name || 'this member'
     
-    if (!confirm(
+    if (!await ask(
       `Remove ${name} from ${chamaName}? Their contribution history will be preserved.`
     )) return
 
@@ -279,6 +286,21 @@ export function MembersSettingsTab({
                 <p className="text-[13px] mt-1" style={{ color: 'var(--text-muted)' }}>
                   The invite code is sent to this number by SMS
                 </p>
+                <label className="block text-[13px] font-semibold mb-1.5 mt-4" style={{ color: 'var(--text-secondary)' }}>
+                  Email (optional)
+                </label>
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleSendInvite() }}
+                  placeholder="name@example.com"
+                  className="w-full px-4 py-2.5 rounded-[14px] border text-[14px] focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30"
+                  style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                />
+                <p className="text-[13px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                  We email the code too, if you add an address
+                </p>
               </div>
             </div>
 
@@ -312,7 +334,7 @@ export function MembersSettingsTab({
               </button>
               <button
                 onClick={handleSendInvite}
-                disabled={sending || !invitePhone.trim()}
+                disabled={sending || (!invitePhone.trim() && !inviteEmail.trim())}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[14px] text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 {sending ? (
                   <>

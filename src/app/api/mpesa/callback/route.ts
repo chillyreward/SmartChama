@@ -1,4 +1,6 @@
 import { timingSafeEqual } from 'crypto';
+import { after } from 'next/server';
+import { processOutbox } from '@/lib/outbox';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { querySTKPushStatus } from '@/lib/mpesa';
 
@@ -144,7 +146,8 @@ export async function POST(request: Request) {
     p_description: `Contribution - ${receipt}`
   });
 
-  // Write to outbox instead of calling external APIs directly
+  // Queue the confirmation SMS/email and trust score update, then handle it
+  // straight after responding to Safaricom (the daily cron retries failures)
   await supabase.from('outbox').insert({
     event_type: 'contribution_confirmed',
     payload: {
@@ -164,17 +167,27 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (memberProfile?.profile_id) {
+      // Shows in the member's notification list on the web and in the app
+      await supabase.from('notifications').insert({
+        profile_id: memberProfile.profile_id,
+        chama_id: contribution.chama_id,
+        type: 'contribution',
+        title: 'Payment confirmed',
+        message: `KSh ${Number(contribution.amount).toLocaleString('en-KE')} is recorded. M-Pesa ref ${receipt}.`,
+      });
       const { notifyUserByProfileId } = await import('@/lib/push-notifications');
       await notifyUserByProfileId(
         memberProfile.profile_id,
-        'Payment Confirmed! 💳',
-        `Your contribution of KSh ${contribution.amount} has been received. Receipt: ${receipt}`,
+        'Payment confirmed',
+        `KSh ${Number(contribution.amount).toLocaleString('en-KE')} is recorded. M-Pesa ref ${receipt}.`,
         { type: 'contribution_confirmed', receipt }
       );
     }
   } catch (pushErr) {
     console.error('Push notification trigger error:', pushErr);
   }
+
+  after(() => processOutbox(supabase).catch((e) => console.error('Outbox after-callback error:', e)));
 
   return respondOk();
 }

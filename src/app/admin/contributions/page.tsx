@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
 import { Bell, Download, Plus } from "lucide-react";
+import { toast } from '@/components/ui/Feedback';
 import { Avatar, Button, Chip, EmptyState, Field, Modal, Money, Notice, PageHeader, Panel, PanelTitle, Stat, TableWrap, cn, formatKsh, inputClass, tableClass, type ChipKind } from "@/components/ui";
 
 import { useEffect, useState } from "react";
@@ -90,7 +91,7 @@ export default function AdminContributionsPage() {
       setRecordMemberId(""); setRecordAmount(""); setRecordReference(""); setRecordDate(today);
       fetchData();
     } catch (err: any) {
-      alert("Error recording contribution: " + err.message);
+      toast(`Could not record the payment. ${err.message}`, 'danger');
     } finally {
       setRecordSaving(false);
     }
@@ -143,7 +144,7 @@ export default function AdminContributionsPage() {
       setToastMsg(`Reminder sent to ${targets.length} member${targets.length === 1 ? '' : 's'}.`);
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err: any) {
-      alert("Error sending reminders: " + err.message);
+      toast(`Could not send reminders. ${err.message}`, 'danger');
     }
   };
 

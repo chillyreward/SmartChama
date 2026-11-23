@@ -289,3 +289,8 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Toasts slide up once; nothing else on the page animates on its own */
+@keyframes ak-toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.ak-toast-in { animation: ak-toast-in 180ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .ak-toast-in { animation: none; } }

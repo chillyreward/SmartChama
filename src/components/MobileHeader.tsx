@@ -6,7 +6,7 @@ import { Bell } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { RingMark, initialsOf } from '@/components/ui';
+import { LogoMark, initialsOf } from '@/components/ui';
 import { ROLE_LABEL } from '@/components/shell/nav';
 
 export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean }) {
@@ -34,7 +34,7 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
     <header className="lg:hidden fixed top-0 inset-x-0 z-30 bg-page/90 backdrop-blur-md border-b border-line pt-safe">
       <div className="h-[60px] px-4 flex items-center justify-between gap-3">
         <Link href={isAdmin ? '/admin/dashboard' : '/dashboard'} className="flex items-center gap-2.5 min-w-0">
-          <RingMark size={26} />
+          <LogoMark size={30} />
           <span className="min-w-0">
             <span className="block text-[15px] font-semibold leading-tight truncate">{group?.name || 'Akibora'}</span>
             <span className="block text-[12px] text-ink-3 leading-tight">

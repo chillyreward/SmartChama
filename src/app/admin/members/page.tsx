@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
 import { Download, Search, UserPlus } from "lucide-react";
+import { toast, ask } from '@/components/ui/Feedback';
 import { Avatar, Button, Chip, EmptyState, Field, Meter, Modal, Money, Notice, PageHeader, Panel, Tabs, TableWrap, cn, inputClass, tableClass, textareaClass, type ChipKind } from "@/components/ui";
 import { ROLE_LABEL } from "@/components/shell/nav";
 
@@ -117,7 +118,7 @@ export default function AdminMembersPage() {
       setShowRoleModal(false);
       fetchData();
     } catch (err) {
-      alert("Error updating role");
+      toast('Could not change the role. Try again.', 'danger');
     }
   };
 
@@ -137,7 +138,7 @@ export default function AdminMembersPage() {
       setFlagReason("");
       fetchData();
     } catch (err) {
-      alert("Error flagging member");
+      toast('Could not flag this member. Try again.', 'danger');
     }
   };
 
@@ -163,7 +164,7 @@ export default function AdminMembersPage() {
       setTimeout(() => setToastMsg(""), 3000);
       fetchData();
     } catch (err) {
-      alert("Error approving member");
+      toast('Could not approve. Try again.', 'danger');
     } finally {
       setProcessingId(null);
     }
@@ -183,7 +184,7 @@ export default function AdminMembersPage() {
       setTimeout(() => setToastMsg(""), 3000);
       fetchData();
     } catch (err) {
-      alert("Error rejecting member");
+      toast('Could not decline. Try again.', 'danger');
     } finally {
       setProcessingId(null);
     }
@@ -208,12 +209,12 @@ export default function AdminMembersPage() {
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err) {
       console.error(err);
-      alert("Error sending reminder");
+      toast('Could not send the reminder. Try again.', 'danger');
     }
   };
 
   const handleRemove = async (m: any) => {
-    if (confirm(`Remove ${m.profile?.full_name} from the group? Their payment history stays in the record.`)) {
+    if (await ask({ title: `Remove ${m.profile?.full_name || 'this member'}?`, body: 'Their payment history stays in the record.', confirmLabel: 'Remove', danger: true })) {
       try {
         const { error } = await supabase
           .from('chama_memberships')
@@ -226,7 +227,7 @@ export default function AdminMembersPage() {
         setToastMsg(`${m.profile?.full_name} removed`);
         setTimeout(() => setToastMsg(""), 3000);
       } catch (err) {
-        alert("Error removing member");
+        toast('Could not remove this member. Try again.', 'danger');
       }
     }
   };

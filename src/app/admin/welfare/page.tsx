@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- untyped API rows */
 
 import { useState, useEffect } from 'react';
+import { ask } from '@/components/ui/Feedback';
 import { useAuth } from '@/components/AuthProvider';
 import { Avatar, Button, Chip, EmptyState, Money, Notice, PageHeader, Panel, PanelTitle, Stat, cn, formatKsh, type ChipKind } from '@/components/ui';
 import PageSkeleton from '@/components/PageSkeleton';
@@ -119,7 +120,7 @@ export default function AdminWelfarePage() {
                         </>
                       )}
                       {c.status === 'approved' && (
-                        <Button size="sm" variant="forest" onClick={() => { if (confirm(`Mark ${formatKsh(c.amount)} as paid to ${name}? Do this once the money has been sent.`)) handleAction(c.id, 'paid'); }}>Mark as paid</Button>
+                        <Button size="sm" variant="forest" onClick={async () => { if (await ask(`Mark ${formatKsh(c.amount)} as paid to ${name}? Do this once the money has been sent.`)) handleAction(c.id, 'paid'); }}>Mark as paid</Button>
                       )}
                     </div>
                   )}

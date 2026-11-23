@@ -1,89 +1,28 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { forbidden, isInternalRequest } from '@/lib/api-guard';
-import { sendSms } from '@/lib/sms';
+import { processOutbox } from '@/lib/outbox';
+import { recalcTrustScore } from '@/lib/trust-score';
 
 // Daily Vercel cron (Authorization: Bearer CRON_SECRET). Drains queued side
 // effects so request handlers never make internal HTTP loopbacks.
-// Events: contribution_confirmed, send_sms.
+// Events are normally handled seconds after they are queued (see lib/outbox);
+// this retries failures and refreshes trust scores.
 
 export async function GET(request: Request) {
   if (!isInternalRequest(request)) return forbidden();
 
   try {
     const supabase = getSupabaseAdmin();
+    const processed = await processOutbox(supabase, 100);
 
-    const { data: pendingEvents } = await supabase
-      .from('outbox')
-      .select('*')
-      .eq('processed', false)
-      .lt('attempts', 5)
-      .order('created_at', { ascending: true })
-      .limit(20);
-
-    for (const event of pendingEvents || []) {
-      try {
-        const payload = event.payload || {};
-
-        if (event.event_type === 'contribution_confirmed') {
-          const { membership_id, amount, receipt } = payload;
-
-          // 1. Trust score: share of this member's contributions that were confirmed
-          const { data: contribs } = await supabase
-            .from('contributions_v2')
-            .select('status')
-            .eq('membership_id', membership_id);
-          const total = contribs?.length || 0;
-          const confirmed = contribs?.filter(c => c.status === 'confirmed').length || 0;
-          const score = total > 0 ? Math.round((confirmed / total) * 100) : 100;
-          await supabase
-            .from('chama_memberships')
-            .update({ trust_score: score })
-            .eq('id', membership_id);
-
-          // 2. Confirmation SMS
-          const { data: membership } = await supabase
-            .from('chama_memberships')
-            .select(`
-              profiles(full_name, phone_number),
-              chamas_v2(name)
-            `)
-            .eq('id', membership_id)
-            .maybeSingle();
-
-          const phone = (membership?.profiles as any)?.phone_number;
-          const chamaName = (membership?.chamas_v2 as any)?.name || 'your group';
-          if (phone) {
-            await sendSms(phone, `Akibora: Your KSh ${amount} contribution to ${chamaName} is confirmed. Receipt: ${receipt}.`);
-          }
-        } else if (event.event_type === 'send_sms') {
-          const { phone, message } = payload;
-          if (phone && message) {
-            const result = await sendSms(phone, String(message).slice(0, 480));
-            if (!result.success) throw new Error('SMS provider rejected the message');
-          }
-        } else {
-          console.warn('Outbox: unknown event type', event.event_type);
-        }
-
-        // Mark event as processed
-        await supabase
-          .from('outbox')
-          .update({
-            processed: true,
-            processed_at: new Date().toISOString()
-          })
-          .eq('id', event.id);
-
-      } catch (err) {
-        console.error('Outbox processing failed:', event.id, err);
-        await supabase
-          .from('outbox')
-          .update({
-            attempts: (event.attempts || 0) + 1
-          })
-          .eq('id', event.id);
-      }
+    // Keep every active member's trust score current, including cash payments
+    // that officials record (those don't go through the M-Pesa callback).
+    try {
+      const { data: members } = await supabase.from('chama_memberships').select('id').eq('status', 'active');
+      for (const m of members || []) await recalcTrustScore(supabase, m.id);
+    } catch (scoreErr) {
+      console.error('Daily trust score refresh error:', scoreErr);
     }
 
     // Contributions still pending after 30 minutes almost certainly never got a
@@ -101,9 +40,7 @@ export async function GET(request: Request) {
       console.error('Stale contribution cleanup error:', cleanupErr);
     }
 
-    return NextResponse.json({
-      processed: pendingEvents?.length || 0
-    });
+    return NextResponse.json({ processed });
 
   } catch (error) {
     console.error('Outbox process error:', error);

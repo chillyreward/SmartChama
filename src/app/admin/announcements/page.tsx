@@ -1,5 +1,6 @@
 "use client";
 import { MIcon } from '@/components/ui/MIcon';
+import { toast, ask } from '@/components/ui/Feedback';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -76,18 +77,18 @@ export default function AdminAnnouncementsPage() {
       setIsImportant(false);
       fetchData();
     } catch (err: any) {
-      alert("Error sending announcement: " + (err?.message || 'please try again'));
+      toast(`Could not send the announcement. ${err?.message || 'Try again.'}`, 'danger');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Delete this announcement?")) {
+    if (await ask({ title: 'Delete this announcement?', confirmLabel: 'Delete', danger: true })) {
       try {
         const { error } = await supabase.from('announcements').delete().eq('id', id);
         if (error) throw error;
         fetchData();
       } catch (err) {
-        alert("Error deleting");
+        toast('Could not delete it. Try again.', 'danger');
       }
     }
   };

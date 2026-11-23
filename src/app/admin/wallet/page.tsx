@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
 import { ArrowDownLeft, ArrowUpRight, Plus } from "lucide-react";
+import { toast, ask } from '@/components/ui/Feedback';
 import { Button, Chip, EmptyState, Field, Modal, Money, Notice, PageHeader, Panel, PanelTitle, Skeleton, Ticks, cn, formatKsh, inputClass, textareaClass, type ChipKind } from "@/components/ui";
 
 import { useEffect, useState } from "react";
@@ -80,7 +81,7 @@ export default function AdminWalletPage() {
       setDepAmount(""); setDepRef(""); setDepNotes("");
       fetchData();
     } catch (err: any) {
-      alert("Error depositing: " + err.message);
+      toast(`Could not record the deposit. ${err.message}`, 'danger');
     }
   };
 
@@ -88,7 +89,7 @@ export default function AdminWalletPage() {
     try {
       const amt = Number(withAmount);
       if (amt > wallet.balance) {
-        alert("Insufficient funds recorded");
+        toast('That is more than the wallet has recorded.', 'danger');
         return;
       }
       
@@ -132,16 +133,16 @@ export default function AdminWalletPage() {
       setWithAmount(""); setWithReason("");
       fetchData();
     } catch (err: any) {
-      alert("Error requesting withdrawal: " + err.message);
+      toast(`Could not send the request. ${err.message}`, 'danger');
     }
   };
 
   const handleExecuteWithdrawal = async (req: any) => {
     if (wallet.balance < req.amount) {
-      alert("Insufficient funds to execute this withdrawal");
+      toast('The wallet has less than this request.', 'danger');
       return;
     }
-    if (confirm(`Release ${formatKsh(req.amount)}? Only do this once you are sending the money from the group account.`)) {
+    if (await ask({ title: `Release ${formatKsh(req.amount)}?`, body: 'Only do this once you are sending the money from the group account.', confirmLabel: 'Release' })) {
       try {
         // Checks member approval and balance, then pays out under a wallet lock
         const { data, error } = await supabase.rpc('execute_withdrawal', { p_consent_id: req.id });
@@ -151,13 +152,13 @@ export default function AdminWalletPage() {
         setTimeout(() => setToastMsg(""), 3000);
         fetchData();
       } catch (err: any) {
-        alert("Error executing withdrawal: " + err.message);
+        toast(`Could not release the money. ${err.message}`, 'danger');
       }
     }
   };
 
   const handleCancelConsent = async (req: any) => {
-    if (confirm("Cancel this consent request?")) {
+    if (await ask({ title: 'Cancel this request?', body: 'Members can no longer vote on it.', confirmLabel: 'Cancel request', cancelLabel: 'Keep it', danger: true })) {
       try {
         await supabase
           .from('withdrawal_consents')
@@ -167,7 +168,7 @@ export default function AdminWalletPage() {
         setTimeout(() => setToastMsg(""), 3000);
         fetchData();
       } catch (err) {
-        alert("Error cancelling request");
+        toast('Could not cancel the request. Try again.', 'danger');
       }
     }
   };

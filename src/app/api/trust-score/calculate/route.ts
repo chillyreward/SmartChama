@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAuth } from '@/lib/api-auth'
+import { recalcTrustScore } from '@/lib/trust-score'
 import { ADMIN_ROLES, getChamaMembership, internalHeaders, isInternalRequest } from '@/lib/api-guard'
 
 export async function POST(request: Request) {
@@ -49,84 +50,9 @@ export async function POST(request: Request) {
       console.error('Trigger fraud check error:', fErr);
     }
 
-    // Fetch confirmed contributions for this membership
-    const { data: contributions, error: contErr } = await supabase
-      .from('contributions_v2')
-      .select('created_at, status, payment_method, mpesa_receipt')
-      .eq('membership_id', membership_id)
-      .eq('status', 'confirmed')
-      .order('created_at', { ascending: true })
-
-    if (contErr) throw contErr
-
-    // Calculations
-    const joinedAt = new Date(membership.joined_at)
-    const now = new Date()
-    
-    // months_active = months since joined_at (minimum 1)
-    let months_active = (now.getFullYear() - joinedAt.getFullYear()) * 12 + (now.getMonth() - joinedAt.getMonth()) + 1
-    if (months_active < 1) months_active = 1
-
-    // confirmed_months = sum of consistency weights per month (M-Pesa verified = 1.0, Manual/Cash = 0.5)
-    const monthWeights: { [key: string]: number } = {}
-    const distinctMonths = new Set<string>()
-    
-    contributions?.forEach(c => {
-      const d = new Date(c.created_at)
-      const monthStr = `${d.getFullYear()}-${d.getMonth()}`
-      distinctMonths.add(monthStr)
-
-      const isMpesaVerified = c.payment_method === 'mpesa' && !!c.mpesa_receipt
-      const weight = isMpesaVerified ? 1.0 : 0.5
-      
-      if (!monthWeights[monthStr] || weight > monthWeights[monthStr]) {
-        monthWeights[monthStr] = weight
-      }
-    })
-
-    let confirmed_months = 0
-    Object.values(monthWeights).forEach(w => {
-      confirmed_months += w
-    })
-
-    // on_time_rate = confirmed_months / months_active (capped at 1)
-    const on_time_rate = Math.min(confirmed_months / months_active, 1)
-    const contribution_score = on_time_rate * 55
-
-    // Tenure
-    const tenure_score = Math.min(months_active / 24, 1) * 25
-
-    // Streak Calculation (consecutive months contributed up to current month)
-    let streak = 0
-    let currentCheckMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    
-    while (true) {
-      const monthStr = `${currentCheckMonth.getFullYear()}-${currentCheckMonth.getMonth()}`
-      if (distinctMonths.has(monthStr)) {
-        streak++
-        currentCheckMonth.setMonth(currentCheckMonth.getMonth() - 1)
-      } else {
-        break
-      }
-    }
-    
-    const streak_capped = Math.min(streak, 12)
-    const participation_score = (streak_capped / 12) * 20
-
-    const trust_score = Math.round(
-      contribution_score +
-      tenure_score +
-      participation_score
-    )
-
-    // Update membership
-    await supabase
-      .from('chama_memberships')
-      .update({ 
-        trust_score,
-        contribution_streak: streak
-      })
-      .eq('id', membership_id)
+    const result = await recalcTrustScore(supabase, membership_id)
+    const trust_score = result?.trust_score ?? 0
+    const streak = result?.streak ?? 0
 
     return new Response(JSON.stringify({ trust_score, streak }), {
       status: 200,

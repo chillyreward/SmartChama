@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
 import { UserPlus } from "lucide-react";
+import { toast, ask } from '@/components/ui/Feedback';
 import { Button, EmptyState, Field, Notice, PageHeader, Panel, PanelTitle, Skeleton, TableWrap, Tabs, cn, inputClass, tableClass } from "@/components/ui";
 
 import { useEffect, useState } from "react";
@@ -130,7 +131,7 @@ export default function AdminSettingsPage() {
       await refreshMemberData();
     } catch (err) {
       console.error(err);
-      alert("Error saving chama rules");
+      toast('Could not save the rules. Try again.', 'danger');
     } finally {
       setSaving(false);
     }
@@ -160,14 +161,14 @@ export default function AdminSettingsPage() {
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err) {
       console.error(err);
-      alert("Error saving payment configuration");
+      toast('Could not save where payments go. Try again.', 'danger');
     } finally {
       setSaving(false);
     }
   };
 
   const handleRevokeInvite = async (token: string) => {
-    if (!confirm("Cancel this invite? The code will stop working.")) return;
+    if (!await ask({ title: 'Cancel this invite?', body: 'The link will stop working.', confirmLabel: 'Cancel invite', cancelLabel: 'Keep it', danger: true })) return;
     try {
       const { error } = await supabase
         .from('invite_tokens')
@@ -181,7 +182,7 @@ export default function AdminSettingsPage() {
       await fetchInvites();
     } catch (err) {
       console.error(err);
-      alert("Error revoking invite");
+      toast('Could not cancel the invite. Try again.', 'danger');
     }
   };
 

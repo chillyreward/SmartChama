@@ -4,6 +4,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { requireAuth } from '@/lib/api-auth';
 import { ADMIN_ROLES, getChamaMembership } from '@/lib/api-guard';
 import { formatKenyanPhone, sendSms } from '@/lib/sms';
+import { isDeliverable, layout, sendEmail } from '@/lib/email';
+import { SITE } from '@/lib/site';
 
 export async function POST(request: Request) {
   try {
@@ -91,7 +93,7 @@ export async function POST(request: Request) {
 
     const chamaNameStr = chama?.name || 'Akibora';
     const inviterStr = admin?.full_name || 'An Admin';
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || SITE.url || '';
     const link = appUrl ? ` ${appUrl}/signup?token=${inviteCode}` : '';
     const messageText = `You have been invited by ${inviterStr} to join ${chamaNameStr} on Akibora. Use invite code: ${inviteCode} to register.${link} Expires in 48 hours.`;
 
@@ -110,8 +112,24 @@ export async function POST(request: Request) {
       }
     }
 
+    // Email invite, when an address was given (works alongside SMS)
+    let emailSent = false;
+    if (isDeliverable(email)) {
+      const { html, text } = layout({
+        heading: `Join ${chamaNameStr} on Akibora`,
+        lines: [`${inviterStr} invited you to ${chamaNameStr}.`, 'Sign up with this invite code. It works once and expires in 48 hours.'],
+        code: inviteCode,
+        button: { label: 'Accept the invite', url: `${appUrl}/signup?token=${inviteCode}` },
+      });
+      const r = await sendEmail(email, `${inviterStr} invited you to ${chamaNameStr}`, html, text);
+      emailSent = r.sent;
+      if (emailSent && !smsSent) note = `Email invite sent to ${email}`;
+      else if (emailSent) note += ` and emailed to ${email}`;
+    }
+
     return NextResponse.json({
       success: true,
+      email_sent: emailSent,
       code: inviteCode,
       sms_sent: smsSent,
       provider,
