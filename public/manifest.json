@@ -4,8 +4,8 @@
   "description": "Digital savings management for African savings groups",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FAFAFA",
-  "theme_color": "#22C55E",
+  "background_color": "#0E1F18",
+  "theme_color": "#0E1F18",
   "icons": [
     {
       "src": "/icon-192x192.png",
