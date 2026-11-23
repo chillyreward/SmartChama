@@ -397,7 +397,7 @@ export default function MemberDashboard({
               {[
                 ['/dashboard/contributions?pay=1', 'Pay a contribution'],
                 ['/dashboard/welfare', 'Ask the welfare fund for help'],
-                ['/dashboard/smartgrow', 'Vote on an investment'],
+                ['/dashboard/smartgrow', 'See group investments'],
                 ['/dashboard/chat', 'Message the group'],
               ].map(([href, label]) => (
                 <Link key={href} href={href} className="h-12 px-4 rounded-[14px] bg-canopy hover:bg-[#21402F] flex items-center text-[15px]">{label}</Link>

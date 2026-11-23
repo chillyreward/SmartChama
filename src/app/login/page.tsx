@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -246,9 +247,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center"
                   style={{ color: 'var(--text-muted)' }}>
-                  <span className="material-symbols-outlined text-[20px]">
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
+                  <MIcon name={showPassword ? 'visibility_off' : 'visibility'}  className="text-[20px]" />
                 </button>
               </div>
             </div>

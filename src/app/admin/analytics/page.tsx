@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -143,7 +144,7 @@ export default function AdminAnalyticsPage() {
       <div className="mb-8 no-print">
         <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <MIcon name="chevron_right"  className="text-[14px]" />
           <span>Analytics</span>
         </p>
         

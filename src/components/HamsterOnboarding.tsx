@@ -1,4 +1,5 @@
 'use client';
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useState, useEffect, useCallback } from 'react';
 
@@ -343,7 +344,7 @@ export default function HamsterOnboarding() {
                 onClick={prev}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-medium text-[#3F3F46] dark:text-[#D4D4D8] hover:bg-gray-100 dark:hover:bg-[#1e1e22] transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                <MIcon name="arrow_back"  className="text-[18px]" />
                 Back
               </button>
             )}
@@ -353,9 +354,7 @@ export default function HamsterOnboarding() {
               className="ml-auto flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white text-[14px] font-semibold transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95"
             >
               {isLast ? 'Get Started' : 'Next'}
-              <span className="material-symbols-outlined text-[18px]">
-                {isLast ? 'rocket_launch' : 'arrow_forward'}
-              </span>
+              <MIcon name={isLast ? 'rocket_launch' : 'arrow_forward'}  className="text-[18px]" />
             </button>
           </div>
 

@@ -23,7 +23,7 @@ const ITEMS = [
   },
   {
     title: 'SmartGrow investments',
-    body: 'Propose a money market fund, Treasury bill or SACCO shares, and let the whole group vote before any money moves.',
+    body: 'Officials can put money the group isn\'t using into a money market fund, Treasury bills or SACCO shares, and every member sees where it went and what it earns.',
   },
   {
     title: 'Chat and announcements',

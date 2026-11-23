@@ -1,8 +1,9 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped API rows */
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/../components/AuthProvider';
-import { ShieldAlert, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
+import { Button, Chip, EmptyState, Money, Notice, PageHeader, Panel, PanelTitle, Skeleton, formatKsh, type ChipKind } from '@/components/ui';
 
 export default function MemberPenaltiesPage() {
   const { member, group } = useAuth();
@@ -44,7 +45,7 @@ export default function MemberPenaltiesPage() {
 
       const data = await res.json();
       if (data.success) {
-        setMsg({ error: '', success: 'Fine paid successfully!' });
+        setMsg({ error: '', success: 'Fine paid. It\'s cleared from your record.' });
         fetchPenalties();
       } else {
         setMsg({ error: data.error || 'Failed to settle fine.', success: '' });
@@ -56,97 +57,76 @@ export default function MemberPenaltiesPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-5xl mx-auto space-y-6 animate-pulse">
-        <div className="h-8 w-64 rounded bg-slate-200 dark:bg-slate-800" />
-        <div className="h-44 rounded-xl bg-slate-200 dark:bg-slate-800" />
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-64" />
+        <div className="grid md:grid-cols-2 gap-4"><Skeleton className="h-36" /><Skeleton className="h-36" /></div>
+        <Skeleton className="h-64" />
       </div>
     );
   }
 
-  const unpaidCount = penalties.filter(p => p.status === 'unpaid').length;
-  const unpaidTotal = penalties.filter(p => p.status === 'unpaid').reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const unpaid = penalties.filter((p) => p.status === 'unpaid');
+  const unpaidTotal = unpaid.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const TYPE: Record<string, string> = { late_contribution: 'Late contribution', missed_meeting: 'Missed meeting', loan_default: 'Missed repayment', custom: 'Fine' };
+  const ST: Record<string, { kind: ChipKind; label: string }> = { unpaid: { kind: 'late', label: 'Unpaid' }, paid: { kind: 'paid', label: 'Paid' }, waived: { kind: 'neutral', label: 'Waived' } };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-          <ShieldAlert className="w-7 h-7 text-[var(--ak-brand-ink)]" />
-          My Fines & Penalties
-        </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Track and settle any fines for late contributions or missed meetings.
-        </p>
-      </div>
+    <div>
+      <PageHeader title="Penalties" subtitle="Fines your group's rules apply, for example after a contribution is late. You can see the reason for each one." />
 
-      {msg.error && (
-        <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          {msg.error}
-        </div>
-      )}
+      {msg.error && <Notice tone="danger" className="mb-4">{msg.error}</Notice>}
+      {msg.success && <Notice tone="ok" className="mb-4">{msg.success}</Notice>}
 
-      {msg.success && (
-        <div className="p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 text-green-700 dark:text-green-400 text-sm flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 shrink-0" />
-          {msg.success}
-        </div>
-      )}
-
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="sc-card p-6 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Unpaid Fines Count</p>
-          <p className="text-2xl font-bold text-amber-500 mt-1">{unpaidCount}</p>
-        </div>
-        <div className="sc-card p-6 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Total Outstanding Fine</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">KSh {unpaidTotal.toLocaleString('en-KE')}</p>
-        </div>
-      </div>
-
-      {/* List */}
-      <div className="sc-card p-6 rounded-2xl border space-y-4">
-        <h3 className="text-lg font-bold text-[var(--text-primary)]">Penalty Records</h3>
-
-        {penalties.length === 0 ? (
-          <div className="text-center py-8 space-y-2">
-            <CheckCircle className="w-10 h-10 text-[var(--ak-brand-ink)] mx-auto" />
-            <p className="text-base font-bold text-[var(--text-primary)]">Clean Record!</p>
-            <p className="text-xs text-[var(--text-muted)]">You have no fines or penalties in this Chama.</p>
-          </div>
+      <div className="grid gap-4 md:grid-cols-2 mb-4">
+        {unpaid.length > 0 ? (
+          <Panel className="bg-amber-soft border-transparent text-amber-ink rounded-[28px]">
+            <div className="text-[14px]">You owe</div>
+            <Money value={unpaidTotal} className="block text-[46px] leading-[1.05] mt-1" />
+            <p className="text-[14px] mt-1">across {unpaid.length} {unpaid.length === 1 ? 'fine' : 'fines'}</p>
+          </Panel>
         ) : (
-          <div className="divide-y divide-[var(--border)]">
-            {penalties.map(p => (
-              <div key={p.id} className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-[var(--text-primary)] capitalize">{p.type.replace('_', ' ')}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold capitalize ${
-                      p.status === 'paid' ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400' :
-                      p.status === 'waived' ? 'bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)]' :
-                      'bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400'
-                    }`}>
-                      {p.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{p.reason || 'Fine imposed'}</p>
-                </div>
-
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-                  <span className="text-base font-bold text-[var(--text-primary)]">KSh {Number(p.amount).toLocaleString('en-KE')}</span>
-                  {p.status === 'unpaid' && (
-                    <button
-                      onClick={() => handlePay(p.id)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
-                      Pay Fine
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <Panel tone="sage" className="rounded-[28px]">
+            <div className="text-[14px] text-[#2B4637]">You owe</div>
+            <div className="font-display text-[40px] leading-[1.05] mt-1">Nothing</div>
+            <p className="text-[14px] text-[#2B4637] mt-1">A clean record. Keep paying on time.</p>
+          </Panel>
         )}
+        <Panel>
+          <div className="text-[14px] text-ink-2">How fines work in {group?.name || 'your group'}</div>
+          <p className="text-[15px] mt-2 leading-relaxed">
+            {group?.late_penalty_amount
+              ? <>A late contribution adds <strong>{formatKsh(group.late_penalty_amount)}</strong> once the grace period of {group?.grace_period_days ?? 0} days has passed.</>
+              : <>Your officials set fines in the group rules. Ask them if something looks wrong.</>}
+          </p>
+        </Panel>
       </div>
+
+      <Panel aria-labelledby="fines-h">
+        <PanelTitle id="fines-h">All fines</PanelTitle>
+        {penalties.length === 0 ? (
+          <EmptyState title="No fines, ever">Nothing has been charged to you in this group.</EmptyState>
+        ) : (
+          <ul className="mt-3">
+            {penalties.map((p) => {
+              const st = ST[p.status] || { kind: 'neutral' as ChipKind, label: p.status };
+              return (
+                <li key={p.id} className="flex flex-wrap items-center gap-3 py-4 border-t border-line first:border-t-0">
+                  <div className="flex-1 min-w-[200px]">
+                    <div className="text-[16px] font-medium">{TYPE[p.type] || String(p.type || 'Fine').replace('_', ' ')}</div>
+                    <div className="text-[14px] text-ink-3 mt-0.5">
+                      {p.reason || 'No reason recorded'}
+                      {p.created_at && ` · ${new Date(p.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                    </div>
+                  </div>
+                  <Money value={Number(p.amount)} className="text-[20px]" />
+                  <Chip kind={st.kind}>{st.label}</Chip>
+                  {p.status === 'unpaid' && <Button size="sm" onClick={() => handlePay(p.id)}>Pay {formatKsh(p.amount)}</Button>}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Panel>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -228,7 +229,7 @@ function SignupForm() {
           }}
         >
           <div className="w-16 h-16 bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-[36px]">hourglass_top</span>
+            <MIcon name="hourglass_top"  className="text-[36px]" />
           </div>
 
           <h1 className="text-2xl font-bold mb-2 font-geist" style={{ color: 'var(--text-primary)' }}>
@@ -255,9 +256,7 @@ function SignupForm() {
       <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
         <div className="w-full max-w-md text-center">
           <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              mark_email_unread
-            </span>
+            <MIcon name="mark_email_unread"  className="text-[40px] text-[var(--ak-brand-ink)]" />
           </div>
           <h1 className="text-[28px] font-bold mb-2">Confirm your email</h1>
           <p className="text-[15px] mb-8 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
@@ -329,9 +328,7 @@ function SignupForm() {
         <div className="w-full max-w-md text-center">
           
           <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              check_circle
-            </span>
+            <MIcon name="check_circle"  className="text-[40px] text-[var(--ak-brand-ink)]" />
           </div>
 
           <h1 className="text-[28px] font-bold mb-2">
@@ -536,9 +533,7 @@ function SignupForm() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-[var(--ak-text-3)] cursor-pointer">
-                    <span className="material-symbols-outlined text-[20px]">
-                      {showPassword ? 'visibility_off' : 'visibility'}
-                    </span>
+                    <MIcon name={showPassword ? 'visibility_off' : 'visibility'}  className="text-[20px]" />
                   </button>
                 </div>
                 {password && (

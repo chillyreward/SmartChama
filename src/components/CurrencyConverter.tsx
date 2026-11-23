@@ -26,40 +26,27 @@ export default function CurrencyConverter({ amountKES }: Props) {
   const converted = rates ? convertFromKES(amountKES, rates, selectedCurrency) : '—';
 
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-          Equivalent Value
-        </span>
-        <div className="flex gap-1">
+    <div className="rounded-[24px] bg-surface border border-line p-5">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[14px] text-ink-2">Worth abroad</span>
+        <div role="group" aria-label="Currency" className="flex gap-1 p-1 rounded-full bg-surface-2">
           {currencies.map(c => (
             <button
               key={c.code}
               type="button"
+              aria-pressed={selectedCurrency === c.code}
               onClick={() => setSelectedCurrency(c.code)}
-              className={`px-2 py-1 rounded-md text-xs font-bold transition-colors ${
-                selectedCurrency === c.code
-                  ? 'bg-[var(--ak-solid)] text-white'
-                  : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-              }`}
+              className={`h-8 px-3 rounded-full text-[12px] font-semibold transition-colors ${selectedCurrency === c.code ? 'bg-primary text-on-primary' : 'text-ink-3 hover:text-ink'}`}
             >
               {c.code}
             </button>
           ))}
         </div>
       </div>
-      <div className="text-2xl font-bold text-[var(--text-primary)] font-geist">
-        {loading ? (
-          <span className="animate-pulse text-[var(--text-muted)]">Loading...</span>
-        ) : (
-          <>{selected.symbol}{converted} <span className="text-sm font-normal text-[var(--text-secondary)]">{selected.code}</span></>
-        )}
+      <div className="font-money text-[30px] mt-2">
+        {loading ? <span className="text-ink-3 text-[16px] font-sans">Getting today&apos;s rate…</span> : <>{selected.symbol}{converted} <span className="text-[14px] font-sans text-ink-3">{selected.code}</span></>}
       </div>
-      {rates && (
-        <p className="text-[10px] text-[var(--text-muted)] mt-1">
-          Rate as of {rates.date} · Powered by Frankfurter API
-        </p>
-      )}
+      {rates && <p className="text-[12px] text-ink-3 mt-1">Rate from {rates.date}, via the Frankfurter API.</p>}
     </div>
   );
 }

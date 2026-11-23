@@ -1,143 +1,162 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
-import { Send, Mic, Bot, User, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from 'react';
+import { SendHorizontal, Trash2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/components/AuthProvider';
+import { OFFICIAL_ROLES } from '@/components/shell/nav';
+import { Avatar, Notice, cn } from '@/components/ui';
 
-export default function ChatPage() {
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Jambo! I am your Akibora Advisor. I can help you analyze your savings or suggest investment groups. What's on your mind?" }
-  ]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+type Msg = { id: string; chama_id: string; member_id: string; content: string; created_at: string; name?: string };
 
-  // Auto-scroll to bottom when messages change
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const y = new Date(); y.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === y.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+export default function GroupChatPage() {
+  const { member, group } = useAuth();
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [text, setText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+  const isOfficial = OFFICIAL_ROLES.includes(member?.role || '');
+
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
-  // --- SEND MESSAGE FUNCTION ---
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    // 1. Add User Message to UI instantly
-    const userMsg = { role: "user", content: input };
-    setMessages(prev => [...prev, userMsg]);
-    setInput("");
-    setIsTyping(true); // Show typing animation
-
-    try {
-      // 2. Send to YOUR Backend (Gemini)
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+    if (!group?.id) return;
+    let cancelled = false;
+    (async () => {
+      const [m, p] = await Promise.all([
+        supabase.from('chama_messages').select('id, chama_id, member_id, content, created_at').eq('chama_id', group.id).order('created_at', { ascending: false }).limit(150),
+        supabase.from('chama_memberships').select('id, profiles(full_name)').eq('chama_id', group.id),
+      ]);
+      if (cancelled) return;
+      if (m.error) setError('Messages did not load. Check your connection and refresh.');
+      const map: Record<string, string> = {};
+      (p.data || []).forEach((r: { id: string; profiles: { full_name?: string } | { full_name?: string }[] | null }) => {
+        const prof = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
+        map[r.id] = prof?.full_name || 'Member';
       });
+      setNames(map);
+      setMessages(((m.data as Msg[]) || []).reverse());
+      setLoading(false);
+    })();
 
-      const data = await response.json();
+    const channel = supabase
+      .channel(`group-chat-${group.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chama_messages', filter: `chama_id=eq.${group.id}` }, (payload) => {
+        const row = payload.new as Msg;
+        setMessages((prev) => (prev.some((x) => x.id === row.id) ? prev : [...prev, row]));
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'chama_messages' }, (payload) => {
+        const old = payload.old as { id: string };
+        setMessages((prev) => prev.filter((x) => x.id !== old.id));
+      })
+      .subscribe();
 
-      // 3. Add AI Response to UI
-      if (data.reply) {
-        const aiMsg = { role: "assistant", content: data.reply };
-        setMessages(prev => [...prev, aiMsg]);
-        
-        // 4. Speak the response!
-      }
-    } catch (error) {
-      console.error("Chat Error:", error);
-      const errorMsg = { role: "assistant", content: "Pole! My brain is offline right now. Check your internet." };
-      setMessages(prev => [...prev, errorMsg]);
-    } finally {
-      setIsTyping(false); // Hide typing animation
-    }
+    return () => { cancelled = true; supabase.removeChannel(channel); };
+  }, [group?.id]);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [messages.length]);
+
+  const send = async () => {
+    const content = text.trim();
+    if (!content || !member?.id || !group?.id || sending) return;
+    setSending(true);
+    setError('');
+    const { data, error: err } = await supabase
+      .from('chama_messages')
+      .insert({ chama_id: group.id, member_id: member.id, content: content.slice(0, 2000) })
+      .select('id, chama_id, member_id, content, created_at')
+      .single();
+    setSending(false);
+    if (err) { setError('Your message was not sent. Try again.'); return; }
+    setText('');
+    if (data) setMessages((prev) => (prev.some((x) => x.id === data.id) ? prev : [...prev, data as Msg]));
   };
 
+  const remove = async (id: string) => {
+    const { error: err } = await supabase.from('chama_messages').delete().eq('id', id);
+    if (!err) setMessages((prev) => prev.filter((x) => x.id !== id));
+  };
+
+  let lastDay = '';
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] lg:h-[calc(100vh-60px)]">
-      {/* Chat Header */}
-      <div className="flex items-center gap-3 mb-4 pb-4 border-b" style={{ borderColor: 'var(--border)' }}>
-        <div className="size-10 bg-[var(--ak-solid)] rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <Bot className="w-6 h-6 text-white" />
-        </div>
+    <div className="flex flex-col h-[calc(100dvh-196px)] lg:h-[calc(100dvh-64px)] -mb-4">
+      <div className="flex items-end justify-between gap-4 pb-4 border-b border-line">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2 font-geist" style={{ color: 'var(--text-primary)' }}>
-            Chama AI <Sparkles className="w-4 h-4 text-[var(--ak-brand-ink)]" />
-          </h1>
-          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Powered by Gemini & 11Labs</p>
+          <h1 className="font-display text-[30px] sm:text-[36px] leading-tight">Group chat</h1>
+          <p className="text-[14px] text-ink-3 mt-0.5">Everyone in {group?.name || 'the group'} can read this.</p>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-            <div className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === "user" ? "bg-[var(--ak-solid)] text-white" : "bg-emerald-900/20 border border-[var(--ak-brand-ink)]/30"}`}>
-              {msg.role === "user" ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-[var(--ak-brand-ink)]" />}
-            </div>
-            <div 
-              className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${
-                msg.role === "user" 
-                  ? "bg-[var(--ak-solid)] text-white rounded-tr-none" 
-                  : "rounded-tl-none shadow-sm"
-              }`}
-              style={msg.role === "user" ? {} : {
-                backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              {msg.content}
-            </div>
-          </div>
-        ))}
-        
-        {isTyping && (
-          <div className="flex gap-3">
-            <div className="size-8 rounded-full bg-emerald-900/20 border border-[var(--ak-brand-ink)]/30 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-[var(--ak-brand-ink)]" />
-            </div>
-            <div className="px-4 py-3 rounded-2xl rounded-tl-none flex gap-1 items-center" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--text-muted)' }}></div>
-              <div className="w-2 h-2 rounded-full animate-bounce delay-75" style={{ backgroundColor: 'var(--text-muted)' }}></div>
-              <div className="w-2 h-2 rounded-full animate-bounce delay-150" style={{ backgroundColor: 'var(--text-muted)' }}></div>
-            </div>
+      <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-1" aria-live="polite">
+        {loading && <p className="text-[14px] text-ink-3">Loading messages…</p>}
+        {!loading && messages.length === 0 && (
+          <div className="m-auto text-center max-w-[40ch]">
+            <p className="font-display text-[24px]">Say jambo to the group</p>
+            <p className="text-[14px] text-ink-3 mt-1">Questions about a payment, the next meeting or the merry-go-round all go here.</p>
           </div>
         )}
-        <div ref={scrollRef} />
+        {messages.map((m, i) => {
+          const mine = m.member_id === member?.id;
+          const name = names[m.member_id] || m.name || 'Member';
+          const day = dayLabel(m.created_at);
+          const showDay = day !== lastDay;
+          lastDay = day;
+          const prev = messages[i - 1];
+          const grouped = !showDay && prev && prev.member_id === m.member_id;
+          return (
+            <div key={m.id}>
+              {showDay && <div className="text-center text-[12px] text-ink-3 my-3">{day}</div>}
+              <div className={cn('group flex gap-2.5 items-end', mine && 'flex-row-reverse', grouped ? 'mt-0.5' : 'mt-2')}>
+                <span className={cn(grouped && 'invisible')}><Avatar name={mine ? member?.full_name : name} size={30} tone={mine ? 'lavender' : 'sage'} /></span>
+                <div className={cn('max-w-[78%] sm:max-w-[60%]')}>
+                  {!grouped && !mine && <div className="text-[12px] text-ink-3 mb-1 ml-1">{name}</div>}
+                  <div className={cn('px-4 py-2.5 text-[15px] leading-relaxed whitespace-pre-wrap break-words rounded-[18px]', mine ? 'bg-primary text-on-primary rounded-br-md' : 'bg-surface border border-line rounded-bl-md')}>
+                    {m.content}
+                  </div>
+                  <div className={cn('flex items-center gap-2 mt-1 text-[11px] text-ink-3', mine ? 'justify-end mr-1' : 'ml-1')}>
+                    {new Date(m.created_at).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })}
+                    {(mine || isOfficial) && (
+                      <button type="button" onClick={() => remove(m.id)} aria-label="Delete message" className="opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-danger">
+                        <Trash2 size={13} aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={endRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="relative flex items-center gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Ask about savings, contributions, or group rules..."
-            className="w-full rounded-full pl-6 pr-24 py-4 outline-none focus:border-[var(--ak-brand-ink)] transition-all"
-            style={{
-              backgroundColor: 'var(--bg-input)',
-              borderColor: 'var(--border)',
-              borderWidth: '1px',
-              color: 'var(--text-primary)'
-            }}
+      {error && <Notice tone="danger" className="mb-2">{error}</Notice>}
+      <form className="pt-3 border-t border-line flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
+        <label className="flex-1">
+          <span className="sr-only">Message</span>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+            rows={1}
+            maxLength={2000}
+            placeholder="Write to the group"
+            className="w-full max-h-40 resize-none px-5 py-3.5 rounded-[24px] bg-surface border border-line text-[16px] placeholder:text-ink-3 focus:outline-none focus:border-line-strong"
           />
-          <div className="absolute right-2 flex items-center gap-1">
-            <button className="p-2.5 rounded-full transition-colors hover:text-[var(--ak-brand-ink)]" style={{ color: 'var(--text-muted)' }}>
-              <Mic className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={handleSend}
-              className="p-2.5 rounded-full bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors font-bold shadow-sm"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
+        </label>
+        <button type="submit" disabled={!text.trim() || sending} aria-label="Send" className="w-[52px] h-[52px] rounded-full bg-primary text-on-primary flex items-center justify-center disabled:opacity-40 shrink-0">
+          <SendHorizontal size={20} aria-hidden="true" />
+        </button>
+      </form>
     </div>
   );
 }

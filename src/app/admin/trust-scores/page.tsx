@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -175,7 +176,7 @@ export default function AdminTrustScoresPage() {
 
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] text-white px-5 py-3 rounded-xl shadow-lg z-50 flex items-center gap-3">
-          <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-[18px]">auto_awesome</span>
+          <MIcon name="auto_awesome"  className="text-[var(--ak-brand-ink)] text-[18px]" />
           <span className="text-[14px] font-medium">{toastMsg}</span>
         </div>
       )}
@@ -185,12 +186,12 @@ export default function AdminTrustScoresPage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] mb-1 flex items-center gap-1">
             <span>Admin</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Credit Scores</span>
           </p>
           <h1 className="text-[26px] font-bold tracking-tight">AI Credit Scores</h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px] text-[var(--ak-brand-ink)]">smart_toy</span>
+            <MIcon name="smart_toy"  className="text-[16px] text-[var(--ak-brand-ink)]" />
             Powered by Akibora AI · GPT-4o
           </p>
         </div>
@@ -203,7 +204,7 @@ export default function AdminTrustScoresPage() {
             {calculatingAll ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <span className="material-symbols-outlined text-[18px]">smart_toy</span>
+              <MIcon name="smart_toy"  className="text-[18px]" />
             )}
             {calculatingAll ? 'Calculating...' : 'Recalculate All with AI'}
           </button>
@@ -220,7 +221,7 @@ export default function AdminTrustScoresPage() {
         ].map(stat => (
           <div key={stat.label} className="card-bg border border-[var(--border)] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className={`material-symbols-outlined text-[18px] ${stat.color || 'text-[var(--text-muted)]'}`}>{stat.icon}</span>
+              <MIcon name={stat.icon} className={`text-[18px] ${stat.color || 'text-[var(--text-muted)]'}`} />
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">{stat.label}</span>
             </div>
             <div className="text-[28px] font-bold">{String(stat.value ?? 0)}</div>
@@ -281,18 +282,16 @@ export default function AdminTrustScoresPage() {
                       className="p-1.5 rounded-lg hover:bg-[var(--border)] transition-colors disabled:opacity-40"
                       title="Recalculate with AI"
                     >
-                      <span className="material-symbols-outlined text-[18px] text-[var(--ak-brand-ink)]">smart_toy</span>
+                      <MIcon name="smart_toy"  className="text-[18px] text-[var(--ak-brand-ink)]" />
                     </button>
                     <button
                       onClick={e => { e.stopPropagation(); setOverrideMember(m); setShowOverrideModal(true); }}
                       className="p-1.5 rounded-lg hover:bg-[var(--border)] transition-colors"
                       title="Manual override"
                     >
-                      <span className="material-symbols-outlined text-[18px] text-[var(--text-muted)]">edit</span>
+                      <MIcon name="edit"  className="text-[18px] text-[var(--text-muted)]" />
                     </button>
-                    <span className={`material-symbols-outlined text-[18px] text-[var(--text-muted)] transition-transform ${expandedId === m.id ? 'rotate-180' : ''}`}>
-                      expand_more
-                    </span>
+                    <MIcon name="expand_more" className={`text-[18px] text-[var(--text-muted)] transition-transform ${expandedId === m.id ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
 
@@ -305,7 +304,7 @@ export default function AdminTrustScoresPage() {
 
                         {/* AI header */}
                         <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[16px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+                          <MIcon name="smart_toy"  className="text-[16px] text-[var(--ak-brand-ink)]" />
                           <span className="font-semibold text-[13px]">AI Credit Profile</span>
                         </div>
 
@@ -316,7 +315,7 @@ export default function AdminTrustScoresPage() {
                         {m.ai_risk_flags && m.ai_risk_flags.length > 0 && (
                           <div>
                             <p className="text-[11px] font-bold uppercase tracking-wider text-red-500 mb-1.5 flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[14px]">warning</span>
+                              <MIcon name="warning"  className="text-[14px]" />
                               Risk Flags Detected
                             </p>
                             <div className="flex flex-wrap gap-1.5">
@@ -361,7 +360,7 @@ export default function AdminTrustScoresPage() {
                         {m.ai_recommendation && (
                           <div className="rounded-lg px-3 py-2 flex gap-2 items-start"
                             style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                            <span className="material-symbols-outlined text-[16px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5">lightbulb</span>
+                            <MIcon name="lightbulb"  className="text-[16px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5" />
                             <p className="text-[12px] text-[var(--text-muted)]">{m.ai_recommendation}</p>
                           </div>
                         )}
@@ -369,7 +368,7 @@ export default function AdminTrustScoresPage() {
                     ) : (
                       <div className="rounded-xl p-4 text-[13px] text-[var(--text-muted)] flex items-center gap-2"
                         style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}>
-                        <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+                        <MIcon name="smart_toy"  className="text-[16px]" />
                         Click the AI icon to generate an explainable credit profile for this member.
                       </div>
                     )}

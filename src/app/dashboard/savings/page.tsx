@@ -1,308 +1,148 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { Download, Filter, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from 'react';
+import { Download } from 'lucide-react';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/lib/supabase';
+import { exportToPDF } from '@/lib/export';
+import { Button, Chip, EmptyState, Money, PageHeader, Panel, PanelTitle, Skeleton, Stat, TableWrap, cn, formatKsh, tableClass, type ChipKind } from '@/components/ui';
+
+type C = { id: string; amount: number; status: string; created_at: string; payment_method: string | null; mpesa_receipt: string | null; reference: string | null };
+
+const ST: Record<string, { kind: ChipKind; label: string }> = {
+  confirmed: { kind: 'paid', label: 'Confirmed' },
+  pending: { kind: 'pending', label: 'Waiting' },
+  failed: { kind: 'failed', label: 'Failed' },
+  late: { kind: 'late', label: 'Late' },
+  partial: { kind: 'info', label: 'Part paid' },
+};
 
 export default function SavingsPage() {
   const { member, group } = useAuth();
-  const [contributions, setContributions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [totalSavings, setTotalSavings] = useState(0);
+  const [rows, setRows] = useState<C[] | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    async function fetchSavings() {
-      if (!member?.id) return;
-      try {
-        const { data, error } = await supabase
-          .from('contributions_v2')
-          .select('*, profiles(full_name)')
-          .eq('membership_id', member.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        if (data) {
-          setContributions(data);
-          const total = data
-            .filter((c: any) => c.status === 'confirmed')
-            .reduce((sum: number, c: any) => sum + Number(c.amount), 0);
-          setTotalSavings(total);
-        }
-      } catch (err) {
-        console.error('Error fetching contributions:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchSavings();
+    if (!member?.id) return;
+    supabase
+      .from('contributions_v2')
+      .select('id, amount, status, created_at, payment_method, mpesa_receipt, reference')
+      .eq('membership_id', member.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setRows((data as C[]) || []));
   }, [member?.id]);
 
-  const chamaName = group?.name || 'Group';
-
-  const stats = [
-    { 
-      label: "Total Personal Savings", 
-      value: `KES ${totalSavings.toLocaleString('en-KE')}`, 
-      change: contributions.length > 0 ? `From ${contributions.filter(c => c.status === 'confirmed').length} contribution(s)` : "No entries", 
-      positive: true, 
-      accent: "border-t-[var(--ak-brand-ink)]" 
-    },
-    { 
-      label: "Interest Earned", 
-      value: "KES 0", 
-      change: "0% accrued", 
-      positive: true, 
-      accent: "border-t-blue-400" 
-    },
-    { 
-      label: "Next Contribution Due", 
-      value: `KES ${(group?.contribution_amount || 0).toLocaleString('en-KE')}`, 
-      subtext: `Frequency: ${group?.contribution_frequency || 'monthly'}`, 
-      highlight: true, 
-      accent: "border-t-amber-400" 
+  const s = useMemo(() => {
+    const list = rows || [];
+    const confirmed = list.filter((c) => c.status === 'confirmed');
+    const total = confirmed.reduce((a, c) => a + Number(c.amount), 0);
+    const pending = list.filter((c) => c.status === 'pending').reduce((a, c) => a + Number(c.amount), 0);
+    const byMonth = new Map<string, number>();
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      byMonth.set(`${d.getFullYear()}-${d.getMonth()}`, 0);
     }
-  ];
+    confirmed.forEach((c) => {
+      const d = new Date(c.created_at);
+      const k = `${d.getFullYear()}-${d.getMonth()}`;
+      if (byMonth.has(k)) byMonth.set(k, (byMonth.get(k) || 0) + Number(c.amount));
+    });
+    const chart = [...byMonth.entries()].map(([k, v]) => {
+      const [y, m] = k.split('-').map(Number);
+      return { label: new Date(y, m, 1).toLocaleDateString('en-KE', { month: 'short' }), amount: v };
+    });
+    const activeMonths = chart.filter((c) => c.amount > 0).length;
+    return { total, pending, count: confirmed.length, chart, avg: activeMonths ? chart.reduce((a, c) => a + c.amount, 0) / activeMonths : 0 };
+  }, [rows]);
+
+  const download = async () => {
+    if (!rows) return;
+    setBusy(true);
+    try {
+      await exportToPDF(
+        `Savings statement: ${member?.full_name || 'Member'}`,
+        group?.name || '',
+        ['Date', 'Amount (KSh)', 'Paid by', 'Receipt', 'Status'],
+        rows.map((c) => [
+          new Date(c.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }),
+          Number(c.amount).toLocaleString('en-KE'),
+          c.payment_method === 'cash' ? 'Cash' : c.payment_method === 'bank' ? 'Bank' : 'M-Pesa',
+          c.mpesa_receipt || c.reference || '',
+          ST[c.status]?.label || c.status,
+        ]),
+        'akibora_savings_statement',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!rows) {
+    return (
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-60" />
+        <div className="grid md:grid-cols-3 gap-4"><Skeleton className="h-36" /><Skeleton className="h-36" /><Skeleton className="h-36" /></div>
+        <Skeleton className="h-80" />
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)]">
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media screen {
-          .print-only {
-            display: none !important;
-          }
-        }
-        @media print {
-          .no-print {
-            display: none !important;
-          }
-          .print-only {
-            display: block !important;
-            color: #000000 !important;
-            background: #ffffff !important;
-          }
-          body {
-            color: #000000 !important;
-            background: #ffffff !important;
-          }
-        }
-      `}} />
+    <div>
+      <PageHeader
+        title="Your savings"
+        subtitle={`Everything you have put into ${group?.name || 'the group'}, confirmed payment by payment.`}
+        actions={<Button variant="outline" onClick={download} disabled={busy || rows.length === 0}><Download size={18} aria-hidden="true" />{busy ? 'Preparing…' : 'Download statement'}</Button>}
+      />
 
-      {/* PRINT-ONLY AREA */}
-      <div className="print-only font-inter text-black bg-white p-8 w-full max-w-[800px] mx-auto">
-        <div className="flex justify-between items-start border-b-2 border-green-600 pb-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-green-700">Akibora Financial Statement</h1>
-            <p className="text-sm text-gray-500 mt-1">Generated on {new Date().toLocaleDateString('en-KE', { dateStyle: 'long' })}</p>
-          </div>
-          <div className="text-right">
-            <h2 className="text-lg font-bold text-gray-800">{chamaName}</h2>
-            <p className="text-sm text-gray-500">Group Savings Summary</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-8 bg-gray-50 p-4 rounded-xl">
-          <div>
-            <p className="text-xs text-gray-400 uppercase font-semibold">Member Details</p>
-            <p className="text-sm font-bold mt-1">{member?.profiles?.full_name || 'Member'}</p>
-            <p className="text-sm text-gray-650">{member?.profiles?.phone_number || ''}</p>
-            <p className="text-sm text-gray-650">{member?.profiles?.email || ''}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-gray-400 uppercase font-semibold">Savings Stats</p>
-            <p className="text-sm text-gray-500 mt-1">Total Personal Savings:</p>
-            <p className="text-lg font-bold text-green-700">KES {totalSavings.toLocaleString('en-KE')}</p>
-          </div>
-        </div>
-
-        <h3 className="text-md font-bold mb-3 text-gray-800 border-b pb-1">Contribution History</h3>
-        <table className="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr className="border-b bg-gray-150">
-              <th className="py-2 px-3">Date</th>
-              <th className="py-2 px-3">Method</th>
-              <th className="py-2 px-3">Reference/Receipt</th>
-              <th className="py-2 px-3 text-right">Amount</th>
-              <th className="py-2 px-3">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contributions.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="py-4 text-center text-gray-500">No contributions recorded.</td>
-              </tr>
-            ) : (
-              contributions.map((c, idx) => (
-                <tr key={idx} className="border-b">
-                  <td className="py-2.5 px-3 text-gray-650">{new Date(c.created_at).toLocaleDateString('en-KE')}</td>
-                  <td className="py-2.5 px-3 uppercase text-gray-650">{c.payment_method || 'mpesa'}</td>
-                  <td className="py-2.5 px-3 font-mono text-gray-650">{c.mpesa_receipt || c.reference || '-'}</td>
-                  <td className="py-2.5 px-3 text-right font-bold text-gray-800">KES {Number(c.amount).toLocaleString('en-KE')}</td>
-                  <td className="py-2.5 px-3 uppercase font-semibold text-gray-650">{c.status}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-        <div className="mt-12 text-center text-xs text-gray-450 border-t pt-4">
-          Thank you for being a valued member of {chamaName}. Powered by Akibora.
-        </div>
+      <div className="grid gap-4 md:grid-cols-[1.4fr_1fr_1fr] mb-4">
+        <Panel tone="forest" className="rounded-[28px] sm:p-7">
+          <div className="text-[14px] text-[#A9C2B3]">Confirmed savings</div>
+          <Money value={s.total} className="block text-[46px] sm:text-[56px] leading-[1.05] mt-1" />
+          <div className="text-[14px] text-[#A9C2B3] mt-1">from {s.count} {s.count === 1 ? 'payment' : 'payments'}</div>
+        </Panel>
+        <Stat label="Usual month" value={formatKsh(s.avg)} hint="average over months you paid this year" />
+        <Stat label="Waiting for M-Pesa" value={formatKsh(s.pending)} hint={s.pending ? 'shows as confirmed once Safaricom replies' : 'nothing outstanding'} />
       </div>
 
-      {/* SCREEN UI */}
-      <div className="no-print">
-        {/* Page Header */}
-        <div className="mb-8">
-          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-            <span>Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span>Savings</span>
-          </p>
-          
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-                Savings & History
-              </h1>
-              <p className="text-[14px] text-[var(--text-muted)] mt-1">
-                {chamaName} — Track your personal growth and collective group contributions in real-time.
-              </p>
-            </div>
-            
-            <div className="flex gap-3 w-full md:w-auto">
-              <button 
-                onClick={() => window.print()}
-                className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-[var(--ak-solid)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--ak-solid)] transition-all">
-                <Download className="w-4 h-4" />
-                Export Statement
-              </button>
-            </div>
-          </div>
+      <Panel aria-labelledby="yr-h" className="mb-4">
+        <PanelTitle id="yr-h">The last twelve months</PanelTitle>
+        <div className="h-[220px] mt-4 -mx-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={s.chart} margin={{ top: 5, right: 8, left: 8, bottom: 0 }}>
+              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--ak-text-3)' }} />
+              <Tooltip cursor={{ fill: 'var(--ak-raised)' }} formatter={(v) => [formatKsh(Number(v)), 'Saved']} contentStyle={{ borderRadius: 12, background: 'var(--ak-surface)', border: '1px solid var(--ak-line)', color: 'var(--ak-text)' }} />
+              <Bar dataKey="amount" fill="#3FA673" radius={[8, 8, 2, 2]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
+      </Panel>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-6 lg:gap-6">
-            {stats.map((stat, idx) => (
-              <div 
-                key={idx} 
-                className={`card-bg border border-[var(--border)] border-t-2 ${stat.accent} rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 last:col-span-2 lg:last:col-span-1`}
-              >
-                <p className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">
-                  {stat.label}
-                </p>
-                <p className="text-[22px] md:text-3xl font-bold text-[var(--text-main)] mb-2 font-geist">{stat.value}</p>
-                {stat.change && (
-                  <div className="flex items-center gap-1 text-sm text-[var(--brand-green)]">
-                    <TrendingUp className="w-4 h-4" />
-                    <span className="font-semibold">{stat.change}</span>
-                  </div>
-                )}
-                {stat.subtext && <p className="text-sm text-[var(--text-muted)] mt-1">{stat.subtext}</p>}
-              </div>
-            ))}
-          </div>
-
-          {/* Right Column - Transaction History */}
-          <div className="lg:col-span-2 card-bg border border-[var(--border)] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-            <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
-              <h2 className="text-xl font-bold text-[var(--text-main)]">Transaction History</h2>
-              <div className="flex gap-2">
-                <button className="p-2 rounded-lg bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)] transition-all">
-                  <Filter className="w-5 h-5" />
-                </button>
-                <button 
-                  onClick={() => window.print()}
-                  className="p-2 rounded-lg bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)] transition-all">
-                  <Download className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div>
-              {loading ? (
-                <div className="py-12 text-center text-[var(--text-muted)] text-sm">
-                  Loading contribution records...
-                </div>
-              ) : contributions.length === 0 ? (
-                <div className="py-12 text-center text-[var(--text-muted)] text-sm">
-                  No contributions recorded yet.
-                </div>
-              ) : (
-                <>
-                  {/* Mobile Card List */}
-                  <div className="md:hidden flex flex-col divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-                    {contributions.map((tx, idx) => (
-                      <div key={idx} className="py-4 px-4 active:bg-[var(--ak-surface-2)] dark:active:bg-[var(--ak-raised)] transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center text-xs font-bold shadow-sm">
-                              {member?.profiles?.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'M'}
-                            </div>
-                            <span className="text-sm font-semibold text-[var(--text-main)]">You</span>
-                          </div>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                            tx.status === 'confirmed' 
-                              ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' 
-                              : 'bg-orange-100 dark:bg-orange-900/30 text-orange-850 dark:text-orange-400'
-                          }`}>
-                            {tx.status}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-[var(--ak-line)]/50 dark:border-[var(--ak-line)]/50">
-                          <span className="text-[12px] text-[var(--text-muted)]">
-                            {tx.payment_method === 'mpesa' ? `M-Pesa STK (${tx.mpesa_receipt || 'No receipt'})` : `Cash/Manual Entry`}
-                          </span>
-                          <span className="text-[14px] font-bold text-[var(--text-main)] font-mono">KES {Number(tx.amount).toLocaleString('en-KE')}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Desktop Table */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead className="bg-gray-50 dark:bg-[var(--ak-page)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
-                        <tr>
-                          <th className="px-6 py-4">Date</th>
-                          <th className="px-6 py-4">Method</th>
-                          <th className="px-6 py-4 hidden sm:table-cell">Reference/Receipt</th>
-                          <th className="px-6 py-4">Amount</th>
-                          <th className="px-6 py-4">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-                        {contributions.map((tx, idx) => (
-                          <tr key={idx} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                            <td className="px-6 py-4 text-sm text-[var(--text-muted)] whitespace-nowrap">
-                              {new Date(tx.created_at).toLocaleDateString('en-KE')}
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className="text-sm font-semibold text-[var(--text-main)] uppercase">{tx.payment_method || 'mpesa'}</span>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-[var(--text-muted)] hidden sm:table-cell font-mono">{tx.mpesa_receipt || tx.reference || '-'}</td>
-                            <td className="px-6 py-4 text-sm font-bold text-[var(--text-main)] font-mono">KES {Number(tx.amount).toLocaleString('en-KE')}</td>
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                tx.status === 'confirmed' 
-                                  ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' 
-                                  : 'bg-orange-100 dark:bg-orange-900/30 text-orange-850 dark:text-orange-400'
-                              }`}>
-                                {tx.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <Panel aria-labelledby="all-h">
+        <PanelTitle id="all-h" action={<span className="text-[13px] text-ink-3">{rows.length} records</span>}>Every payment</PanelTitle>
+        {rows.length === 0 ? (
+          <EmptyState title="No payments yet">Your first contribution will appear here with its M-Pesa receipt.</EmptyState>
+        ) : (
+          <TableWrap className="mt-3">
+            <table className={cn(tableClass, 'min-w-[560px]')}>
+              <thead><tr><th>Date</th><th className="!text-right">Amount</th><th>Paid by</th><th>Receipt</th><th>Status</th></tr></thead>
+              <tbody>
+                {rows.map((c) => (
+                  <tr key={c.id}>
+                    <td className="text-ink-2 whitespace-nowrap">{new Date(c.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td className="text-right"><Money value={Number(c.amount)} className="text-[17px]" /></td>
+                    <td className="text-ink-2">{c.payment_method === 'cash' ? 'Cash' : c.payment_method === 'bank' ? 'Bank' : 'M-Pesa'}</td>
+                    <td className="font-mono text-[12px] text-ink-3">{c.mpesa_receipt || c.reference || '—'}</td>
+                    <td><Chip kind={(ST[c.status] || { kind: 'neutral' }).kind}>{ST[c.status]?.label || c.status}</Chip></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableWrap>
+        )}
+      </Panel>
     </div>
   );
 }

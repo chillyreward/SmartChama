@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -97,7 +98,7 @@ export default function AdminMemberDetailPage() {
     <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
+          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
@@ -105,14 +106,14 @@ export default function AdminMemberDetailPage() {
       {/* HEADER */}
       <div className="flex items-center gap-4 mb-8">
         <Link href="/admin/members" className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)] flex items-center justify-center transition-colors border border-[var(--border)] card-bg">
-          <span className="material-symbols-outlined text-[var(--text-muted)]">arrow_back</span>
+          <MIcon name="arrow_back"  className="text-[var(--text-muted)]" />
         </Link>
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Members</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Profile</span>
           </p>
           <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Member Profile</h1>
@@ -132,7 +133,7 @@ export default function AdminMemberDetailPage() {
                 {member.role || 'Member'}
               </span>
               <span className="text-sm text-[var(--text-muted)] flex items-center gap-1 font-semibold">
-                <span className="material-symbols-outlined text-[16px]">phone</span>
+                <MIcon name="phone"  className="text-[16px]" />
                 {member.profile?.phone_number || 'No phone'}
               </span>
             </div>

@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -89,7 +90,7 @@ export default function AdminAuditLogPage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Audit Log</span>
           </p>
           <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Audit Log</h1>
@@ -97,14 +98,14 @@ export default function AdminAuditLogPage() {
         </div>
         <div className="w-full md:w-auto">
           <button className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-2 w-full md:w-auto">
-            <span className="material-symbols-outlined text-[18px]">download</span>
+            <MIcon name="download"  className="text-[18px]" />
             Export Log
           </button>
         </div>
       </div>
 
       <div className="bg-transparent border border-[var(--border)] rounded-2xl p-4 mb-6 flex items-start gap-3 text-[var(--text-muted)]">
-        <span className="material-symbols-outlined text-[var(--text-muted)] shrink-0 mt-0.5">shield</span>
+        <MIcon name="shield"  className="text-[var(--text-muted)] shrink-0 mt-0.5" />
         <p className="text-xs leading-relaxed">
           For compliance and transparency, all actions taken by administrators, chairladies, and treasurers are logged here permanently. This log cannot be altered or deleted.
         </p>

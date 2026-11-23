@@ -1,4 +1,7 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { Coins, UserPlus } from 'lucide-react';
+import { EmptyState, PageHeader, Panel, Skeleton, cn, formatKsh } from '@/components/ui';
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -51,8 +54,8 @@ export default function GroupActivityPage() {
           combined.push(...contributions.map((c: any) => ({
             id: `c-${c.id}`,
             type: 'contribution',
-            title: 'Contribution Added',
-            description: `${c.membership?.profile?.full_name ?? 'Someone'} contributed KSh ${c.amount}`,
+            title: 'Contribution paid',
+            description: `${c.membership?.profile?.full_name ?? 'Someone'} paid ${formatKsh(c.amount)}`,
             date: new Date(c.created_at),
             icon: 'payments',
             color: 'text-[var(--ak-brand-ink)]',
@@ -65,7 +68,7 @@ export default function GroupActivityPage() {
           combined.push(...newMembers.map((m: any) => ({
             id: `m-${m.id}`,
             type: 'member',
-            title: 'New Member Joined',
+            title: 'New member',
             description: `${m.profile?.full_name ?? 'Someone'} joined the group`,
             date: new Date(m.created_at),
             icon: 'person_add',
@@ -92,52 +95,36 @@ export default function GroupActivityPage() {
 
   if (isLoading || loading) {
     return (
-      <div className="p-8 h-full flex items-center justify-center">
-        <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-64" />
+        <Skeleton className="h-96" />
       </div>
     );
   }
 
   return (
-    <div className="p-8 font-inter max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold font-geist" style={{ color: 'var(--text-primary)' }}>Group Activity</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Recent events in {group?.name}</p>
-      </div>
-
-      <div className="rounded-xl shadow-sm p-6 transition-colors" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+    <div>
+      <PageHeader title="Group activity" subtitle={`Payments and new members in ${group?.name || 'your group'}, newest first.`} />
+      <Panel>
         {activities.length === 0 ? (
-          <div className="text-center py-10">
-            <span className="material-symbols-outlined text-5xl mb-2" style={{ color: 'var(--text-muted)' }}>history</span>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>No recent activity found.</p>
-          </div>
+          <EmptyState title="Nothing has happened yet">When members pay or join, it shows up here.</EmptyState>
         ) : (
-          <div className="relative border-l-2 ml-4 pl-6 space-y-8" style={{ borderColor: 'var(--border)' }}>
-            {activities.map((activity) => (
-              <div key={activity.id} className="relative">
-                {/* Timeline Dot */}
-                <div 
-                  className={`absolute -left-[35px] w-8 h-8 rounded-full flex items-center justify-center ${activity.bg} shadow-sm`}
-                  style={{ border: '2px solid var(--bg-card)' }}
-                >
-                  <span className={`material-symbols-outlined text-sm ${activity.color}`}>
-                    {activity.icon}
-                  </span>
-                </div>
-                
-                {/* Content */}
-                <div>
-                  <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{activity.title}</h3>
-                  <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{activity.description}</p>
-                  <div className="text-xs mt-2 font-mono" style={{ color: 'var(--text-muted)' }}>
-                    {activity.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} at {activity.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </div>
-              </div>
+          <ol className="relative ml-4 border-l border-line-strong/40">
+            {activities.map((a) => (
+              <li key={a.id} className="relative pl-8 pb-7 last:pb-1">
+                <span aria-hidden="true" className={cn('absolute -left-[17px] top-0 w-[34px] h-[34px] rounded-full flex items-center justify-center ring-4 ring-surface', a.type === 'member' ? 'bg-lavender text-lavender-ink' : 'bg-mint text-forest')}>
+                  {a.type === 'member' ? <UserPlus size={16} /> : <Coins size={16} />}
+                </span>
+                <div className="text-[16px] font-medium">{a.title}</div>
+                <p className="text-[15px] text-ink-2 mt-0.5">{a.description}</p>
+                <time className="block text-[13px] text-ink-3 mt-1">
+                  {a.date.toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}, {a.date.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })}
+                </time>
+              </li>
             ))}
-          </div>
+          </ol>
         )}
-      </div>
+      </Panel>
     </div>
   );
 }

@@ -1,10 +1,13 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { NewContributionModal } from "@/components/NewContributionModal";
+import { Plus } from "lucide-react";
+import { Avatar, Button, Chip, EmptyState, Money, Notice, PageHeader, Panel, PanelTitle, Skeleton, TableWrap, Ticks, cn, formatKsh, tableClass, type ChipKind } from "@/components/ui";
 
 export default function ContributionsPage() {
   const { member, group, isLoading: authLoading } = useAuth();
@@ -27,7 +30,6 @@ export default function ContributionsPage() {
   const [memberStatuses, setMemberStatuses] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
 
-  const fmt = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
 
   const fetchData = async () => {
     if (!member || !group) return;
@@ -141,201 +143,141 @@ export default function ContributionsPage() {
     return () => { supabase.removeChannel(channel); };
   }, [group]);
 
-  const getStatusBadge = (status: string) => {
-    const map: Record<string, string> = {
-      Paid: 'bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-400',
-      Partial: 'bg-blue-100 dark:bg-blue-950/30 text-blue-800 dark:text-blue-400',
-      Pending: 'bg-orange-100 dark:bg-orange-950/30 text-orange-800 dark:text-orange-400',
-      Late: 'bg-red-100 dark:bg-red-950/30 text-red-800 dark:text-red-400',
-      confirmed: 'bg-green-100 dark:bg-green-950/30 text-green-800 dark:text-green-400',
-      pending: 'bg-orange-100 dark:bg-orange-950/30 text-orange-800 dark:text-orange-400',
-      failed: 'bg-red-100 dark:bg-red-950/30 text-red-800 dark:text-red-400',
-      late: 'bg-red-100 dark:bg-red-950/30 text-red-800 dark:text-red-400',
-    };
-    return (
-      <span className={`px-2.5 py-1 rounded text-xs font-semibold capitalize ${map[status] || 'bg-gray-100 text-gray-600'}`}>
-        {status}
-      </span>
-    );
+  const STATUS: Record<string, { kind: ChipKind; label: string }> = {
+    Paid: { kind: 'paid', label: 'Paid' },
+    Partial: { kind: 'info', label: 'Part paid' },
+    Pending: { kind: 'pending', label: 'Not yet' },
+    Late: { kind: 'late', label: 'Late' },
+    confirmed: { kind: 'paid', label: 'Confirmed' },
+    pending: { kind: 'pending', label: 'Waiting for M-Pesa' },
+    failed: { kind: 'failed', label: 'Failed' },
+    late: { kind: 'late', label: 'Late' },
+    partial: { kind: 'info', label: 'Part paid' },
+  };
+  const badge = (s: string) => {
+    const x = STATUS[s] || { kind: 'neutral' as ChipKind, label: s };
+    return <Chip kind={x.kind}>{x.label}</Chip>;
   };
 
   if (authLoading || loading) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full space-y-6">
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-40 animate-pulse" />
-        <div className="grid lg:grid-cols-2 gap-6">
-          <div className="card-bg border border-[var(--border)] rounded-2xl h-72 animate-pulse" />
-          <div className="card-bg border border-[var(--border)] rounded-2xl h-72 animate-pulse" />
-        </div>
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-64" />
+        <Skeleton className="h-44 rounded-[28px]" />
+        <div className="grid lg:grid-cols-2 gap-4"><Skeleton className="h-72" /><Skeleton className="h-72" /></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center pt-20 text-[var(--text-main)]">
-        <span className="material-symbols-outlined text-red-500 text-5xl mb-4">error_outline</span>
-        <p className="text-red-500 text-sm">{error}</p>
-        <button onClick={fetchData} className="mt-4 text-[var(--ak-brand-ink)] hover:underline">Retry</button>
-      </div>
+      <Notice tone="danger" title="Contributions didn't load">
+        {error} <button onClick={fetchData} className="underline font-semibold ml-1">Try again</button>
+      </Notice>
     );
   }
 
+  const myPaidThisMonth = memberStatuses.find((m) => m.id === member?.id);
+
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)]">
+    <div>
+      <PageHeader
+        title="Contributions"
+        subtitle={`What ${group?.name || 'the group'} has collected this month, and your own payment history.`}
+        actions={<Button onClick={() => setShowModal(true)}><Plus size={18} aria-hidden="true" />Pay a contribution</Button>}
+      />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <p className="text-[12px] text-[var(--ak-text-3)] mb-1 flex items-center gap-1">
-            <span>Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span>Contributions</span>
-          </p>
-          <h1 className="text-[26px] font-bold tracking-tight">Contributions</h1>
-          <p className="text-[13px] text-[var(--text-muted)] mt-1">{group?.name} — Track your payments</p>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-[var(--ak-solid)] text-white px-5 py-2.5 rounded-xl text-[14px] font-semibold hover:bg-[var(--ak-solid)] transition-colors self-start">
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          New Contribution
-        </button>
-      </div>
-
-      {/* This month summary */}
-      <div className="bg-[var(--ak-page)] border border-[#163822] rounded-2xl p-6 md:p-8 mb-6 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <Panel tone="forest" className="rounded-[28px] sm:p-8 mb-4">
+        <div className="grid md:grid-cols-[1fr_1.2fr] gap-6 md:gap-10 items-end">
           <div>
-            <div className="text-[11px] font-bold tracking-wider text-gray-400 mb-2">THIS MONTH'S COLLECTION</div>
-            <div className="text-[32px] md:text-[40px] font-bold leading-tight">KSh {fmt(collectionStats.collected)}</div>
-            <div className="text-[13px] text-gray-400 mt-1">Target: KSh {fmt(collectionStats.target)}</div>
+            <div className="text-[14px] text-[#A9C2B3]">Collected this month</div>
+            <Money value={collectionStats.collected} className="block text-[44px] sm:text-[56px] leading-[1.05] mt-1" />
+            <div className="text-[14px] text-[#A9C2B3] mt-1">of {formatKsh(collectionStats.target)} expected</div>
           </div>
-          <div className="w-full md:w-1/2">
-            <div className="flex justify-between mb-2">
-              <span className="text-[13px] text-gray-300">Progress</span>
-              <span className="text-[13px] text-white font-medium">{collectionStats.progress}%</span>
+          <div>
+            <Ticks total={Math.max(collectionStats.totalMembers, 1)} done={collectionStats.membersPaid} className="[&>span]:h-3" />
+            <div className="flex justify-between text-[14px] mt-3">
+              <span className="text-[#C9DACF]">{collectionStats.membersPaid} of {collectionStats.totalMembers} members have paid</span>
+              <span className="font-money text-[20px] text-mint">{collectionStats.progress}%</span>
             </div>
-            <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-[var(--ak-solid)] transition-all duration-700" style={{ width: `${collectionStats.progress}%` }} />
-            </div>
-            <div className="text-[12px] text-gray-400 text-right">
-              {collectionStats.membersPaid} of {collectionStats.totalMembers} members paid
-            </div>
+            {myPaidThisMonth && (
+              <p className="text-[14px] mt-3 text-[#EEF4EF]">
+                {myPaidThisMonth.status === 'Paid' ? 'You have paid this month.' : myPaidThisMonth.paid > 0 ? `You have paid ${formatKsh(myPaidThisMonth.paid)} so far.` : 'You haven\'t paid this month yet.'}
+              </p>
+            )}
           </div>
         </div>
-      </div>
+      </Panel>
 
-      <div className="grid lg:grid-cols-2 gap-6 mb-6">
-        {/* Chart */}
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-6 shadow-sm">
-          <h2 className="text-[17px] font-bold mb-5">Collection History (6 months)</h2>
-          {chartData.some(d => d.amount > 0) ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v: any) => [`KSh ${Number(v).toLocaleString('en-KE')}`, 'Collected']}
-                  contentStyle={{ borderRadius: 12, backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }} />
-                <Bar dataKey="amount" fill="#3FA673" radius={[6, 6, 0, 0]} barSize={36} />
-              </BarChart>
-            </ResponsiveContainer>
+      <div className="grid lg:grid-cols-2 gap-4 mb-4">
+        <Panel aria-labelledby="hist-h">
+          <PanelTitle id="hist-h">The last six months</PanelTitle>
+          <p className="text-[14px] text-ink-3 mt-1">Confirmed contributions from the whole group.</p>
+          {chartData.some((d) => d.amount > 0) ? (
+            <div className="h-[230px] mt-4 -mx-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 5, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid vertical={false} stroke="var(--ak-line)" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--ak-text-3)' }} />
+                  <YAxis axisLine={false} tickLine={false} width={40} tick={{ fontSize: 11, fill: 'var(--ak-text-3)' }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip cursor={{ fill: 'var(--ak-raised)' }} formatter={(v) => [formatKsh(Number(v)), 'Collected']} contentStyle={{ borderRadius: 12, background: 'var(--ak-surface)', border: '1px solid var(--ak-line)', color: 'var(--ak-text)' }} />
+                  <Bar dataKey="amount" fill="#3FA673" radius={[8, 8, 2, 2]} barSize={32} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
-            <div className="h-56 flex flex-col items-center justify-center">
-              <span className="material-symbols-outlined text-[40px] text-[var(--text-muted)] mb-2">bar_chart</span>
-              <p className="text-[13px] text-[var(--text-muted)]">No confirmed contributions yet</p>
-            </div>
+            <EmptyState title="No confirmed payments yet">The chart fills in as M-Pesa confirms each contribution.</EmptyState>
           )}
-        </div>
+        </Panel>
 
-        {/* Member status */}
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col">
-          <h2 className="text-[17px] font-bold mb-5">Member Status This Month</h2>
-          <div className="overflow-y-auto flex-1 max-h-64 rounded-xl border border-[var(--border)]">
-            <table className="w-full text-left text-[13px]">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)]">
-                <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Member</th>
-                  <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Paid</th>
-                  <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {memberStatuses.length === 0 ? (
-                  <tr><td colSpan={3} className="px-4 py-8 text-center text-[var(--text-muted)]">No members found</td></tr>
-                ) : memberStatuses.map(m => (
-                  <tr key={m.id} className="hover:bg-[var(--bg-subtle)] transition-colors">
-                    <td className="px-4 py-3 font-medium">{m.full_name}</td>
-                    <td className="px-4 py-3 font-mono">KSh {fmt(m.paid)}</td>
-                    <td className="px-4 py-3 text-right">{getStatusBadge(m.status)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Panel aria-labelledby="who-h" className="flex flex-col">
+          <PanelTitle id="who-h">Who has paid this month</PanelTitle>
+          <ul className="mt-3 flex-1 max-h-[280px] overflow-y-auto -mx-2">
+            {memberStatuses.length === 0 ? (
+              <li className="px-2 py-6 text-ink-3 text-[14px]">No active members yet.</li>
+            ) : memberStatuses.map((m) => (
+              <li key={m.id} className="flex items-center gap-3 px-2 py-2.5 border-t border-line first:border-t-0">
+                <Avatar name={m.full_name} size={34} tone={m.id === member?.id ? 'lavender' : 'sage'} />
+                <span className="flex-1 min-w-0 truncate text-[15px]">{m.id === member?.id ? 'You' : m.full_name}</span>
+                <Money value={m.paid} className="text-[16px] text-ink-2" />
+                {badge(m.status)}
+              </li>
+            ))}
+          </ul>
+        </Panel>
       </div>
 
-      {/* My Contribution History — TABLE */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h2 className="text-[17px] font-bold">My Contribution History</h2>
-          <span className="text-[12px] text-[var(--text-muted)]">{myContributions.length} records</span>
-        </div>
-
+      <Panel aria-labelledby="mine-h">
+        <PanelTitle id="mine-h" action={<span className="text-[13px] text-ink-3">{myContributions.length} payments</span>}>Your payments</PanelTitle>
         {myContributions.length === 0 ? (
-          <div className="p-10 text-center">
-            <span className="material-symbols-outlined text-[40px] text-[var(--text-muted)] block mb-2">receipt_long</span>
-            <p className="text-[14px] text-[var(--text-muted)]">No contributions recorded yet.</p>
-            <button onClick={() => setShowModal(true)}
-              className="mt-4 inline-flex items-center gap-2 bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-[13px] font-semibold">
-              <span className="material-symbols-outlined text-[16px]">add</span>Make First Contribution
-            </button>
-          </div>
+          <EmptyState title="No payments yet" action={<Button onClick={() => setShowModal(true)}>Make your first contribution</Button>}>
+            When you pay, the M-Pesa receipt shows here so you never need to keep the SMS.
+          </EmptyState>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
-              <thead className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)]">
-                <tr>
-                  <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Date</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Amount</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Method</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Receipt</th>
-                  <th className="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {myContributions.map(c => (
-                  <tr key={c.id} className="hover:bg-[var(--bg-subtle)] transition-colors">
-                    <td className="px-5 py-3.5 text-[var(--text-main)]">
-                      {new Date(c.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-5 py-3.5 font-mono font-semibold text-[var(--text-main)]">
-                      KSh {fmt(Number(c.amount))}
-                    </td>
-                    <td className="px-5 py-3.5 capitalize text-[var(--text-muted)]">
-                      {c.payment_method || 'M-Pesa'}
-                    </td>
-                    <td className="px-5 py-3.5 font-mono text-[var(--text-muted)] text-[12px]">
-                      {c.mpesa_receipt || '—'}
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      {getStatusBadge(c.status)}
-                    </td>
+          <TableWrap className="mt-3">
+            <table className={cn(tableClass, 'min-w-[560px]')}>
+              <thead><tr><th>Date</th><th className="!text-right">Amount</th><th>Paid by</th><th>Receipt</th><th>Status</th></tr></thead>
+              <tbody>
+                {myContributions.map((c) => (
+                  <tr key={c.id}>
+                    <td className="text-ink-2 whitespace-nowrap">{new Date(c.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td className="text-right whitespace-nowrap"><Money value={Number(c.amount)} className="text-[17px]" /></td>
+                    <td className="text-ink-2">{c.payment_method === 'cash' ? 'Cash' : c.payment_method === 'bank' ? 'Bank' : 'M-Pesa'}</td>
+                    <td className="font-mono text-[12px] text-ink-3">{c.mpesa_receipt || '—'}</td>
+                    <td>{badge(c.status)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableWrap>
         )}
-      </div>
+      </Panel>
 
       {showModal && (
         <NewContributionModal
           onClose={() => {
             setShowModal(false);
-            fetchData(); // Refresh table after closing
+            fetchData();
           }}
           defaultAmount={group?.contribution_amount || 500}
           memberPhone={(member as any)?.profile?.phone_number || (member as any)?.profiles?.phone_number || (member as any)?.phone_number || ''}

@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
@@ -88,12 +89,12 @@ export default function FraudDetectionPage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] mb-1 flex items-center gap-1">
             <span>Admin</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>AI Fraud Detection</span>
           </p>
           <h1 className="text-[26px] font-bold tracking-tight">AI Fraud Detection</h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+            <MIcon name="smart_toy"  className="text-[16px] text-[var(--ak-brand-ink)]" />
             Powered by Akibora AI · Detects fraud before damage occurs
           </p>
         </div>
@@ -105,7 +106,7 @@ export default function FraudDetectionPage() {
           {scanning ? (
             <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Scanning...</>
           ) : (
-            <><span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>radar</span>Run AI Fraud Scan</>
+            <><MIcon name="radar"  className="text-[18px]" />Run AI Fraud Scan</>
           )}
         </button>
       </div>
@@ -121,7 +122,7 @@ export default function FraudDetectionPage() {
       {!result && !scanning && (
         <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center">
           <div className="w-16 h-16 rounded-full bg-[var(--ak-solid)]/10 flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-[32px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>radar</span>
+            <MIcon name="radar"  className="text-[32px] text-[var(--ak-brand-ink)]" />
           </div>
           <h2 className="text-[18px] font-bold mb-2">No scan run yet</h2>
           <p className="text-[14px] text-[var(--text-muted)] max-w-md mx-auto mb-6">
@@ -138,7 +139,7 @@ export default function FraudDetectionPage() {
       {scanning && (
         <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center">
           <div className="w-16 h-16 rounded-full bg-[var(--ak-solid)]/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="material-symbols-outlined text-[32px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+            <MIcon name="smart_toy"  className="text-[32px] text-[var(--ak-brand-ink)]" />
           </div>
           <h2 className="text-[18px] font-bold mb-2">AI is scanning your group...</h2>
           <p className="text-[14px] text-[var(--text-muted)]">Checking transactions, contributions, and member patterns</p>
@@ -153,9 +154,7 @@ export default function FraudDetectionPage() {
           <div className={`rounded-2xl p-6 border ${riskConfig?.bg} flex flex-col md:flex-row md:items-center gap-4`}
             style={{ border: `1px solid var(--border)` }}>
             <div className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 ${riskConfig?.bg}`}>
-              <span className={`material-symbols-outlined text-[28px] ${riskConfig?.color}`} style={{ fontVariationSettings: "'FILL' 1" }}>
-                {riskConfig?.icon}
-              </span>
+              <MIcon name={riskConfig?.icon} className={`text-[28px] ${riskConfig?.color}`} />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
@@ -186,7 +185,7 @@ export default function FraudDetectionPage() {
           {result.immediate_actions.length > 0 && (
             <div className="rounded-2xl p-5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30">
               <h3 className="text-[15px] font-bold text-red-600 dark:text-red-400 mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>emergency</span>
+                <MIcon name="emergency"  className="text-[18px]" />
                 Immediate Actions Required
               </h3>
               <ul className="space-y-2">
@@ -203,7 +202,7 @@ export default function FraudDetectionPage() {
           {/* No flags */}
           {result.flags.length === 0 && (
             <div className="card-bg border border-[var(--border)] rounded-2xl p-8 text-center">
-              <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)] block mb-2" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
+              <MIcon name="verified_user"  className="text-[40px] text-[var(--ak-brand-ink)] block mb-2" />
               <h3 className="text-[16px] font-bold mb-1">No fraud patterns detected</h3>
               <p className="text-[14px] text-[var(--text-muted)]">Your group's activity looks clean. Run scans regularly to stay protected.</p>
             </div>
@@ -215,7 +214,7 @@ export default function FraudDetectionPage() {
               <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
                 <h3 className="text-[16px] font-bold">Detected Fraud Flags ({result.flags.length})</h3>
                 <span className="text-[12px] text-[var(--text-muted)] flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+                  <MIcon name="smart_toy"  className="text-[14px]" />
                   AI + Rule-based detection
                 </span>
               </div>
@@ -225,9 +224,7 @@ export default function FraudDetectionPage() {
                   return (
                     <div key={i} className={`p-5 ${cfg.bg}`}>
                       <div className="flex items-start gap-3">
-                        <span className={`material-symbols-outlined text-[22px] ${cfg.text} flex-shrink-0 mt-0.5`} style={{ fontVariationSettings: "'FILL' 1" }}>
-                          {cfg.icon}
-                        </span>
+                        <MIcon name={cfg.icon} className={`text-[22px] ${cfg.text} flex-shrink-0 mt-0.5`} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
                             <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${cfg.badge}`}>
@@ -246,7 +243,7 @@ export default function FraudDetectionPage() {
                           )}
                           {flag.recommendation && (
                             <div className="mt-2 flex items-start gap-1.5">
-                              <span className="material-symbols-outlined text-[14px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5">lightbulb</span>
+                              <MIcon name="lightbulb"  className="text-[14px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5" />
                               <p className="text-[12px] text-[var(--text-muted)]">{flag.recommendation}</p>
                             </div>
                           )}
@@ -263,7 +260,7 @@ export default function FraudDetectionPage() {
           <div className="flex justify-center">
             <button onClick={runScan} disabled={scanning}
               className="flex items-center gap-2 border border-[var(--border)] px-5 py-2.5 rounded-xl text-[14px] font-medium hover:bg-[var(--bg-subtle)] transition-colors">
-              <span className="material-symbols-outlined text-[18px]">refresh</span>
+              <MIcon name="refresh"  className="text-[18px]" />
               Run Again
             </button>
           </div>

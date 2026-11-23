@@ -1,4 +1,5 @@
 ﻿'use client';
+import { MIcon } from '@/components/ui/MIcon';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -318,7 +319,7 @@ export default function AdminDashboardPage({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center text-[var(--text-main)]">
-        <span className="material-symbols-outlined text-[#ba1a1a] text-5xl mb-4">error_outline</span>
+        <MIcon name="error_outline"  className="text-[#ba1a1a] text-5xl mb-4" />
         <p className="text-body-sm text-[#ba1a1a]">{error}</p>
         <button onClick={retry} className="mt-4 text-[var(--brand-green)] text-body-sm underline">Try again</button>
       </div>
@@ -336,7 +337,7 @@ export default function AdminDashboardPage({
       
       {toastMessage && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
+          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
           <span className="text-body-sm font-medium">{toastMessage}</span>
         </div>
       )}
@@ -345,7 +346,7 @@ export default function AdminDashboardPage({
       <div className="mb-8">
         <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <MIcon name="chevron_right"  className="text-[14px]" />
           <span>Overview</span>
         </p>
         
@@ -382,7 +383,7 @@ export default function AdminDashboardPage({
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
           <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">GROUP Credit Score</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-[24px] md:text-[28px]">verified</span>
+            <MIcon name="verified"  className="text-[var(--ak-brand-ink)] text-[24px] md:text-[28px]" />
             <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">{metrics.avgTrust || 0}</div>
           </div>
         </div>
@@ -419,7 +420,7 @@ export default function AdminDashboardPage({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <span className="material-symbols-outlined text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-6xl mb-4">show_chart</span>
+              <MIcon name="show_chart"  className="text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-6xl mb-4" />
               <h3 className="text-headline-sm text-[var(--text-main)] font-bold">No contributions recorded yet.</h3>
               <p className="text-body-sm text-[var(--text-muted)] mt-2">Charts will appear once members start contributing.</p>
             </div>
@@ -428,7 +429,7 @@ export default function AdminDashboardPage({
 
         <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col">
           <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-red-650">warning</span>
+            <MIcon name="warning"  className="text-[20px] text-red-650" />
             Pending Actions
           </h2>
           
@@ -436,7 +437,7 @@ export default function AdminDashboardPage({
             {pendingActions.late.length > 0 && (
               <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-xl text-orange-800 dark:text-orange-400">
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined">schedule</span>
+                  <MIcon name="schedule" className="" />
                   <span className="text-sm font-semibold">{pendingActions.late.length} late contributions</span>
                 </div>
               </div>
@@ -444,7 +445,7 @@ export default function AdminDashboardPage({
 
             {pendingActions.late.length === 0 && (
               <div className="flex flex-col items-center justify-center py-6 text-center">
-                <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-4xl mb-2">check_circle</span>
+                <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)] text-4xl mb-2" />
                 <span className="text-body-sm text-[var(--text-main)] font-medium">All clear!</span>
                 <span className="text-xs text-[var(--text-muted)] mt-1">No pending actions require your attention.</span>
               </div>
@@ -479,7 +480,7 @@ export default function AdminDashboardPage({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-center bg-transparent rounded-xl border border-dashed border-[var(--border)]">
-              <span className="material-symbols-outlined text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-4xl mb-2">stars</span>
+              <MIcon name="stars"  className="text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-4xl mb-2" />
               <span className="text-body-sm text-[var(--text-muted)]">No contributions recorded this month.</span>
             </div>
           )}

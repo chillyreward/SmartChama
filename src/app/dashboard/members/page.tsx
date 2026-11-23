@@ -1,9 +1,12 @@
-﻿"use client";
+"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { Search } from "lucide-react";
+import { Avatar, EmptyState, Meter, Modal, Money, Notice, PageHeader, Panel, Skeleton, Tabs, cn, inputClass } from "@/components/ui";
+import { ROLE_LABEL } from "@/components/shell/nav";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import { getTrustStatusLabel } from "@/lib/trust-score-display";
 
 export default function MembersPage() {
   const { session, member: currentMember, group, isLoading: authLoading } = useAuth();
@@ -23,7 +26,6 @@ export default function MembersPage() {
 
   const [selectedMember, setSelectedMember] = useState<any>(null);
   
-  const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
   const getInitials = (name: string) => name ? name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '??';
 
   const fetchData = async () => {
@@ -113,453 +115,100 @@ export default function MembersPage() {
     }
   }, [authLoading, currentMember, group]);
 
-  const filteredMembers = members.filter(m => {
-    if (searchQuery && !m.full_name.toLowerCase().includes(searchQuery.toLowerCase()) && !m.phone.includes(searchQuery)) {
-      return false;
-    }
-    if (filter === "Active" && m.status !== "Active") return false;
-    if (filter === "Admin" && m.role !== "admin") return false;
-    if (filter === "Flagged" && m.status !== "Flagged") return false;
-    return true;
-  });
-
-  const getTrustScoreStyles = (score: number) => {
-    if (score >= 80) return { text: "text-[var(--brand-green)]", bg: "bg-[var(--ak-solid)]" };
-    if (score >= 60) return { text: "text-yellow-600 dark:text-yellow-400", bg: "bg-yellow-400" };
-    return { text: "text-red-500", bg: "bg-red-500" };
-  };
 
   if (authLoading || loading) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full text-[var(--text-main)]">
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-6 h-32 animate-pulse mb-6 shadow-sm"></div>
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-6 h-96 animate-pulse shadow-sm"></div>
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-60" />
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">{[0, 1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-40" />)}</div>
       </div>
     );
   }
 
   if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full pt-20 text-[var(--text-main)]">
-        <span className="material-symbols-outlined text-red-500 text-5xl mb-4">error_outline</span>
-        <p className="text-body-sm text-red-500">{error}</p>
-        <button onClick={fetchData} className="mt-4 text-[var(--brand-green)] hover:underline font-medium">Retry</button>
-      </div>
-    );
+    return <Notice tone="danger" title="Members didn't load">{error} <button onClick={fetchData} className="underline font-semibold ml-1">Try again</button></Notice>;
   }
 
-  const chamaName = group?.name || 'Group';
+  const OFFICIAL = ['admin', 'chairlady', 'treasurer', 'secretary'];
+  const shown = members
+    .filter((m) => !searchQuery || m.full_name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((m) => filter !== 'Officials' || OFFICIAL.includes(m.role))
+    .filter((m) => filter !== 'New' || new Date(m.joined_at).getMonth() === new Date().getMonth() && new Date(m.joined_at).getFullYear() === new Date().getFullYear())
+    .sort((a, b) => Number(OFFICIAL.includes(b.role)) - Number(OFFICIAL.includes(a.role)) || a.full_name.localeCompare(b.full_name));
+  const sel = selectedMember;
 
   return (
-    <div className="p-6 max-w-[1280px] mx-auto w-full relative font-inter text-[var(--text-main)]">
-      
-      {/* Page Header */}
-      <div className="mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>Dashboard</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <span>Members</span>
-        </p>
-        
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-              Members
-            </h1>
-            <p className="text-[14px] text-[var(--text-muted)] mt-1">
-              {chamaName} — {members.length} members
-            </p>
-          </div>
-        </div>
+    <div>
+      <PageHeader title="Members" subtitle={`The ${stats.active} people saving together in ${group?.name || 'this group'}.`} />
+
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <Tabs label="Show" value={filter} onChange={setFilter} items={[{ value: 'All', label: 'Everyone', count: stats.active }, { value: 'Officials', label: 'Officials' }, { value: 'New', label: 'New this month', count: stats.newThisMonth }]} />
+        <label className="relative w-full sm:w-[260px]">
+          <span className="sr-only">Search members</span>
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-3" aria-hidden="true" />
+          <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name" className={cn(inputClass, 'h-11 pl-10')} />
+        </label>
       </div>
 
-      {/* METRIC CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8">
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">ACTIVE MEMBERS</div>
-          <div className="flex items-center justify-between">
-            <div className="text-[22px] md:text-3xl font-bold text-[var(--text-main)] font-geist">{stats.active}</div>
-            <span className="material-symbols-outlined text-gray-300 dark:text-[var(--ak-text-2)] text-2xl hidden sm:inline">group</span>
-          </div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">NEW THIS MONTH</div>
-          <div className="flex items-end gap-3">
-            <div className="text-[22px] md:text-3xl font-bold text-[var(--brand-green)] font-geist">{stats.newThisMonth}</div>
-            {stats.newThisMonth > 0 && (
-              <div className="bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] rounded-full px-3 py-0.5 text-xs font-semibold mb-1 hidden sm:block">
-                +{stats.newThisMonth} joined
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-red-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200 last:col-span-2 md:last:col-span-1">
-          <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">FLAGGED MEMBERS</div>
-          <div className="flex items-end gap-3">
-            <div className="text-[22px] md:text-3xl font-bold text-[var(--text-main)] font-geist">{stats.flagged}</div>
-            {stats.flagged > 0 && (
-              <div className="bg-orange-100 dark:bg-orange-900/30 text-orange-850 dark:text-orange-400 rounded px-2.5 py-0.5 text-xs font-semibold mb-1 hidden sm:block">
-                Needs review
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* SEARCH + FILTER BAR */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm hover:shadow-md transition-all duration-200">
-        <div className="relative w-full md:w-auto">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-lg">search</span>
-          <input 
-            type="text" 
-            placeholder="Search members by name or phone..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-72 border border-[var(--border)] rounded-lg px-4 py-2 pl-10 text-sm outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)] text-[var(--text-main)] bg-transparent placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] transition-all"
-          />
-        </div>
-        
-        <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)]">
-          {["All", "Active", "Admin", "Flagged"].map((f) => (
-            <button 
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-md transition-all ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)]' : 'hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)]'}`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* MEMBERS TABLE */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-        
-        {/* Mobile Card List */}
-        <div className="md:hidden flex flex-col divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-          {filteredMembers.length > 0 ? filteredMembers.map((member) => {
-            const trustStyles = getTrustScoreStyles(member.trust);
-            const isFlagged = member.status === "Flagged";
+      {shown.length === 0 ? (
+        <Panel><EmptyState title="No one matches">Try a different name or filter.</EmptyState></Panel>
+      ) : (
+        <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {shown.map((m) => {
+            const me = m.id === currentMember?.id;
+            const official = OFFICIAL.includes(m.role);
             return (
-              <div key={member.id} className="py-4 px-4 active:bg-[var(--ak-surface-2)] dark:active:bg-[var(--ak-raised)] transition-colors cursor-pointer" onClick={() => setSelectedMember(member)}>
-                <div className="flex items-center justify-between mb-2">
+              <li key={m.id}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedMember(m)}
+                  className={cn('w-full text-left rounded-[24px] p-5 border transition-colors', me ? 'bg-lavender text-lavender-ink border-lavender' : 'bg-surface border-line hover:border-line-strong')}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-                      {member.initials}
+                    <Avatar name={m.full_name} size={44} tone={me ? 'forest' : official ? 'mint' : 'sage'} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[16px] font-semibold truncate">{me ? `${m.full_name} (you)` : m.full_name}</div>
+                      <div className={cn('text-[13px]', me ? 'text-[#3A3060]' : 'text-ink-3')}>{ROLE_LABEL[m.role] || 'Member'} · since {m.joined}</div>
                     </div>
+                  </div>
+                  <div className="flex items-end justify-between gap-3 mt-5">
                     <div>
-                      <p className="text-[14px] font-semibold text-[var(--text-main)]">{member.full_name}</p>
-                      <p className="text-[12px] text-[var(--text-muted)]">{member.phone}</p>
+                      <div className={cn('text-[12px]', me ? 'text-[#3A3060]' : 'text-ink-3')}>Saved</div>
+                      <Money value={m.totalSaved} className="text-[22px]" />
+                    </div>
+                    <div className="text-right">
+                      <div className={cn('text-[12px]', me ? 'text-[#3A3060]' : 'text-ink-3')}>Trust score</div>
+                      <div className="font-money text-[22px]">{m.trust}</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className={`rounded px-2.5 py-0.5 text-xs font-semibold ${member.roleClass} capitalize`}>
-                      {member.role || 'Member'}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center mt-2 pt-2 border-t border-[var(--ak-line)]/50 dark:border-[var(--ak-line)]/50">
-                  <div>
-                    <p className="text-[11px] text-[var(--text-muted)] uppercase">Saved</p>
-                    <p className="text-[13px] font-bold text-[var(--text-main)] font-mono">KSh {formatCurrency(member.totalSaved)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-[var(--text-muted)] uppercase text-right">Trust</p>
-                    {(() => {
-                      const isAdmin = currentMember && ['admin', 'chairlady', 'treasurer', 'secretary'].includes(currentMember.role);
-                      const isSelf = currentMember && currentMember.id === member.id;
-                      if (isAdmin || isSelf) {
-                        return (
-                          <span className={`text-[13px] font-mono font-bold ${trustStyles.text}`}>
-                            {member.trust}/100
-                          </span>
-                        );
-                      } else {
-                        const status = getTrustStatusLabel(member.trust);
-                        return (
-                          <span className="text-[11px] font-semibold" style={{ color: status.color }}>
-                            {status.label}
-                          </span>
-                        );
-                      }
-                    })()}
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setSelectedMember(member); }}
-                      className={`text-[13px] font-semibold hover:underline ${isFlagged ? "text-red-500" : "text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]"}`}
-                    >
-                      {isFlagged ? "Review" : "View"}
-                    </button>
-                  </div>
-                </div>
-              </div>
+                  <Meter value={m.trust} segments={20} height={8} className="mt-2" offClass={me ? 'bg-black/10' : 'bg-raised'} />
+                </button>
+              </li>
             );
-          }) : (
-            <div className="py-8 text-center text-sm text-[var(--text-muted)]">
-              No members match your search criteria.
-            </div>
-          )}
-        </div>
-
-        {/* Desktop table hidden on mobile */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-4">MEMBER</th>
-                <th className="px-6 py-4">ROLE</th>
-                <th className="px-6 py-4">PHONE</th>
-                <th className="px-6 py-4">JOINED</th>
-                <th className="px-6 py-4">TOTAL SAVED</th>
-                <th className="px-6 py-4">Credit Score</th>
-                <th className="px-6 py-4">STATUS</th>
-                <th className="px-6 py-4">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-              {filteredMembers.length > 0 ? filteredMembers.map((member) => {
-                const trustStyles = getTrustScoreStyles(member.trust);
-                const isFlagged = member.status === "Flagged";
-                
-                return (
-                  <tr key={member.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-                          {member.initials}
-                        </div>
-                        <div className="font-semibold text-[var(--text-main)] text-sm whitespace-nowrap">
-                          {member.full_name}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`rounded px-2.5 py-0.5 text-xs font-semibold ${member.roleClass} whitespace-nowrap capitalize`}>
-                        {member.role || 'Member'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[var(--text-muted)] whitespace-nowrap">
-                      {member.phone}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[var(--text-muted)] whitespace-nowrap">
-                      {member.joined}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[var(--text-main)] font-bold whitespace-nowrap font-mono">
-                      KSh {formatCurrency(member.totalSaved)}
-                    </td>
-                    <td className="px-6 py-4">
-                      {(() => {
-                        const isAdmin = currentMember && ['admin', 'chairlady', 'treasurer', 'secretary'].includes(currentMember.role);
-                        const isSelf = currentMember && currentMember.id === member.id;
-                        
-                        if (isAdmin || isSelf) {
-                          return (
-                            <div className="flex items-center gap-2">
-                              <span className={`text-sm font-mono font-bold ${trustStyles.text}`}>
-                                {member.trust}
-                              </span>
-                              <div className={`w-2 h-2 rounded-full ${trustStyles.bg}`}></div>
-                            </div>
-                          );
-                        } else {
-                          const status = getTrustStatusLabel(member.trust);
-                          return (
-                            <span className="text-xs font-semibold px-2 py-1 rounded card-bg border border-[var(--border)]" style={{ color: status.color }}>
-                              {status.label}
-                            </span>
-                          );
-                        }
-                      })()}
-                    </td>
-                    <td className="px-6 py-4">
-                      {isFlagged ? (
-                        <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-850 dark:text-orange-400 rounded px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap border border-orange-200 dark:border-orange-900/40">
-                          Flagged
-                        </span>
-                      ) : (
-                        <span className="bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] rounded px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap border border-[var(--ak-brand-ink)] dark:border-[var(--ak-line)]">
-                          Active
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <button 
-                        onClick={() => setSelectedMember(member)}
-                        className={`text-sm font-semibold hover:underline whitespace-nowrap ${isFlagged ? "text-red-500" : "text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]"}`}
-                      >
-                        {isFlagged ? "Review" : "View"}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              }) : (
-                <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-sm text-[var(--text-muted)]">
-                    No members match your search criteria.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* OVERLAY FOR SIDE DRAWER */}
-      {selectedMember && (
-        <div 
-          className="fixed inset-0 bg-[var(--ak-page)]/40 backdrop-blur-sm z-20 transition-opacity"
-          onClick={() => setSelectedMember(null)}
-        />
+          })}
+        </ul>
       )}
 
-      {/* MEMBER DETAIL SIDE DRAWER */}
-      <div 
-        className={`fixed right-0 top-0 h-full w-full max-w-sm sm:w-96 card-bg border-l border-[var(--border)] p-8 z-30 transition-transform duration-300 ease-in-out shadow-2xl overflow-y-auto ${
-          selectedMember ? "translate-x-0" : "translate-x-full"
-        } text-[var(--text-main)]`}
-      >
-        {selectedMember && (
-          <>
-            {/* Top */}
-            <div className="flex justify-end mb-4">
-              <button 
-                onClick={() => setSelectedMember(null)}
-                className="text-[var(--text-muted)] hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)] bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] p-2 rounded-full"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            
-            <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 text-2xl font-bold flex items-center justify-center rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] shadow-sm">
-                {selectedMember.initials}
-              </div>
-              <h2 className="text-2xl font-bold font-geist text-[var(--text-main)] mt-4">
-                {selectedMember.full_name}
-              </h2>
-              <span className={`mt-2 rounded px-2.5 py-0.5 text-xs font-semibold ${selectedMember.roleClass} capitalize`}>
-                {selectedMember.role || 'Member'}
-              </span>
-            </div>
-
-            <div className="border-t border-[var(--border)] my-6"></div>
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
+      <Modal open={!!sel} onClose={() => setSelectedMember(null)} title={sel?.full_name || ''}>
+        {sel && (
+          <div>
+            <div className="flex items-center gap-4">
+              <Avatar name={sel.full_name} size={56} tone="sage" />
               <div>
-                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone</div>
-                <div className="text-sm font-semibold text-[var(--text-main)]">{selectedMember.phone}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Joined</div>
-                <div className="text-sm font-semibold text-[var(--text-main)]">{selectedMember.joined}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Total Saved</div>
-                <div className="text-sm font-bold text-[var(--text-main)] font-mono">KSh {formatCurrency(selectedMember.totalSaved)}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Credit Score</div>
-                <div className="text-sm font-semibold text-[var(--text-main)]">
-                  {currentMember && (['admin', 'chairlady', 'treasurer', 'secretary'].includes(currentMember.role) || currentMember.id === selectedMember.id) 
-                    ? `${selectedMember.trust}/100` 
-                    : 'Hidden'}
-                </div>
+                <div className="text-[15px] text-ink-2">{ROLE_LABEL[sel.role] || 'Member'}</div>
+                <div className="text-[14px] text-ink-3">Member since {sel.joined}</div>
               </div>
             </div>
-
-            {/* Trust arc */}
-            <div className="flex flex-col items-center justify-center mb-8">
-              {(() => {
-                const isAdmin = currentMember && ['admin', 'chairlady', 'treasurer', 'secretary'].includes(currentMember.role);
-                const isSelf = currentMember && currentMember.id === selectedMember.id;
-                
-                if (isAdmin || isSelf) {
-                  return (
-                    <>
-                      <div className="relative w-24 h-24 flex items-center justify-center">
-                        <svg viewBox="0 0 36 36" className="w-24 h-24 absolute inset-0 transform -rotate-90">
-                          {/* Background Circle */}
-                          <path
-                            className="text-gray-100 dark:text-[var(--ak-text-2)]"
-                            strokeWidth="3"
-                            stroke="currentColor"
-                            fill="none"
-                            d="M18 2.0845
-                              a 15.9155 15.9155 0 0 1 0 31.831
-                              a 15.9155 15.9155 0 0 1 0 -31.831"
-                          />
-                          {/* Progress Circle */}
-                          <path
-                            className={getTrustScoreStyles(selectedMember.trust).text}
-                            strokeDasharray={`${selectedMember.trust}, 100`}
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            stroke="currentColor"
-                            fill="none"
-                            d="M18 2.0845
-                              a 15.9155 15.9155 0 0 1 0 31.831
-                              a 15.9155 15.9155 0 0 1 0 -31.831"
-                          />
-                        </svg>
-                        <div className={`text-2xl font-bold font-geist ${getTrustScoreStyles(selectedMember.trust).text} relative z-10`}>
-                          {selectedMember.trust}
-                        </div>
-                      </div>
-                      <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mt-2">
-                        {getTrustStatusLabel(selectedMember.trust).label}
-                      </div>
-                    </>
-                  );
-                } else {
-                  const status = getTrustStatusLabel(selectedMember.trust);
-                  return (
-                    <div className="bg-transparent border border-[var(--border)] rounded-xl p-6 flex flex-col items-center justify-center w-full shadow-sm">
-                      <span className="material-symbols-outlined text-4xl mb-2" style={{ color: status.color }}>verified_user</span>
-                      <span className="text-lg font-bold" style={{ color: status.color }}>{status.label}</span>
-                    </div>
-                  );
-                }
-              })()}
-            </div>
-
-            {/* Contribution streak */}
-            <div className="bg-gray-50 dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-xl p-4 mb-6 flex items-start gap-3 shadow-sm">
-              <span className="material-symbols-outlined text-[var(--brand-green)]">local_fire_department</span>
-              <div>
-                <div className="text-sm font-semibold text-[var(--text-main)] mb-0.5">{selectedMember.contribution_streak || 0} consecutive months</div>
-                <div className="text-xs text-[var(--text-muted)]">Maintaining a steady saving habit</div>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex flex-col gap-3 mt-8">
-              <button className="flex items-center justify-center gap-2 bg-transparent border border-[var(--border)] text-[var(--text-main)] w-full rounded-lg py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm">
-                <span className="material-symbols-outlined text-lg">chat</span>
-                Send Message
-              </button>
-              {currentMember?.role === 'admin' && (
-                <>
-                  <button className="flex items-center justify-center gap-2 bg-transparent border border-[var(--border)] text-[var(--text-main)] w-full rounded-lg py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm">
-                    <span className="material-symbols-outlined text-lg">manage_accounts</span>
-                    Edit Role
-                  </button>
-                  {selectedMember.status !== 'Flagged' && (
-                    <button className="flex items-center justify-center gap-2 bg-transparent border border-red-200 dark:border-red-900/40 text-red-500 w-full rounded-lg py-3 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all mt-2 shadow-sm">
-                      <span className="material-symbols-outlined text-lg">flag</span>
-                      Flag Member
-                    </button>
-                  )}
-                </>
+            <dl className="mt-5 divide-y divide-line text-[15px]">
+              <div className="flex justify-between py-3"><dt className="text-ink-3">Saved in the group</dt><dd><Money value={sel.totalSaved} className="text-[18px]" /></dd></div>
+              <div className="flex justify-between py-3"><dt className="text-ink-3">Trust score</dt><dd className="font-money text-[18px]">{sel.trust} / 100</dd></div>
+              {sel.phone && sel.phone !== '—' && (
+                <div className="flex justify-between py-3"><dt className="text-ink-3">Phone</dt><dd><a href={`tel:${sel.phone}`} className="text-brand hover:underline">{sel.phone}</a></dd></div>
               )}
-            </div>
-          </>
+            </dl>
+          </div>
         )}
-      </div>
+      </Modal>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { MIcon } from '@/components/ui/MIcon';
 import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
@@ -12,7 +13,7 @@ export default function Page() {
           <p className="text-body-lg text-[var(--ak-text-2)] mb-12">Put idle group funds to work with vetted investment opportunities.</p>
           
           <div className="bg-white border border-[var(--ak-line)] rounded-2xl p-12 shadow-sm text-center">
-            <span className="material-symbols-outlined text-[48px] text-[var(--ak-brand-ink)] mb-4">construction</span>
+            <MIcon name="construction"  className="text-[48px] text-[var(--ak-brand-ink)] mb-4" />
             <h2 className="text-headline-sm font-geist text-[var(--ak-text)] mb-2">Page Under Construction</h2>
             <p className="text-body-sm text-[var(--ak-text-2)]">We're currently building out this section. Check back soon.</p>
           </div>

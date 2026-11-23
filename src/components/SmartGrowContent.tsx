@@ -1,8 +1,9 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { Button, Chip, EmptyState, Field, Modal, Money, Notice, PageHeader, Panel, PanelTitle, Skeleton, TableWrap, cn, formatKsh, inputClass, tableClass } from '@/components/ui';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 
 const SEED_PRODUCTS = [
@@ -58,7 +59,6 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
   const [investing, setInvesting] = useState(false);
   const [toast, setToast] = useState('');
 
-  const formatCurrency = (val: number) => val.toLocaleString('en-KE', { maximumFractionDigits: 0 });
 
   useEffect(() => {
     if (authLoading) return;
@@ -165,30 +165,34 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
         ...investments
       ]);
       setWallet({ ...wallet, balance: newBalance, invested: newInvested });
-      setToast(`Investment of KSh ${amount} confirmed.`);
+      setToast(`${formatKsh(amount)} recorded as invested in ${selectedProduct.name}.`);
       setTimeout(() => setToast(''), 4000);
       setSelectedProduct(null);
       setInvestAmount('');
 
     } catch (err) {
       console.error('Invest Error', err);
-      alert('Failed to process investment.');
+      setToast('The investment was not recorded. Check the amount and try again.');
     } finally {
       setInvesting(false);
     }
   };
 
-  const getRiskColor = (risk: string) => {
-    switch(risk) {
-      case 'low': return { strip: 'bg-[var(--ak-solid)]', badge: 'bg-[var(--ak-tint)] text-[var(--ak-brand-ink)]' };
-      case 'medium': return { strip: 'bg-yellow-400', badge: 'bg-[#fef9c3] text-[#854d0e]' };
-      case 'high': return { strip: 'bg-red-400', badge: 'bg-red-100 text-red-800' };
-      default: return { strip: 'bg-gray-400', badge: 'bg-gray-100 text-gray-800' };
-    }
+  const RISK: Record<string, { label: string; cls: string }> = {
+    low: { label: 'Low risk', cls: 'bg-tint text-brand' },
+    medium: { label: 'Medium risk', cls: 'bg-amber-soft text-amber-ink' },
+    high: { label: 'Higher risk', cls: 'bg-danger-soft text-danger-ink' },
   };
+  const KIND: Record<string, string> = { money_market: 'Money market fund', government_security: 'Government security', fixed_deposit: 'Fixed deposit', sacco: 'SACCO shares' };
 
   if (loading) {
-    return <div className="p-8 flex justify-center"><div className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></div></div>;
+    return (
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-60" />
+        <Skeleton className="h-48 rounded-[28px]" />
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-72" />)}</div>
+      </div>
+    );
   }
 
   const calcProjected = (rate: number) => {
@@ -198,348 +202,132 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
 
   const totalInvested = investments.reduce((sum, inv) => sum + Number(inv.amount), 0);
   const totalReturns = investments.reduce((sum, inv) => sum + Number(inv.actual_return || 0), 0);
-  const activeCount = investments.filter(i => i.status === 'active').length;
+  const available = Number(wallet?.balance || 0);
 
   return (
-    <div className="p-4 md:p-8 max-w-[1280px] mx-auto font-inter pb-24 text-[var(--text-main)]">
-      {toast && (
-        <div className="fixed top-4 right-4 bg-[var(--ak-solid)] text-white px-4 py-3 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <span className="material-symbols-outlined">check_circle</span>
-          <span className="text-body-sm font-medium">{toast}</span>
-        </div>
-      )}
+    <div>
+      <PageHeader
+        title="SmartGrow"
+        subtitle={isAdminRoute
+          ? 'Put money the group isn\'t using to work in regulated Kenyan products. Every member sees each investment you make.'
+          : 'Where your group\'s spare money is invested, and what each option pays. Your officials make the investments.'}
+      />
 
-      {/* Page Header */}
-      <div className="mb-6 md:mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>{isAdminRoute ? 'Admin Dashboard' : 'Dashboard'}</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <span>SmartGrow</span>
-        </p>
-        
-        <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-          SmartGrow Investment
-        </h1>
-      </div>
+      {toast && <Notice tone="ok" className="mb-4">{toast}</Notice>}
 
-      {/* HEADER SECTION */}
-      <div className="bg-[var(--ak-page)] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8 mb-8 md:mb-12 shadow-sm border border-white/5">
-        <div className="max-w-xl">
-          <div className="text-label-caps text-[var(--ak-brand-ink)] tracking-widest mb-3 md:mb-4">SMARTGROW</div>
-          <h1 className="text-[28px] md:text-[36px] font-geist font-bold text-white mb-4 leading-tight">Grow your group's idle funds.</h1>
-          <p className="text-[14px] md:text-[16px] text-gray-400 leading-relaxed mb-6">
-            Akibora partners with regulated Kenyan investment providers to help your group put idle funds to work. All products are licensed by the Capital Markets Authority or Central Bank of Kenya.
-          </p>
-          <button 
-            onClick={() => {
-              document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="bg-[var(--ak-solid)] text-white px-6 py-3 rounded-lg text-headline-sm font-semibold flex items-center gap-2 hover:bg-[#1ea94e] transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined">trending_up</span>
-            Get Started
-          </button>
-        </div>
-
-        <div className="w-full md:w-auto min-w-full md:min-w-[300px]">
-          {investments.length > 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col gap-4">
-               <div>
-                 <div className="text-label-caps text-gray-400 mb-1">TOTAL INVESTED</div>
-                 <div className="text-[28px] font-geist font-bold text-white">KSh {formatCurrency(totalInvested)}</div>
-               </div>
-               <div className="flex justify-between items-end">
-                 <div>
-                   <div className="text-label-caps text-gray-400 mb-1">TOTAL RETURNS</div>
-                   <div className="text-[20px] font-geist font-bold text-[var(--ak-brand-ink)]">KSh {formatCurrency(totalReturns)}</div>
-                 </div>
-                 <div className="text-right">
-                   <div className="text-label-caps text-gray-400 mb-1">ACTIVE</div>
-                   <div className="text-[20px] font-geist font-bold text-white">{activeCount}</div>
-                 </div>
-               </div>
-            </div>
-          ) : (
-            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-               <div className="text-label-caps text-gray-400 mb-2">START YOUR FIRST INVESTMENT</div>
-               <p className="text-body-sm text-gray-400 mt-2">Your group has not made any investments yet.</p>
-               <p className="text-body-sm text-gray-500 mt-3">
-                 Idle funds in your wallet earn nothing. Even a short-term money market fund earning 9 to 11 percent annually grows your group meaningfully over time.
-               </p>
-               <div className="text-label-caps text-[var(--ak-brand-ink)] mt-4">Minimum to start: KSh 1,000</div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* AVAILABLE PRODUCTS */}
-      <div id="products-section" className="mb-12">
-        <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)]">Where to grow your funds</h2>
-        <p className="text-body-sm text-[var(--text-muted)] mt-1 mb-6">All investment products are regulated and licensed in Kenya.</p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map(product => {
-            const colors = getRiskColor(product.risk_level);
-            const canInvest = (wallet?.balance || 0) >= product.min_amount;
-            return (
-              <div key={product.id} className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-md hover:border-[var(--ak-brand-ink)] dark:hover:border-[var(--ak-brand-ink)] transition-all">
-                <div className={`w-full ${colors.strip} h-2`}></div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className={`px-2 py-1 rounded text-[11px] font-bold tracking-wider ${colors.badge}`}>
-                      {product.risk_level.toUpperCase()} RISK
-                    </span>
-                  </div>
-                  <h3 className="text-headline-sm font-geist font-bold text-[var(--text-main)]">{product.name}</h3>
-                  <p className="text-body-sm text-[var(--text-muted)]">{product.provider}</p>
-                  
-                  <div className="border-t border-[var(--border)] my-4"></div>
-                  
-                  <div className="flex flex-col gap-2 mb-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-label-caps text-[var(--text-muted)]">Expected Return</span>
-                      <span className="text-mono-data font-bold text-[var(--brand-green)]">{product.expected_return_min}–{product.expected_return_max}% p.a.</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-label-caps text-[var(--text-muted)]">Minimum Investment</span>
-                      <span className="text-mono-data font-bold text-[var(--text-main)]">KSh {formatCurrency(product.min_amount)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-label-caps text-[var(--text-muted)]">Liquidity</span>
-                      <span className="text-mono-data font-bold text-[var(--text-main)]">{product.liquidity_days} days</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-label-caps text-[var(--text-muted)]">Regulated by</span>
-                      <span className="text-body-sm font-bold text-[var(--text-main)]">{product.regulatory_body}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-body-sm text-[var(--text-muted)] flex-1">
-                    {product.description}
-                  </p>
-
-                  <div className="mt-6">
-                    {isAdminRoute ? (
-                      canInvest ? (
-                        <button 
-                          onClick={() => setSelectedProduct(product)}
-                          className="w-full bg-[var(--ak-solid)] text-white rounded-lg py-2.5 text-body-sm font-bold hover:bg-[#1ea94e] transition-colors cursor-pointer"
-                        >
-                          Invest Now
-                        </button>
-                      ) : (
-                        <div className="w-full relative group">
-                          <button 
-                            disabled 
-                            className="w-full bg-[var(--ak-raised)] dark:bg-[var(--ak-raised)] text-[var(--text-muted)] rounded-lg py-2.5 text-body-sm font-bold cursor-not-allowed"
-                          >
-                            Insufficient funds
-                          </button>
-                          <div className="absolute bottom-full mb-2 hidden group-hover:block w-full bg-gray-800 text-white text-xs p-2 rounded text-center shadow-lg">
-                            Your total recorded needs at least KSh {formatCurrency(product.min_amount)} to invest in this product.
-                          </div>
-                        </div>
-                      )
-                    ) : (
-                      <button 
-                        disabled 
-                        className="w-full bg-transparent border border-[var(--border)] text-[var(--text-muted)] rounded-lg py-2.5 text-body-sm font-bold cursor-not-allowed"
-                      >
-                        Admin Action Required
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* ACTIVE INVESTMENTS */}
-      <div>
-        <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Active Investments</h2>
-        {investments.length === 0 ? (
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-12 flex flex-col items-center justify-center text-center shadow-sm">
-            <span className="material-symbols-outlined text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-[48px] mb-4">savings</span>
-            <h3 className="text-headline-sm font-geist font-bold text-[var(--text-main)]">No active investments</h3>
-            <p className="text-body-sm text-[var(--text-muted)] mt-2 max-w-sm">
-              Your group has not made any investments yet. Choose a product above to get started.
-            </p>
+      <Panel tone="forest" className="rounded-[28px] sm:p-8 mb-6">
+        <div className="grid sm:grid-cols-3 gap-6">
+          <div>
+            <div className="text-[14px] text-[#A9C2B3]">Invested now</div>
+            <Money value={totalInvested} className="block text-[40px] sm:text-[48px] leading-[1.05] mt-1" />
+            <div className="text-[13px] text-[#A9C2B3] mt-1">in {investments.filter((i) => i.status === 'active').length} active {investments.filter((i) => i.status === 'active').length === 1 ? 'investment' : 'investments'}</div>
           </div>
+          <div>
+            <div className="text-[14px] text-[#A9C2B3]">Returns received</div>
+            <Money value={totalReturns} className="block text-[32px] leading-[1.05] mt-2 text-mint" />
+          </div>
+          <div>
+            <div className="text-[14px] text-[#A9C2B3]">Available to invest</div>
+            <Money value={available} className="block text-[32px] leading-[1.05] mt-2" />
+          </div>
+        </div>
+      </Panel>
+
+      <h2 className="font-display text-[26px] mb-1">Options</h2>
+      <p className="text-[14px] text-ink-3 mb-4">Return ranges are each provider&apos;s published expectation, not a promise. Rates change.</p>
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
+        {products.map((product) => {
+          const risk = RISK[product.risk_level] || RISK.low;
+          const canInvest = available >= Number(product.min_amount);
+          return (
+            <Panel key={product.id} as="article" className="flex flex-col">
+              <div className="flex items-start justify-between gap-3">
+                <span className="text-[13px] text-ink-3">{KIND[product.type] || product.type}</span>
+                <span className={cn('text-[12px] font-semibold px-2.5 py-1 rounded-full', risk.cls)}>{risk.label}</span>
+              </div>
+              <h3 className="font-display text-[23px] leading-tight mt-2">{product.name}</h3>
+              <div className="text-[14px] text-ink-2">{product.provider}</div>
+              <div className="font-money text-[34px] mt-4 text-brand">{product.expected_return_min}–{product.expected_return_max}%</div>
+              <div className="text-[13px] text-ink-3 -mt-0.5">expected a year</div>
+              <dl className="grid grid-cols-3 gap-2 mt-4 text-[13px]">
+                <div><dt className="text-ink-3">From</dt><dd className="font-medium">{formatKsh(product.min_amount)}</dd></div>
+                <div><dt className="text-ink-3">Access in</dt><dd className="font-medium">{product.liquidity_days} days</dd></div>
+                <div><dt className="text-ink-3">Regulator</dt><dd className="font-medium">{product.regulatory_body}</dd></div>
+              </dl>
+              <p className="text-[14px] text-ink-2 mt-4 flex-1">{product.description}</p>
+              {isAdminRoute ? (
+                <Button className="mt-5 w-full" disabled={!canInvest} onClick={() => setSelectedProduct(product)}>
+                  {canInvest ? 'Invest from the pot' : `Needs at least ${formatKsh(product.min_amount)}`}
+                </Button>
+              ) : (
+                <p className="mt-5 text-[13px] text-ink-3">Officials decide investments. Suggest this one in the group chat.</p>
+              )}
+            </Panel>
+          );
+        })}
+      </div>
+
+      <Panel aria-labelledby="inv-h">
+        <PanelTitle id="inv-h">The group&apos;s investments</PanelTitle>
+        {investments.length === 0 ? (
+          <EmptyState title="Nothing invested yet">{isAdminRoute ? 'Pick an option above when the pot has money it doesn\'t need for a while.' : 'When officials invest, each one is listed here with its date and amount.'}</EmptyState>
         ) : (
-          <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
-            {/* Desktop Table View */}
-            <table className="hidden md:table w-full text-left border-collapse min-w-[700px]">
-              <thead className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)]">
-                <tr>
-                  <th className="py-4 px-6 text-label-caps font-bold">PRODUCT</th>
-                  <th className="py-4 px-6 text-label-caps font-bold">PROVIDER</th>
-                  <th className="py-4 px-6 text-label-caps font-bold">AMOUNT</th>
-                  <th className="py-4 px-6 text-label-caps font-bold">START DATE</th>
-                  <th className="py-4 px-6 text-label-caps font-bold">RETURN (EST)</th>
-                  <th className="py-4 px-6 text-label-caps font-bold">STATUS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-                {investments.map(inv => {
-                  const p = inv.smartgrow_products;
-                  const d = new Date(inv.start_date);
-                  return (
-                    <tr key={inv.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                      <td className="py-4 px-6 text-body-sm font-bold text-[var(--text-main)]">{p?.name || 'Unknown'}</td>
-                      <td className="py-4 px-6 text-body-sm text-[var(--text-muted)]">{p?.provider}</td>
-                      <td className="py-4 px-6 text-body-sm font-mono font-bold text-[var(--text-main)]">KSh {formatCurrency(inv.amount)}</td>
-                      <td className="py-4 px-6 text-body-sm text-[var(--text-muted)]">{d.toLocaleDateString()}</td>
-                      <td className="py-4 px-6 text-body-sm font-mono font-bold text-[var(--brand-green)]">{p?.expected_return_min}%</td>
-                      <td className="py-4 px-6">
-                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${inv.status === 'active' ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
-                          {inv.status}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
+          <TableWrap className="mt-3">
+            <table className={cn(tableClass, 'min-w-[620px]')}>
+              <thead><tr><th>Option</th><th>Started</th><th className="!text-right">Invested</th><th className="!text-right">Expected a year</th><th>Status</th></tr></thead>
+              <tbody>
+                {investments.map((inv) => (
+                  <tr key={inv.id}>
+                    <td><div className="font-medium">{inv.smartgrow_products?.name}</div><div className="text-[13px] text-ink-3">{inv.smartgrow_products?.provider}</div></td>
+                    <td className="text-ink-2 whitespace-nowrap">{inv.start_date ? new Date(inv.start_date).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+                    <td className="text-right"><Money value={Number(inv.amount)} className="text-[17px]" /></td>
+                    <td className="text-right text-ink-2">{inv.smartgrow_products?.expected_return_min}–{inv.smartgrow_products?.expected_return_max}%</td>
+                    <td><Chip kind={inv.status === 'active' ? 'paid' : 'neutral'}>{inv.status === 'active' ? 'Active' : inv.status === 'matured' ? 'Matured' : inv.status}</Chip></td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-
-            {/* Mobile Card List View */}
-            <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] p-4">
-              {investments.map(inv => {
-                const p = inv.smartgrow_products;
-                const d = new Date(inv.start_date);
-                return (
-                  <div key={inv.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-sm font-bold text-[var(--text-main)]">{p?.name || 'Unknown'}</div>
-                        <div className="text-xs text-[var(--text-muted)] mt-0.5">{p?.provider}</div>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inv.status === 'active' ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
-                        {inv.status}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)]/30 p-2.5 rounded-lg border border-[var(--border)] text-xs">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] text-[var(--text-muted)] uppercase font-semibold">Invested</span>
-                        <span className="font-mono font-bold text-[var(--text-main)]">KSh {formatCurrency(inv.amount)}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] text-[var(--text-muted)] uppercase font-semibold">Start Date</span>
-                        <span>{d.toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5 text-right">
-                        <span className="text-[10px] text-[var(--text-muted)] uppercase font-semibold">Est Return</span>
-                        <span className="font-mono font-bold text-[var(--brand-green)]">{p?.expected_return_min}%</span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          </TableWrap>
         )}
-      </div>
+      </Panel>
 
-      {/* INVEST MODAL */}
-      {selectedProduct && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="card-bg border border-[var(--border)] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in text-[var(--text-main)]">
-            <div className="p-6">
-              <h2 className="text-[24px] font-geist font-bold text-[var(--text-main)]">Invest in {selectedProduct.name}</h2>
-              <p className="text-body-sm text-[var(--text-muted)] mb-6">{selectedProduct.provider}</p>
-
-              <div className="bg-transparent text-[var(--brand-green)] border border-[var(--ak-brand-ink)] dark:border-[var(--ak-brand-ink)]/30 rounded-xl p-4 flex items-start gap-3 mb-6">
-                <span className="material-symbols-outlined text-[var(--brand-green)] mt-0.5">info</span>
-                <p className="text-body-sm text-[var(--text-main)]">
-                  This investment will be made from your total recorded pool. All members will be notified.
-                </p>
+      <Modal
+        open={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        title={selectedProduct ? `Invest in ${selectedProduct.name}` : ''}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setSelectedProduct(null)}>Cancel</Button>
+            <Button type="submit" form="invest-form" disabled={investing || !selectedProduct || Number(investAmount) < Number(selectedProduct?.min_amount || 0) || Number(investAmount) > available}>
+              {investing ? 'Recording…' : `Invest ${formatKsh(Number(investAmount) || 0)}`}
+            </Button>
+          </>
+        }
+      >
+        {selectedProduct && (
+          <form id="invest-form" onSubmit={handleInvest} className="flex flex-col gap-5">
+            <p className="text-[14px] text-ink-2">{selectedProduct.provider}. Make the transfer to the provider from the group account, then record it here so every member sees it.</p>
+            <Field label="Amount" hint={`Between ${formatKsh(selectedProduct.min_amount)} and ${formatKsh(available)}.`}>
+              <input type="number" inputMode="numeric" min={selectedProduct.min_amount} max={available} required value={investAmount} onChange={(e) => setInvestAmount(e.target.value)} className={inputClass} />
+            </Field>
+            <Field label="How long">
+              <select value={investDuration} onChange={(e) => setInvestDuration(e.target.value)} className={inputClass}>
+                <option value="">Choose</option>
+                <option value="ongoing">No fixed end, withdraw when needed</option>
+                <option value="3">3 months</option>
+                <option value="6">6 months</option>
+                <option value="12">12 months</option>
+              </select>
+            </Field>
+            {Number(investAmount) > 0 && (
+              <div className="rounded-[18px] bg-sage text-sage-ink p-4">
+                <div className="text-[13px] text-[#2B4637]">After a year, if the provider pays its expected rate</div>
+                <div className="font-money text-[28px] mt-1">{formatKsh(calcProjected(selectedProduct.expected_return_min))} to {formatKsh(calcProjected(selectedProduct.expected_return_max))}</div>
               </div>
-
-              <form onSubmit={handleInvest} className="flex flex-col gap-5">
-                <div>
-                  <label className="block text-label-caps text-[var(--text-muted)] font-bold mb-2">INVESTMENT AMOUNT</label>
-                  <div className="flex border border-[var(--border)] rounded-lg overflow-hidden focus-within:border-[var(--ak-brand-ink)] focus-within:ring-1 focus-within:ring-[var(--ak-brand-ink)]">
-                    <div className="bg-transparent border-r border-[var(--border)] px-3 py-3 flex items-center">
-                      <span className="text-body-sm font-bold text-[var(--text-muted)]">KSh</span>
-                    </div>
-                    <input 
-                      type="number" 
-                      required
-                      min={selectedProduct.min_amount}
-                      max={wallet?.balance || 0}
-                      value={investAmount}
-                      onChange={e => setInvestAmount(e.target.value)}
-                      placeholder={selectedProduct.min_amount.toString()}
-                      className="flex-1 px-4 py-3 bg-transparent text-[var(--text-main)] font-mono focus:outline-none"
-                    />
-                  </div>
-                  <p className="text-body-sm text-[var(--text-muted)] mt-1 flex justify-between">
-                    <span>Available tracked pool: KSh {formatCurrency(wallet?.balance || 0)}</span>
-                    <button type="button" className="text-[var(--ak-brand-ink)] cursor-pointer hover:underline font-bold focus:outline-none focus:ring-1 focus:ring-[var(--ak-brand-ink)] rounded" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</button>
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-label-caps text-[var(--text-muted)] font-bold mb-2">DURATION</label>
-                  <select 
-                    required
-                    value={investDuration}
-                    onChange={e => setInvestDuration(e.target.value)}
-                    className="w-full border border-[var(--border)] bg-transparent rounded-lg px-4 py-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--ak-brand-ink)] dark:bg-[var(--ak-surface)]"
-                  >
-                    <option value="" disabled>Select duration</option>
-                    {selectedProduct.type === 'money_market' && <option value="ongoing">Ongoing (withdraw anytime)</option>}
-                    {selectedProduct.type === 'government_security' && <option value="91">91 days (fixed)</option>}
-                    {selectedProduct.type === 'fixed_deposit' && <option value="180">180 days (fixed)</option>}
-                    {selectedProduct.type === 'sacco' && <option value="365">12 months minimum</option>}
-                    {!['money_market', 'government_security', 'fixed_deposit', 'sacco'].includes(selectedProduct.type) && (
-                       <option value="custom">{selectedProduct.liquidity_days} days</option>
-                    )}
-                  </select>
-                </div>
-
-                {investAmount && Number(investAmount) >= selectedProduct.min_amount && (
-                  <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-lg p-4 mt-2">
-                    <div className="text-label-caps text-[var(--text-muted)] font-bold mb-3">PROJECTED RETURNS (1 YEAR)</div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-body-sm text-[var(--text-main)]">At {selectedProduct.expected_return_min}% p.a.</span>
-                      <span className="text-mono-data font-bold text-[var(--text-main)]">KSh {formatCurrency(calcProjected(selectedProduct.expected_return_min))}</span>
-                    </div>
-                    <div className="flex justify-between items-center border-t border-[var(--border)] pt-2">
-                      <span className="text-body-sm text-[var(--text-main)] font-bold">At {selectedProduct.expected_return_max}% p.a.</span>
-                      <span className="text-mono-data font-bold text-[var(--brand-green)]">KSh {formatCurrency(calcProjected(selectedProduct.expected_return_max))}</span>
-                    </div>
-                    <p className="text-[12px] text-[var(--text-muted)] mt-3 italic">
-                      Note: Returns are estimates based on current rates and are not guaranteed.
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-3 mt-4">
-                  <button 
-                    type="button" 
-                    onClick={() => { setSelectedProduct(null); setInvestAmount(''); setInvestDuration(''); }}
-                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-[var(--text-main)] bg-transparent border border-[var(--border)] hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={investing}
-                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-white bg-[var(--ak-solid)] hover:bg-[#1ea94e] flex items-center gap-2 cursor-pointer"
-                  >
-                    {investing ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : null}
-                    {investing ? 'Confirming...' : 'Confirm Investment'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
+            )}
+          </form>
+        )}
+      </Modal>
     </div>
   );
 }

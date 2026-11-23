@@ -1,4 +1,5 @@
 'use client';
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useState } from 'react';
 import Image from 'next/image';
@@ -46,7 +47,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
         className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--ak-brand-ink)] transition-colors"
         type="button"
       >
-        <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
+        <MIcon name="qr_code_2"  className="text-[18px]" />
         Invite Members
       </button>
 
@@ -63,7 +64,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
               aria-label="Close"
               type="button"
             >
-              <span className="material-symbols-outlined">close</span>
+              <MIcon name="close" className="" />
             </button>
 
             <div className="text-center">
@@ -101,9 +102,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--ak-brand-ink)] transition-colors"
                   type="button"
                 >
-                  <span className="material-symbols-outlined text-[18px]">
-                    {copied ? 'check_circle' : 'content_copy'}
-                  </span>
+                  <MIcon name={copied ? 'check_circle' : 'content_copy'}  className="text-[18px]" />
                   {copied ? 'Copied!' : 'Copy Link'}
                 </button>
                 <button
@@ -111,7 +110,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1da851] transition-colors"
                   type="button"
                 >
-                  <span className="material-symbols-outlined text-[18px]">share</span>
+                  <MIcon name="share"  className="text-[18px]" />
                   WhatsApp
                 </button>
               </div>

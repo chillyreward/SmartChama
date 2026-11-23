@@ -1,4 +1,5 @@
 'use client';
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -63,7 +64,7 @@ export default function ContributionChart({ data, title = "Contributions", heigh
           </ResponsiveContainer>
         ) : (
           <div className="flex flex-col items-center justify-center h-full bg-gray-50 rounded-lg border border-dashed border-gray-200">
-            <span className="material-symbols-outlined text-gray-300 text-4xl mb-2">bar_chart</span>
+            <MIcon name="bar_chart"  className="text-gray-300 text-4xl mb-2" />
             <p className="text-body-sm text-secondary">No chart data available</p>
           </div>
         )}

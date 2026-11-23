@@ -1,3 +1,4 @@
+import { MIcon } from '@/components/ui/MIcon';
 import LandingNav from "@/components/LandingNav";
 import LandingFooter from "@/components/LandingFooter";
 
@@ -47,7 +48,7 @@ export default function SecurityPage() {
       {/* HERO */}
       <section className="bg-[var(--ak-page)] py-24 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-6xl mb-6">shield</span>
+          <MIcon name="shield"  className="text-[var(--ak-brand-ink)] text-6xl mb-6" />
           <h1 className="text-display-lg font-geist font-bold text-white mb-6 leading-tight">Security you can trust</h1>
           <p className="text-[18px] text-gray-400 max-w-xl mx-auto leading-relaxed">
             Akibora handles real money for real families. We take security seriously at every level.
@@ -61,7 +62,7 @@ export default function SecurityPage() {
           {sections.map((sec, idx) => (
             <div key={idx} className="flex gap-6">
               <div className="w-12 h-12 bg-[var(--ak-tint)] rounded-full flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">{sec.icon}</span>
+                <MIcon name={sec.icon}  className="text-[var(--ak-brand-ink)]" />
               </div>
               <div>
                 <h3 className="text-headline-sm font-geist font-bold text-[var(--ak-text)] mb-3">{sec.title}</h3>

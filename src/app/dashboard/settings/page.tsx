@@ -1,4 +1,6 @@
 'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { Button, Field, Notice, PageHeader, Panel, PanelTitle, Skeleton, Tabs, cn, inputClass } from '@/components/ui'
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
@@ -116,7 +118,7 @@ export default function SettingsPage() {
       const { error: idError } = await saveNationalId(supabase as any, session.user.id, nationalId.trim())
       if (idError) throw idError
 
-      setToastMsg('Profile updated successfully.')
+      setToastMsg('Saved.')
       setTimeout(() => setToastMsg(''), 3000)
       await refreshMemberData()
     } catch (err: any) {
@@ -155,7 +157,11 @@ export default function SettingsPage() {
     setToastMsg('')
 
     if (newPassword !== confirmPassword) {
-      setErrorMsg('New passwords do not match.')
+      setErrorMsg('The two passwords don\'t match.')
+      return
+    }
+    if (newPassword.length < 8) {
+      setErrorMsg('Use at least 8 characters.')
       return
     }
 
@@ -167,7 +173,7 @@ export default function SettingsPage() {
 
       if (error) throw error
 
-      setToastMsg('Password updated successfully.')
+      setToastMsg('Your password is changed.')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
@@ -200,336 +206,130 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex justify-center items-center">
-        <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-52" />
+        <Skeleton className="h-11 w-96" />
+        <Skeleton className="h-96" />
       </div>
     )
   }
 
+  const PREFS: { key: string; label: string; hint: string; group: 'what' | 'how' }[] = [
+    { key: 'contribution_reminders', label: 'Contribution reminders', hint: 'Before and on the day a payment is due', group: 'what' },
+    { key: 'late_payment_alerts', label: 'Late payment alerts', hint: 'If a payment is missed or a fine is added', group: 'what' },
+    { key: 'monthly_report', label: 'Monthly summary', hint: 'What you and the group saved last month', group: 'what' },
+    { key: 'new_member_joins', label: 'New members', hint: 'When someone joins the group', group: 'what' },
+    { key: 'sms_notifications', label: 'SMS', hint: 'Works on any phone', group: 'how' },
+    { key: 'whatsapp_notifications', label: 'WhatsApp', hint: 'If your group has it switched on', group: 'how' },
+    { key: 'email_notifications', label: 'Email', hint: 'To the address on your profile', group: 'how' },
+  ]
+
+  const Toggle = ({ k, label, hint }: { k: string; label: string; hint: string }) => (
+    <div className="flex items-center justify-between gap-4 py-4 border-t border-line first:border-t-0">
+      <div>
+        <div className="text-[15px] font-medium">{label}</div>
+        <div className="text-[13px] text-ink-3">{hint}</div>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={!!notifPrefs[k]}
+        aria-label={label}
+        onClick={() => handleTogglePref(k)}
+        className={cn('relative w-[52px] h-[30px] rounded-full transition-colors shrink-0', notifPrefs[k] ? 'bg-moss dark:bg-mint' : 'bg-raised border border-line')}
+      >
+        <span className={cn('absolute top-[3px] w-6 h-6 rounded-full bg-white shadow transition-all', notifPrefs[k] ? 'left-[25px]' : 'left-[3px]')} />
+      </button>
+    </div>
+  )
+
   return (
-    <div className="max-w-5xl p-6 md:p-8 font-inter text-[var(--text-main)]">
-      
-      {/* Page Header */}
-      <div className="mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>Dashboard</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <span>Settings</span>
-        </p>
-        
-        <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-          Member Settings
-        </h1>
-        <p className="text-[14px] text-[var(--text-muted)] mt-1">
-          Manage your personal details, adjust notification rules, and configure security settings.
-        </p>
-      </div>
+    <div>
+      <PageHeader title="Settings" subtitle="Your details, how we reach you, and keeping your account safe." />
 
-      {toastMsg && (
-        <div className="bg-transparent text-[var(--brand-green)] border border-[#bccbb9] dark:border-[var(--ak-line)] p-4 rounded-xl text-[14px] font-medium mb-6">
-          {toastMsg}
+      <Tabs
+        label="Settings sections"
+        value={activeTab}
+        onChange={(v) => { setActiveTab(v); setErrorMsg(''); setToastMsg('') }}
+        className="mb-5"
+        items={[{ value: 'Profile Details', label: 'Your details' }, { value: 'Notifications', label: 'Notifications' }, { value: 'Security', label: 'Security' }]}
+      />
+
+      {toastMsg && <Notice tone="ok" className="mb-4">{toastMsg}</Notice>}
+      {errorMsg && <Notice tone="danger" className="mb-4">{errorMsg}</Notice>}
+
+      {activeTab === 'Profile Details' && (
+        <Panel className="max-w-[760px]">
+          <form onSubmit={handleSaveProfile} className="grid sm:grid-cols-2 gap-5">
+            <Field label="Full name" className="sm:col-span-2">
+              <input value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" required className={inputClass} />
+            </Field>
+            <div className="sm:col-span-2">
+              <PhoneVerification currentPhone={phoneNumber} onVerified={setPhoneNumber} label="Phone number (you sign in with this)" />
+            </div>
+            <Field label="Email" hint="Optional. Used for statements if you switch email on.">
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className={inputClass} />
+            </Field>
+            <Field label="National ID number" hint="Only you can see this.">
+              <input value={nationalId} onChange={(e) => setNationalId(e.target.value)} inputMode="numeric" className={inputClass} />
+            </Field>
+            <Field label="County">
+              <select value={county} onChange={(e) => setCounty(e.target.value)} className={inputClass}>
+                <option value="">Choose your county</option>
+                {countiesList.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+            <Field label="Occupation">
+              <input value={occupation} onChange={(e) => setOccupation(e.target.value)} className={inputClass} />
+            </Field>
+            <div className="sm:col-span-2 flex justify-end">
+              <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
+            </div>
+          </form>
+        </Panel>
+      )}
+
+      {activeTab === 'Notifications' && (
+        <div className="grid lg:grid-cols-2 gap-4 max-w-[1000px]">
+          <Panel>
+            <PanelTitle>What to tell you about</PanelTitle>
+            <div className="mt-2">{PREFS.filter((p) => p.group === 'what').map((p) => <Toggle key={p.key} k={p.key} label={p.label} hint={p.hint} />)}</div>
+          </Panel>
+          <Panel>
+            <PanelTitle>How to reach you</PanelTitle>
+            <div className="mt-2">{PREFS.filter((p) => p.group === 'how').map((p) => <Toggle key={p.key} k={p.key} label={p.label} hint={p.hint} />)}</div>
+          </Panel>
         </div>
       )}
 
-      {errorMsg && (
-        <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 p-4 rounded-xl text-[14px] font-medium mb-6">
-          {errorMsg}
+      {activeTab === 'Security' && (
+        <div className="grid lg:grid-cols-[1.2fr_1fr] gap-4 max-w-[1000px] items-start">
+          <Panel>
+            <PanelTitle>Change your password</PanelTitle>
+            <form onSubmit={handleChangePassword} className="flex flex-col gap-5 mt-4">
+              <Field label="New password" hint={newPassword ? `Strength: ${passwordStrength.label.toLowerCase()}` : 'At least 8 characters. Longer is stronger.'}>
+                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" minLength={8} required className={inputClass} />
+              </Field>
+              <Field label="Type it again" error={confirmPassword && confirmPassword !== newPassword ? 'The two passwords don\'t match yet.' : undefined}>
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" required className={inputClass} />
+              </Field>
+              <Button type="submit" disabled={saving} className="self-start">{saving ? 'Updating…' : 'Update password'}</Button>
+            </form>
+          </Panel>
+          <div className="flex flex-col gap-4">
+            <Panel>
+              <PanelTitle>Sign out</PanelTitle>
+              <p className="text-[14px] text-ink-2 mt-2">Signs you out on this device. Do this if you used a shared or borrowed phone.</p>
+              <Button variant="outline" className="mt-4" onClick={handleSignOutAll}>Sign out</Button>
+            </Panel>
+            <Panel className="border-danger/40">
+              <PanelTitle>Delete your account</PanelTitle>
+              <p className="text-[14px] text-ink-2 mt-2">Removes your personal details. Your group keeps the record of payments you made, without your name.</p>
+              <Button variant="danger" className="mt-4" onClick={() => router.push('/account/delete')}>Delete my account</Button>
+            </Panel>
+          </div>
         </div>
       )}
-
-      <div className="flex flex-col md:flex-row gap-8">
-        
-        {/* Left: Tab selectors */}
-        <div className="w-full md:w-64 shrink-0 space-y-1">
-          {tabs.map(t => (
-            <button
-              key={t.name}
-              onClick={() => {
-                setActiveTab(t.name)
-                setErrorMsg('')
-                setToastMsg('')
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-semibold transition-colors text-left ${
-                activeTab === t.name
-                  ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]'
-                  : 'text-[var(--ak-text-2)] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)]'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">{t.icon}</span>
-              {t.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Right: Tab Contents */}
-        <div className="flex-1 card-bg border border-[var(--border)] p-6 rounded-2xl shadow-sm">
-          
-          {/* PROFILE DETAILS TAB */}
-          {activeTab === 'Profile Details' && (
-            <div>
-              <div className="border-b border-gray-100 dark:border-gray-800 pb-4 mb-6">
-                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white font-geist">
-                  Profile Details
-                </h3>
-              </div>
-
-              <form onSubmit={handleSaveProfile} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div>
-                    <PhoneVerification currentPhone={phoneNumber} onVerified={setPhoneNumber} label="Phone number (primary ID)" />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                      National ID
-                    </label>
-                    <input
-                      type="text"
-                      value={nationalId}
-                      onChange={(e) => setNationalId(e.target.value)}
-                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                      County
-                    </label>
-                    <select
-                      value={county}
-                      onChange={(e) => setCounty(e.target.value)}
-                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                    >
-                      <option value="">Select County</option>
-                      {countiesList.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                      Occupation
-                    </label>
-                    <input
-                      type="text"
-                      value={occupation}
-                      onChange={(e) => setOccupation(e.target.value)}
-                      placeholder="e.g. Entrepreneur, Farmer"
-                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                    />
-                  </div>
-
-                </div>
-
-                <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
-                  >
-                    {saving ? 'Saving...' : 'Save Profile'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* NOTIFICATIONS TAB */}
-          {activeTab === 'Notifications' && (
-            <div>
-              <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mb-6 font-geist">
-                Communication Preferences
-              </h3>
-              
-              <div className="space-y-4">
-                {[
-                  { key: 'contribution_reminders', label: 'Contribution Reminders', desc: 'Alerts when monthly contributions are due.' },
-                  { key: 'late_payment_alerts', label: 'Late Payment Alerts', desc: 'Reminders if contributions are overdue.' },
-                  { key: 'monthly_report', label: 'Monthly Financial Report', desc: 'Receive details on group balances.' },
-                  { key: 'new_member_joins', label: 'New Member Joins', desc: 'Notifications when someone joins the chama.' },
-                  { key: 'whatsapp_notifications', label: 'WhatsApp Alerts', desc: 'Send core notifications directly to your WhatsApp.' },
-                  { key: 'sms_notifications', label: 'SMS Notifications', desc: 'Receive transactional updates via text.' },
-                  { key: 'email_notifications', label: 'Email Correspondence', desc: 'Send summary updates and report details to email.' }
-                ].map(pref => (
-                  <div key={pref.key} className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-3">
-                    <div>
-                      <h4 className="text-[14px] font-bold text-[var(--ak-text)] dark:text-white">{pref.label}</h4>
-                      <p className="text-[12px] text-[var(--ak-text-2)] dark:text-gray-400 mt-0.5">{pref.desc}</p>
-                    </div>
-                    
-                    <div
-                      className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors duration-200 shrink-0 ${
-                        notifPrefs[pref.key] ? 'bg-[var(--ak-solid)]' : 'bg-gray-200 dark:bg-gray-700'
-                      }`}
-                      onClick={() => handleTogglePref(pref.key)}
-                    >
-                      <div
-                        className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 shadow-sm ${
-                          notifPrefs[pref.key] ? 'translate-x-4' : 'translate-x-0'
-                        }`}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-
-
-          {/* SECURITY TAB */}
-          {activeTab === 'Security' && (
-            <div className="space-y-8">
-              
-              {/* Change Password */}
-              <form onSubmit={handleChangePassword} className="space-y-4">
-                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
-                  Change Password
-                </h3>
-
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                      Current Password
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                        New Password
-                      </label>
-                      <input
-                        type="password"
-                        required
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
-                        Confirm New Password
-                      </label>
-                      <input
-                        type="password"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
-                      />
-                    </div>
-                  </div>
-
-                  {newPassword && (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-gray-400">
-                        <span>Password Strength:</span>
-                        <span>{passwordStrength.label}</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div className={`h-full transition-all duration-200 ${passwordStrength.color}`} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="bg-[var(--ak-solid)] text-white px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
-                  >
-                    Change Password
-                  </button>
-                </div>
-              </form>
-
-              {/* Two-Factor Authentication */}
-              <div className="space-y-3">
-                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
-                  Two-Factor Authentication (2FA)
-                </h3>
-                <div className="bg-gray-50 dark:bg-[#1f2620]/30 border border-[var(--ak-line)] dark:border-gray-800 p-4 rounded-xl flex gap-3 items-start">
-                  <span className="material-symbols-outlined text-[var(--brand-green)]">security</span>
-                  <div>
-                    <h4 className="text-[14px] font-bold text-[var(--ak-text)] dark:text-white">Enhanced Verification</h4>
-                    <p className="text-[12px] text-[var(--ak-text-2)] dark:text-gray-400 mt-0.5 leading-relaxed">
-                      Two-factor authentication via SMS is available. Enable OTP login to activate. Contact administrator to verify mobile setup.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sessions */}
-              <div className="space-y-4">
-                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
-                  Active Sessions
-                </h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center bg-gray-50 dark:bg-[#1f2620]/30 border border-[var(--ak-line)] dark:border-gray-800 p-3 rounded-lg text-[13px]">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-secondary">devices</span>
-                      <div>
-                        <div className="font-bold text-[var(--ak-text)] dark:text-white">Current Session Device</div>
-                        <div className="text-[11px] text-[var(--ak-text-2)] dark:text-gray-400">IP: Client Address • Last active just now</div>
-                      </div>
-                    </div>
-                    <span className="bg-green-100 dark:bg-green-950/20 text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                      Active
-                    </span>
-                  </div>
-
-                  <div className="flex justify-end pt-2">
-                    <button
-                      onClick={handleSignOutAll}
-                      className="bg-white dark:bg-[var(--ak-surface)] border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-red-50 dark:hover:bg-red-950/10 transition-colors cursor-pointer"
-                    >
-                      Sign Out All Devices
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </div>
-      </div>
     </div>
   )
 }

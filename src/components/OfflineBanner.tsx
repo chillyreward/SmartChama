@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useState, useEffect } from 'react'
 
 export function OfflineBanner() {
@@ -37,9 +38,7 @@ export function OfflineBanner() {
         color: isOffline ? '#000000' : '#ffffff'
       }}
     >
-      <span className="material-symbols-outlined text-[18px]">
-        {isOffline ? 'wifi_off' : 'wifi'}
-      </span>
+      <MIcon name={isOffline ? 'wifi_off' : 'wifi'}  className="text-[18px]" />
       {isOffline
         ? 'You are offline. Some features are unavailable.'
         : 'Back online. Syncing your data...'}

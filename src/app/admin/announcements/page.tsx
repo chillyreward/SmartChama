@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -103,7 +104,7 @@ export default function AdminAnnouncementsPage() {
     <div className="p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
+          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
@@ -113,7 +114,7 @@ export default function AdminAnnouncementsPage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Announcements</span>
           </p>
           <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Announcements</h1>
@@ -124,7 +125,7 @@ export default function AdminAnnouncementsPage() {
             onClick={() => setShowModal(true)}
             className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center gap-2"
           >
-            <span className="material-symbols-outlined text-[18px]">campaign</span>
+            <MIcon name="campaign"  className="text-[18px]" />
             New Announcement
           </button>
         </div>
@@ -133,7 +134,7 @@ export default function AdminAnnouncementsPage() {
       <div className="flex flex-col gap-4">
         {announcements.length === 0 ? (
           <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center text-[var(--text-muted)] shadow-sm">
-            <span className="material-symbols-outlined text-[48px] mb-4 text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">campaign</span>
+            <MIcon name="campaign"  className="text-[48px] mb-4 text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]" />
             <div className="text-lg font-bold font-geist text-[var(--text-main)]">No announcements yet</div>
             <div className="text-xs mt-1 text-[var(--text-muted)]">Send your first broadcast to the group.</div>
           </div>
@@ -153,7 +154,7 @@ export default function AdminAnnouncementsPage() {
                   onClick={() => handleDelete(ann.id)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500"
                 >
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                  <MIcon name="delete"  className="text-[18px]" />
                 </button>
               </div>
               
@@ -218,7 +219,7 @@ export default function AdminAnnouncementsPage() {
             <div className="flex gap-3 mt-8">
               <button onClick={() => setShowModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded-lg py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
               <button onClick={handleSend} disabled={!title || !message} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded-lg py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)] flex items-center justify-center gap-2 transition-all">
-                <span className="material-symbols-outlined text-[18px]">send</span>
+                <MIcon name="send"  className="text-[18px]" />
                 Send Now
               </button>
             </div>

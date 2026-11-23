@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
@@ -121,9 +122,7 @@ export default function SelectGroupPage() {
                 {isSelecting ? (
                   <div className="w-5 h-5 rounded-full border-2 border-[var(--ak-brand-ink)]/30 border-t-[var(--ak-brand-ink)] animate-spin" />
                 ) : (
-                  <span className="material-symbols-outlined text-[20px]" style={{ color: 'var(--text-muted)' }}>
-                    chevron_right
-                  </span>
+                  <MIcon name="chevron_right"  className="text-[20px]" style={{ color: 'var(--text-muted)' }} />
                 )}
               </div>
             </button>

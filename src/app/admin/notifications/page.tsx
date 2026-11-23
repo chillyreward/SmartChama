@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -109,7 +110,7 @@ export default function AdminNotificationsPage() {
       <div className="mb-8">
         <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <MIcon name="chevron_right"  className="text-[14px]" />
           <span>Notifications</span>
         </p>
         
@@ -145,9 +146,7 @@ export default function AdminNotificationsPage() {
       ) : filteredNotifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-[var(--border)] rounded-2xl card-bg">
           <div className="w-16 h-16 bg-transparent text-[var(--brand-green)] rounded-full flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-[28px] text-[var(--brand-green)]">
-              notifications_off
-            </span>
+            <MIcon name="notifications_off"  className="text-[28px] text-[var(--brand-green)]" />
           </div>
           <h2 className="text-[18px] font-semibold text-[var(--ak-text)] dark:text-white mb-2">
             No notifications yet
@@ -171,9 +170,7 @@ export default function AdminNotificationsPage() {
                 }`}
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${config.bg}`}>
-                  <span className={`material-symbols-outlined text-[20px] ${config.color}`}>
-                    {config.icon}
-                  </span>
+                  <MIcon name={config.icon} className={`text-[20px] ${config.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-4">

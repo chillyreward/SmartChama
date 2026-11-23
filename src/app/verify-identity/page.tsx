@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -77,9 +78,7 @@ function VerifyIdentity() {
 function Result({ tone, title, body, next }: { tone: 'good' | 'wait'; title: string; body: string; next: string }) {
   return (
     <div className="rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-6 space-y-3 text-center">
-      <span className="material-symbols-outlined text-[44px]" style={{ color: tone === 'good' ? '#3FA673' : '#D97706', fontVariationSettings: "'FILL' 1" }}>
-        {tone === 'good' ? 'verified_user' : 'hourglass_top'}
-      </span>
+      <MIcon name={tone === 'good' ? 'verified_user' : 'hourglass_top'}  className="text-[44px]" />
       <h2 className="text-[20px] font-bold">{title}</h2>
       <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{body}</p>
       <Link href={next} className="inline-block w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white font-semibold">Continue</Link>

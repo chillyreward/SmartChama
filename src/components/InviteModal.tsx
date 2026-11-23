@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useState } from 'react'
 
 type Channel = 'sms' | 'whatsapp'
@@ -93,7 +94,7 @@ export function InviteModal({
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-[20px] font-bold">Invite a Member</h2>
               <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>
-                <span className="material-symbols-outlined">close</span>
+                <MIcon name="close" className="" />
               </button>
             </div>
 
@@ -111,11 +112,7 @@ export function InviteModal({
                       borderColor: active ? cfg.color : 'var(--border)',
                       backgroundColor: active ? `${cfg.color}10` : 'var(--bg-subtle)'
                     }}>
-                    <span
-                      className="material-symbols-outlined text-[24px]"
-                      style={{ color: active ? cfg.color : 'var(--text-muted)', fontVariationSettings: "'FILL' 1" }}>
-                      {cfg.icon}
-                    </span>
+                    <MIcon name={cfg.icon}  className="text-[24px]" />
                     <span className="text-[13px] font-semibold" style={{ color: active ? cfg.color : 'var(--text-secondary)' }}>
                       {cfg.label}
                     </span>
@@ -128,10 +125,7 @@ export function InviteModal({
             {/* Info banner */}
             <div className="rounded-xl p-3 mb-5 flex gap-2"
               style={{ backgroundColor: 'var(--bg-subtle)', borderLeft: `3px solid ${channelConfig[channel].color}` }}>
-              <span className="material-symbols-outlined text-[16px] flex-shrink-0 mt-0.5"
-                style={{ color: channelConfig[channel].color, fontVariationSettings: "'FILL' 1" }}>
-                {channel === 'whatsapp' ? 'chat' : 'sms'}
-              </span>
+              <MIcon name={channel === 'whatsapp' ? 'chat' : 'sms'}  className="text-[16px] flex-shrink-0 mt-0.5" />
               <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                 {channel === 'whatsapp'
                   ? `WhatsApp opens with the invite code for ${chamaName} ready to send.`
@@ -185,9 +179,7 @@ export function InviteModal({
               <button onClick={handleSend} disabled={!phone.trim()}
                 className="flex-1 py-3 text-white rounded-xl text-[14px] font-semibold disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 style={{ backgroundColor: channelConfig[channel].color }}>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  {channel === 'whatsapp' ? 'chat' : 'sms'}
-                </span>
+                <MIcon name={channel === 'whatsapp' ? 'chat' : 'sms'}  className="text-[18px]" />
                 Send via {channelConfig[channel].label}
               </button>
             </div>
@@ -214,10 +206,7 @@ export function InviteModal({
               return (
                 <div className="w-14 h-14 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: `${cfg.color}15` }}>
-                  <span className="material-symbols-outlined text-[32px]"
-                    style={{ color: cfg.color, fontVariationSettings: "'FILL' 1" }}>
-                    {result?.sms_sent ? (currentChan === 'whatsapp' ? 'chat' : 'sms') : 'key'}
-                  </span>
+                  <MIcon name={result?.sms_sent ? (currentChan === 'whatsapp' ? 'chat' : 'sms') : 'key'}  className="text-[32px]" />
                 </div>
               );
             })()}
@@ -241,7 +230,7 @@ export function InviteModal({
                 className="w-full py-3 rounded-xl text-[14px] font-semibold text-white flex items-center justify-center gap-2"
                 style={{ backgroundColor: channelConfig.whatsapp.color }}
               >
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
+                <MIcon name="chat"  className="text-[18px]" />
                 Open WhatsApp to send
               </a>
             )}
@@ -258,7 +247,7 @@ export function InviteModal({
               <button onClick={() => navigator.clipboard.writeText(result?.code || '')}
                 className="text-[12px] flex items-center gap-1 transition-colors hover:opacity-70"
                 style={{ color: 'var(--text-muted)' }}>
-                <span className="material-symbols-outlined text-[14px]">content_copy</span>
+                <MIcon name="content_copy"  className="text-[14px]" />
                 Copy code
               </button>
             </div>

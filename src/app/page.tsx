@@ -126,7 +126,7 @@ export default function LandingPage() {
               </div>
               <div className="flex flex-col gap-6">
                 <FlowCard title="Officials" body="Chair, treasurer and secretary" edge="Approve payouts" side="right" />
-                <FlowCard title="SmartGrow" body="Money market, T-bills, SACCO shares" edge="Investments the group voted for" side="right" out />
+                <FlowCard title="SmartGrow" body="Money market, T-bills, SACCO shares" edge="Investments officials make" side="right" out />
               </div>
             </div>
           </div>

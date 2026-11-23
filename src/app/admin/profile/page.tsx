@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
@@ -183,7 +184,7 @@ export default function AdminProfilePage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Profile</span>
           </p>
           <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
@@ -198,7 +199,7 @@ export default function AdminProfilePage() {
             onClick={() => router.push('/dashboard')}
             className="bg-transparent border border-[var(--border)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all flex items-center gap-2 shadow-sm"
           >
-            <span className="material-symbols-outlined text-[18px]">switch_account</span>
+            <MIcon name="switch_account"  className="text-[18px]" />
             Switch to Member View
           </button>
         </div>
@@ -325,7 +326,7 @@ export default function AdminProfilePage() {
                   National ID
                   {nationalId && (
                     <span className="text-[11px] text-[var(--brand-green)] font-bold flex items-center gap-0.5">
-                      <span className="material-symbols-outlined text-[14px]">verified</span> Verified
+                      <MIcon name="verified"  className="text-[14px]" /> Verified
                     </span>
                   )}
                 </label>

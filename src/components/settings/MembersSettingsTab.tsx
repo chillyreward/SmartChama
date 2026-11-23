@@ -1,4 +1,5 @@
 ﻿'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useState, useEffect } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 
@@ -205,9 +206,7 @@ export function MembersSettingsTab({
                 setInviteError('')
               }}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors">
-              <span className="material-symbols-outlined text-[20px]">
-                person_add
-              </span>
+              <MIcon name="person_add"  className="text-[20px]" />
               Invite Member
             </button>
           )}
@@ -322,7 +321,7 @@ export function MembersSettingsTab({
                   </>
                 ) : (
                   <>
-                    <span className="material-symbols-outlined text-[18px]">sms</span>
+                    <MIcon name="sms"  className="text-[18px]" />
                     Send SMS Invite
                   </>
                 )}
@@ -341,12 +340,7 @@ export function MembersSettingsTab({
               border: '1px solid #BBF7D0'
             }}>
             <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-[22px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5"
-                style={{
-                  fontVariationSettings: "'FILL' 1"
-                }}>
-                check_circle
-              </span>
+              <MIcon name="check_circle"  className="text-[22px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-[14px] font-semibold text-[var(--ak-brand-ink)] mb-1">
                   {inviteResult.sms_sent ? 'SMS invite sent!' : 'Invite created'}
@@ -367,9 +361,7 @@ export function MembersSettingsTab({
                       setTimeout(() => setToast(''), 2000)
                     }}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-medium text-[var(--ak-brand-ink)] bg-white border border-[#BBF7D0] hover:bg-[var(--ak-tint)]">
-                    <span className="material-symbols-outlined text-[14px]">
-                      content_copy
-                    </span>
+                    <MIcon name="content_copy"  className="text-[14px]" />
                     Copy
                   </button>
                 </div>
@@ -495,9 +487,7 @@ export function MembersSettingsTab({
                       backgroundColor: 'transparent'
                     }}
                     title="Remove member">
-                    <span className="material-symbols-outlined text-[18px]">
-                      person_remove
-                    </span>
+                    <MIcon name="person_remove"  className="text-[18px]" />
                   </button>
                 )}
               </div>
@@ -507,12 +497,9 @@ export function MembersSettingsTab({
 
           {members.filter(m => m.status === 'active').length === 0 && (
             <div className="px-6 py-12 text-center">
-              <span className="material-symbols-outlined text-[40px] mb-3 block"
-                style={{
+              <MIcon name="group"  className="text-[40px] mb-3 block" style={{
                   color: 'var(--text-muted)'
-                }}>
-                group
-              </span>
+                }} />
               <p
                 className="text-[14px]"
                 style={{

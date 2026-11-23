@@ -1,8 +1,10 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
+import { EmptyState, PageHeader, Panel, Skeleton, Tabs, cn } from '@/components/ui'
 
 interface NotificationType {
   id: string
@@ -90,107 +92,57 @@ export default function NotificationsPage() {
 
   const getIconConfig = (type: string) => {
     switch (type) {
-      case 'contribution':
-        return { icon: 'payments', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/30' }
-      case 'new_member':
-        return { icon: 'person_add', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30' }
-      case 'announcement':
-        return { icon: 'campaign', color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30' }
-      case 'reminder':
-      default:
-        return { icon: 'alarm', color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30' }
+      case 'contribution': return { icon: 'payments', cls: 'bg-mint text-forest' };
+      case 'new_member': return { icon: 'person_add', cls: 'bg-lavender text-lavender-ink' };
+      case 'announcement': return { icon: 'campaign', cls: 'bg-sage text-sage-ink' };
+      default: return { icon: 'schedule', cls: 'bg-amber-soft text-amber-ink' };
     }
   }
 
+  const unread = notifications.filter((n) => !n.read).length
+
   return (
-    <div className="max-w-4xl p-6 md:p-8 font-inter text-[var(--text-main)]">
-      {/* Page Header */}
-      <div className="mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>Dashboard</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <span>Notifications</span>
-        </p>
-        
-        <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-          Notifications
-        </h1>
-        <p className="text-[14px] text-[var(--text-muted)] mt-1">
-          Updates on contributions and activity in your savings group.
-        </p>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-[var(--border)] pb-3 mb-6 overflow-x-auto scrollbar-hide">
-        {(['All', 'Unread', 'Contributions', 'Group'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-[14px] font-medium transition-colors whitespace-nowrap ${
-              activeTab === tab
-                ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]'
-                : 'text-[var(--ak-text-2)] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)]'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
-        </div>
-      ) : filteredNotifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-[var(--border)] rounded-2xl card-bg">
-          <div className="w-16 h-16 bg-transparent text-[var(--brand-green)] rounded-full flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-[28px] text-[var(--brand-green)]">
-              notifications_off
-            </span>
-          </div>
-          <h2 className="text-[18px] font-semibold text-[var(--ak-text)] dark:text-white mb-2">
-            No notifications yet
-          </h2>
-          <p className="text-[14px] text-[var(--ak-text-2)] dark:text-gray-400 max-w-sm">
-            Notifications about your contributions and group activity will appear here.
-          </p>
-        </div>
-      ) : (
-        <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] shadow-sm">
-          {filteredNotifications.map(notif => {
-            const config = getIconConfig(notif.type)
-            return (
-              <div
-                key={notif.id}
-                className={`p-4 flex gap-4 transition-colors ${
-                  !notif.read
-                    ? 'bg-[var(--ak-tint)]/30 dark:bg-[var(--ak-surface)]/10 border-l-4 border-[var(--ak-brand-ink)]'
-                    : 'card-bg border-l-4 border-transparent'
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${config.bg}`}>
-                  <span className={`material-symbols-outlined text-[20px] ${config.color}`}>
-                    {config.icon}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-4">
-                    <h4 className={`text-[14px] text-[var(--ak-text)] dark:text-white truncate ${!notif.read ? 'font-bold' : 'font-medium'}`}>
-                      {notif.title}
-                    </h4>
-                    <span className="text-[12px] text-[var(--ak-text-3)] dark:text-gray-500 font-mono whitespace-nowrap">
-                      {timeAgo(notif.created_at)}
-                    </span>
+    <div>
+      <PageHeader title="Notifications" subtitle="Payments, reminders, announcements and new members. Opening this page marks them as read." />
+      <Tabs
+        label="Filter notifications"
+        value={activeTab}
+        onChange={setActiveTab}
+        className="mb-4"
+        items={[
+          { value: 'All', label: 'All', count: notifications.length },
+          { value: 'Unread', label: 'New', count: unread },
+          { value: 'Contributions', label: 'Payments' },
+          { value: 'Group', label: 'Group' },
+        ]}
+      />
+      <Panel className="p-2 sm:p-3">
+        {loading ? (
+          <div className="flex flex-col gap-2 p-2">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-16" />)}</div>
+        ) : filteredNotifications.length === 0 ? (
+          <EmptyState className="px-4" title={activeTab === 'Unread' ? 'You\'re all caught up' : 'Nothing here yet'}>
+            Reminders before a due date, confirmed payments and group announcements show up here.
+          </EmptyState>
+        ) : (
+          <ul>
+            {filteredNotifications.map((n) => {
+              const c = getIconConfig(n.type)
+              return (
+                <li key={n.id} className={cn('flex gap-4 px-3 sm:px-4 py-4 rounded-[16px]', !n.read && 'bg-tint')}>
+                  <span className={cn('w-10 h-10 rounded-full flex items-center justify-center shrink-0', c.cls)}><MIcon name={c.icon} size={18} /></span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-[15px] font-semibold">{n.title}</span>
+                      <time className="text-[12px] text-ink-3 whitespace-nowrap">{timeAgo(n.created_at)}</time>
+                    </div>
+                    <p className="text-[14px] text-ink-2 mt-0.5">{n.message}</p>
                   </div>
-                  <p className="text-[14px] text-[var(--ak-text-2)] dark:text-gray-400 mt-1 leading-relaxed">
-                    {notif.message}
-                  </p>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </Panel>
     </div>
-  );
+  )
 }

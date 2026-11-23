@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -186,7 +187,7 @@ export default function AdminWalletPage() {
     <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
+          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
@@ -196,7 +197,7 @@ export default function AdminWalletPage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Wallet</span>
           </p>
           <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Recorded Contributions (Tracked Pool)</h1>
@@ -207,14 +208,14 @@ export default function AdminWalletPage() {
             onClick={() => setShowWithdrawModal(true)}
             className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
           >
-            <span className="material-symbols-outlined text-[18px]">arrow_outward</span>
+            <MIcon name="arrow_outward"  className="text-[18px]" />
             Request Withdrawal
           </button>
           <button 
             onClick={() => setShowDepositModal(true)}
             className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <MIcon name="add"  className="text-[18px]" />
             Deposit Funds
           </button>
         </div>

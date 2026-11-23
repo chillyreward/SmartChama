@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useMemo, useState } from 'react'
 
 // Contribution schedule:
@@ -117,12 +118,12 @@ export default function ContributionSchedulePicker({
           <div className="flex items-center justify-between">
             <button type="button" onClick={() => shift(-1)} disabled={atCurrentMonth} aria-label="Previous month"
               className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)] disabled:opacity-30">
-              <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+              <MIcon name="chevron_left"  className="text-[20px]" />
             </button>
             <span className="text-[14px] font-semibold text-[var(--ak-text)] dark:text-white">{monthLabel}</span>
             <button type="button" onClick={() => shift(1)} aria-label="Next month"
               className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)]">
-              <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+              <MIcon name="chevron_right"  className="text-[20px]" />
             </button>
           </div>
 
@@ -172,7 +173,7 @@ export default function ContributionSchedulePicker({
                     {prettyDate(d)}
                     <button type="button" onClick={() => toggle(d)} aria-label={`Remove ${prettyDate(d)}`}
                       className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-[var(--ak-tint)] dark:hover:bg-[#14532D]">
-                      <span className="material-symbols-outlined text-[14px]">close</span>
+                      <MIcon name="close"  className="text-[14px]" />
                     </button>
                   </span>
                 ))}

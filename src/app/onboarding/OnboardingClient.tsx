@@ -1,4 +1,5 @@
 'use client';
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -312,7 +313,7 @@ export default function OnboardingClient() {
               onClick={() => setStep(1)} 
               className="text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)] flex items-center gap-1 text-body-sm font-medium"
             >
-              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+              <MIcon name="arrow_back"  className="text-[20px]" />
               Back
             </button>
           </div>
@@ -390,7 +391,7 @@ export default function OnboardingClient() {
                 {/* JOIN EXISTING GROUP SECTION */}
                 <div className="border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-xl p-5 mb-8 bg-white dark:bg-[var(--ak-surface)]">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">group_add</span>
+                    <MIcon name="group_add"  className="text-[var(--ak-brand-ink)]" />
                     <h2 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">Join an Existing Group</h2>
                   </div>
                   <p className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] mb-4">
@@ -598,7 +599,7 @@ export default function OnboardingClient() {
                     {saving ? 'Creating...' : (
                       <>
                         Create Group
-                        <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                        <MIcon name="arrow_forward"  className="text-[20px]" />
                       </>
                     )}
                   </button>

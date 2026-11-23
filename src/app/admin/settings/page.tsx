@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -194,7 +195,7 @@ export default function AdminSettingsPage() {
     <div className="p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-solid)] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <span className="material-symbols-outlined text-[20px]">check_circle</span>
+          <MIcon name="check_circle"  className="text-[20px]" />
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
@@ -203,7 +204,7 @@ export default function AdminSettingsPage() {
       <div className="mb-8">
         <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <MIcon name="chevron_right"  className="text-[14px]" />
           <span>Settings</span>
         </p>
         <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
@@ -227,7 +228,7 @@ export default function AdminSettingsPage() {
                   : 'text-[var(--ak-text-2)] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)]'
               }`}
             >
-              <span className="material-symbols-outlined text-[20px]">{t.icon}</span>
+              <MIcon name={t.icon}  className="text-[20px]" />
               {t.name}
             </button>
           ))}
@@ -430,7 +431,7 @@ export default function AdminSettingsPage() {
                   onClick={() => setShowInviteModal(true)}
                   className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  <span className="material-symbols-outlined text-md">person_add</span>
+                  <MIcon name="person_add"  className="text-md" />
                   Invite Member
                 </button>
               </div>

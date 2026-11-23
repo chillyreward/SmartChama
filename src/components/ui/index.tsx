@@ -241,3 +241,132 @@ export function EmptyState({ title, children, action, className }: { title: stri
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Page kit                                                             */
+/* ------------------------------------------------------------------ */
+export function PageHeader({ title, subtitle, actions, back, className }: { title: ReactNode; subtitle?: ReactNode; actions?: ReactNode; back?: { href: string; label: string }; className?: string }) {
+  return (
+    <div className={cn('flex flex-wrap items-end justify-between gap-4 mb-6', className)}>
+      <div className="min-w-0">
+        {back && (
+          <Link href={back.href} className="inline-flex items-center gap-1.5 text-[14px] text-ink-3 hover:text-ink mb-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+            {back.label}
+          </Link>
+        )}
+        <h1 className="font-display text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">{title}</h1>
+        {subtitle && <p className="text-[15px] text-ink-2 mt-1.5 max-w-[64ch]">{subtitle}</p>}
+      </div>
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+    </div>
+  );
+}
+
+export function Stat({ label, value, hint, tone = 'surface', className, money }: { label: ReactNode; value: ReactNode; hint?: ReactNode; tone?: Tone; className?: string; money?: boolean }) {
+  return (
+    <Panel tone={tone} as="div" className={cn('p-5 sm:p-5', className)}>
+      <div className={cn('text-[14px]', tone === 'surface' ? 'text-ink-2' : 'opacity-75')}>{label}</div>
+      <div className={cn('mt-1 text-[30px] sm:text-[34px] leading-tight', money !== false && 'font-money')}>{value}</div>
+      {hint && <div className={cn('mt-1 text-[13px]', tone === 'surface' ? 'text-ink-3' : 'opacity-75')}>{hint}</div>}
+    </Panel>
+  );
+}
+
+export function Tabs<T extends string>({ value, onChange, items, className, label }: { value: T; onChange: (v: T) => void; items: { value: T; label: ReactNode; count?: number }[]; className?: string; label?: string }) {
+  return (
+    <div role="tablist" aria-label={label} className={cn('inline-flex flex-wrap gap-1 p-1 rounded-full bg-surface-2 border border-line', className)}>
+      {items.map((it) => {
+        const on = it.value === value;
+        return (
+          <button
+            key={it.value}
+            role="tab"
+            type="button"
+            aria-selected={on}
+            onClick={() => onChange(it.value)}
+            className={cn('h-9 px-4 rounded-full text-[14px] font-medium inline-flex items-center gap-2 transition-colors', on ? 'bg-primary text-on-primary' : 'text-ink-2 hover:text-ink hover:bg-raised')}
+          >
+            {it.label}
+            {typeof it.count === 'number' && <span className={cn('text-[12px] px-1.5 rounded-full', on ? 'bg-black/15' : 'bg-raised')}>{it.count}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export const inputClass = 'w-full h-12 px-4 rounded-[14px] bg-surface-2 border border-line text-[16px] text-ink placeholder:text-ink-3 focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30 disabled:opacity-60';
+export const textareaClass = 'w-full px-4 py-3 rounded-[14px] bg-surface-2 border border-line text-[16px] text-ink placeholder:text-ink-3 focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30';
+
+export function Field({ label, hint, error, children, className }: { label: ReactNode; hint?: ReactNode; error?: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <label className={cn('flex flex-col gap-2', className)}>
+      <span className="text-[14px] font-medium text-ink">{label}</span>
+      {children}
+      {hint && !error && <span className="text-[13px] text-ink-3">{hint}</span>}
+      {error && <span className="text-[13px] text-danger" role="alert">{error}</span>}
+    </label>
+  );
+}
+
+export function Notice({ tone = 'info', title, children, className }: { tone?: 'info' | 'warn' | 'danger' | 'ok'; title?: ReactNode; children?: ReactNode; className?: string }) {
+  return (
+    <div
+      role={tone === 'danger' ? 'alert' : 'status'}
+      className={cn(
+        'rounded-[18px] px-4 py-3.5 text-[14px] leading-relaxed',
+        tone === 'info' && 'bg-sage text-sage-ink',
+        tone === 'ok' && 'bg-tint text-brand',
+        tone === 'warn' && 'bg-amber-soft text-amber-ink',
+        tone === 'danger' && 'bg-danger-soft text-danger-ink',
+        className,
+      )}
+    >
+      {title && <div className="font-semibold mb-0.5">{title}</div>}
+      {children}
+    </div>
+  );
+}
+
+export function Modal({ open, onClose, title, children, footer, wide }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true">
+      <button type="button" aria-label="Close" className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className={cn('relative w-full max-h-[92dvh] overflow-y-auto bg-surface text-ink rounded-t-[28px] sm:rounded-[28px] shadow-2xl animate-slide-up', wide ? 'sm:max-w-[680px]' : 'sm:max-w-[480px]')}>
+        <div className="sticky top-0 z-10 bg-surface flex items-center justify-between gap-3 px-6 pt-5 pb-3">
+          <h2 className="font-display text-[24px] leading-tight">{title}</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="w-10 h-10 rounded-full hover:bg-raised flex items-center justify-center shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </div>
+        <div className="px-6 pb-6">{children}</div>
+        {footer && <div className="sticky bottom-0 bg-surface border-t border-line px-6 py-4 flex flex-wrap justify-end gap-2">{footer}</div>}
+      </div>
+    </div>
+  );
+}
+
+export function Avatar({ name, size = 36, tone = 'lavender', src }: { name?: string | null; size?: number; tone?: 'lavender' | 'sage' | 'mint' | 'forest'; src?: string | null }) {
+  const bg = { lavender: 'bg-lavender text-forest', sage: 'bg-sage text-forest', mint: 'bg-mint text-forest', forest: 'bg-forest text-mint' }[tone];
+  if (src) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt="" width={size} height={size} className="rounded-full object-cover shrink-0" style={{ width: size, height: size }} />;
+  }
+  return (
+    <span aria-hidden="true" className={cn('rounded-full flex items-center justify-center font-semibold shrink-0', bg)} style={{ width: size, height: size, fontSize: Math.max(11, size * 0.36) }}>
+      {initialsOf(name)}
+    </span>
+  );
+}
+
+export const tableClass = 'w-full text-[14px] [&_th]:text-left [&_th]:font-medium [&_th]:text-ink-3 [&_th]:px-3 [&_th]:py-2.5 [&_td]:px-3 [&_td]:py-3.5 [&_tbody_tr]:border-t [&_tbody_tr]:border-line';
+
+export function TableWrap({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn('overflow-x-auto -mx-3', className)}>{children}</div>;
+}
+
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={cn('rounded-2xl bg-raised animate-pulse', className)} />;
+}

@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -134,7 +135,7 @@ export default function AdminTransactionsPage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Transactions</span>
           </p>
           <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">All Transactions</h1>
@@ -145,21 +146,21 @@ export default function AdminTransactionsPage() {
             onClick={handleExportPDF}
             className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>
+            <MIcon name="picture_as_pdf"  className="text-[16px] text-red-500" />
             Export PDF
           </button>
           <button 
             onClick={handleExportExcel}
             className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px] text-green-600">table_chart</span>
+            <MIcon name="table_chart"  className="text-[16px] text-green-600" />
             Export Excel
           </button>
           <button 
             onClick={handleExportCSV}
             className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px]">download</span>
+            <MIcon name="download"  className="text-[16px]" />
             CSV
           </button>
         </div>
@@ -168,7 +169,7 @@ export default function AdminTransactionsPage() {
       {/* FILTERS */}
       <div className="card-bg border border-[var(--border)] rounded-2xl p-4 mb-6 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between hover:shadow-md transition-all duration-200">
         <div className="relative w-full md:w-72">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[20px]">search</span>
+          <MIcon name="search"  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[20px]" />
           <input 
             type="text" 
             placeholder="Search by ref, type or member..." 
@@ -237,9 +238,7 @@ export default function AdminTransactionsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <span className={`material-symbols-outlined text-[16px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`}>
-                            {isIncoming ? 'arrow_downward' : 'arrow_upward'}
-                          </span>
+                          <MIcon name={isIncoming ? 'arrow_downward' : 'arrow_upward'} className={`text-[16px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`} />
                           <span className="text-sm font-semibold text-[var(--text-main)] capitalize">
                             {(tx.type === 'loan_repayment' ? 'repayment' : tx.type.startsWith('loan') ? 'payout' : tx.type).replace('_', ' ')}
                           </span>
@@ -294,9 +293,7 @@ export default function AdminTransactionsPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`material-symbols-outlined text-[14px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`}>
-                          {isIncoming ? 'arrow_downward' : 'arrow_upward'}
-                        </span>
+                        <MIcon name={isIncoming ? 'arrow_downward' : 'arrow_upward'} className={`text-[14px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`} />
                         <span className="font-semibold text-sm text-[var(--text-main)] capitalize">
                           {(tx.type === 'loan_repayment' ? 'repayment' : tx.type.startsWith('loan') ? 'payout' : tx.type).replace('_', ' ')}
                         </span>
@@ -385,7 +382,7 @@ export default function AdminTransactionsPage() {
                 onClick={() => setSelectedTransaction(null)}
                 className="text-[var(--text-muted)] hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)] bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] p-2 rounded-full -mr-2"
               >
-                <span className="material-symbols-outlined text-[20px]">close</span>
+                <MIcon name="close"  className="text-[20px]" />
               </button>
             </div>
             
@@ -466,7 +463,7 @@ export default function AdminTransactionsPage() {
                 }}
                 className="flex items-center justify-center gap-2 bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white w-full rounded-lg py-3 text-sm font-bold transition-all shadow-sm cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[20px]">download</span>
+                <MIcon name="download"  className="text-[20px]" />
                 Download Receipt
               </button>
             </div>

@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useState, useEffect } 
   from 'react'
 import { useRouter } 
@@ -416,7 +417,7 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-page)' }}>
         <div className="w-full max-w-md rounded-2xl p-8 text-center space-y-4" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          <span className="material-symbols-outlined text-[44px] text-amber-500">hourglass_top</span>
+          <MIcon name="hourglass_top"  className="text-[44px] text-amber-500" />
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Waiting for approval</h1>
           <p className="text-[15px]" style={{ color: 'var(--text-secondary)' }}>
             Your request to join <strong>{pendingChamaName}</strong> has been sent to the group&apos;s officials.
@@ -572,12 +573,10 @@ export default function OnboardingPage() {
                       backgroundColor: 
                         '#F0FDF4' 
                     }}>
-                    <span className="
+                    <MIcon name="add_circle" className="
                       material-symbols-outlined 
                       text-[24px] 
-                      text-[var(--ak-brand-ink)]">
-                      add_circle
-                    </span>
+                      text-[var(--ak-brand-ink)]" />
                   </div>
                   <div>
                     <p 
@@ -626,12 +625,10 @@ export default function OnboardingPage() {
                       backgroundColor: 
                         '#F0FDF4' 
                     }}>
-                    <span className="
+                    <MIcon name="group_add" className="
                       material-symbols-outlined 
                       text-[24px] 
-                      text-[var(--ak-brand-ink)]">
-                      group_add
-                    </span>
+                      text-[var(--ak-brand-ink)]" />
                   </div>
                   <div>
                     <p 
@@ -670,11 +667,9 @@ export default function OnboardingPage() {
                 color: 
                   'var(--text-secondary)' 
               }}>
-              <span className="
+              <MIcon name="arrow_back" className="
                 material-symbols-outlined 
-                text-[18px]">
-                arrow_back
-              </span>
+                text-[18px]" />
               Back
             </button>
 
@@ -906,11 +901,9 @@ export default function OnboardingPage() {
                 color: 
                   'var(--text-secondary)' 
               }}>
-              <span className="
+              <MIcon name="arrow_back" className="
                 material-symbols-outlined 
-                text-[18px]">
-                arrow_back
-              </span>
+                text-[18px]" />
               Back
             </button>
 
@@ -1244,11 +1237,9 @@ export default function OnboardingPage() {
                 color: 
                   'var(--text-secondary)' 
               }}>
-              <span className="
+              <MIcon name="arrow_back" className="
                 material-symbols-outlined 
-                text-[18px]">
-                arrow_back
-              </span>
+                text-[18px]" />
               Back
             </button>
 

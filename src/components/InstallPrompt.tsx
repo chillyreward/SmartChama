@@ -1,4 +1,5 @@
 'use client'
+import { MIcon } from '@/components/ui/MIcon';
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
@@ -76,7 +77,7 @@ export function InstallPrompt() {
     >
       {/* Close button */}
       <button onClick={handleDismiss} className="absolute top-3 right-3" style={{ color: 'var(--text-muted)' }}>
-        <span className="material-symbols-outlined text-[20px]">close</span>
+        <MIcon name="close"  className="text-[20px]" />
       </button>
 
       <div className="flex items-start gap-3 pr-6">
@@ -108,7 +109,7 @@ export function InstallPrompt() {
 
           {platform === 'ios' && (
             <div className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-              <span className="material-symbols-outlined text-[16px]">ios_share</span>
+              <MIcon name="ios_share"  className="text-[16px]" />
               Tap Share then Add to Home Screen
             </div>
           )}

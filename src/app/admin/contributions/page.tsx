@@ -1,4 +1,5 @@
 "use client";
+import { MIcon } from '@/components/ui/MIcon';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -150,7 +151,7 @@ export default function AdminContributionsPage() {
     <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
+          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
@@ -160,7 +161,7 @@ export default function AdminContributionsPage() {
         <div>
           <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Contributions</span>
           </p>
           <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Contributions</h1>
@@ -171,25 +172,25 @@ export default function AdminContributionsPage() {
             onClick={handleExportPDF} 
             className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span>
+            <MIcon name="picture_as_pdf"  className="text-[16px] text-red-500" />
             Export PDF
           </button>
           <button 
             onClick={handleExportExcel} 
             className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px] text-green-600">table_chart</span>
+            <MIcon name="table_chart"  className="text-[16px] text-green-600" />
             Export Excel
           </button>
           <button onClick={handleBulkRemind} className="bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-355 border border-orange-200 dark:border-orange-900/30 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-orange-100 dark:hover:bg-orange-950/40 transition-all shadow-sm flex items-center justify-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px]">notifications_active</span>
+            <MIcon name="notifications_active"  className="text-[16px]" />
             Bulk Remind
           </button>
           <button 
             onClick={() => setShowRecordModal(true)}
             className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px]">add</span>
+            <MIcon name="add"  className="text-[16px]" />
             Record Contribution
           </button>
         </div>

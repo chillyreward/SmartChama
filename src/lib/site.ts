@@ -33,6 +33,6 @@ export const PLANS = [
     price: 'KSh 2,500',
     per: 'a month',
     blurb: 'For investment groups growing their pot.',
-    features: ['Everything in Pro', 'SmartGrow investment votes', 'Fraud checks on every payment', 'Priority support'],
+    features: ['Everything in Pro', 'SmartGrow investments', 'Fraud checks on every payment', 'Priority support'],
   },
 ] as const;
