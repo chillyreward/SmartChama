@@ -1,5 +1,7 @@
 "use client";
-import { MIcon } from '@/components/ui/MIcon';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { Bell, Download, Plus } from "lucide-react";
+import { Avatar, Button, Chip, EmptyState, Field, Modal, Money, Notice, PageHeader, Panel, PanelTitle, Stat, TableWrap, cn, formatKsh, inputClass, tableClass, type ChipKind } from "@/components/ui";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -19,6 +21,9 @@ export default function AdminContributionsPage() {
   const PAGE_SIZE = 50;
 
   const [showRecordModal, setShowRecordModal] = useState(false);
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('record') === '1') setShowRecordModal(true); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
   const [recordMemberId, setRecordMemberId] = useState("");
   const [recordAmount, setRecordAmount] = useState("");
   const [recordMethod, setRecordMethod] = useState<'cash' | 'bank'>('cash');
@@ -29,7 +34,6 @@ export default function AdminContributionsPage() {
 
   const memberName = (c: any) => c.membership?.profile?.full_name || 'Member';
 
-  const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
 
   const fetchData = async () => {
     if (!adminMember || !group) return;
@@ -80,7 +84,7 @@ export default function AdminContributionsPage() {
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Could not record the contribution');
 
-      setToastMsg("Contribution recorded!");
+      setToastMsg("Payment recorded. The member can see it now.");
       setTimeout(() => setToastMsg(""), 3000);
       setShowRecordModal(false);
       setRecordMemberId(""); setRecordAmount(""); setRecordReference(""); setRecordDate(today);
@@ -124,7 +128,7 @@ export default function AdminContributionsPage() {
       const targets = members.filter(m => lateMemberships.has(m.id) && m.profile_id);
 
       if (targets.length === 0) {
-        alert("No members are currently late or pending.");
+        setToastMsg("Nobody is late or waiting right now.");
         return;
       }
 
@@ -136,7 +140,7 @@ export default function AdminContributionsPage() {
         message: `Your contribution to ${group?.name || 'the group'} is due. Please make a payment.`
       })));
       if (error) throw error;
-      setToastMsg(`Reminders sent to ${targets.length} member${targets.length === 1 ? '' : 's'}!`);
+      setToastMsg(`Reminder sent to ${targets.length} member${targets.length === 1 ? '' : 's'}.`);
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err: any) {
       alert("Error sending reminders: " + err.message);
@@ -147,245 +151,120 @@ export default function AdminContributionsPage() {
     return <PageSkeleton />;
   }
 
+  const ST: Record<string, { kind: ChipKind; label: string }> = {
+    confirmed: { kind: 'paid', label: 'Confirmed' },
+    pending: { kind: 'pending', label: 'Waiting for M-Pesa' },
+    failed: { kind: 'failed', label: 'Failed' },
+    late: { kind: 'late', label: 'Late' },
+    partial: { kind: 'info', label: 'Part paid' },
+  };
+  const now = new Date();
+  const thisMonth = contributions.filter((c) => { const d = new Date(c.created_at); return c.status === 'confirmed' && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  const collected = thisMonth.reduce((s, c) => s + Number(c.amount), 0);
+  const waiting = contributions.filter((c) => c.status === 'pending').length;
+  const cash = thisMonth.filter((c) => c.payment_method === 'cash' || c.payment_method === 'bank').reduce((s, c) => s + Number(c.amount), 0);
+
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
-      {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
-          <span className="text-body-sm font-medium">{toastMsg}</span>
-        </div>
-      )}
+    <div>
+      <PageHeader
+        title="Contributions"
+        subtitle="M-Pesa payments record themselves when Safaricom confirms them. Log cash and bank payments here."
+        actions={
+          <>
+            <Button variant="outline" onClick={handleExportExcel}><Download size={18} aria-hidden="true" />Excel</Button>
+            <Button variant="outline" onClick={handleExportPDF}><Download size={18} aria-hidden="true" />PDF</Button>
+            <Button variant="outline" onClick={handleBulkRemind}><Bell size={18} aria-hidden="true" />Remind late payers</Button>
+            <Button onClick={() => setShowRecordModal(true)}><Plus size={18} aria-hidden="true" />Record cash payment</Button>
+          </>
+        }
+      />
 
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-        <div>
-          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-            <span>Admin Dashboard</span>
-            <MIcon name="chevron_right"  className="text-[14px]" />
-            <span>Contributions</span>
-          </p>
-          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Contributions</h1>
-          <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Manage all group contributions and payments</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <button 
-            onClick={handleExportPDF} 
-            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-          >
-            <MIcon name="picture_as_pdf"  className="text-[16px] text-red-500" />
-            Export PDF
-          </button>
-          <button 
-            onClick={handleExportExcel} 
-            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-          >
-            <MIcon name="table_chart"  className="text-[16px] text-green-600" />
-            Export Excel
-          </button>
-          <button onClick={handleBulkRemind} className="bg-orange-50 dark:bg-orange-950/20 text-orange-850 dark:text-orange-355 border border-orange-200 dark:border-orange-900/30 px-3 py-2 rounded-lg text-xs font-semibold hover:bg-orange-100 dark:hover:bg-orange-950/40 transition-all shadow-sm flex items-center justify-center gap-1.5">
-            <MIcon name="notifications_active"  className="text-[16px]" />
-            Bulk Remind
-          </button>
-          <button 
-            onClick={() => setShowRecordModal(true)}
-            className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <MIcon name="add"  className="text-[16px]" />
-            Record Contribution
-          </button>
-        </div>
+      {toastMsg && <Notice tone="ok" className="mb-4">{toastMsg}</Notice>}
+
+      <div className="grid gap-4 md:grid-cols-3 mb-4">
+        <Stat tone="forest" label="Confirmed this month" value={formatKsh(collected)} hint={`${new Set(thisMonth.map((c) => c.membership_id)).size} members`} />
+        <Stat label="Of that, cash or bank" value={formatKsh(cash)} hint="logged by officials" />
+        <Stat label="Waiting for M-Pesa" value={String(waiting)} money={false} hint="prompts sent, not yet confirmed" />
       </div>
 
-      {/* TABLE / CARD LIST */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 min-h-[400px]">
-        {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-4">DATE</th>
-                <th className="px-6 py-4">MEMBER</th>
-                <th className="px-6 py-4">AMOUNT</th>
-                <th className="px-6 py-4">METHOD</th>
-                <th className="px-6 py-4">REFERENCE</th>
-                <th className="px-6 py-4">STATUS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-              {contributions.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
-                    No contributions found for this group.
-                  </td>
-                </tr>
-              ) : (
-                contributions.map(c => (
-                  <tr key={c.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors group">
-                    <td className="px-6 py-4 text-sm text-[var(--text-muted)] whitespace-nowrap">
-                      {new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-[var(--text-main)] whitespace-nowrap">
-                      {memberName(c)}
-                    </td>
-                    <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)] whitespace-nowrap">
-                      KSh {formatCurrency(Number(c.amount))}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[var(--text-muted)]">
-                      {c.payment_method || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-mono text-[var(--text-muted)]">
-                      {c.reference || '—'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
-                        c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
-                        c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
-                      }`}>
-                        {c.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Card List View */}
-        <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-          {contributions.length === 0 ? (
-            <div className="p-6 text-center text-[var(--text-muted)] text-sm">
-              No contributions found for this group.
-            </div>
-          ) : (
-            contributions.map(c => (
-              <div key={c.id} className="p-4 flex flex-col gap-2 hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-semibold text-[var(--text-main)] text-sm">
-                      {memberName(c)}
-                    </div>
-                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                      {new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-mono font-bold text-sm text-[var(--text-main)]">
-                      KSh {formatCurrency(Number(c.amount))}
-                    </div>
-                    <div className="mt-1">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
-                        c.status === 'confirmed' ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]' :
-                        c.status === 'late' ? 'bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
-                      }`}>
-                        {c.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center text-xs text-[var(--text-muted)] pt-1 border-t border-dashed border-[var(--ak-line)] dark:border-[var(--ak-line)] mt-1">
-                  <div>
-                    <span className="font-medium">Method:</span> {c.payment_method || '—'}
-                    {c.reference && <span className="ml-3"><span className="font-medium">Ref:</span> <span className="font-mono">{c.reference}</span></span>}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-        
-        {/* Pagination Controls */}
-        <div className="flex items-center justify-between border-t border-[var(--border)] px-6 py-4 card-bg">
-          <div className="text-xs text-[var(--text-muted)]">
-            Showing Page {page + 1}
+      <Panel>
+        <PanelTitle>All payments</PanelTitle>
+        {contributions.length === 0 ? (
+          <EmptyState title="No payments yet" action={<Button onClick={() => setShowRecordModal(true)}>Record the first one</Button>}>
+            M-Pesa payments appear here automatically. Cash payments appear once you log them.
+          </EmptyState>
+        ) : (
+          <TableWrap className="mt-3">
+            <table className={cn(tableClass, 'min-w-[720px]')}>
+              <thead><tr><th>Date</th><th>Member</th><th className="!text-right">Amount</th><th>Paid by</th><th>Receipt or reference</th><th>Status</th></tr></thead>
+              <tbody>
+                {contributions.map((c) => {
+                  const st = ST[c.status] || { kind: 'neutral' as ChipKind, label: c.status };
+                  return (
+                    <tr key={c.id}>
+                      <td className="text-ink-2 whitespace-nowrap">{new Date(c.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                      <td><span className="flex items-center gap-2.5"><Avatar name={memberName(c)} size={28} tone="sage" />{memberName(c)}</span></td>
+                      <td className="text-right"><Money value={Number(c.amount)} className="text-[17px]" /></td>
+                      <td className="text-ink-2">{c.payment_method === 'cash' ? 'Cash' : c.payment_method === 'bank' ? 'Bank' : 'M-Pesa'}</td>
+                      <td className="font-mono text-[12px] text-ink-3">{c.mpesa_receipt || c.reference || '—'}</td>
+                      <td><Chip kind={st.kind}>{st.label}</Chip></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </TableWrap>
+        )}
+        {(page > 0 || hasMore) && (
+          <div className="flex items-center justify-between mt-4">
+            <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>Newer</Button>
+            <span className="text-[13px] text-ink-3">Page {page + 1}</span>
+            <Button variant="ghost" size="sm" disabled={!hasMore} onClick={() => setPage((p) => p + 1)}>Older</Button>
           </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setPage(p => Math.max(0, p - 1))}
-              disabled={page === 0}
-              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm"
-            >
-              Previous
-            </button>
-            <button 
-              onClick={() => setPage(p => p + 1)}
-              disabled={!hasMore}
-              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
+        )}
+      </Panel>
 
-      {/* RECORD MODAL */}
-      {showRecordModal && (
-        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-md shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-2">Record Cash or Bank Payment</h2>
-            <p className="text-[13px] text-[var(--text-muted)] mb-6">M-Pesa payments are recorded automatically once Safaricom confirms them.</p>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Member</label>
-                <select 
-                  value={recordMemberId} 
-                  onChange={e => setRecordMemberId(e.target.value)} 
-                  className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-[var(--ak-brand-ink)]"
-                >
-                  <option value="">Select Member...</option>
-                  {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
-                <input 
-                  type="number" 
-                  value={recordAmount} 
-                  onChange={e => setRecordAmount(e.target.value)} 
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" 
-                />
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Payment Method</label>
-                <select 
-                  value={recordMethod} 
-                  onChange={e => setRecordMethod(e.target.value as 'cash' | 'bank')} 
-                  className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-[var(--ak-brand-ink)]"
-                >
-                  <option value="cash">Cash</option>
-                  <option value="bank">Bank transfer</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reference Code</label>
-                <input 
-                  type="text" 
-                  value={recordReference} 
-                  onChange={e => setRecordReference(e.target.value)} 
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)] font-mono" 
-                />
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Date</label>
-                <input 
-                  type="date"
-                  max={today}
-                  value={recordDate} 
-                  onChange={e => setRecordDate(e.target.value)} 
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" 
-                />
-              </div>
-            </div>
- 
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowRecordModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
-              <button onClick={handleRecord} disabled={!recordMemberId || !recordAmount || recordSaving} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)]">{recordSaving ? 'Saving...' : 'Save Record'}</button>
-            </div>
+      <Modal
+        open={showRecordModal}
+        onClose={() => setShowRecordModal(false)}
+        title="Record a cash or bank payment"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setShowRecordModal(false)}>Cancel</Button>
+            <Button onClick={handleRecord} disabled={recordSaving || !recordMemberId || !(Number(recordAmount) > 0)}>{recordSaving ? 'Saving…' : 'Record payment'}</Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-5">
+          <Notice tone="info">Your name is saved on this entry. Cash counts half towards the member&apos;s trust score; M-Pesa counts fully.</Notice>
+          <Field label="Who paid?">
+            <select value={recordMemberId} onChange={(e) => setRecordMemberId(e.target.value)} className={inputClass}>
+              <option value="">Choose a member</option>
+              {members.map((m) => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+            </select>
+          </Field>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Amount">
+              <input type="number" inputMode="numeric" min={1} value={recordAmount} onChange={(e) => setRecordAmount(e.target.value)} placeholder={String(group?.contribution_amount || '')} className={inputClass} />
+            </Field>
+            <Field label="Paid on">
+              <input type="date" value={recordDate} max={today} onChange={(e) => setRecordDate(e.target.value)} className={inputClass} />
+            </Field>
           </div>
+          <Field label="How">
+            <div role="radiogroup" className="flex gap-2">
+              {(['cash', 'bank'] as const).map((m) => (
+                <button key={m} type="button" role="radio" aria-checked={recordMethod === m} onClick={() => setRecordMethod(m)} className={cn('flex-1 h-12 rounded-[14px] border text-[15px] font-medium', recordMethod === m ? 'bg-primary text-on-primary border-transparent' : 'border-line bg-surface-2')}>
+                  {m === 'cash' ? 'Cash' : 'Bank deposit'}
+                </button>
+              ))}
+            </div>
+          </Field>
+          <Field label="Reference" hint="Optional: a receipt number or bank slip reference.">
+            <input value={recordReference} onChange={(e) => setRecordReference(e.target.value)} className={inputClass} />
+          </Field>
         </div>
-      )}
-
+      </Modal>
     </div>
   );
 }

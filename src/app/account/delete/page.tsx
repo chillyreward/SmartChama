@@ -59,7 +59,7 @@ export default function DeleteAccountPage() {
           ) : !email ? (
             <>
               <p>Sign in first, then come back to this page to delete your account.</p>
-              <Link href="/login?redirect=/account/delete" className="inline-block px-5 py-3 rounded-xl bg-[var(--ak-solid)] text-white font-semibold">Sign in</Link>
+              <Link href="/login?redirect=/account/delete" className="inline-block px-5 py-3 rounded-xl bg-primary text-on-primary font-semibold">Sign in</Link>
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Can&apos;t sign in? Email privacy@akibora.co.ke from the address on your account and we will delete it within 30 days.</p>
             </>
           ) : (

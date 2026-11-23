@@ -1,491 +1,336 @@
 ﻿'use client';
-import { MIcon } from '@/components/ui/MIcon';
-import { useEffect, useState, useRef } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { Bell, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/components/AuthProvider';
 import NextContributionCard from '@/components/NextContributionCard';
+import { ROLE_LABEL } from '@/components/shell/nav';
+import {
+  Avatar, Button, ButtonLink, Chip, EmptyState, Money, Notice, PageHeader, Panel, PanelTitle, Ticks, cn, formatKsh,
+} from '@/components/ui';
+
+type Member = { id: string; profile_id: string; name: string; joined_at: string | null; status: string; role: string };
+type Contribution = { membership_id: string; amount: number; created_at: string; status: string };
+
+const MONTHS = 12;
 
 export default function AdminDashboardPage({
   member: initialAdmin,
   chama: initialChama,
-  metrics: initialMetrics,
-  initialTransactions
 }: {
   member?: any;
   chama?: any;
   metrics?: any;
   initialTransactions?: any[];
 } = {}) {
-  const router = useRouter();
-  const { session, member: authAdmin, group: authChama, isLoading: authLoading } = useAuth();
-
+  const { member: authAdmin, group: authChama } = useAuth();
   const admin = initialAdmin || authAdmin;
   const chama = initialChama || authChama;
+  const chamaId: string | undefined = chama?.id;
 
-  const [loading, setLoading] = useState(!initialMetrics);
+  const [members, setMembers] = useState<Member[] | null>(null);
+  const [contribs, setContribs] = useState<Contribution[]>([]);
+  const [wallet, setWallet] = useState<{ balance: number; invested: number } | null>(null);
+  const [welfare, setWelfare] = useState<number>(0);
+  const [penalties, setPenalties] = useState<{ total: number; people: number }>({ total: 0, people: 0 });
+  const [claims, setClaims] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [rounds, setRounds] = useState<{ current: number; list: { round_number: number; name: string; status: string; scheduled_date: string | null }[] } | null>(null);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
+  const [busy, setBusy] = useState<string | null>(null);
 
-  const [metrics, setMetrics] = useState({
-    totalSavings: initialMetrics ? initialMetrics.totalSavings : 0,
-    memberCount: initialMetrics ? initialMetrics.memberCount : 0,
-    collectionRate: initialMetrics ? initialMetrics.collectionRate : 0,
-    avgTrust: initialMetrics ? initialMetrics.avgTrust : 0
-  });
-
-  const [pendingActions, setPendingActions] = useState({
-    late: [] as any[]
-  });
-
-  const [recentTransactions, setRecentTransactions] = useState<any[]>(initialTransactions || []);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [topContributors, setTopContributors] = useState<any[]>([]);
-  const [toastMessage, setToastMessage] = useState('');
-
-  const formatCurrency = (val: number) => val.toLocaleString('en-KE', { maximumFractionDigits: 0 });
-
-  const hasFetched = useRef(false);
-
-  useEffect(() => {
-    if (initialMetrics) {
-      setMetrics({
-        totalSavings: initialMetrics.totalSavings,
-        memberCount: initialMetrics.memberCount,
-        collectionRate: initialMetrics.collectionRate,
-        avgTrust: initialMetrics.avgTrust
-      });
-      
-      if (initialMetrics.contributions) {
-        const contribByMember: Record<string, { name: string; amount: number; count: number }> = {};
-        initialMetrics.contributions.forEach((c: any) => {
-          const mInfo = initialMetrics.members.find((m: any) => m.id === c.membership_id);
-          const name = mInfo?.profiles?.full_name || 'Member';
-          if (!contribByMember[c.membership_id]) {
-            contribByMember[c.membership_id] = { name, amount: 0, count: 0 };
-          }
-          contribByMember[c.membership_id].amount += c.amount;
-          contribByMember[c.membership_id].count += 1;
-        });
-        
-        const formattedTop = Object.values(contribByMember)
-          .sort((a, b) => b.amount - a.amount)
-          .slice(0, 5);
-        setTopContributors(formattedTop);
-
-        const twelveMonthsAgo = new Date();
-        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-        
-        const monthly: Record<string, number> = {};
-        initialMetrics.contributions.forEach((c: any) => {
-          const cDate = new Date(c.created_at);
-          if (cDate >= twelveMonthsAgo) {
-            const month = cDate.toLocaleString('en-KE', { month: 'short', year: '2-digit' });
-            monthly[month] = (monthly[month] || 0) + c.amount;
-          }
-        });
-        
-        const chartDataFormatted = Object.entries(monthly).map(([month, amount]) => ({ month, amount }));
-        setChartData(chartDataFormatted);
-      }
-
-    }
-  }, [initialMetrics]);
-
-  useEffect(() => {
-    if (initialTransactions) {
-      setRecentTransactions(initialTransactions);
-    }
-  }, [initialTransactions]);
-
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-    
-    const adminRoles = ['admin', 'chairlady', 'treasurer', 'secretary'];
-    
-    if (!admin || !chama || !adminRoles.includes(admin.role)) {
-      if (initialAdmin && initialChama && admin && adminRoles.includes(admin.role)) {
-        // Ok
-      } else {
-        router.push('/dashboard');
-        return;
-      }
-    }
-
-    if (initialAdmin && initialChama) {
-      const channel = supabase
-        .channel('admin_dashboard')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'contributions_v2', filter: `chama_id=eq.${chama.id}` },
-          (payload) => {
-            loadGroupMetrics(chama.id).catch(e => console.error(e));
-            loadTopContributors(chama.id).catch(e => console.error(e));
-            showToast('New contribution received!');
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-
-    async function loadAdminDashboardData() {
-      try {
-        await Promise.all([
-          loadGroupMetrics(chama!.id),
-          loadPendingActions(chama!.id),
-          loadRecentTransactions(chama!.id),
-          loadGroupSavingsTrend(chama!.id),
-          loadTopContributors(chama!.id)
-        ]);
-      } catch (err) {
-        console.error('Error:', err);
-        setError('Failed to load data. Please refresh the page.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    
-    loadAdminDashboardData();
-
-    const channel = supabase
-      .channel('admin_dashboard')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'contributions_v2', filter: `chama_id=eq.${chama.id}` },
-        (payload) => {
-          loadGroupMetrics(chama.id).catch(e => console.error(e));
-          loadTopContributors(chama.id).catch(e => console.error(e));
-          showToast('New contribution received!');
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [authLoading, session, admin, chama, router, initialAdmin, initialChama]);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 3000);
-  };
-
-  async function loadTopContributors(chamaId: string) {
-    const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    
-    const { data, error } = await supabase
-      .from('contributions_v2')
-      .select('amount, chama_memberships(profiles(full_name))')
-      .eq('chama_id', chamaId)
-      .eq('status', 'confirmed')
-      .gte('created_at', firstDay);
-      
-    if (error) throw error;
-    
-    const grouped = (data || []).reduce((acc: any, curr: any) => {
-      const name = curr.chama_memberships?.profiles?.full_name || 'Unknown Member';
-      acc[name] = (acc[name] || 0) + curr.amount;
-      return acc;
-    }, {});
-    
-    const sorted = Object.entries(grouped)
-      .map(([name, amount]) => ({ name, amount: amount as number }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5);
-      
-    setTopContributors(sorted);
-  }
-
-  async function loadGroupMetrics(chamaId: string) {
-    const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-    const [contribsRes, membersCountRes, thisMonthRes, membersRes] = await Promise.all([
-      supabase.from('contributions_v2').select('amount').eq('chama_id', chamaId).eq('status', 'confirmed'),
-      supabase.from('chama_memberships').select('*', { count: 'exact' }).eq('chama_id', chamaId).eq('status', 'active'),
-      supabase.from('contributions_v2').select('membership_id, amount, status').eq('chama_id', chamaId).gte('created_at', firstDay),
-      supabase.from('chama_memberships').select('trust_score').eq('chama_id', chamaId)
+  const load = useCallback(async () => {
+    if (!chamaId) return;
+    const since = new Date();
+    since.setMonth(since.getMonth() - (MONTHS - 1), 1);
+    since.setHours(0, 0, 0, 0);
+    const [m, c, w, wf, p, cl, wd, cyc] = await Promise.all([
+      supabase.from('chama_memberships').select('id, profile_id, role, status, joined_at, profiles(full_name)').eq('chama_id', chamaId).in('status', ['active', 'pending']),
+      supabase.from('contributions_v2').select('membership_id, amount, created_at, status').eq('chama_id', chamaId).gte('created_at', since.toISOString()),
+      supabase.from('wallets').select('balance, invested').eq('chama_id', chamaId).maybeSingle(),
+      supabase.from('welfare_fund').select('balance').eq('chama_id', chamaId).maybeSingle(),
+      supabase.from('member_penalties').select('membership_id, amount').eq('chama_id', chamaId).eq('status', 'unpaid'),
+      supabase.from('welfare_claims').select('id, amount, reason, description, status, membership_id').eq('chama_id', chamaId).eq('status', 'pending'),
+      supabase.from('withdrawal_consents').select('id, amount, reason, votes_for, total_eligible_voters, status').eq('chama_id', chamaId).eq('status', 'pending'),
+      supabase.from('merry_go_round_cycles').select('id, current_round').eq('chama_id', chamaId).eq('status', 'active').order('created_at', { ascending: false }).limit(1).maybeSingle(),
     ]);
+    if (m.error) { setError('The group overview did not load. Refresh to try again.'); return; }
+    const mem: Member[] = (m.data || []).map((r: any) => ({ id: r.id, profile_id: r.profile_id, role: r.role, status: r.status, joined_at: r.joined_at, name: r.profiles?.full_name || 'Member' }));
+    setMembers(mem);
+    setContribs((c.data as Contribution[]) || []);
+    setWallet(w.data ? { balance: Number(w.data.balance || 0), invested: Number(w.data.invested || 0) } : { balance: 0, invested: 0 });
+    setWelfare(Number(wf.data?.balance || 0));
+    const pen = (p.data || []) as { membership_id: string; amount: number }[];
+    setPenalties({ total: pen.reduce((s, x) => s + Number(x.amount), 0), people: new Set(pen.map((x) => x.membership_id)).size });
+    setClaims(cl.data || []);
+    setWithdrawals(wd.data || []);
+    if (cyc.data) {
+      const { data: sched } = await supabase.from('merry_go_round_schedule').select('round_number, status, scheduled_date, recipient_membership_id').eq('cycle_id', cyc.data.id).order('round_number');
+      const names = Object.fromEntries(mem.map((x) => [x.id, x.name]));
+      setRounds({ current: cyc.data.current_round, list: (sched || []).map((r: any) => ({ ...r, name: names[r.recipient_membership_id] || 'Member' })) });
+    } else {
+      setRounds(null);
+    }
+  }, [chamaId]);
 
-    if (contribsRes.error) throw contribsRes.error;
-    if (membersCountRes.error) throw membersCountRes.error;
-    if (thisMonthRes.error) throw thisMonthRes.error;
-    if (membersRes.error) throw membersRes.error;
+  useEffect(() => {
+    load(); // eslint-disable-line react-hooks/set-state-in-effect -- loads remote data
+  }, [load]);
 
-    const totalSavings = contribsRes.data?.reduce((sum, c) => sum + c.amount, 0) || 0;
-    const memberCount = membersCountRes.count || 0;
+  const active = useMemo(() => (members || []).filter((m) => m.status === 'active'), [members]);
+  const pending = useMemo(() => (members || []).filter((m) => m.status === 'pending'), [members]);
 
-    const paidCount = new Set(
-      thisMonthRes.data?.filter(c => c.status === 'confirmed').map(c => c.membership_id)
-    ).size;
-    
-    const collectionRate = (memberCount > 0)
-      ? Math.round((paidCount / memberCount) * 100)
-      : 0;
+  // This month
+  const now = new Date();
+  const thisKey = `${now.getFullYear()}-${now.getMonth()}`;
+  const keyOf = (iso: string) => { const d = new Date(iso); return `${d.getFullYear()}-${d.getMonth()}`; };
+  const confirmed = contribs.filter((c) => c.status === 'confirmed');
+  const monthPaid = confirmed.filter((c) => keyOf(c.created_at) === thisKey);
+  const collected = monthPaid.reduce((s, c) => s + Number(c.amount), 0);
+  const paidIds = new Set(monthPaid.map((c) => c.membership_id));
+  const expected = Number(chama?.contribution_amount || 0) * active.length;
+  const unpaid = active.filter((m) => !paidIds.has(m.id));
 
-    const avgTrust = (membersRes.data && membersRes.data.length > 0)
-      ? Math.round(membersRes.data.reduce((sum, m) => sum + (m.trust_score || 0), 0) / membersRes.data.length)
-      : 0;
-    
-    setMetrics({
-      totalSavings,
-      memberCount,
-      collectionRate,
-      avgTrust
-    });
-  }
+  // Month-by-month grid
+  const months = useMemo(() => {
+    const out: { key: string; label: string; end: Date }[] = [];
+    for (let i = MONTHS - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      out.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString('en-KE', { month: 'short' }), end: new Date(d.getFullYear(), d.getMonth() + 1, 0) });
+    }
+    return out;
+  }, [now.getMonth(), now.getFullYear()]); // eslint-disable-line react-hooks/exhaustive-deps
+  const dueDay = Number(chama?.contribution_due_day || 1) + Number(chama?.grace_period_days || 0);
+  const cell = (m: Member, mo: { key: string; end: Date }) => {
+    if (m.joined_at && new Date(m.joined_at) > mo.end) return 'before';
+    const paid = confirmed.filter((c) => c.membership_id === m.id && keyOf(c.created_at) === mo.key);
+    if (paid.length === 0) return mo.key === thisKey ? 'due' : 'missed';
+    const late = paid.every((c) => new Date(c.created_at).getDate() > dueDay);
+    return late ? 'late' : 'ok';
+  };
+  const CELL: Record<string, string> = {
+    ok: 'bg-moss dark:bg-[#3FA673]',
+    late: 'bg-amber',
+    missed: 'bg-surface border-[1.5px] border-danger',
+    due: 'bg-raised',
+    before: 'bg-transparent border border-dashed border-line',
+  };
+  const CELL_LABEL: Record<string, string> = { ok: 'On time', late: 'Late', missed: 'Missed', due: 'Not paid yet', before: 'Not a member yet' };
 
-  async function loadPendingActions(chamaId: string) {
-    const lateContributors = await supabase.from('contributions_v2')
-      .select('membership_id, chama_memberships(profiles(full_name))')
-      .eq('chama_id', chamaId)
-      .eq('status', 'late');
-
-    if (lateContributors.error) throw lateContributors.error;
-
-    setPendingActions({
-      late: lateContributors.data || []
-    });
-  }
-
-  async function loadRecentTransactions(chamaId: string) {
-    const { data, error } = await supabase
-      .from('transactions_v2')
-      .select('*, chama_memberships(profiles(full_name))')
-      .eq('chama_id', chamaId)
-      .order('created_at', { ascending: false })
-      .limit(5);
-      
-    if (error) throw error;
-    setRecentTransactions(data || []);
-  }
-
-  async function loadGroupSavingsTrend(chamaId: string) {
-    const twelveMonthsAgo = new Date();
-    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 6);
-    
-    const { data, error } = await supabase
-      .from('contributions_v2')
-      .select('amount, created_at')
-      .eq('chama_id', chamaId)
-      .eq('status', 'confirmed')
-      .gte('created_at', twelveMonthsAgo.toISOString())
-      .order('created_at', { ascending: true });
-      
-    if (error) throw error;
-    
-    const monthly: Record<string, number> = {};
-    data?.forEach(c => {
-      const month = new Date(c.created_at).toLocaleString('en-KE', { month: 'short', year: '2-digit' });
-      monthly[month] = (monthly[month] || 0) + c.amount;
-    });
-    
-    const chartDataFormatted = Object.entries(monthly).map(([month, amount]) => ({ month, amount }));
-    setChartData(chartDataFormatted);
-  }
-
-  const retry = () => {
-    setLoading(true);
-    setError('');
-    window.location.reload();
+  const decide = async (m: Member, approve: boolean) => {
+    setBusy(m.id);
+    const { error: err } = await supabase.from('chama_memberships').update({ status: approve ? 'active' : 'rejected' }).eq('id', m.id);
+    setBusy(null);
+    if (err) { setToast('That did not save. Try again from the Members page.'); return; }
+    if (approve) {
+      await supabase.from('notifications').insert({
+        chama_id: chamaId,
+        profile_id: m.profile_id,
+        type: 'member_approved',
+        title: `You're in ${chama?.name || 'the group'}`,
+        message: 'An official approved your request. You can now see the group and pay contributions.',
+      });
+    }
+    setToast(approve ? 'Member approved.' : 'Request declined.');
+    load();
   };
 
-  if (loading) {
+  const remind = async () => {
+    setBusy('remind');
+    try {
+      const { error: err } = await supabase.from('notifications').insert(unpaid.map((m) => ({
+        chama_id: chamaId,
+        profile_id: m.profile_id,
+        type: 'reminder',
+        title: 'Your contribution is due',
+        message: `${chama?.name || 'Your group'} is waiting for this month's ${formatKsh(chama?.contribution_amount)}. Pay from the app with M-Pesa.`,
+        read: false,
+      })));
+      if (err) throw err;
+      setToast(`An in-app reminder went to ${unpaid.length} ${unpaid.length === 1 ? 'member' : 'members'}.`);
+    } catch {
+      setToast('Reminders could not be sent right now.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  if (!members && !error) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          {[...Array(5)].map((_, i) => <div key={i} className="h-28 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>)}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
-          <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
-        </div>
+      <div className="flex flex-col gap-4 animate-pulse" aria-busy="true">
+        <div className="h-12 w-80 rounded-xl bg-raised" />
+        <div className="grid md:grid-cols-4 gap-3">{[0, 1, 2, 3].map((i) => <div key={i} className="h-36 rounded-[22px] bg-surface border border-line" />)}</div>
+        <div className="h-96 rounded-[24px] bg-surface border border-line" />
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center text-[var(--text-main)]">
-        <MIcon name="error_outline"  className="text-[#ba1a1a] text-5xl mb-4" />
-        <p className="text-body-sm text-[#ba1a1a]">{error}</p>
-        <button onClick={retry} className="mt-4 text-[var(--brand-green)] text-body-sm underline">Try again</button>
-      </div>
-    );
-  }
-
-  const getCollectionColor = (rate: number) => {
-    if (rate >= 85) return "text-[var(--brand-green)]";
-    if (rate >= 60) return "text-yellow-500";
-    return "text-red-600 dark:text-red-400";
-  };
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)] relative">
-      
-      {toastMessage && (
-        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
-          <span className="text-body-sm font-medium">{toastMessage}</span>
-        </div>
-      )}
-
-      {/* Page Header */}
-      <div className="mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>Admin Dashboard</span>
-          <MIcon name="chevron_right"  className="text-[14px]" />
-          <span>Overview</span>
-        </p>
-        
-        <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-          Admin Overview
-        </h1>
-        <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">
-          {chama?.name || 'Group'} · Manage savings, members, and system compliance status.
-        </p>
-      </div>
-      
-      <NextContributionCard chamaId={chama?.id} isOfficial />
-
-      {/* METRICS */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">TOTAL SAVINGS</div>
-          <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">KSh {formatCurrency(metrics.totalSavings)}</div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">TOTAL MEMBERS</div>
-          <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">{metrics.memberCount}</div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-amber-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">COLLECTION RATE</div>
-          <div className={`text-[20px] md:text-[28px] font-geist font-bold ${getCollectionColor(metrics.collectionRate)}`}>
-            {metrics.collectionRate}%
-          </div>
-          <div className="text-xs text-[var(--text-muted)] mt-1">This month</div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
-          <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">GROUP Credit Score</div>
-          <div className="flex items-center gap-2">
-            <MIcon name="verified"  className="text-[var(--ak-brand-ink)] text-[24px] md:text-[28px]" />
-            <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">{metrics.avgTrust || 0}</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
-          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Group Savings Growth</h2>
-          {chartData.length > 0 ? (
-            <div className="h-[200px] md:h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorSavings" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3FA673" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3FA673" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} dy={10} />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }} 
-                    tickFormatter={(val) => `KSh ${(val/1000).toFixed(0)}k`}
-                  />
-                  <Tooltip 
-                    formatter={(value: any) => [`KSh ${formatCurrency(value)}`, 'Total Savings']}
-                    contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
-                  />
-                  <Area type="monotone" dataKey="amount" stroke="#3FA673" strokeWidth={3} fillOpacity={1} fill="url(#colorSavings)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <MIcon name="show_chart"  className="text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-6xl mb-4" />
-              <h3 className="text-headline-sm text-[var(--text-main)] font-bold">No contributions recorded yet.</h3>
-              <p className="text-body-sm text-[var(--text-muted)] mt-2">Charts will appear once members start contributing.</p>
-            </div>
-          )}
-        </div>
-
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col">
-          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-4 flex items-center gap-2">
-            <MIcon name="warning"  className="text-[20px] text-red-650" />
-            Pending Actions
-          </h2>
-          
-          <div className="flex flex-col gap-3">
-            {pendingActions.late.length > 0 && (
-              <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 rounded-xl text-orange-800 dark:text-orange-400">
-                <div className="flex items-center gap-3">
-                  <MIcon name="schedule" className="" />
-                  <span className="text-sm font-semibold">{pendingActions.late.length} late contributions</span>
-                </div>
-              </div>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        className="mb-2"
+        title={chama?.name || 'Your group'}
+        subtitle={<>{ROLE_LABEL[admin?.role] || 'Official'} view. Group code <span className="font-mono text-[14px] text-ink">{chama?.group_code || '—'}</span></>}
+        actions={
+          <>
+            <ButtonLink href="/admin/contributions?record=1" variant="outline"><Plus size={18} aria-hidden="true" />Record cash payment</ButtonLink>
+            {unpaid.length > 0 && (
+              <Button onClick={remind} disabled={busy === 'remind'}><Bell size={18} aria-hidden="true" />Remind {unpaid.length} who {unpaid.length === 1 ? "hasn't" : "haven't"} paid</Button>
             )}
+          </>
+        }
+      />
 
-            {pendingActions.late.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)] text-4xl mb-2" />
-                <span className="text-body-sm text-[var(--text-main)] font-medium">All clear!</span>
-                <span className="text-xs text-[var(--text-muted)] mt-1">No pending actions require your attention.</span>
-              </div>
-            )}
-          </div>
-        </div>
+      {error && <Notice tone="danger">{error}</Notice>}
+      {toast && <Notice tone="ok">{toast}</Notice>}
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Panel tone="forest" className="rounded-[22px]">
+          <div className="text-[14px] text-[#A9C2B3]">Collected this month</div>
+          <Money value={collected} className="block text-[36px] leading-tight mt-1" />
+          <Ticks total={Math.max(active.length, 1)} done={paidIds.size} className="mt-3" />
+          <div className="text-[13px] text-[#A9C2B3] mt-2">{paidIds.size} of {active.length} paid{expected > collected ? `, ${formatKsh(expected - collected)} to go` : ''}</div>
+        </Panel>
+        <Panel className="rounded-[22px]">
+          <div className="text-[14px] text-ink-2">The pot</div>
+          <Money value={wallet?.balance} className="block text-[36px] leading-tight mt-1" />
+          <div className="text-[13px] text-ink-3 mt-2">{wallet?.invested ? `${formatKsh(wallet.invested)} more invested in SmartGrow` : 'Nothing invested yet'}</div>
+        </Panel>
+        <Panel className="rounded-[22px]">
+          <div className="text-[14px] text-ink-2">Welfare fund</div>
+          <Money value={welfare} className="block text-[36px] leading-tight mt-1" />
+          <div className="text-[13px] text-ink-3 mt-2">{claims.length ? `${claims.length} ${claims.length === 1 ? 'claim' : 'claims'} waiting for you` : 'No claims waiting'}</div>
+        </Panel>
+        <Panel className="rounded-[22px]">
+          <div className="text-[14px] text-ink-2">Unpaid penalties</div>
+          <Money value={penalties.total} className="block text-[36px] leading-tight mt-1" />
+          <div className={cn('text-[13px] mt-2', penalties.people ? 'text-amber-ink' : 'text-ink-3')}>{penalties.people ? `Owed by ${penalties.people} ${penalties.people === 1 ? 'member' : 'members'}` : 'Nothing owed'}</div>
+        </Panel>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 card-bg border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
-          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-2">Top Contributors</h2>
-          <p className="text-sm text-[var(--text-muted)] mb-6">Members with the highest confirmed contributions this month.</p>
-          
-          {topContributors.length > 0 ? (
-            <div className="space-y-4">
-              {topContributors.map((t, idx) => (
-                <div key={idx} className="flex items-center justify-between border-b border-gray-100 dark:border-[var(--ak-line)] last:border-0 pb-3 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-sm">
-                      {t.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[var(--text-main)] text-sm">{t.name}</div>
-                      <div className="text-xs text-[var(--text-muted)]">Rank #{idx + 1}</div>
-                    </div>
-                  </div>
-                  <div className="font-bold text-[var(--text-main)] font-mono">
-                    KSh {formatCurrency(t.amount)}
-                  </div>
-                </div>
+      <div className="grid gap-4 xl:grid-cols-[1.6fr_1fr]">
+        <Panel aria-labelledby="grid-h" className="min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="grid-h" className="font-display text-[24px]">Who paid, month by month</h2>
+            <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-ink-2">
+              {(['ok', 'late', 'missed', 'due'] as const).map((k) => (
+                <li key={k} className="flex items-center gap-1.5"><span className={cn('w-3 h-3 rounded-[3px] box-border', CELL[k])} aria-hidden="true" />{CELL_LABEL[k]}</li>
               ))}
-            </div>
+            </ul>
+          </div>
+          {active.length === 0 ? (
+            <EmptyState title="No members yet">Share the group code. As people join and pay, this grid fills in.</EmptyState>
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-center bg-transparent rounded-xl border border-dashed border-[var(--border)]">
-              <MIcon name="stars"  className="text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-4xl mb-2" />
-              <span className="text-body-sm text-[var(--text-muted)]">No contributions recorded this month.</span>
+            <div className="overflow-x-auto mt-4">
+              <table className="w-full min-w-[620px] border-separate border-spacing-[5px] -mx-[5px] text-[13px]">
+                <caption className="sr-only">Contributions by member for the last {MONTHS} months</caption>
+                <thead>
+                  <tr>
+                    <th className="text-left font-medium text-ink-3 w-[150px]"><span className="sr-only">Member</span></th>
+                    {months.map((mo) => <th key={mo.key} className="font-medium text-ink-3 text-[11px]">{mo.label}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {active.map((m) => (
+                    <tr key={m.id}>
+                      <th scope="row" className="text-left font-normal truncate max-w-[150px] pr-2">{m.name}</th>
+                      {months.map((mo) => {
+                        const st = cell(m, mo);
+                        return (
+                          <td key={mo.key} className="p-0">
+                            <span className={cn('block h-[22px] rounded-[5px] box-border', CELL[st])} title={`${m.name}, ${mo.label}: ${CELL_LABEL[st]}`} aria-label={`${mo.label}: ${CELL_LABEL[st]}`} />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
-        </div>
+        </Panel>
+
+        <Panel tone="sage" aria-labelledby="wait-h" className="flex flex-col gap-3">
+          <h2 id="wait-h" className="font-display text-[24px]">Waiting for you</h2>
+          {pending.length === 0 && claims.length === 0 && withdrawals.length === 0 && (
+            <p className="text-[15px] text-[#2B4637]">Nothing needs a decision right now.</p>
+          )}
+          {pending.map((p) => (
+            <div key={p.id} className="rounded-[18px] bg-white/80 dark:bg-white/90 p-4 text-sage-ink">
+              <div className="text-[13px] text-[#44604F]">Join request</div>
+              <div className="flex items-center gap-2.5 mt-1"><Avatar name={p.name} size={30} tone="mint" /><span className="text-[16px] font-semibold">{p.name}</span></div>
+              <div className="flex gap-2 mt-3">
+                <Button variant="forest" size="sm" className="flex-1" disabled={busy === p.id} onClick={() => decide(p, true)}>Approve</Button>
+                <Button variant="outline" size="sm" className="flex-1 !text-sage-ink !border-sage-ink" disabled={busy === p.id} onClick={() => decide(p, false)}>Decline</Button>
+              </div>
+            </div>
+          ))}
+          {claims.map((c) => (
+            <Link key={c.id} href="/admin/welfare" className="block rounded-[18px] bg-white/80 dark:bg-white/90 p-4 text-sage-ink hover:bg-white">
+              <div className="flex justify-between text-[13px] text-[#44604F]"><span>Welfare claim</span><span>Open to decide</span></div>
+              <div className="flex justify-between items-baseline mt-1 gap-3">
+                <span className="text-[15px] font-semibold capitalize">{c.reason}</span>
+                <Money value={c.amount} className="text-[20px]" />
+              </div>
+            </Link>
+          ))}
+          {withdrawals.map((w) => (
+            <Link key={w.id} href="/admin/wallet" className="block rounded-[18px] bg-white/80 dark:bg-white/90 p-4 text-sage-ink hover:bg-white">
+              <div className="flex justify-between text-[13px] text-[#44604F]"><span>Withdrawal vote</span><span>{w.votes_for || 0} of {w.total_eligible_voters || '?'} in favour</span></div>
+              <div className="flex justify-between items-baseline mt-1 gap-3">
+                <span className="text-[15px] font-semibold">{w.reason || 'Withdrawal'}</span>
+                <Money value={w.amount} className="text-[20px]" />
+              </div>
+            </Link>
+          ))}
+        </Panel>
       </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.6fr_1fr]">
+        <Panel aria-labelledby="rot-h" className="min-w-0">
+          <PanelTitle id="rot-h" action={<Link href="/admin/merry-go-round" className="text-[14px] text-brand hover:underline">{rounds ? 'Manage' : 'Start one'}</Link>}>Merry-go-round</PanelTitle>
+          {!rounds || rounds.list.length === 0 ? (
+            <EmptyState title="No round running">Start a merry-go-round to set who receives the pot each round.</EmptyState>
+          ) : (
+            <div className="overflow-x-auto mt-4">
+              <ol className="grid gap-1.5 min-w-[720px]" style={{ gridTemplateColumns: `repeat(${rounds.list.length}, minmax(84px, 1fr))` }}>
+                {rounds.list.map((r) => {
+                  const now = r.round_number === rounds.current;
+                  const past = r.status === 'paid';
+                  return (
+                    <li key={r.round_number} aria-current={now ? 'step' : undefined} className={cn('flex flex-col p-3 rounded-[14px]', now ? 'bg-mint text-forest' : past ? 'bg-forest text-[#EEF4EF]' : 'bg-surface-2 border border-dashed border-line-strong/60')}>
+                      <span className="text-[12px] opacity-80">Round {r.round_number}</span>
+                      <span className="text-[14px] font-semibold truncate mt-0.5">{r.name.split(' ')[0]}</span>
+                      <span className="text-[12px] opacity-80 mt-0.5">{past ? 'Paid' : now ? 'This round' : r.scheduled_date ? new Date(r.scheduled_date + 'T00:00:00').toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) : '—'}</span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
+        </Panel>
+        <NextContributionCard chamaId={chamaId} isOfficial />
+      </div>
+
+      {unpaid.length > 0 && (
+        <Panel aria-labelledby="unpaid-h">
+          <PanelTitle id="unpaid-h">Not paid this month</PanelTitle>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {unpaid.map((m) => (
+              <li key={m.id}>
+                <Link href={`/admin/members/${m.id}`} className="inline-flex items-center gap-2 h-10 pl-1.5 pr-4 rounded-full bg-surface-2 border border-line hover:border-line-strong text-[14px]">
+                  <Avatar name={m.name} size={28} tone="sage" />{m.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Chip kind="info" className="mt-4">Expected each: {formatKsh(chama?.contribution_amount)}</Chip>
+        </Panel>
+      )}
     </div>
   );
 }

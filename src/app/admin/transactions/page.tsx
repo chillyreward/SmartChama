@@ -129,7 +129,7 @@ export default function AdminTransactionsPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
+    <div className="w-full min-h-full text-[var(--text-main)]">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
@@ -138,27 +138,27 @@ export default function AdminTransactionsPage() {
             <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Transactions</span>
           </p>
-          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">All Transactions</h1>
+          <h1 className="text-[24px] md:font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">All Transactions</h1>
           <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Complete financial ledger for the group</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <button 
             onClick={handleExportPDF}
-            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <MIcon name="picture_as_pdf"  className="text-[16px] text-red-500" />
             Export PDF
           </button>
           <button 
             onClick={handleExportExcel}
-            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+            className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <MIcon name="table_chart"  className="text-[16px] text-green-600" />
             Export Excel
           </button>
           <button 
             onClick={handleExportCSV}
-            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <MIcon name="download"  className="text-[16px]" />
             CSV
@@ -167,7 +167,7 @@ export default function AdminTransactionsPage() {
       </div>
 
       {/* FILTERS */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl p-4 mb-6 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between hover:shadow-md transition-all duration-200">
+      <div className="bg-surface border border-line rounded-[24px] p-4 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between hover:shadow-md transition-all duration-200">
         <div className="relative w-full md:w-72">
           <MIcon name="search"  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[20px]" />
           <input 
@@ -186,7 +186,7 @@ export default function AdminTransactionsPage() {
               onClick={() => setFilter(f)}
               className={`px-4 py-1.5 rounded-md transition-all ${
                 filter === f 
-                  ? 'card-bg shadow-sm text-[var(--text-main)]' 
+                  ? 'card-bg text-[var(--text-main)]' 
                   : 'hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)]'
               }`}
             >
@@ -197,12 +197,12 @@ export default function AdminTransactionsPage() {
       </div>
 
       {/* TABLE / CARD LIST */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden min-h-[400px] hover:shadow-md transition-all duration-200">
+      <div className="bg-surface border border-line rounded-[24px] overflow-hidden min-h-[400px] hover:shadow-md transition-all duration-200">
         {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[13px] font-medium">
                 <th className="px-6 py-4">DATE</th>
                 <th className="px-6 py-4">TYPE</th>
                 <th className="px-6 py-4">MEMBER</th>
@@ -342,14 +342,14 @@ export default function AdminTransactionsPage() {
             <button 
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm"
+              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all "
             >
               Previous
             </button>
             <button 
               onClick={() => setPage(p => p + 1)}
               disabled={!hasMore}
-              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm"
+              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all "
             >
               Next
             </button>
@@ -375,8 +375,8 @@ export default function AdminTransactionsPage() {
             {/* Top */}
             <div className="flex justify-between items-start mb-6">
               <div>
-                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">#{selectedTransaction.id.substring(0,8).toUpperCase()}</div>
-                <h2 className="text-2xl font-bold font-geist text-[var(--text-main)] mt-1 capitalize">{selectedTransaction.type}</h2>
+                <div className="text-[10px] font-bold text-[var(--text-muted)]">#{selectedTransaction.id.substring(0,8).toUpperCase()}</div>
+                <h2 className="text-2xl font-bold text-[var(--text-main)] mt-1 capitalize">{selectedTransaction.type}</h2>
               </div>
               <button 
                 onClick={() => setSelectedTransaction(null)}
@@ -386,8 +386,8 @@ export default function AdminTransactionsPage() {
               </button>
             </div>
             
-            <div className="flex flex-col items-center justify-center py-6 bg-gray-50 dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-2xl mb-8 shadow-sm">
-              <div className={`text-[32px] font-geist font-bold font-mono ${selectedTransaction.isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
+            <div className="flex flex-col items-center justify-center py-6 bg-gray-50 dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-2xl mb-8 ">
+              <div className={`text-[32px] font-bold font-mono ${selectedTransaction.isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
                 {selectedTransaction.isIncoming ? '+' : '-'} KSh {formatCurrency(Number(selectedTransaction.amount))}
               </div>
               <div className="mt-2">
@@ -461,7 +461,7 @@ export default function AdminTransactionsPage() {
                   link.click();
                   document.body.removeChild(link);
                 }}
-                className="flex items-center justify-center gap-2 bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white w-full rounded-lg py-3 text-sm font-bold transition-all shadow-sm cursor-pointer"
+                className="flex items-center justify-center gap-2 bg-[var(--ak-solid)] hover:bg-primary text-on-primary w-full rounded-lg py-3 text-sm font-bold transition-all cursor-pointer"
               >
                 <MIcon name="download"  className="text-[20px]" />
                 Download Receipt

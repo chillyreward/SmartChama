@@ -135,7 +135,7 @@ export function InviteModal({
 
             {/* Name */}
             <div className="mb-4">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+              <label className="block text-[11px] font-semibold mb-1.5"
                 style={{ color: 'var(--text-secondary)' }}>
                 Member Name <span style={{ color: 'var(--text-muted)' }}>(optional)</span>
               </label>
@@ -147,7 +147,7 @@ export function InviteModal({
 
             {/* Phone */}
             <div className="mb-6">
-              <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+              <label className="block text-[11px] font-semibold mb-1.5"
                 style={{ color: 'var(--text-secondary)' }}>
                 Phone Number
               </label>
@@ -212,7 +212,7 @@ export function InviteModal({
             })()}
 
             <div>
-              <h3 className="text-[18px] font-bold mb-1">
+              <h3 className="font-display font-normal text-[22px] mb-1">
                 {result?.sms_sent ? 'SMS Sent!' : 'Invite Created'}
               </h3>
               <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
@@ -238,7 +238,7 @@ export function InviteModal({
             {/* Code */}
             <div className="w-full rounded-xl p-4 flex flex-col items-center gap-2"
               style={{ backgroundColor: 'var(--bg-subtle)', border: '1px dashed var(--border)' }}>
-              <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-muted)' }}>
                 Invite Code
               </span>
               <span className="text-[28px] font-mono font-bold tracking-widest" style={{ color: channelConfig[channel].color }}>

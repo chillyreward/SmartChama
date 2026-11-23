@@ -18,9 +18,9 @@ export type MemberSignupResult = {
   message?: string
 }
 
-const label = 'block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]'
+const label = 'block text-[11px] font-semibold mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]'
 const input = 'w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]'
-const primary = 'w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] disabled:opacity-50 transition-colors'
+const primary = 'w-full py-3.5 rounded-xl bg-primary text-on-primary text-[16px] font-semibold hover:opacity-90 disabled:opacity-50 transition-colors'
 
 export default function MemberPhoneSignup({ initialCode = '', onDone }: { initialCode?: string; onDone: (r: MemberSignupResult) => void }) {
   const [fullName, setFullName] = useState('')

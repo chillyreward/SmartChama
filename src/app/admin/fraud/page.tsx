@@ -82,7 +82,7 @@ export default function FraudDetectionPage() {
   const lowFlags = result?.flags.filter(f => f.severity === 'low') || []
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)]">
+    <div className="w-full text-[var(--text-main)]">
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
@@ -92,7 +92,7 @@ export default function FraudDetectionPage() {
             <MIcon name="chevron_right"  className="text-[14px]" />
             <span>AI Fraud Detection</span>
           </p>
-          <h1 className="text-[26px] font-bold tracking-tight">AI Fraud Detection</h1>
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">AI Fraud Detection</h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
             <MIcon name="smart_toy"  className="text-[16px] text-[var(--ak-brand-ink)]" />
             Powered by Akibora AI · Detects fraud before damage occurs
@@ -101,7 +101,7 @@ export default function FraudDetectionPage() {
         <button
           onClick={runScan}
           disabled={scanning || !group}
-          className="flex items-center gap-2 bg-[var(--ak-solid)] text-white px-6 py-3 rounded-xl text-[14px] font-semibold hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-full text-[14px] font-semibold hover:opacity-90 transition-colors disabled:opacity-50"
         >
           {scanning ? (
             <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Scanning...</>
@@ -120,16 +120,16 @@ export default function FraudDetectionPage() {
 
       {/* Empty state */}
       {!result && !scanning && (
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center">
+        <div className="bg-surface border border-line rounded-[24px] p-12 text-center">
           <div className="w-16 h-16 rounded-full bg-[var(--ak-solid)]/10 flex items-center justify-center mx-auto mb-4">
             <MIcon name="radar"  className="text-[32px] text-[var(--ak-brand-ink)]" />
           </div>
-          <h2 className="text-[18px] font-bold mb-2">No scan run yet</h2>
+          <h2 className="font-display font-normal text-[22px] mb-2">No scan run yet</h2>
           <p className="text-[14px] text-[var(--text-muted)] max-w-md mx-auto mb-6">
             The AI will analyse your group's transactions, contributions, and member behaviour for fraud patterns — including duplicates, fake contributions, suspicious reversals, and abnormal withdrawals.
           </p>
           <button onClick={runScan} disabled={!group}
-            className="bg-[var(--ak-solid)] text-white px-6 py-3 rounded-xl text-[14px] font-semibold hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50">
+            className="bg-primary text-on-primary px-6 py-3 rounded-full text-[14px] font-semibold hover:opacity-90 transition-colors disabled:opacity-50">
             Run First Scan
           </button>
         </div>
@@ -137,11 +137,11 @@ export default function FraudDetectionPage() {
 
       {/* Scanning state */}
       {scanning && (
-        <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center">
+        <div className="bg-surface border border-line rounded-[24px] p-12 text-center">
           <div className="w-16 h-16 rounded-full bg-[var(--ak-solid)]/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
             <MIcon name="smart_toy"  className="text-[32px] text-[var(--ak-brand-ink)]" />
           </div>
-          <h2 className="text-[18px] font-bold mb-2">AI is scanning your group...</h2>
+          <h2 className="font-display font-normal text-[22px] mb-2">AI is scanning your group...</h2>
           <p className="text-[14px] text-[var(--text-muted)]">Checking transactions, contributions, and member patterns</p>
         </div>
       )}
@@ -201,7 +201,7 @@ export default function FraudDetectionPage() {
 
           {/* No flags */}
           {result.flags.length === 0 && (
-            <div className="card-bg border border-[var(--border)] rounded-2xl p-8 text-center">
+            <div className="bg-surface border border-line rounded-[24px] p-8 text-center">
               <MIcon name="verified_user"  className="text-[40px] text-[var(--ak-brand-ink)] block mb-2" />
               <h3 className="text-[16px] font-bold mb-1">No fraud patterns detected</h3>
               <p className="text-[14px] text-[var(--text-muted)]">Your group's activity looks clean. Run scans regularly to stay protected.</p>
@@ -210,7 +210,7 @@ export default function FraudDetectionPage() {
 
           {/* Flags list */}
           {result.flags.length > 0 && (
-            <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden">
+            <div className="bg-surface border border-line rounded-[24px] overflow-hidden">
               <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
                 <h3 className="text-[16px] font-bold">Detected Fraud Flags ({result.flags.length})</h3>
                 <span className="text-[12px] text-[var(--text-muted)] flex items-center gap-1">

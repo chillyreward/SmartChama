@@ -86,7 +86,7 @@ export default function SelectGroupClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] p-6 pt-20 font-inter transition-colors duration-300 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
+    <div className="min-h-screen bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] p-6 pt-20 transition-colors duration-300 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 justify-center mb-8">
           <Image
@@ -103,7 +103,7 @@ export default function SelectGroupClient() {
         </div>
 
         <div className="text-center mb-10">
-          <h1 className="text-[32px] font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] font-geist">Choose a group</h1>
+          <h1 className="text-[32px] font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] ">Choose a group</h1>
           <p className="text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] mt-2">You belong to multiple savings groups. Select one to continue.</p>
         </div>
 
@@ -116,11 +116,11 @@ export default function SelectGroupClient() {
               <div 
                 key={m.id} 
                 onClick={() => handleSelect(chama.id, m.role)}
-                className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-2xl p-6 hover:border-[var(--ak-brand-ink)] cursor-pointer transition-colors shadow-sm flex flex-col justify-between"
+                className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-2xl p-6 hover:border-[var(--ak-brand-ink)] cursor-pointer transition-colors flex flex-col justify-between"
               >
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-headline-sm font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] font-geist leading-tight">{chama.name}</h2>
+                    <h2 className="text-headline-sm font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] leading-tight">{chama.name}</h2>
                     <span className={`px-2 py-1 rounded text-xs font-semibold capitalize whitespace-nowrap ml-2 ${
                       isLeadership 
                         ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' 

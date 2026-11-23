@@ -1,5 +1,7 @@
 "use client";
-import { MIcon } from '@/components/ui/MIcon';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { UserPlus } from "lucide-react";
+import { Button, EmptyState, Field, Notice, PageHeader, Panel, PanelTitle, Skeleton, TableWrap, Tabs, cn, inputClass, tableClass } from "@/components/ui";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -123,7 +125,7 @@ export default function AdminSettingsPage() {
 
       if (error) throw error;
 
-      setToastMsg("Chama rules updated successfully!");
+      setToastMsg("Rules saved.");
       setTimeout(() => setToastMsg(""), 3000);
       await refreshMemberData();
     } catch (err) {
@@ -154,7 +156,7 @@ export default function AdminSettingsPage() {
 
       if (error) throw error;
 
-      setToastMsg("Payment configuration saved successfully!");
+      setToastMsg("Payment details saved. Members will see them before paying.");
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err) {
       console.error(err);
@@ -165,7 +167,7 @@ export default function AdminSettingsPage() {
   };
 
   const handleRevokeInvite = async (token: string) => {
-    if (!confirm("Are you sure you want to revoke this invitation code?")) return;
+    if (!confirm("Cancel this invite? The code will stop working.")) return;
     try {
       const { error } = await supabase
         .from('invite_tokens')
@@ -174,7 +176,7 @@ export default function AdminSettingsPage() {
 
       if (error) throw error;
 
-      setToastMsg("Invite revoked successfully!");
+      setToastMsg("Invite cancelled.");
       setTimeout(() => setToastMsg(""), 3000);
       await fetchInvites();
     } catch (err) {
@@ -185,312 +187,141 @@ export default function AdminSettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="h-96 bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-60" />
+        <Skeleton className="h-11 w-[520px] max-w-full" />
+        <Skeleton className="h-96" />
       </div>
     );
   }
 
+  const PAY_TYPES = [
+    { v: 'till' as const, label: 'Till number', hint: 'Buy Goods' },
+    { v: 'paybill' as const, label: 'Paybill', hint: 'with an account number' },
+    { v: 'phone' as const, label: 'Phone number', hint: 'Send Money' },
+  ];
+
   return (
-    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
-      {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[var(--ak-solid)] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <MIcon name="check_circle"  className="text-[20px]" />
-          <span className="text-body-sm font-medium">{toastMsg}</span>
+    <div>
+      <PageHeader title="Group settings" subtitle={`The rules ${group?.name || 'your group'} runs by, where payments go, and who can join.`} />
+
+      <Tabs
+        label="Settings sections"
+        value={activeTab}
+        onChange={setActiveTab}
+        className="mb-5"
+        items={[
+          { value: 'Chama Rules', label: 'Rules' },
+          { value: 'Payment Configurations', label: 'Where payments go' },
+          { value: 'members', label: 'Members' },
+          { value: 'Member Invites', label: 'Invites' },
+        ]}
+      />
+
+      {toastMsg && <Notice tone="ok" className="mb-4">{toastMsg}</Notice>}
+
+      {activeTab === 'Chama Rules' && (
+        <div className="flex flex-col gap-4 max-w-[860px]">
+          <Panel>
+            <PanelTitle>The basics</PanelTitle>
+            <form onSubmit={handleSaveRules} className="grid sm:grid-cols-2 gap-5 mt-4">
+              <Field label="Group name" className="sm:col-span-2">
+                <input value={chamaName} onChange={(e) => setChamaName(e.target.value)} required className={inputClass} />
+              </Field>
+              <Field label="County">
+                <select value={county} onChange={(e) => setCounty(e.target.value)} className={inputClass}>
+                  {countiesList.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+              <Field label="Each contribution" hint="What every member pays each time it's due.">
+                <input type="number" inputMode="numeric" min={0} value={contributionAmount} onChange={(e) => setContributionAmount(Number(e.target.value))} className={inputClass} />
+              </Field>
+              <Field label="Grace period" hint="Days after the due date before a payment counts as late.">
+                <input type="number" inputMode="numeric" min={0} max={30} value={gracePeriodDays} onChange={(e) => setGracePeriodDays(Number(e.target.value))} className={inputClass} />
+              </Field>
+              <Field label="Late fine" hint="Added once the grace period has passed. Use 0 for none.">
+                <input type="number" inputMode="numeric" min={0} value={latePenaltyAmount} onChange={(e) => setLatePenaltyAmount(Number(e.target.value))} className={inputClass} />
+              </Field>
+              <div className="sm:col-span-2 flex justify-end">
+                <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save rules'}</Button>
+              </div>
+            </form>
+          </Panel>
+          {group?.id && <ContributionScheduleSettings chamaId={group.id} onSaved={refreshMemberData} />}
         </div>
       )}
 
-      {/* HEADER */}
-      <div className="mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>Admin Dashboard</span>
-          <MIcon name="chevron_right"  className="text-[14px]" />
-          <span>Settings</span>
-        </p>
-        <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-          Chama Settings
-        </h1>
-        <p className="text-[14px] text-[var(--text-muted)] mt-1">Configure chama financial parameters, payment paths, and invitations.</p>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Left Tabs */}
-        <div className="w-full md:w-64 shrink-0 space-y-1">
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              onClick={() => {
-                setActiveTab(t.id);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-semibold transition-colors text-left ${
-                activeTab === t.id
-                  ? 'bg-transparent text-[var(--brand-green)]'
-                  : 'text-[var(--ak-text-2)] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)]'
-              }`}
-            >
-              <MIcon name={t.icon}  className="text-[20px]" />
-              {t.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="flex-1 card-bg border border-[var(--border)] p-6 rounded-2xl shadow-sm">
-          {/* CHAMA RULES TAB */}
-          {activeTab === 'Chama Rules' && (
-            <form onSubmit={handleSaveRules} className="space-y-6">
-              <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">Chama Group Rules</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Group Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={chamaName}
-                    onChange={e => setChamaName(e.target.value)}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">County</label>
-                  <select
-                    value={county}
-                    onChange={e => setCounty(e.target.value)}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  >
-                    {countiesList.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Standard Contribution Amount (KSh)</label>
-                  <input
-                    type="number"
-                    required
-                    value={contributionAmount}
-                    onChange={e => setContributionAmount(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Grace Period (Days)</label>
-                  <input
-                    type="number"
-                    value={gracePeriodDays}
-                    onChange={e => setGracePeriodDays(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Late Penalty Amount (KSh)</label>
-                  <input
-                    type="number"
-                    value={latePenaltyAmount}
-                    onChange={e => setLatePenaltyAmount(Number(e.target.value))}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
-                >
-                  {saving ? 'Saving...' : 'Save Chama Rules'}
+      {activeTab === 'Payment Configurations' && (
+        <Panel className="max-w-[760px]">
+          <PanelTitle>Where members&apos; payments go</PanelTitle>
+          <p className="text-[14px] text-ink-2 mt-1">Members see this before they pay. The money goes straight to this account; Akibora only records it.</p>
+          <form onSubmit={handleSavePaymentConfig} className="flex flex-col gap-5 mt-5">
+            <div role="radiogroup" aria-label="Account type" className="grid sm:grid-cols-3 gap-2">
+              {PAY_TYPES.map((t) => (
+                <button key={t.v} type="button" role="radio" aria-checked={paymentType === t.v} onClick={() => setPaymentType(t.v)} className={cn('rounded-[16px] border p-4 text-left', paymentType === t.v ? 'bg-primary text-on-primary border-transparent' : 'bg-surface-2 border-line hover:border-line-strong')}>
+                  <div className="text-[15px] font-semibold">{t.label}</div>
+                  <div className="text-[13px] opacity-75">{t.hint}</div>
                 </button>
-              </div>
-            </form>
-          )}
-          {activeTab === 'Chama Rules' && group?.id && (
-            <ContributionScheduleSettings chamaId={group.id} onSaved={refreshMemberData} />
-          )}
-
-          {activeTab === 'members' && (
-            <MembersSettingsTab
-              chamaId={group?.id || ''}
-              adminId={session?.user?.id || ''}
-              chamaName={group?.name || ''}
-            />
-          )}
-
-          {/* PAYMENT CONFIGURATIONS TAB */}
-          {activeTab === 'Payment Configurations' && (
-            <form onSubmit={handleSavePaymentConfig} className="space-y-6">
-              <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">Payment Configurations</h2>
-              <p className="text-xs text-[var(--text-muted)] mb-4">Set up the M-Pesa account details where members' savings contributions will be sent. These credentials will be shown to members in the deposit warning card.</p>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Payment Method Type</label>
-                  <select
-                    value={paymentType}
-                    onChange={e => setPaymentType(e.target.value as any)}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  >
-                    <option value="till">Lipa Na M-Pesa Till Number</option>
-                    <option value="paybill">M-Pesa Paybill</option>
-                    <option value="phone">Custodian Mobile Number</option>
-                  </select>
-                </div>
-
-                {paymentType === 'till' && (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Till Number</label>
-                    <input
-                      type="text"
-                      required
-                      value={tillNumber}
-                      onChange={e => setTillNumber(e.target.value)}
-                      placeholder="e.g. 5432109"
-                      className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                    />
-                  </div>
-                )}
-
-                {paymentType === 'paybill' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Paybill Business Number</label>
-                      <input
-                        type="text"
-                        required
-                        value={paybillNumber}
-                        onChange={e => setPaybillNumber(e.target.value)}
-                        placeholder="e.g. 247247"
-                        className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Account Reference / Number</label>
-                      <input
-                        type="text"
-                        required
-                        value={accountNumber}
-                        onChange={e => setAccountNumber(e.target.value)}
-                        placeholder="e.g. CHAMA001"
-                        className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {paymentType === 'phone' && (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Custodian Phone Number</label>
-                    <input
-                      type="text"
-                      required
-                      value={phoneNumber}
-                      onChange={e => setPhoneNumber(e.target.value)}
-                      placeholder="e.g. 0712345678"
-                      className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-[var(--text-main)] mb-1.5">Account / Recipient Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={accountName}
-                    onChange={e => setAccountName(e.target.value)}
-                    placeholder="e.g. Akibora Group Custody Account"
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-3 py-2 text-[14px]"
-                  />
-                  <p className="text-[11px] text-[var(--text-muted)] mt-1">This verifies to members that they are depositing to the correct group custody wallet.</p>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
-                >
-                  {saving ? 'Saving...' : 'Save Payment Config'}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* MEMBER INVITES TAB */}
-          {activeTab === 'Member Invites' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-800">
-                <h2 className="text-xl font-bold text-[var(--text-main)] font-geist">Chama Invitations</h2>
-                <button
-                  onClick={() => setShowInviteModal(true)}
-                  className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5"
-                >
-                  <MIcon name="person_add"  className="text-md" />
-                  Invite Member
-                </button>
-              </div>
-
-              <div>
-                <h3 className="text-[14px] font-bold text-[var(--text-main)] mb-4">Pending Invites</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b border-[var(--border)] text-left text-xs uppercase tracking-wider text-[var(--text-muted)]">
-                        <th className="py-3 px-4 font-bold">Invite Code</th>
-                        <th className="py-3 px-4 font-bold">Expires At</th>
-                        <th className="py-3 px-4 font-bold">Max Uses</th>
-                        <th className="py-3 px-4 font-bold text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--border)]">
-                      {invites.map((invite) => {
-                        const isExpired = new Date(invite.expires_at) < new Date();
-                        return (
-                          <tr key={invite.token} className="text-sm text-[var(--text-main)]">
-                            <td className="py-3 px-4 font-mono font-bold text-[var(--brand-green)]">{invite.token}</td>
-                            <td className="py-3 px-4 text-[var(--text-muted)]">{new Date(invite.expires_at).toLocaleString()}</td>
-                            <td className="py-3 px-4">{invite.max_uses}</td>
-                            <td className="py-3 px-4 text-right">
-                              <button
-                                onClick={() => handleRevokeInvite(invite.token)}
-                                className="text-red-500 hover:text-red-700 text-xs font-semibold cursor-pointer"
-                              >
-                                Revoke
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {invites.length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="py-8 text-center text-sm text-[var(--text-muted)]">No active invite tokens found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              ))}
             </div>
-          )}
-        </div>
-      </div>
+            {paymentType === 'till' && (
+              <Field label="Till number"><input inputMode="numeric" value={tillNumber} onChange={(e) => setTillNumber(e.target.value)} required className={inputClass} /></Field>
+            )}
+            {paymentType === 'paybill' && (
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Paybill number"><input inputMode="numeric" value={paybillNumber} onChange={(e) => setPaybillNumber(e.target.value)} required className={inputClass} /></Field>
+                <Field label="Account number"><input value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} required className={inputClass} /></Field>
+              </div>
+            )}
+            {paymentType === 'phone' && (
+              <Field label="M-Pesa phone number"><input type="tel" inputMode="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="0712 345 678" required className={inputClass} /></Field>
+            )}
+            <Field label="Name on the account" hint="So members can check it before paying.">
+              <input value={accountName} onChange={(e) => setAccountName(e.target.value)} className={inputClass} />
+            </Field>
+            <Button type="submit" disabled={saving} className="self-end">{saving ? 'Saving…' : 'Save payment details'}</Button>
+          </form>
+        </Panel>
+      )}
 
-      {showInviteModal && group && (
-        <InviteModal
-          onClose={() => {
-            setShowInviteModal(false);
-            fetchInvites();
-          }}
-          chamaId={group.id}
-          chamaName={group.name}
-          adminId={session?.user?.id || ""}
-        />
+      {activeTab === 'members' && (
+        <MembersSettingsTab chamaId={group?.id || ''} adminId={session?.user?.id || ''} chamaName={group?.name || ''} />
+      )}
+
+      {activeTab === 'Member Invites' && (
+        <Panel className="max-w-[860px]">
+          <PanelTitle action={<Button size="sm" onClick={() => setShowInviteModal(true)}><UserPlus size={16} aria-hidden="true" />Invite someone</Button>}>Invites</PanelTitle>
+          <div className="mt-4 rounded-[18px] bg-sage text-sage-ink p-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="text-[13px] text-[#2B4637]">Group code anyone can join with</div>
+              <div className="font-mono text-[22px] mt-0.5">{(group as any)?.group_code || '—'}</div>
+            </div>
+            <span className="text-[13px] text-[#2B4637] max-w-[34ch]">People who join with the code wait for an official to approve them.</span>
+          </div>
+          {invites.length === 0 ? (
+            <EmptyState title="No personal invites waiting">Personal invites send a link by SMS or WhatsApp and skip the approval step.</EmptyState>
+          ) : (
+            <TableWrap className="mt-4">
+              <table className={cn(tableClass, 'min-w-[520px]')}>
+                <thead><tr><th>Invite code</th><th>Uses left</th><th>Expires</th><th><span className="sr-only">Actions</span></th></tr></thead>
+                <tbody>
+                  {invites.map((invite) => (
+                    <tr key={invite.token}>
+                      <td className="font-mono text-[13px]">{invite.token}</td>
+                      <td className="text-ink-2">{invite.max_uses ?? '—'}</td>
+                      <td className="text-ink-2">{invite.expires_at ? new Date(invite.expires_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Never'}</td>
+                      <td className="text-right"><Button size="sm" variant="ghost" onClick={() => handleRevokeInvite(invite.token)}>Cancel invite</Button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </TableWrap>
+          )}
+        </Panel>
+      )}
+
+      {showInviteModal && (
+        <InviteModal onClose={() => { setShowInviteModal(false); fetchInvites(); }} chamaId={group?.id || ''} chamaName={group?.name || ''} adminId={session?.user?.id || ''} />
       )}
     </div>
   );

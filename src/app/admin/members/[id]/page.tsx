@@ -61,11 +61,11 @@ export default function AdminMemberDetailPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="h-48 card-bg border border-[var(--border)] rounded-2xl animate-pulse mb-6 shadow-sm"></div>
+      <div className="w-full ">
+        <div className="h-48 bg-surface border border-line rounded-[24px] animate-pulse mb-6 "></div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
-          <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
+          <div className="h-96 bg-surface border border-line rounded-[24px] animate-pulse "></div>
+          <div className="h-96 bg-surface border border-line rounded-[24px] animate-pulse "></div>
         </div>
       </div>
     );
@@ -74,7 +74,7 @@ export default function AdminMemberDetailPage() {
   if (!member) {
     return (
       <div className="p-8 text-center text-[var(--text-main)]">
-        <h2 className="text-[22px] font-geist font-bold">Member not found</h2>
+        <h2 className="text-[22px] font-bold">Member not found</h2>
         <Link href="/admin/members" className="text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] mt-4 inline-block hover:underline font-semibold">
           ← Back to Members
         </Link>
@@ -95,7 +95,7 @@ export default function AdminMemberDetailPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
+    <div className="w-full relative text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
           <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
@@ -116,18 +116,18 @@ export default function AdminMemberDetailPage() {
             <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Profile</span>
           </p>
-          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Member Profile</h1>
+          <h1 className="text-[24px] md:font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Member Profile</h1>
         </div>
       </div>
 
       {/* PROFILE CARD */}
-      <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 shadow-sm hover:shadow-md transition-all duration-200">
+      <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 hover:shadow-md transition-all duration-200">
         <div className="flex items-center gap-6 w-full md:w-auto">
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-transparent text-[var(--brand-green)] flex items-center justify-center rounded-full text-2xl md:text-[32px] font-bold shadow-sm border border-[var(--ak-brand-ink)]/20 shrink-0">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-transparent text-[var(--brand-green)] flex items-center justify-center rounded-full text-2xl md:text-[32px] font-bold border border-[var(--ak-brand-ink)]/20 shrink-0">
             {getInitials(member.profile?.full_name)}
           </div>
           <div>
-            <h2 className="text-[20px] md:text-2xl font-bold font-geist text-[var(--text-main)] tracking-tight">{member.profile?.full_name || 'Unnamed Member'}</h2>
+            <h2 className="text-[20px] md:text-2xl font-bold text-[var(--text-main)] tracking-tight">{member.profile?.full_name || 'Unnamed Member'}</h2>
             <div className="flex flex-wrap items-center gap-3 mt-1 md:mt-2">
               <span className={`px-2.5 py-0.5 rounded text-xs font-bold capitalize ${roleColors[member.role] || roleColors['member']}`}>
                 {member.role || 'Member'}
@@ -144,15 +144,15 @@ export default function AdminMemberDetailPage() {
         </div>
 
         <div className="flex gap-4 w-full md:w-auto">
-          <div className="flex-1 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[130px] shadow-sm">
+          <div className="flex-1 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[130px] ">
             <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">CREDIT SCORE</div>
-            <div className={`text-[20px] md:text-[28px] font-geist font-bold mt-1 ${member.trust_score >= 80 ? 'text-[var(--brand-green)]' : member.trust_score >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
+            <div className={`text-[20px] md:text-[28px] font-bold mt-1 ${member.trust_score >= 80 ? 'text-[var(--brand-green)]' : member.trust_score >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
               {member.trust_score || 0}
             </div>
           </div>
-          <div className="flex-1 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[150px] shadow-sm">
+          <div className="flex-1 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[150px] ">
             <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">TOTAL SAVED</div>
-            <div className="text-[20px] md:text-[28px] font-geist font-bold mt-1 text-[var(--brand-green)] whitespace-nowrap">
+            <div className="text-[20px] md:text-[28px] font-bold mt-1 text-[var(--brand-green)] whitespace-nowrap">
               KSh {formatCurrency(totalSaved)}
             </div>
           </div>
@@ -162,9 +162,9 @@ export default function AdminMemberDetailPage() {
       <div className="grid grid-cols-1 gap-6">
         
         {/* CONTRIBUTIONS HISTORY */}
-        <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
+        <div className="bg-surface border border-line rounded-[24px] overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
           <div className="p-4 md:p-6 border-b border-[var(--border)] flex justify-between items-center shrink-0">
-            <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Contributions</h3>
+            <h3 className="font-display font-normal text-[22px] text-[var(--text-main)]">Contributions</h3>
             <span className="bg-transparent text-[var(--brand-green)] text-xs px-2.5 py-0.5 rounded font-bold">
               {contributions.length} Records
             </span>
@@ -175,9 +175,9 @@ export default function AdminMemberDetailPage() {
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)]">
                 <tr>
-                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">DATE</th>
-                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">AMOUNT</th>
-                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] text-right">STATUS</th>
+                  <th className="px-6 py-3 text-[13px] font-medium text-[var(--text-muted)]">DATE</th>
+                  <th className="px-6 py-3 text-[13px] font-medium text-[var(--text-muted)]">AMOUNT</th>
+                  <th className="px-6 py-3 text-[13px] font-medium text-[var(--text-muted)] text-right">STATUS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">

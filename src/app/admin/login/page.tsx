@@ -128,10 +128,10 @@ export default function AdminLoginPage() {
                 style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}
               >
                 <Crown className="w-4 h-4 text-[var(--ak-brand-ink)]" />
-                <span className="text-xs font-bold text-[var(--ak-brand-ink)] uppercase tracking-wider">Admin Access</span>
+                <span className="text-xs font-bold text-[var(--ak-brand-ink)]">Admin Access</span>
               </div>
               <h1 
-                className="text-2xl font-bold mb-2 font-geist"
+                className="text-2xl font-bold mb-2 "
                 style={{ color: 'var(--text-primary)' }}
               >
                 Chama Admin Login
@@ -153,7 +153,7 @@ export default function AdminLoginPage() {
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
                 <label 
-                  className="block text-xs font-bold uppercase tracking-widest mb-2 ml-1"
+                  className="block text-xs font-bold mb-2 ml-1"
                   style={{ color: 'var(--text-secondary)' }}
                 >
                   Admin Email
@@ -179,7 +179,7 @@ export default function AdminLoginPage() {
 
               <div>
                 <label 
-                  className="block text-xs font-bold uppercase tracking-widest mb-2 ml-1"
+                  className="block text-xs font-bold mb-2 ml-1"
                   style={{ color: 'var(--text-secondary)' }}
                 >
                   Password
@@ -213,7 +213,7 @@ export default function AdminLoginPage() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                className="w-full bg-[var(--ak-solid)] hover:bg-primary text-on-primary font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (
                   <>

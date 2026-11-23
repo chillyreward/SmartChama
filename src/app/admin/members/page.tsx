@@ -1,5 +1,8 @@
 "use client";
-import { MIcon } from '@/components/ui/MIcon';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { Download, Search, UserPlus } from "lucide-react";
+import { Avatar, Button, Chip, EmptyState, Field, Meter, Modal, Money, Notice, PageHeader, Panel, Tabs, TableWrap, cn, inputClass, tableClass, textareaClass, type ChipKind } from "@/components/ui";
+import { ROLE_LABEL } from "@/components/shell/nav";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -35,7 +38,6 @@ export default function AdminMembersPage() {
   const [flagReason, setFlagReason] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
 
   const fetchData = async () => {
     if (!adminMember || !group) return;
@@ -110,7 +112,7 @@ export default function AdminMembersPage() {
 
       if (error) throw error;
 
-      setToastMsg("Role updated!");
+      setToastMsg("Role saved.");
       setTimeout(() => setToastMsg(""), 3000);
       setShowRoleModal(false);
       fetchData();
@@ -129,7 +131,7 @@ export default function AdminMembersPage() {
 
       if (error) throw error;
 
-      setToastMsg("Member flagged");
+      setToastMsg("Member flagged.");
       setTimeout(() => setToastMsg(""), 3000);
       setShowFlagModal(false);
       setFlagReason("");
@@ -153,11 +155,11 @@ export default function AdminMembersPage() {
         chama_id: group?.id,
         profile_id: m.profile_id,
         type: 'member_approved',
-        title: 'Membership Approved!',
-        message: `Your request to join ${group?.name || 'the chama'} has been approved by the admin.`
+        title: `You're in ${group?.name || 'the group'}`,
+        message: 'An official approved your request. You can now see the group and pay contributions.'
       });
 
-      setToastMsg("Member approved!");
+      setToastMsg("Member approved. They've been notified.");
       setTimeout(() => setToastMsg(""), 3000);
       fetchData();
     } catch (err) {
@@ -195,14 +197,14 @@ export default function AdminMembersPage() {
           chama_id: group?.id,
           profile_id: m.profile_id,
           type: 'reminder',
-          title: 'Contribution Reminder',
-          message: 'Please review your pending actions in the dashboard.',
+          title: 'A reminder from your officials',
+          message: `Please check ${group?.name || 'your group'} in Akibora. Your contribution may be due.`,
           read: false
         });
 
       if (error) throw error;
 
-      setToastMsg(`Reminder sent to ${m.profile?.full_name}`);
+      setToastMsg(`Reminder sent to ${m.profile?.full_name}.`);
       setTimeout(() => setToastMsg(""), 3000);
     } catch (err) {
       console.error(err);
@@ -211,7 +213,7 @@ export default function AdminMembersPage() {
   };
 
   const handleRemove = async (m: any) => {
-    if (confirm(`Are you sure you want to remove ${m.profile?.full_name}? This will set their status to inactive.`)) {
+    if (confirm(`Remove ${m.profile?.full_name} from the group? Their payment history stays in the record.`)) {
       try {
         const { error } = await supabase
           .from('chama_memberships')
@@ -269,397 +271,187 @@ export default function AdminMembersPage() {
     return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
   };
 
-  const roleColors: Record<string, string> = {
-    'admin': 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab] border-red-150 dark:border-red-900/30',
-    'chairlady': 'bg-transparent text-[var(--brand-green)] border-[var(--ak-line)] dark:border-[var(--ak-line)]',
-    'treasurer': 'bg-blue-50 dark:bg-blue-950/20 text-blue-750 dark:text-blue-300 border-blue-150 dark:border-blue-900/30',
-    'secretary': 'bg-yellow-50 dark:bg-yellow-950/20 text-yellow-755 dark:text-yellow-300 border-yellow-150 dark:border-yellow-900/30',
-    'member': 'bg-gray-50 dark:bg-gray-800 text-[var(--text-muted)] border-gray-200 dark:border-gray-700'
-  };
-
-  const statusColors: Record<string, string> = {
-    'active': 'bg-transparent text-[var(--brand-green)] border border-[var(--ak-brand-ink)]',
-    'flagged': 'bg-red-50 dark:bg-red-950/20 text-red-750 dark:text-red-400 border border-red-200 dark:border-red-900/30',
-    'pending': 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 border border-amber-250 dark:border-amber-900/30',
-    'inactive': 'bg-gray-100 dark:bg-gray-800 text-gray-500 border border-gray-200'
-  };
-
   if (loading) {
     return <PageSkeleton />;
   }
 
-  const totalCount = members.length;
-  const activeCount = members.filter(m => m.status === 'active').length;
-  const flaggedCount = members.filter(m => m.status === 'flagged').length;
+  const OFFICIAL = ['admin', 'chairlady', 'treasurer', 'secretary'];
+  const activeCount = members.filter((m) => m.status === 'active').length;
+  const pendingList = members.filter((m) => m.status === 'pending');
+  const flaggedCount = members.filter((m) => m.status === 'flagged').length;
+  const STATUS: Record<string, { kind: ChipKind; label: string }> = {
+    active: { kind: 'paid', label: 'Active' },
+    pending: { kind: 'pending', label: 'Wants to join' },
+    flagged: { kind: 'late', label: 'Flagged' },
+    inactive: { kind: 'neutral', label: 'Removed' },
+    rejected: { kind: 'neutral', label: 'Declined' },
+    removed: { kind: 'neutral', label: 'Removed' },
+  };
+  const rows = filteredMembers.filter((m) => m.status !== 'pending' || filter === 'Pending');
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full relative font-inter text-[var(--text-main)]">
-      {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
-          <span className="text-body-sm font-medium">{toastMsg}</span>
-        </div>
+    <div>
+      <PageHeader
+        title="Members"
+        subtitle={`${activeCount} active in ${group?.name || 'the group'}${flaggedCount ? `, ${flaggedCount} flagged` : ''}.`}
+        actions={
+          <>
+            <Button variant="outline" onClick={handleExportExcel}><Download size={18} aria-hidden="true" />Excel</Button>
+            <Button variant="outline" onClick={handleExportPDF} disabled={isExportingPDF}><Download size={18} aria-hidden="true" />PDF</Button>
+            <Button onClick={() => setShowInviteModal(true)}><UserPlus size={18} aria-hidden="true" />Invite members</Button>
+          </>
+        }
+      />
+
+      {toastMsg && <Notice tone="ok" className="mb-4">{toastMsg}</Notice>}
+
+      {pendingList.length > 0 && filter !== 'Pending' && (
+        <Panel tone="sage" className="mb-4">
+          <h2 className="font-display text-[24px]">{pendingList.length} {pendingList.length === 1 ? 'person wants' : 'people want'} to join</h2>
+          <ul className="mt-3 grid md:grid-cols-2 gap-2">
+            {pendingList.map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center gap-3 rounded-[16px] bg-white/80 p-3 text-sage-ink">
+                <Avatar name={m.profile?.full_name} size={36} tone="mint" />
+                <span className="flex-1 min-w-[120px]">
+                  <span className="block text-[15px] font-semibold">{m.profile?.full_name || 'New member'}</span>
+                  <span className="block text-[13px] text-[#44604F]">{m.profile?.phone_number || 'Phone verified'}</span>
+                </span>
+                <Button size="sm" variant="forest" disabled={processingId === m.id} onClick={() => handleApprove(m)}>Approve</Button>
+                <Button size="sm" variant="outline" className="!text-sage-ink !border-sage-ink" disabled={processingId === m.id} onClick={() => handleReject(m)}>Decline</Button>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       )}
 
-      {/* Page Header */}
-      <div className="mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>Admin Dashboard</span>
-          <MIcon name="chevron_right"  className="text-[14px]" />
-          <span>Members</span>
-        </p>
-        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
-              Chama Members
-            </h1>
-            <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">
-              {group?.name || "Akibora"} · {totalCount} total registered members.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            <button 
-              onClick={handleExportPDF}
-              disabled={isExportingPDF}
-              className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
-            >
-              {isExportingPDF ? (
-                <span className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <MIcon name="picture_as_pdf"  className="text-[16px] text-red-500" />
-              )}
-              {isExportingPDF ? 'Exporting...' : 'Export PDF'}
-            </button>
-            <button 
-              onClick={handleExportExcel}
-              className="bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <MIcon name="table_chart"  className="text-[16px] text-green-600" />
-              Export Excel
-            </button>
-            <button
-              onClick={() => setShowInviteModal(true)}
-              className="bg-[var(--ak-solid)] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-1.5 hover:bg-[var(--ak-solid)] transition-all font-semibold text-xs shadow-sm cursor-pointer"
-            >
-              <MIcon name="person_add"  className="text-[16px]" />
-              Invite Member
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* METRIC CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-8">
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-[10px] md:text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">TOTAL MEMBERS</div>
-          <div className="flex items-center justify-between">
-            <div className="text-[22px] md:text-3xl font-bold text-[var(--text-main)] font-geist">{totalCount}</div>
-            <MIcon name="group"  className="text-gray-300 dark:text-[var(--ak-text-2)] text-2xl md:text-3xl" />
-          </div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-500 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
-          <div className="text-[10px] md:text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">ACTIVE MEMBERS</div>
-          <div className="flex items-center justify-between">
-            <div className="text-[22px] md:text-3xl font-bold text-[var(--brand-green)] font-geist">{activeCount}</div>
-            <MIcon name="how_to_reg"  className="text-gray-300 dark:text-[var(--ak-text-2)] text-2xl md:text-3xl" />
-          </div>
-        </div>
-
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-red-500 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200 col-span-2 md:col-span-1">
-          <div className="text-[10px] md:text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">FLAGGED MEMBERS</div>
-          <div className="flex items-center justify-between">
-            <div className="text-[22px] md:text-3xl font-bold text-[var(--text-main)] font-geist">{flaggedCount}</div>
-            <MIcon name="flag"  className="text-red-300 dark:text-red-900/30 text-2xl md:text-3xl" />
-          </div>
-        </div>
-      </div>
-
-      {/* SEARCH & FILTER BAR */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm hover:shadow-md transition-all duration-200">
-        <div className="relative w-full md:w-auto">
-          <MIcon name="search"  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-lg" />
-          <input 
-            type="text" 
-            placeholder="Search members by name or phone..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-72 border border-[var(--border)] rounded-lg px-4 py-2 pl-10 text-sm outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)] text-[var(--text-main)] bg-transparent placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] transition-all"
+      <Panel>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Tabs
+            label="Show"
+            value={filter}
+            onChange={setFilter}
+            items={[
+              { value: 'All', label: 'Everyone' },
+              { value: 'Admin', label: 'Officials' },
+              { value: 'Pending', label: 'Waiting', count: pendingList.length },
+              { value: 'Flagged', label: 'Flagged', count: flaggedCount },
+            ]}
           />
+          <label className="relative w-full sm:w-[280px]">
+            <span className="sr-only">Search members</span>
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-3" aria-hidden="true" />
+            <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search name or phone" className={cn(inputClass, 'h-11 pl-10')} />
+          </label>
         </div>
-        
-        <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)] self-start md:self-auto overflow-x-auto w-full md:w-auto">
-          {["All", "Active", "Admin", "Pending", "Flagged"].map((f) => (
-            <button 
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-md transition-all cursor-pointer ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)] font-bold' : 'hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)]'}`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* MEMBERS TABLE / CARD LIST */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
-        {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
-            <thead>
-              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-4">MEMBER</th>
-                <th className="px-6 py-4">ROLE</th>
-                <th className="px-6 py-4">PHONE</th>
-                <th className="px-6 py-4">JOINED</th>
-                <th className="px-6 py-4">TOTAL SAVED</th>
-                <th className="px-6 py-4">Credit Score</th>
-                <th className="px-6 py-4">STATUS</th>
-                <th className="px-6 py-4 text-right">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-              {filteredMembers.length > 0 ? (
-                filteredMembers.map((m) => (
-                  <tr key={m.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[var(--ak-brand-ink)]/10">
-                          {getInitials(m.profile?.full_name)}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-[var(--text-main)] text-sm whitespace-nowrap">
-                            {m.profile?.full_name || 'Unnamed Member'}
-                          </div>
-                          <div className="text-xs text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">{m.profile?.email || '—'}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded text-label-caps font-bold border capitalize ${roleColors[m.role] || roleColors['member']}`}>
-                        {m.role || 'Member'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-body-sm text-[var(--text-muted)] whitespace-nowrap">
-                      {m.profile?.phone_number || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-body-sm text-[var(--text-muted)] whitespace-nowrap">
-                      {new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-6 py-4 font-mono font-medium text-[var(--text-main)] whitespace-nowrap">
-                      KSh {formatCurrency(m.totalSaved || 0)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5">
-                        <MIcon name="verified" className={`text-[16px] ${m.trust_score >= 80 ? 'text-[var(--ak-brand-ink)]' : m.trust_score >= 50 ? 'text-yellow-500' : 'text-error'}`} />
-                        <span className="text-body-sm font-bold text-[var(--text-main)]">{m.trust_score || 0}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded text-label-caps font-medium capitalize ${statusColors[m.status] || statusColors['active']}`}>
-                        {m.status || 'active'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {m.status === 'pending' ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleApprove(m)}
-                            disabled={processingId === m.id}
-                            className="bg-[var(--ak-solid)] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[var(--ak-solid)] transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                          >
-                            {processingId === m.id ? (
-                              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                              <MIcon name="check"  className="text-[14px]" />
-                            )}
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleReject(m)}
-                            disabled={processingId === m.id}
-                            className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                          >
-                            {processingId === m.id ? (
-                              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                              <MIcon name="close"  className="text-[14px]" />
-                            )}
-                            Reject
-                          </button>
-                        </div>
-                      ) : (
-                        <select 
-                          className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[var(--ak-brand-ink)]"
+        {rows.length === 0 ? (
+          <EmptyState title="No one here">Try another filter, or invite members with the group code.</EmptyState>
+        ) : (
+          <TableWrap className="mt-4">
+            <table className={cn(tableClass, 'min-w-[760px]')}>
+              <thead><tr><th>Member</th><th>Role</th><th className="!text-right">Saved</th><th>Trust</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead>
+              <tbody>
+                {rows.map((m) => {
+                  const st = STATUS[m.status] || { kind: 'neutral' as ChipKind, label: m.status };
+                  return (
+                    <tr key={m.id}>
+                      <td>
+                        <Link href={`/admin/members/${m.id}`} className="flex items-center gap-3 hover:underline underline-offset-4">
+                          <Avatar name={m.profile?.full_name} size={34} tone={OFFICIAL.includes(m.role) ? 'mint' : 'sage'} />
+                          <span>
+                            <span className="block font-medium">{m.profile?.full_name || 'Member'}</span>
+                            <span className="block text-[12px] text-ink-3">{m.profile?.phone_number || '—'}</span>
+                          </span>
+                        </Link>
+                      </td>
+                      <td className="text-ink-2">{ROLE_LABEL[m.role] || m.role}</td>
+                      <td className="text-right"><Money value={m.totalSaved} className="text-[17px]" /></td>
+                      <td className="w-[140px]">
+                        <div className="flex items-center gap-2"><span className="font-money text-[17px] w-7">{m.trust_score ?? 0}</span><Meter value={m.trust_score ?? 0} segments={12} height={8} className="flex-1" /></div>
+                      </td>
+                      <td>
+                        <Chip kind={st.kind}>{st.label}</Chip>
+                        {m.status === 'flagged' && m.flag_reason && <span className="block text-[12px] text-ink-3 mt-1 max-w-[200px] truncate" title={m.flag_reason}>{m.flag_reason}</span>}
+                      </td>
+                      <td className="text-right">
+                        <select
+                          aria-label={`Actions for ${m.profile?.full_name || 'member'}`}
                           value=""
                           onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === 'view') router.push(`/admin/members/${m.id}`);
-                            if (val === 'role') { setSelectedMember(m); setNewRole(m.role || "member"); setShowRoleModal(true); }
-                            if (val === 'remind') handleSendReminder(m);
-                            if (val === 'flag') { setSelectedMember(m); setShowFlagModal(true); }
-                            if (val === 'remove') handleRemove(m);
-                            e.target.value = ""; // Reset
+                            const v = e.target.value;
+                            if (v === 'role') { setSelectedMember(m); setNewRole(m.role); setShowRoleModal(true); }
+                            if (v === 'flag') { setSelectedMember(m); setShowFlagModal(true); }
+                            if (v === 'remind') handleSendReminder(m);
+                            if (v === 'remove') handleRemove(m);
+                            if (v === 'approve') handleApprove(m);
+                            if (v === 'reject') handleReject(m);
                           }}
+                          className="h-9 px-3 rounded-full bg-surface-2 border border-line text-[13px] cursor-pointer"
                         >
                           <option value="">Actions</option>
-                          <option value="view">View Profile</option>
-                          <option value="role">Edit Role</option>
-                          <option value="remind">Send Reminder</option>
-                          <option value="flag">Flag Member</option>
-                          <option value="remove">Remove</option>
+                          {m.status === 'pending' ? (
+                            <>
+                              <option value="approve">Approve</option>
+                              <option value="reject">Decline</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="remind">Send a reminder</option>
+                              <option value="role">Change role</option>
+                              <option value="flag">Flag</option>
+                              <option value="remove">Remove from group</option>
+                            </>
+                          )}
                         </select>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-[var(--text-muted)] text-body-sm">
-                    No members found matching the filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </TableWrap>
+        )}
 
-        {/* Mobile Card List View */}
-        <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-          {filteredMembers.length > 0 ? (
-            filteredMembers.map((m) => (
-              <div key={m.id} className="p-4 flex flex-col gap-2 hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[var(--ak-brand-ink)]/10">
-                      {getInitials(m.profile?.full_name)}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[var(--text-main)] text-sm">
-                        {m.profile?.full_name || 'Unnamed Member'}
-                      </div>
-                      <div className="text-xs text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">{m.profile?.email || '—'}</div>
-                    </div>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border capitalize ${roleColors[m.role] || roleColors['member']}`}>
-                    {m.role || 'Member'}
-                  </span>
-                </div>
+        {(page > 0 || hasMore) && (
+          <div className="flex items-center justify-between mt-4">
+            <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>Previous</Button>
+            <span className="text-[13px] text-ink-3">Page {page + 1}</span>
+            <Button variant="ghost" size="sm" disabled={!hasMore} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          </div>
+        )}
+      </Panel>
 
-                <div className="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-dashed border-[var(--ak-line)] dark:border-[var(--ak-line)] my-1">
-                  <div>
-                    <span className="text-[var(--text-muted)] block">Phone:</span>
-                    <span className="font-medium text-[var(--text-main)]">{m.profile?.phone_number || '—'}</span>
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-muted)] block">Total Saved:</span>
-                    <span className="font-mono font-bold text-[var(--text-main)]">KSh {formatCurrency(m.totalSaved || 0)}</span>
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-muted)] block">CREDIT SCORE:</span>
-                    <div className="flex items-center gap-1">
-                      <MIcon name="verified"  className="text-[14px] text-[var(--ak-brand-ink)]" />
-                      <span className="font-bold text-[var(--text-main)]">{m.trust_score || 0}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[var(--text-muted)] block">Status:</span>
-                    <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-medium capitalize ${statusColors[m.status] || statusColors['active']}`}>
-                      {m.status || 'active'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center text-xs text-[var(--text-muted)] pt-1">
-                  <span className="text-[11px]">Joined: {new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                  <select 
-                    className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[var(--ak-brand-ink)]"
-                    value=""
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === 'view') router.push(`/admin/members/${m.id}`);
-                      if (val === 'role') { setSelectedMember(m); setNewRole(m.role || "member"); setShowRoleModal(true); }
-                      if (val === 'remind') handleSendReminder(m);
-                      if (val === 'flag') { setSelectedMember(m); setShowFlagModal(true); }
-                      if (val === 'remove') handleRemove(m);
-                      e.target.value = ""; // Reset
-                    }}
-                  >
-                    <option value="">Actions</option>
-                    <option value="view">View Profile</option>
-                    <option value="role">Edit Role</option>
-                    <option value="remind">Send Reminder</option>
-                    <option value="flag">Flag Member</option>
-                    <option value="remove">Remove</option>
-                  </select>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="p-6 text-center text-[var(--text-muted)] text-body-sm">
-              No members found matching the filters.
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* MODALS */}
       {showInviteModal && (
-        <InviteModal
-          onClose={() => setShowInviteModal(false)}
-          chamaId={group?.id || ""}
-          chamaName={group?.name || ""}
-          adminId={session?.user?.id || ""}
-        />
+        <InviteModal onClose={() => setShowInviteModal(false)} chamaId={group?.id || ''} chamaName={group?.name || ''} adminId={session?.user?.id || ''} />
       )}
 
-      {showRoleModal && selectedMember && (
-        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Edit Role for {selectedMember.profile?.full_name}</h2>
-            <select 
-              value={newRole} 
-              onChange={e => setNewRole(e.target.value)} 
-              className="w-full border border-[var(--border)] rounded px-4 py-3 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)] bg-transparent"
-            >
-              <option value="member">Member</option>
-              <option value="secretary">Secretary</option>
-              <option value="treasurer">Treasurer</option>
-              <option value="admin">Admin</option>
-              <option value="chairlady">Chairlady</option>
-            </select>
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowRoleModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
-              <button onClick={handleUpdateRole} className="flex-1 bg-[var(--ak-solid)] text-white rounded py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)]">Update</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={showRoleModal && !!selectedMember}
+        onClose={() => setShowRoleModal(false)}
+        title={`Role for ${selectedMember?.profile?.full_name || 'this member'}`}
+        footer={<><Button variant="ghost" onClick={() => setShowRoleModal(false)}>Cancel</Button><Button onClick={handleUpdateRole}>Save role</Button></>}
+      >
+        <Field label="Role" hint="Officials can approve members, record cash and see this view.">
+          <select value={newRole} onChange={(e) => setNewRole(e.target.value)} className={inputClass}>
+            <option value="member">Member</option>
+            <option value="secretary">Secretary</option>
+            <option value="treasurer">Treasurer</option>
+            <option value="chairlady">Chair</option>
+            <option value="admin">Group admin</option>
+          </select>
+        </Field>
+      </Modal>
 
-      {showFlagModal && selectedMember && (
-        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-error mb-2 flex items-center gap-2">
-              <MIcon name="flag" className="" /> Flag Member
-            </h2>
-            <p className="text-body-sm text-[var(--text-muted)] mb-6">Why are you flagging {selectedMember.profile?.full_name}?</p>
-            
-            <textarea 
-              rows={3} 
-              value={flagReason} 
-              onChange={e => setFlagReason(e.target.value)} 
-              placeholder="e.g. Consistently late on payments..."
-              className="w-full border border-[var(--border)] rounded px-4 py-2 text-[var(--text-main)] bg-transparent outline-none focus:border-error resize-none"
-            />
-
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowFlagModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
-              <button onClick={handleFlag} className="flex-1 bg-error text-white rounded py-2 text-body-sm font-medium hover:bg-red-700">Flag Member</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={showFlagModal && !!selectedMember}
+        onClose={() => setShowFlagModal(false)}
+        title={`Flag ${selectedMember?.profile?.full_name || 'this member'}`}
+        footer={<><Button variant="ghost" onClick={() => setShowFlagModal(false)}>Cancel</Button><Button variant="danger" onClick={handleFlag} disabled={!flagReason.trim()}>Flag member</Button></>}
+      >
+        <Field label="Why?" hint="Other officials will see this reason.">
+          <textarea rows={3} value={flagReason} onChange={(e) => setFlagReason(e.target.value)} className={textareaClass} />
+        </Field>
+      </Modal>
     </div>
   );
 }

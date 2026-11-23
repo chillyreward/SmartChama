@@ -1,9 +1,11 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped API rows */
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/lib/supabase';
-import { RefreshCw, Plus, CheckCircle, Clock, Send, Users, AlertCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
+import { Avatar, Button, Chip, Money, Notice, PageHeader, Panel, PanelTitle, Ticks, WovenRing, cn, formatKsh, initialsOf, type Seat } from '@/components/ui';
 import PageSkeleton from '@/components/PageSkeleton';
 
 export default function AdminMerryGoRoundPage() {
@@ -17,7 +19,7 @@ export default function AdminMerryGoRoundPage() {
   const [members, setMembers] = useState<any[]>([]);
 
   // Setup form
-  const [name, setName] = useState('Merry-Go-Round Cycle');
+  const [name, setName] = useState('Merry-go-round');
   const [amount, setAmount] = useState('1000');
   const [frequency, setFrequency] = useState('monthly');
   const [selectedOrder, setSelectedOrder] = useState<string[]>([]);
@@ -84,7 +86,7 @@ export default function AdminMerryGoRoundPage() {
       if (!res.ok) {
         setActionError(data.error || 'Failed to create cycle.');
       } else {
-        setActionSuccess('Merry-Go-Round cycle created successfully!');
+        setActionSuccess('The merry-go-round has started. Members can see the order now.');
         fetchStatus();
       }
     } catch (err: any) {
@@ -111,7 +113,7 @@ export default function AdminMerryGoRoundPage() {
 
       const data = await res.json();
       if (data.success) {
-        setActionSuccess(`Payout for Round ${roundNum} marked as completed.`);
+        setActionSuccess(`Round ${roundNum} is marked as paid out.`);
         fetchStatus();
       } else {
         setActionError(data.error || 'Failed to process payout.');
@@ -125,200 +127,126 @@ export default function AdminMerryGoRoundPage() {
     return <PageSkeleton />;
   }
 
+  const nameOfMember = (id: string) => (members.find((m) => m.id === id)?.profiles as any)?.full_name || 'Member';
+  const nameOf = (s: any) => s?.chama_memberships?.profiles?.full_name || nameOfMember(s?.recipient_membership_id);
+  const move = (i: number, d: -1 | 1) => {
+    const j = i + d;
+    if (j < 0 || j >= selectedOrder.length) return;
+    const next = [...selectedOrder];
+    [next[i], next[j]] = [next[j], next[i]];
+    setSelectedOrder(next);
+  };
+  const toggle = (id: string) => setSelectedOrder((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
+  const active = cycle && cycle.status === 'active';
+  const seats: Seat[] = schedule.map((s: any) => ({
+    initials: initialsOf(nameOf(s)),
+    state: s.round_number === cycle?.current_round ? 'current' : s.status === 'paid' ? 'received' : 'upcoming',
+  }));
+  const paidThisRound = new Set(contributions.map((c: any) => c.membership_id));
+
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-            <RefreshCw className="w-7 h-7 text-[var(--ak-brand-ink)]" />
-            Merry-Go-Round (Rotating Savings)
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            Manage revolving payouts and member rotation schedules for your Chama.
-          </p>
-        </div>
-      </div>
+    <div>
+      <PageHeader title="Merry-go-round" subtitle="Set the order once. Each round everyone pays in, and you release the pot to that round's member." />
 
-      {actionError && (
-        <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          {actionError}
-        </div>
-      )}
+      {actionError && <Notice tone="danger" className="mb-4">{actionError}</Notice>}
+      {actionSuccess && <Notice tone="ok" className="mb-4">{actionSuccess}</Notice>}
 
-      {actionSuccess && (
-        <div className="p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 text-green-700 dark:text-green-400 text-sm flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 shrink-0" />
-          {actionSuccess}
-        </div>
-      )}
-
-      {/* Active Cycle View or Setup Form */}
-      {cycle && cycle.status === 'active' ? (
-        <div className="space-y-6">
-          {/* Active Cycle Overview Card */}
-          <div className="sc-card p-6 rounded-2xl border space-y-4">
-            <div className="flex flex-wrap justify-between items-center gap-4 border-b pb-4 border-[var(--border)]">
-              <div>
-                <span className="text-xs font-semibold text-[var(--ak-brand-ink)] uppercase tracking-wider">Active Cycle</span>
-                <h2 className="text-xl font-bold text-[var(--text-primary)]">{cycle.name}</h2>
+      {!active ? (
+        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-4 items-start">
+          <Panel tone="forest" className="rounded-[28px] sm:p-8">
+            <h2 className="font-display text-[28px]">Start a new round</h2>
+            <p className="text-[15px] text-[#A9C2B3] mt-1">Members see their place in the order as soon as you start.</p>
+            <form onSubmit={handleCreateCycle} className="flex flex-col gap-5 mt-6">
+              <label className="flex flex-col gap-2 text-[14px]">
+                Name
+                <input value={name} onChange={(e) => setName(e.target.value)} className="h-12 px-4 rounded-[14px] bg-canopy border border-[#2F5A45] text-[16px] focus:outline-none focus:border-mint" />
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-2 text-[14px]">
+                  Each member pays
+                  <input type="number" inputMode="numeric" min={1} value={amount} onChange={(e) => setAmount(e.target.value)} className="h-12 px-4 rounded-[14px] bg-canopy border border-[#2F5A45] text-[16px] focus:outline-none focus:border-mint" />
+                </label>
+                <label className="flex flex-col gap-2 text-[14px]">
+                  How often
+                  <select value={frequency} onChange={(e) => setFrequency(e.target.value)} className="h-12 px-4 rounded-[14px] bg-canopy border border-[#2F5A45] text-[16px] focus:outline-none focus:border-mint">
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Every two weeks</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </label>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-950/30 text-[var(--ak-brand-ink)]">
-                  Round {cycle.current_round} of {cycle.total_rounds}
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)] capitalize">
-                  {cycle.frequency}
-                </span>
+              <div className="rounded-[18px] bg-canopy p-4">
+                <div className="text-[13px] text-[#A9C2B3]">Each round&apos;s pot</div>
+                <div className="font-money text-[32px]">{formatKsh(Number(amount || 0) * selectedOrder.length)}</div>
+                <div className="text-[13px] text-[#A9C2B3]">{selectedOrder.length} members, {selectedOrder.length} rounds</div>
               </div>
-            </div>
+              <Button type="submit" variant="mint" size="lg" disabled={creating || selectedOrder.length < 2}>{creating ? 'Starting…' : 'Start the merry-go-round'}</Button>
+            </form>
+          </Panel>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-              <div className="p-4 rounded-xl bg-[var(--bg-muted)]">
-                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Amount per Member</p>
-                <p className="text-xl font-bold text-[var(--text-primary)] mt-1">KSh {Number(cycle.amount_per_member).toLocaleString('en-KE')}</p>
+          <Panel>
+            <PanelTitle>The order</PanelTitle>
+            <p className="text-[14px] text-ink-3 mt-1">Round 1 receives first. Use the arrows to reorder; untick anyone who is sitting this one out.</p>
+            <ol className="mt-4 flex flex-col gap-1.5">
+              {selectedOrder.map((id, i) => (
+                <li key={id} className="flex items-center gap-3 px-3 py-2 rounded-[14px] bg-surface-2">
+                  <span className="w-16 text-[13px] text-ink-3">Round {i + 1}</span>
+                  <Avatar name={nameOfMember(id)} size={30} tone="sage" />
+                  <span className="flex-1 min-w-0 truncate text-[15px]">{nameOfMember(id)}</span>
+                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={`Move ${nameOfMember(id)} earlier`} className="w-9 h-9 rounded-full hover:bg-raised disabled:opacity-30 flex items-center justify-center"><ChevronUp size={16} /></button>
+                  <button type="button" onClick={() => move(i, 1)} disabled={i === selectedOrder.length - 1} aria-label={`Move ${nameOfMember(id)} later`} className="w-9 h-9 rounded-full hover:bg-raised disabled:opacity-30 flex items-center justify-center"><ChevronDown size={16} /></button>
+                  <button type="button" onClick={() => toggle(id)} aria-label={`Leave ${nameOfMember(id)} out`} className="w-9 h-9 rounded-full hover:bg-raised flex items-center justify-center text-ink-3"><X size={16} /></button>
+                </li>
+              ))}
+            </ol>
+            {members.filter((m) => !selectedOrder.includes(m.id)).length > 0 && (
+              <div className="mt-4">
+                <div className="text-[13px] text-ink-3 mb-2">Left out</div>
+                <div className="flex flex-wrap gap-2">
+                  {members.filter((m) => !selectedOrder.includes(m.id)).map((m) => (
+                    <button key={m.id} type="button" onClick={() => toggle(m.id)} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-dashed border-line-strong text-[13px] hover:bg-raised">
+                      <Plus size={14} aria-hidden="true" />{(m.profiles as any)?.full_name || 'Member'}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="p-4 rounded-xl bg-[var(--bg-muted)]">
-                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Total Pot / Round</p>
-                <p className="text-xl font-bold text-[var(--ak-brand-ink)] mt-1">KSh {(Number(cycle.amount_per_member) * cycle.total_rounds).toLocaleString('en-KE')}</p>
-              </div>
-              <div className="p-4 rounded-xl bg-[var(--bg-muted)]">
-                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Current Round Status</p>
-                <p className="text-xl font-bold text-[var(--text-primary)] mt-1">{contributions.length} / {cycle.total_rounds} Paid</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Schedule Table */}
-          <div className="sc-card p-6 rounded-2xl border space-y-4">
-            <h3 className="text-lg font-bold text-[var(--text-primary)]">Payout Rotation Schedule</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm sc-table">
-                <thead>
-                  <tr className="border-b border-[var(--border)]">
-                    <th className="py-3 px-4">Round</th>
-                    <th className="py-3 px-4">Recipient</th>
-                    <th className="py-3 px-4">Scheduled Date</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border)]">
-                  {schedule.map((item: any) => {
-                    const isCurrent = item.round_number === cycle.current_round;
-                    const recipientName = item.chama_memberships?.profiles?.full_name || 'Member';
-
-                    return (
-                      <tr key={item.id} className={isCurrent ? 'bg-green-50/50 dark:bg-green-950/10 font-medium' : ''}>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center gap-1.5">
-                            Round {item.round_number}
-                            {isCurrent && <span className="w-2 h-2 rounded-full bg-[var(--ak-solid)] animate-pulse" />}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 font-semibold text-[var(--text-primary)]">{recipientName}</td>
-                        <td className="py-3 px-4 text-[var(--text-secondary)]">{item.scheduled_date || 'TBD'}</td>
-                        <td className="py-3 px-4">
-                          {item.status === 'paid' ? (
-                            <span className="inline-flex items-center gap-1 text-xs text-green-600 font-bold">
-                              <CheckCircle className="w-3.5 h-3.5" /> Disbursed
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-xs text-amber-600 font-medium">
-                              <Clock className="w-3.5 h-3.5" /> Pending
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          {item.status !== 'paid' && (
-                            <button
-                              onClick={() => handlePayout(item.round_number)}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors">
-                              Release Payout
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+            )}
+          </Panel>
         </div>
       ) : (
-        /* Setup Form for New Cycle */
-        <div className="sc-card p-6 md:p-8 rounded-2xl border max-w-2xl mx-auto space-y-6">
-          <div className="border-b pb-4 border-[var(--border)]">
-            <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <Plus className="w-5 h-5 text-[var(--ak-brand-ink)]" />
-              Start New Merry-Go-Round Cycle
-            </h2>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              Configure contribution amounts and member rotation sequence.
-            </p>
-          </div>
-
-          <form onSubmit={handleCreateCycle} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1">Cycle Name</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="e.g. 2026 Round 1"
-                className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
-              />
+        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-4 items-start">
+          <Panel tone="forest" className="rounded-[28px] flex flex-col items-center text-center sm:p-8">
+            <div className="text-[14px] text-[#A9C2B3]">{cycle.name}</div>
+            <WovenRing size={300} seats={seats} seatSize={36} className="mt-4" label={`Round ${cycle.current_round} of ${cycle.total_rounds}`}>
+              <span className="text-[13px] text-[#8FAA9B]">Round {cycle.current_round} of {cycle.total_rounds}</span>
+              <Money value={Number(cycle.amount_per_member) * schedule.length} className="text-[32px] leading-tight mt-1" />
+            </WovenRing>
+            <div className="w-full mt-6">
+              <Ticks total={Math.max(schedule.length, 1)} done={paidThisRound.size} />
+              <p className="text-[14px] text-[#C9DACF] mt-2">{paidThisRound.size} of {schedule.length} have paid into this round</p>
             </div>
+          </Panel>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1">Contribution per Member (KSh)</label>
-                <input
-                  type="number"
-                  required
-                  min="100"
-                  value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1">Frequency</label>
-                <select
-                  value={frequency}
-                  onChange={e => setFrequency(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
-                Payout Sequence ({selectedOrder.length} Members)
-              </label>
-              <div className="space-y-2 border rounded-xl p-3 max-h-60 overflow-y-auto border-[var(--border)] bg-[var(--bg-muted)]">
-                {members.map((m, idx) => (
-                  <div key={m.id} className="flex justify-between items-center p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-sm">
-                    <span className="font-medium text-[var(--text-primary)]">{idx + 1}. {m.profiles?.full_name || 'Member'}</span>
-                    <span className="text-xs text-[var(--text-muted)] capitalize">{m.role}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={creating}
-              className="w-full py-3.5 rounded-xl font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-              {creating ? 'Launching...' : 'Launch Cycle'}
-            </button>
-          </form>
+          <Panel>
+            <PanelTitle>Rounds</PanelTitle>
+            <ol className="mt-3 flex flex-col gap-1.5">
+              {schedule.map((item: any) => {
+                const isCurrent = item.round_number === cycle.current_round;
+                return (
+                  <li key={item.id} className={cn('flex flex-wrap items-center gap-3 px-3 py-2.5 rounded-[14px]', isCurrent ? 'bg-mint text-forest' : item.status === 'paid' ? 'bg-surface-2' : 'border border-dashed border-line-strong/60')}>
+                    <span className="w-16 text-[13px] opacity-80">Round {item.round_number}</span>
+                    <span className="flex-1 min-w-[120px] truncate text-[15px] font-medium">{nameOf(item)}</span>
+                    <span className="text-[13px] opacity-80">{item.scheduled_date ? new Date(item.scheduled_date + 'T00:00:00').toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) : ''}</span>
+                    {item.status === 'paid' ? (
+                      <Chip kind="paid">Paid out</Chip>
+                    ) : isCurrent ? (
+                      <Button size="sm" variant="forest" onClick={() => { if (confirm(`Mark round ${item.round_number} as paid out to ${nameOf(item)}? Only do this once the money has been sent.`)) handlePayout(item.round_number); }}>Mark paid out</Button>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ol>
+          </Panel>
         </div>
       )}
     </div>

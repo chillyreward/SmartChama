@@ -81,7 +81,7 @@ function Result({ tone, title, body, next }: { tone: 'good' | 'wait'; title: str
       <MIcon name={tone === 'good' ? 'verified_user' : 'hourglass_top'}  className="text-[44px]" />
       <h2 className="text-[20px] font-bold">{title}</h2>
       <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{body}</p>
-      <Link href={next} className="inline-block w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white font-semibold">Continue</Link>
+      <Link href={next} className="inline-block w-full py-3.5 rounded-xl bg-primary text-on-primary font-semibold">Continue</Link>
     </div>
   )
 }

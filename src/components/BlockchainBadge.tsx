@@ -95,7 +95,7 @@ export default function BlockchainBadge({
                 <Shield className="w-8 h-8 text-white" />
               </div>
 
-              <h3 className="text-xl font-bold mb-2">Blockchain Verified</h3>
+              <h3 className="font-display font-normal text-[22px] mb-2">Blockchain Verified</h3>
               <p className="text-gray-600 mb-6">
                 Scan this QR code to verify the transaction on the blockchain
               </p>

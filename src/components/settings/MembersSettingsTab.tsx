@@ -183,7 +183,7 @@ export function MembersSettingsTab({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2
-              className="text-[18px] font-bold"
+              className="font-display font-normal text-[22px]"
               style={{
                 color: 'var(--text-primary)'
               }}>
@@ -205,7 +205,7 @@ export function MembersSettingsTab({
                 setInviteResult(null)
                 setInviteError('')
               }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 transition-colors">
               <MIcon name="person_add"  className="text-[20px]" />
               Invite Member
             </button>
@@ -226,7 +226,7 @@ export function MembersSettingsTab({
               {/* Name field */}
               <div>
                 <label
-                  className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                  className="block text-[11px] font-semibold mb-1.5"
                   style={{
                     color: 'var(--text-secondary)'
                   }}>
@@ -252,7 +252,7 @@ export function MembersSettingsTab({
               {/* Phone field */}
               <div>
                 <label
-                  className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                  className="block text-[11px] font-semibold mb-1.5"
                   style={{ color: 'var(--text-secondary)' }}>
                   Phone Number
                 </label>
@@ -313,7 +313,7 @@ export function MembersSettingsTab({
               <button
                 onClick={handleSendInvite}
                 disabled={sending || !invitePhone.trim()}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[14px] font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[14px] font-semibold bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 {sending ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -388,7 +388,7 @@ export function MembersSettingsTab({
             borderBottom: '1px solid var(--border)'
           }}>
           <h2
-            className="text-[18px] font-bold"
+            className="font-display font-normal text-[22px]"
             style={{
               color: 'var(--text-primary)'
             }}>
@@ -527,7 +527,7 @@ export function MembersSettingsTab({
               borderBottom: '1px solid var(--border)'
             }}>
             <h2
-              className="text-[18px] font-bold"
+              className="font-display font-normal text-[22px]"
               style={{
                 color: 'var(--text-primary)'
               }}>
@@ -606,7 +606,7 @@ export function MembersSettingsTab({
                       </button>
                       <button
                         onClick={() => handleResendInvite(invite)}
-                        className="px-3 py-1.5 rounded-lg text-[12px] font-medium bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors">
+                        className="px-3 py-1.5 rounded-lg text-[12px] font-medium bg-primary text-on-primary hover:opacity-90 transition-colors">
                         Resend
                       </button>
                     </div>

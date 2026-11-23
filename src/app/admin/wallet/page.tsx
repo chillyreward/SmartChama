@@ -1,5 +1,7 @@
 "use client";
-import { MIcon } from '@/components/ui/MIcon';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped Supabase rows */
+import { ArrowDownLeft, ArrowUpRight, Plus } from "lucide-react";
+import { Button, Chip, EmptyState, Field, Modal, Money, Notice, PageHeader, Panel, PanelTitle, Skeleton, Ticks, cn, formatKsh, inputClass, textareaClass, type ChipKind } from "@/components/ui";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
@@ -24,7 +26,6 @@ export default function AdminWalletPage() {
   const [withAmount, setWithAmount] = useState("");
   const [withReason, setWithReason] = useState("");
 
-  const formatCurrency = (val: number) => val.toLocaleString("en-KE", { maximumFractionDigits: 0 });
 
   const fetchData = async () => {
     if (!adminMember || !group) return;
@@ -140,13 +141,13 @@ export default function AdminWalletPage() {
       alert("Insufficient funds to execute this withdrawal");
       return;
     }
-    if (confirm(`Execute withdrawal of KSh ${formatCurrency(req.amount)}?`)) {
+    if (confirm(`Release ${formatKsh(req.amount)}? Only do this once you are sending the money from the group account.`)) {
       try {
         // Checks member approval and balance, then pays out under a wallet lock
         const { data, error } = await supabase.rpc('execute_withdrawal', { p_consent_id: req.id });
         if (error || !data?.success) throw new Error(data?.error || error?.message);
 
-        setToastMsg("Withdrawal executed successfully!");
+        setToastMsg("Released and recorded.");
         setTimeout(() => setToastMsg(""), 3000);
         fetchData();
       } catch (err: any) {
@@ -162,7 +163,7 @@ export default function AdminWalletPage() {
           .from('withdrawal_consents')
           .update({ status: 'rejected' })
           .eq('id', req.id);
-        setToastMsg("Request cancelled");
+        setToastMsg("Request cancelled.");
         setTimeout(() => setToastMsg(""), 3000);
         fetchData();
       } catch (err) {
@@ -173,343 +174,161 @@ export default function AdminWalletPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="h-48 bg-[var(--ak-page)] rounded-2xl animate-pulse mb-6 shadow-sm"></div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
-          <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
-        </div>
+      <div className="flex flex-col gap-4" aria-busy="true">
+        <Skeleton className="h-12 w-60" />
+        <Skeleton className="h-56 rounded-[28px]" />
+        <div className="grid lg:grid-cols-2 gap-4"><Skeleton className="h-96" /><Skeleton className="h-96" /></div>
       </div>
     );
   }
 
+  const CONSENT: Record<string, { kind: ChipKind; label: string }> = {
+    pending: { kind: 'pending', label: 'Voting open' },
+    approved: { kind: 'paid', label: 'Approved, ready to pay' },
+    executed: { kind: 'info', label: 'Paid out' },
+    rejected: { kind: 'failed', label: 'Turned down' },
+  };
+  const TXL: Record<string, string> = { contribution: 'Contribution', withdrawal: 'Withdrawal', deposit: 'Deposit', penalty: 'Penalty', interest: 'Interest', loan_disbursement: 'Payout', loan_repayment: 'Repayment', repayment: 'Repayment' };
+  const incoming = (t: string) => ['contribution', 'repayment', 'loan_repayment', 'penalty', 'interest', 'deposit'].includes(t);
+  const balance = Number(wallet?.balance || 0);
+
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
-      {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
-          <span className="text-body-sm font-medium">{toastMsg}</span>
-        </div>
-      )}
+    <div>
+      <PageHeader
+        title="Wallet and withdrawals"
+        subtitle="The group's recorded balance. Money leaves only after members vote yes, and you then release it here."
+        actions={
+          <>
+            <Button variant="outline" onClick={() => setShowDepositModal(true)}><Plus size={18} aria-hidden="true" />Record a deposit</Button>
+            <Button onClick={() => setShowWithdrawModal(true)}>Start a withdrawal vote</Button>
+          </>
+        }
+      />
 
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6 md:mb-8">
-        <div>
-          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-            <span>Admin Dashboard</span>
-            <MIcon name="chevron_right"  className="text-[14px]" />
-            <span>Wallet</span>
-          </p>
-          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Recorded Contributions (Tracked Pool)</h1>
-          <p className="text-[14px] text-[var(--text-muted)] mt-1">Manage liquid funds, deposits, and withdrawals</p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-          <button 
-            onClick={() => setShowWithdrawModal(true)}
-            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <MIcon name="arrow_outward"  className="text-[18px]" />
-            Request Withdrawal
-          </button>
-          <button 
-            onClick={() => setShowDepositModal(true)}
-            className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-            <MIcon name="add"  className="text-[18px]" />
-            Deposit Funds
-          </button>
-        </div>
-      </div>
+      {toastMsg && <Notice tone="ok" className="mb-4">{toastMsg}</Notice>}
 
-      {/* HERO WALLET CARD */}
-      <div className="w-full bg-[var(--ak-page)] rounded-2xl p-6 md:p-8 mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8 shadow-sm">
-        <div className="flex-1">
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">RECORDED CONTRIBUTIONS (TRACKED POOL)</div>
-          <div className="text-[36px] md:text-[52px] font-geist font-bold text-white mt-2 leading-none">
-            KSh {formatCurrency(wallet?.balance || 0)}
+      <Panel tone="forest" className="rounded-[28px] sm:p-8 mb-4">
+        <div className="grid md:grid-cols-[1.2fr_1fr] gap-8 items-end">
+          <div>
+            <div className="text-[14px] text-[#A9C2B3]">Recorded balance</div>
+            <Money value={balance} className="block text-[48px] sm:text-[64px] leading-[1.02] mt-1" />
+            <p className="text-[14px] text-[#A9C2B3] mt-3 max-w-[48ch]">This should match the group&apos;s M-Pesa or bank account. If it doesn&apos;t, record the missing deposit or withdrawal.</p>
           </div>
+          <dl className="grid grid-cols-2 gap-3">
+            {[
+              ['Savings pool', wallet?.savings_pool],
+              ['Emergency reserve', wallet?.emergency_reserve],
+              ['Invested', wallet?.invested],
+              ['Paid out', wallet?.loans_disbursed],
+            ].map(([k, v]) => (
+              <div key={k as string} className="rounded-[18px] bg-canopy p-4">
+                <dt className="text-[13px] text-[#A9C2B3]">{k}</dt>
+                <dd className="font-money text-[22px] mt-1">{formatKsh(Number(v || 0))}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        <div className="grid grid-cols-2 gap-4 w-full md:w-auto shrink-0">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5">
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">SAVINGS POOL</div>
-            <div className="text-lg md:text-xl font-bold text-white font-mono">
-              KSh {formatCurrency(wallet?.savings_pool || 0)}
-            </div>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5">
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">EMERGENCY RESERVE</div>
-            <div className="text-lg md:text-xl font-bold text-[var(--ak-brand-ink)] font-mono">
-              KSh {formatCurrency(wallet?.emergency_reserve || 0)}
-            </div>
-          </div>
-        </div>
-      </div>
+      </Panel>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* WITHDRAWAL REQUESTS */}
-        <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
-          <div className="p-6 border-b border-[var(--border)] shrink-0">
-            <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Withdrawal Consent Board</h3>
-          </div>
-          <div className="overflow-y-auto flex-1 p-0">
-            {/* Desktop Table View */}
-            <table className="hidden md:table w-full text-left border-collapse min-w-[500px]">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
-                <tr>
-                  <th className="px-6 py-3">REQUESTED BY</th>
-                  <th className="px-6 py-3">AMOUNT</th>
-                  <th className="px-6 py-3">VOTES</th>
-                  <th className="px-6 py-3">STATUS</th>
-                  <th className="px-6 py-3 text-right">ACTION</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-                {withdrawals.length === 0 ? (
-                  <tr><td colSpan={5} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No withdrawal requests found.</td></tr>
-                ) : (
-                  withdrawals.map(req => {
-                    const totalVoters = req.total_eligible_voters || 3;
-                    const threshold = Math.floor(totalVoters / 2) + 1;
-                    return (
-                      <tr key={req.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-semibold text-[var(--text-main)]">{req.profiles?.full_name || 'Admin'}</div>
-                          <div className="text-xs text-[var(--text-muted)] mt-0.5 max-w-[150px] truncate">{req.reason}</div>
-                        </td>
-                        <td className="px-6 py-4 font-mono font-bold text-[var(--text-main)]">
-                          KSh {formatCurrency(Number(req.amount))}
-                        </td>
-                        <td className="px-6 py-4 text-xs font-semibold text-[var(--text-main)]">
-                          {req.votes_for} / {threshold} Yes
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
-                            req.status === 'executed' ? 'bg-transparent text-[var(--brand-green)]' :
-                            req.status === 'approved' ? 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300' :
-                            req.status === 'pending' ? 'bg-orange-55 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300' : 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab]'
-                          }`}>
-                            {req.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          {req.status === 'pending' && (
-                            <button onClick={() => handleCancelConsent(req)} className="px-3 py-1 bg-transparent hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-500 rounded text-xs font-semibold">
-                              Cancel
-                            </button>
-                          )}
-                          {req.status === 'approved' && (
-                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white rounded text-xs font-bold shadow-sm">
-                              Execute WD
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-
-            {/* Mobile Card List View */}
-            <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] p-4">
-              {withdrawals.length === 0 ? (
-                <div className="text-center py-8 text-[var(--text-muted)] text-sm">No withdrawal requests found.</div>
-              ) : (
-                withdrawals.map(req => {
-                  const totalVoters = req.total_eligible_voters || 3;
-                  const threshold = Math.floor(totalVoters / 2) + 1;
-                  return (
-                    <div key={req.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="text-sm font-semibold text-[var(--text-main)]">{req.profiles?.full_name || 'Admin'}</div>
-                          <div className="text-xs text-[var(--text-muted)] mt-0.5">{req.reason}</div>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold capitalize ${
-                          req.status === 'executed' ? 'bg-transparent text-[var(--brand-green)]' :
-                          req.status === 'approved' ? 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300' :
-                          req.status === 'pending' ? 'bg-orange-55 dark:bg-orange-950/20 text-orange-850 dark:text-orange-300' : 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab]'
-                        }`}>
-                          {req.status}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <div className="font-mono font-bold text-[var(--text-main)]">
-                          KSh {formatCurrency(Number(req.amount))}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-[var(--text-muted)] mr-2">{req.votes_for} / {threshold} Yes</span>
-                          {req.status === 'pending' && (
-                            <button onClick={() => handleCancelConsent(req)} className="px-3 py-1 bg-transparent hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-500 rounded text-xs font-semibold">
-                              Cancel
-                            </button>
-                          )}
-                          {req.status === 'approved' && (
-                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white rounded text-xs font-bold shadow-sm">
-                              Execute WD
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* WALLET AUDIT LOG */}
-        <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px] hover:shadow-md transition-all duration-200">
-          <div className="p-6 border-b border-[var(--border)] shrink-0">
-            <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">Wallet Audit Log</h3>
-          </div>
-          <div className="overflow-y-auto flex-1 p-0">
-            {/* Desktop Table View */}
-            <table className="hidden md:table w-full text-left border-collapse min-w-[500px]">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
-                <tr>
-                  <th className="px-6 py-3">DATE</th>
-                  <th className="px-6 py-3">ACTION</th>
-                  <th className="px-6 py-3 text-right">AMOUNT</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
-                {walletLog.length === 0 ? (
-                  <tr><td colSpan={3} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No recent transactions.</td></tr>
-                ) : (
-                  walletLog.map(log => {
-                    const isIncoming = Number(log.amount) > 0;
-                    return (
-                      <tr key={log.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
-                        <td className="px-6 py-4 text-xs text-[var(--text-muted)] whitespace-nowrap">
-                          {new Date(log.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-semibold text-[var(--text-main)] capitalize">
-                            {(log.type === 'loan_repayment' ? 'repayment' : log.type.startsWith('loan') ? 'payout' : log.type).replace('_', ' ')}
-                          </div>
-                          {log.chama_memberships?.profiles?.full_name && (
-                            <div className="text-xs text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] mt-0.5">{log.chama_memberships.profiles.full_name}</div>
-                          )}
-                        </td>
-                        <td className={`px-6 py-4 text-right font-mono font-bold ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
-                          {isIncoming ? '+' : ''}KSh {formatCurrency(Number(log.amount))}
-                        </td>
-                      </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
-
-            {/* Mobile Card List View */}
-            <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] p-4">
-              {walletLog.length === 0 ? (
-                <div className="text-center py-8 text-[var(--text-muted)] text-sm">No recent transactions.</div>
-              ) : (
-                walletLog.map(log => {
-                  const isIncoming = Number(log.amount) > 0;
-                  return (
-                    <div key={log.id} className="py-3 first:pt-0 last:pb-0 flex justify-between items-center">
+      <div className="grid lg:grid-cols-[1.2fr_1fr] gap-4 items-start">
+        <Panel>
+          <PanelTitle>Withdrawal requests</PanelTitle>
+          {withdrawals.length === 0 ? (
+            <EmptyState title="No requests">Start a vote when the group needs to take money out.</EmptyState>
+          ) : (
+            <ul className="mt-4 flex flex-col gap-3">
+              {withdrawals.map((req) => {
+                const st = CONSENT[req.status] || { kind: 'neutral' as ChipKind, label: req.status };
+                const voters = Number(req.total_eligible_voters || 0);
+                return (
+                  <li key={req.id} className="rounded-[18px] border border-line p-4">
+                    <div className="flex flex-wrap justify-between items-start gap-3">
                       <div>
-                        <div className="text-sm font-semibold text-[var(--text-main)] capitalize">
-                          {(log.type === 'loan_repayment' ? 'repayment' : log.type.startsWith('loan') ? 'payout' : log.type).replace('_', ' ')}
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-[var(--text-muted)]">
-                            {new Date(log.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                          </span>
-                          {log.chama_memberships?.profiles?.full_name && (
-                            <>
-                              <span className="text-[10px] text-gray-300">•</span>
-                              <span className="text-[10px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">{log.chama_memberships.profiles.full_name}</span>
-                            </>
-                          )}
-                        </div>
+                        <Money value={Number(req.amount)} className="text-[26px]" />
+                        <div className="text-[14px] text-ink-2">{req.reason || 'No reason given'}</div>
+                        <div className="text-[13px] text-ink-3">Asked by {req.profiles?.full_name || 'an official'} · {new Date(req.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' })}</div>
                       </div>
-                      <div className={`text-right font-mono font-bold ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
-                        {isIncoming ? '+' : ''}KSh {formatCurrency(Number(log.amount))}
-                      </div>
+                      <Chip kind={st.kind}>{st.label}</Chip>
                     </div>
-                  )
-                })
-              )}
-            </div>
-          </div>
-        </div>
+                    {voters > 0 && (
+                      <div className="mt-3">
+                        <Ticks total={voters} done={Number(req.votes_for || 0)} />
+                        <div className="text-[13px] text-ink-3 mt-1.5">{req.votes_for || 0} yes, {req.votes_against || 0} no, of {voters} members</div>
+                      </div>
+                    )}
+                    {(req.status === 'approved' || req.status === 'pending') && (
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {req.status === 'approved' && <Button size="sm" variant="forest" onClick={() => handleExecuteWithdrawal(req)} disabled={balance < Number(req.amount)}>Release the money</Button>}
+                        <Button size="sm" variant="ghost" onClick={() => handleCancelConsent(req)}>Cancel request</Button>
+                        {req.status === 'approved' && balance < Number(req.amount) && <span className="text-[13px] text-amber-ink self-center">More than the recorded balance</span>}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Panel>
 
+        <Panel>
+          <PanelTitle>Latest movements</PanelTitle>
+          {walletLog.length === 0 ? (
+            <EmptyState title="Nothing yet" />
+          ) : (
+            <ul className="mt-2">
+              {walletLog.map((tx) => {
+                const inn = incoming(tx.type);
+                return (
+                  <li key={tx.id} className="flex items-center gap-3 py-3 border-t border-line first:border-t-0">
+                    <span className={cn('w-9 h-9 rounded-full flex items-center justify-center shrink-0', inn ? 'bg-mint text-forest' : 'bg-raised text-ink-2')}>
+                      {inn ? <ArrowDownLeft size={16} aria-hidden="true" /> : <ArrowUpRight size={16} aria-hidden="true" />}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[15px] truncate">{tx.description || TXL[tx.type] || tx.type}</span>
+                      <span className="block text-[12px] text-ink-3">{tx.chama_memberships?.profiles?.full_name || 'Group'} · {new Date(tx.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' })}</span>
+                    </span>
+                    <span className={cn('font-money text-[17px] whitespace-nowrap', inn && 'text-brand')}>{inn ? '+' : '−'}{formatKsh(Math.abs(Number(tx.amount)))}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Panel>
       </div>
 
-      {/* DEPOSIT MODAL */}
-      {showDepositModal && (
-        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Deposit Funds</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
-                <input type="number" value={depAmount} onChange={e => setDepAmount(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" />
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Payment Method</label>
-                <select value={depMethod} onChange={e => setDepMethod(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]">
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="Cash Deposit">Cash Deposit</option>
-                  <option value="M-Pesa">M-Pesa Paybill</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reference Code</label>
-                <input type="text" value={depRef} onChange={e => setDepRef(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)] font-mono" />
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Notes</label>
-                <input type="text" value={depNotes} onChange={e => setDepNotes(e.target.value)} placeholder="Optional" className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowDepositModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
-              <button onClick={handleDeposit} disabled={!depAmount || !depRef} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)]">Deposit</button>
-            </div>
-          </div>
+      <Modal
+        open={showDepositModal}
+        onClose={() => setShowDepositModal(false)}
+        title="Record a deposit"
+        footer={<><Button variant="ghost" onClick={() => setShowDepositModal(false)}>Cancel</Button><Button onClick={handleDeposit} disabled={!(Number(depAmount) > 0)}>Record deposit</Button></>}
+      >
+        <div className="flex flex-col gap-5">
+          <p className="text-[14px] text-ink-2">For money that reached the group account outside a member&apos;s contribution, like interest or a refund. Your name is saved on it.</p>
+          <Field label="Amount"><input type="number" inputMode="numeric" min={1} value={depAmount} onChange={(e) => setDepAmount(e.target.value)} className={inputClass} /></Field>
+          <Field label="How it came in">
+            <select value={depMethod} onChange={(e) => setDepMethod(e.target.value)} className={inputClass}>
+              <option>Bank Transfer</option>
+              <option>M-Pesa</option>
+              <option>Cash</option>
+            </select>
+          </Field>
+          <Field label="Reference" hint="Optional"><input value={depRef} onChange={(e) => setDepRef(e.target.value)} className={inputClass} /></Field>
+          <Field label="Note" hint="Optional"><textarea rows={2} value={depNotes} onChange={(e) => setDepNotes(e.target.value)} className={textareaClass} /></Field>
         </div>
-      )}
+      </Modal>
 
-      {/* WITHDRAWAL MODAL */}
-      {showWithdrawModal && (
-        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Request Withdrawal</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
-                <input type="number" value={withAmount} onChange={e => setWithAmount(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" />
-              </div>
-              <div>
-                <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reason for Withdrawal</label>
-                <textarea 
-                  rows={3} 
-                  value={withReason} 
-                  onChange={e => setWithReason(e.target.value)} 
-                  placeholder="e.g. Member exit, project funding..."
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)] resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowWithdrawModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
-              <button onClick={handleWithdrawalRequest} disabled={!withAmount || !withReason} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)]">Submit Request</button>
-            </div>
-          </div>
+      <Modal
+        open={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        title="Start a withdrawal vote"
+        footer={<><Button variant="ghost" onClick={() => setShowWithdrawModal(false)}>Cancel</Button><Button onClick={handleWithdrawalRequest} disabled={!(Number(withAmount) > 0) || !withReason.trim()}>Ask members to vote</Button></>}
+      >
+        <div className="flex flex-col gap-5">
+          <Notice tone="info">Every active member is notified and votes. Once most say yes, you can release the money here.</Notice>
+          <Field label="Amount" hint={`Recorded balance: ${formatKsh(balance)}`}><input type="number" inputMode="numeric" min={1} value={withAmount} onChange={(e) => setWithAmount(e.target.value)} className={inputClass} /></Field>
+          <Field label="What it's for" hint="Members see this when they vote."><textarea rows={3} value={withReason} onChange={(e) => setWithReason(e.target.value)} className={textareaClass} /></Field>
         </div>
-      )}
-
+      </Modal>
     </div>
   );
 }

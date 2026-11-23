@@ -88,7 +88,7 @@ export default function LoadingScreen({
           priority
         />
         <span
-          className="text-[28px] font-bold tracking-tight"
+          className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]"
           style={{ 
             color: 'var(--text-primary, #0A0A0A)' 
           }}>
@@ -101,7 +101,7 @@ export default function LoadingScreen({
 
         <div className="flex justify-between items-center">
           <span
-            className="text-[11px] font-semibold uppercase tracking-widest"
+            className="text-[11px] font-semibold"
             style={{ 
               color: 'var(--text-muted, #A3A3A3)' 
             }}>

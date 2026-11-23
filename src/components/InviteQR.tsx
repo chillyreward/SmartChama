@@ -68,7 +68,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
             </button>
 
             <div className="text-center">
-              <h3 className="text-xl font-bold text-[var(--text-primary)] font-geist mb-1">
+              <h3 className="font-display font-normal text-[22px] text-[var(--text-primary)] mb-1">
                 Invite to {chamaName}
               </h3>
               <p className="text-sm text-[var(--text-secondary)] mb-4">
@@ -76,7 +76,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
               </p>
 
               {/* QR Code */}
-              <div className="bg-white p-4 rounded-xl inline-block mb-4 shadow-sm">
+              <div className="bg-white p-4 rounded-xl inline-block mb-4 ">
                 <Image
                   src={qrUrl}
                   alt={`QR code to join ${chamaName}`}

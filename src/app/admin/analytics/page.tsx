@@ -114,7 +114,7 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)] print-full-width">
+    <div className="w-full text-[var(--text-main)] print-full-width">
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           body {
@@ -150,7 +150,7 @@ export default function AdminAnalyticsPage() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+            <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">
               Admin Analytics
             </h1>
             <p className="text-[14px] text-[var(--text-muted)] mt-1">
@@ -161,7 +161,7 @@ export default function AdminAnalyticsPage() {
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value as any)}
-              className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] outline-hidden cursor-pointer shadow-sm"
+              className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] outline-hidden cursor-pointer "
             >
               <option value="30days">Last 30 Days</option>
               <option value="3months">Last 3 Months</option>
@@ -169,7 +169,7 @@ export default function AdminAnalyticsPage() {
             </select>
             <button 
               onClick={() => window.print()}
-              className="bg-[var(--ak-solid)] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[var(--ak-solid)] transition-all shadow-sm cursor-pointer"
+              className="bg-primary text-on-primary rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all cursor-pointer"
             >
               Export Report
             </button>
@@ -179,8 +179,8 @@ export default function AdminAnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* CONTRIBUTION STATUS */}
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 flex flex-col">
-          <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Contributions by Status</h2>
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-blue-500 rounded-2xl hover:shadow-md transition-all duration-200 p-6 flex flex-col">
+          <h2 className="font-display font-normal text-[22px] text-[var(--text-main)] mb-6">Contributions by Status</h2>
           <div className="flex-1 flex flex-col md:flex-row items-center">
             <div className="w-full md:w-1/2 h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -222,13 +222,13 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* CONTRIBUTION STATS */}
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 flex flex-col justify-between">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl hover:shadow-md transition-all duration-200 p-6 flex flex-col justify-between">
           <div>
-            <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Contribution Compliance</h2>
+            <h2 className="font-display font-normal text-[22px] text-[var(--text-main)] mb-6">Contribution Compliance</h2>
             
             <div className="mb-8">
               <div className="flex justify-between items-end mb-2">
-                <div className="text-3xl font-bold text-[var(--ak-brand-ink)] font-geist">
+                <div className="text-3xl font-bold text-[var(--ak-brand-ink)] ">
                   {contributionStats.total > 0 ? Math.round((contributionStats.confirmed / contributionStats.total) * 100) : 0}%
                 </div>
                 <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">RECOVERY RATE IN PERIOD</div>
@@ -255,8 +255,8 @@ export default function AdminAnalyticsPage() {
         </div>
       </div>
 
-      <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
-        <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Top Contributors In Period</h2>
+      <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-500 rounded-2xl hover:shadow-md transition-all duration-200 p-6">
+        <h2 className="font-display font-normal text-[22px] text-[var(--text-main)] mb-6">Top Contributors In Period</h2>
         <div className="flex flex-col gap-4">
           {topMembers.map((m, idx) => (
             <div key={idx} className="flex justify-between items-center p-4 border border-[var(--border)] rounded-xl hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-all">

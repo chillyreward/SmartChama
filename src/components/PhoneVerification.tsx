@@ -81,7 +81,7 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
 
   return (
     <div className="space-y-2">
-      <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
+      <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
         {label}
       </label>
 
@@ -114,7 +114,7 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
             type="button"
             onClick={() => sendCode()}
             disabled={busy || phone.replace(/\D/g, '').length < 9}
-            className="shrink-0 px-4 rounded-xl bg-[var(--ak-solid)] text-white text-[14px] font-semibold disabled:opacity-50"
+            className="shrink-0 px-4 rounded-xl bg-primary text-on-primary text-[14px] font-semibold disabled:opacity-50"
           >
             {busy ? 'Sending…' : 'Send code'}
           </button>
@@ -138,7 +138,7 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
               type="button"
               onClick={verify}
               disabled={busy || code.length !== 6}
-              className="shrink-0 px-4 rounded-xl bg-[var(--ak-solid)] text-white text-[14px] font-semibold disabled:opacity-50"
+              className="shrink-0 px-4 rounded-xl bg-primary text-on-primary text-[14px] font-semibold disabled:opacity-50"
             >
               {busy ? 'Checking…' : 'Verify'}
             </button>

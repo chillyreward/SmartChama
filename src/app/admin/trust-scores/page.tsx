@@ -165,14 +165,14 @@ export default function AdminTrustScoresPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full">
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse" />
+      <div className="w-full">
+        <div className="bg-surface border border-line rounded-[24px] h-96 animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)]">
+    <div className="w-full text-[var(--text-main)]">
 
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] text-white px-5 py-3 rounded-xl shadow-lg z-50 flex items-center gap-3">
@@ -189,7 +189,7 @@ export default function AdminTrustScoresPage() {
             <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Credit Scores</span>
           </p>
-          <h1 className="text-[26px] font-bold tracking-tight">AI Credit Scores</h1>
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">AI Credit Scores</h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
             <MIcon name="smart_toy"  className="text-[16px] text-[var(--ak-brand-ink)]" />
             Powered by Akibora AI · GPT-4o
@@ -199,7 +199,7 @@ export default function AdminTrustScoresPage() {
           <button
             onClick={calculateAllScores}
             disabled={calculatingAll}
-            className="flex items-center gap-2 bg-[var(--ak-solid)] text-white px-5 py-2.5 rounded-xl text-[14px] font-semibold hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-full text-[14px] font-semibold hover:opacity-90 transition-colors disabled:opacity-50"
           >
             {calculatingAll ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -219,10 +219,10 @@ export default function AdminTrustScoresPage() {
           { label: 'Excellent (80+)', value: members.filter(m => m.trust_score >= 80).length, icon: 'verified', color: 'text-[var(--ak-brand-ink)]' },
           { label: 'At Risk (<40)', value: members.filter(m => m.trust_score < 40).length, icon: 'warning', color: 'text-red-500' },
         ].map(stat => (
-          <div key={stat.label} className="card-bg border border-[var(--border)] rounded-xl p-4">
+          <div key={stat.label} className="bg-surface border border-line rounded-[20px] p-4">
             <div className="flex items-center gap-2 mb-1">
               <MIcon name={stat.icon} className={`text-[18px] ${stat.color || 'text-[var(--text-muted)]'}`} />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">{stat.label}</span>
+              <span className="text-[11px] font-semibold text-[var(--text-muted)]">{stat.label}</span>
             </div>
             <div className="text-[28px] font-bold">{String(stat.value ?? 0)}</div>
           </div>
@@ -230,7 +230,7 @@ export default function AdminTrustScoresPage() {
       </div>
 
       {/* Member list */}
-      <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-surface border border-line rounded-[24px] overflow-hidden ">
         <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
           <h2 className="text-[16px] font-bold">Member Scores</h2>
           <span className="text-[12px] text-[var(--text-muted)]">Click a member to see AI analysis</span>
@@ -314,13 +314,13 @@ export default function AdminTrustScoresPage() {
                         {/* Risk flags */}
                         {m.ai_risk_flags && m.ai_risk_flags.length > 0 && (
                           <div>
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-red-500 mb-1.5 flex items-center gap-1">
+                            <p className="text-[13px] font-medium text-red-500 mb-1.5 flex items-center gap-1">
                               <MIcon name="warning"  className="text-[14px]" />
                               Risk Flags Detected
                             </p>
                             <div className="flex flex-wrap gap-1.5">
                               {m.ai_risk_flags.map((f, i) => (
-                                <span key={i} className="px-2.5 py-1 rounded-lg text-[12px] bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/30">
+                                <span key={i} className="px-2.5 py-1 rounded-lg text-[12px] bg-danger-soft text-danger-ink border border-red-200 dark:border-red-900/30">
                                   {f}
                                 </span>
                               ))}
@@ -331,10 +331,10 @@ export default function AdminTrustScoresPage() {
                         {/* Positive factors */}
                         {m.ai_positive_factors && m.ai_positive_factors.length > 0 && (
                           <div>
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--ak-brand-ink)] mb-1.5">Strengths</p>
+                            <p className="text-[13px] font-medium text-[var(--ak-brand-ink)] mb-1.5">Strengths</p>
                             <div className="flex flex-wrap gap-1.5">
                               {m.ai_positive_factors.map((f, i) => (
-                                <span key={i} className="px-2.5 py-1 rounded-lg text-[12px] bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/30">
+                                <span key={i} className="px-2.5 py-1 rounded-lg text-[12px] bg-tint text-brand border border-green-200 dark:border-green-900/30">
                                   ✓ {f}
                                 </span>
                               ))}
@@ -345,7 +345,7 @@ export default function AdminTrustScoresPage() {
                         {/* Negative factors */}
                         {m.ai_negative_factors && m.ai_negative_factors.length > 0 && (
                           <div>
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-orange-500 mb-1.5">Areas of Concern</p>
+                            <p className="text-[13px] font-medium text-orange-500 mb-1.5">Areas of Concern</p>
                             <div className="flex flex-wrap gap-1.5">
                               {m.ai_negative_factors.map((f, i) => (
                                 <span key={i} className="px-2.5 py-1 rounded-lg text-[12px] bg-orange-50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900/30">
@@ -383,20 +383,20 @@ export default function AdminTrustScoresPage() {
       {/* Override Modal */}
       {showOverrideModal && overrideMember && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <h2 className="text-[18px] font-bold mb-1">Override Credit Score</h2>
+          <div className="bg-surface border border-line rounded-[24px] p-6 w-full max-w-sm shadow-2xl">
+            <h2 className="font-display font-normal text-[22px] mb-1">Override Credit Score</h2>
             <p className="text-[13px] text-[var(--text-muted)] mb-5">
               {overrideMember.full_name} · Current score: <strong>{overrideMember.trust_score}</strong>
             </p>
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--text-muted)]">New Score (0–100)</label>
+                <label className="block text-[11px] font-semibold mb-1.5 text-[var(--text-muted)]">New Score (0–100)</label>
                 <input type="number" min="0" max="100" value={newScore}
                   onChange={e => setNewScore(e.target.value)}
                   className="w-full border border-[var(--border)] rounded-lg px-4 py-2.5 bg-[var(--bg-input)] text-[var(--text-main)] focus:outline-none focus:border-[var(--ak-brand-ink)]" />
               </div>
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--text-muted)]">Reason (logged in audit)</label>
+                <label className="block text-[11px] font-semibold mb-1.5 text-[var(--text-muted)]">Reason (logged in audit)</label>
                 <textarea rows={3} value={overrideReason}
                   onChange={e => setOverrideReason(e.target.value)}
                   placeholder="Required for audit trail..."
@@ -410,7 +410,7 @@ export default function AdminTrustScoresPage() {
               </button>
               <button onClick={handleOverride}
                 disabled={!newScore || !overrideReason}
-                className="flex-1 bg-[var(--ak-solid)] text-white rounded-lg py-2.5 text-[14px] font-semibold hover:bg-[var(--ak-solid)] disabled:opacity-50">
+                className="flex-1 bg-primary text-on-primary rounded-lg py-2.5 text-[14px] font-semibold hover:opacity-90 disabled:opacity-50">
                 Update Score
               </button>
             </div>

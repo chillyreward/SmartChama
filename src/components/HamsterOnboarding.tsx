@@ -309,7 +309,7 @@ export default function HamsterOnboarding() {
 
           {/* Content */}
           <div className="px-8 pt-6 pb-4">
-            <h2 className="text-xl font-bold text-[#09090B] dark:text-white mb-2 leading-tight">
+            <h2 className="font-display font-normal text-[22px] text-[#09090B] dark:text-white mb-2 leading-tight">
               {current.title}
             </h2>
             <p className="text-[15px] text-[#3F3F46] dark:text-[#D4D4D8] leading-relaxed">
@@ -351,7 +351,7 @@ export default function HamsterOnboarding() {
 
             <button
               onClick={next}
-              className="ml-auto flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white text-[14px] font-semibold transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95"
+              className="ml-auto flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--ak-solid)] hover:bg-primary text-on-primary text-[14px] font-semibold transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95"
             >
               {isLast ? 'Get Started' : 'Next'}
               <MIcon name={isLast ? 'rocket_launch' : 'arrow_forward'}  className="text-[18px]" />

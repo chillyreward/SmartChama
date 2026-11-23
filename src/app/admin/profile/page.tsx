@@ -177,7 +177,7 @@ export default function AdminProfilePage() {
   }
 
   return (
-    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
+    <div className="w-full min-h-full text-[var(--text-main)]">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
@@ -187,7 +187,7 @@ export default function AdminProfilePage() {
             <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Profile</span>
           </p>
-          <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">
             Admin Profile Settings
           </h1>
           <p className="text-[14px] text-[var(--text-muted)] mt-1">
@@ -197,7 +197,7 @@ export default function AdminProfilePage() {
         <div>
           <button
             onClick={() => router.push('/dashboard')}
-            className="bg-transparent border border-[var(--border)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all flex items-center gap-2 shadow-sm"
+            className="bg-transparent border border-[var(--border)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all flex items-center gap-2 "
           >
             <MIcon name="switch_account"  className="text-[18px]" />
             Switch to Member View
@@ -221,12 +221,12 @@ export default function AdminProfilePage() {
         
         {/* Left Side: Avatar & Role */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="card-bg border border-[var(--border)] border-t-2 border-t-red-500 p-6 rounded-2xl text-center shadow-sm hover:shadow-md transition-all duration-200">
+          <div className="card-bg border border-[var(--border)] border-t-2 border-t-red-500 p-6 rounded-2xl text-center hover:shadow-md transition-all duration-200">
             <div className="relative w-24 h-24 mx-auto mb-4 group cursor-pointer">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover border-2 border-[var(--ak-brand-ink)]" />
               ) : (
-                <div className="w-full h-full rounded-full bg-[var(--ak-solid)] text-white flex items-center justify-center font-bold text-2xl">
+                <div className="w-full h-full rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-2xl">
                   {getInitials(fullName)}
                 </div>
               )}
@@ -237,9 +237,9 @@ export default function AdminProfilePage() {
               </label>
             </div>
 
-            <h3 className="text-[18px] font-bold text-[var(--ak-text)] dark:text-white truncate font-geist">{fullName || 'Admin User'}</h3>
+            <h3 className="font-display font-normal text-[22px] text-[var(--ak-text)] dark:text-white truncate ">{fullName || 'Admin User'}</h3>
             <div className="mt-2">
-              <span className="bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-red-450 text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full border border-red-200/50 dark:border-red-900/30">
+              <span className="bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-red-450 text-[11px] font-extrabold px-3 py-1 rounded-full border border-red-200/50 dark:border-red-900/30">
                 Group Administrator
               </span>
             </div>
@@ -257,8 +257,8 @@ export default function AdminProfilePage() {
           </div>
 
           {/* Managed Groups */}
-          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
-            <h3 className="text-[15px] font-bold text-[var(--ak-text)] dark:text-white mb-4 font-geist">
+          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] p-6 rounded-2xl hover:shadow-md transition-all duration-200">
+            <h3 className="text-[15px] font-bold text-[var(--ak-text)] dark:text-white mb-4 ">
               Chamas You Administer
             </h3>
             {managedChamas.length === 0 ? (
@@ -285,8 +285,8 @@ export default function AdminProfilePage() {
 
         {/* Right Side: Form Inputs */}
         <div className="lg:col-span-2">
-          <form onSubmit={handleSave} className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 space-y-6">
-            <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-[var(--border)] pb-3 font-geist">
+          <form onSubmit={handleSave} className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] p-6 rounded-2xl hover:shadow-md transition-all duration-200 space-y-6">
+            <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-[var(--border)] pb-3 ">
               Personal Information
             </h3>
 
@@ -360,7 +360,7 @@ export default function AdminProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-[var(--ak-solid)] hover:bg-[#1ea94e] text-white px-6 py-2.5 rounded-lg text-[14px] font-semibold transition-colors shadow-sm disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+                className="bg-[var(--ak-solid)] hover:bg-[#1ea94e] text-white px-6 py-2.5 rounded-lg text-[14px] font-semibold transition-colors disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
               >
                 {saving ? 'Saving changes...' : 'Save Profile'}
               </button>

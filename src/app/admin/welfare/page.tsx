@@ -1,8 +1,9 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any -- untyped API rows */
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/../components/AuthProvider';
-import { Heart, CheckCircle, XCircle, AlertCircle, DollarSign, UserCheck } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
+import { Avatar, Button, Chip, EmptyState, Money, Notice, PageHeader, Panel, PanelTitle, Stat, cn, formatKsh, type ChipKind } from '@/components/ui';
 import PageSkeleton from '@/components/PageSkeleton';
 
 export default function AdminWelfarePage() {
@@ -46,7 +47,7 @@ export default function AdminWelfarePage() {
 
       const data = await res.json();
       if (data.success) {
-        setMsg({ error: '', success: `Claim status updated to ${data.claim.status}.` });
+        setMsg({ error: '', success: data.claim.status === 'paid' ? 'Marked as paid.' : data.claim.status === 'approved' ? 'Approved. Mark it paid once the money is sent.' : 'Request declined.' });
         fetchWelfareStatus();
       } else {
         setMsg({ error: data.error || 'Failed to update claim.', success: '' });
@@ -60,123 +61,74 @@ export default function AdminWelfarePage() {
     return <PageSkeleton />;
   }
 
-  const pendingClaimsCount = claims.filter(c => c.status === 'pending').length;
+  const REASONS: Record<string, string> = { bereavement: 'Bereavement', medical: 'Medical or hospital', wedding: 'Wedding', education: 'School fees', other: 'Another emergency' };
+  const ST: Record<string, { kind: ChipKind; label: string }> = {
+    pending: { kind: 'pending', label: 'Waiting for a decision' },
+    approved: { kind: 'info', label: 'Approved, not yet paid' },
+    paid: { kind: 'paid', label: 'Paid out' },
+    rejected: { kind: 'failed', label: 'Declined' },
+  };
+  const order = ['pending', 'approved', 'paid', 'rejected'];
+  const sorted = [...claims].sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
+  const pendingClaims = claims.filter((c) => c.status === 'pending');
+  const paidTotal = claims.filter((c) => c.status === 'paid').reduce((s, c) => s + Number(c.amount || 0), 0);
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-          <Heart className="w-7 h-7 text-[var(--ak-brand-ink)]" />
-          Welfare & Emergency Fund
-        </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Manage emergency payouts, bereavement assistance, and member welfare claims.
-        </p>
+    <div>
+      <PageHeader title="Welfare fund" subtitle="Requests for help from members. Approve, decline, and mark as paid once the money has gone out." />
+      {msg.error && <Notice tone="danger" className="mb-4">{msg.error}</Notice>}
+      {msg.success && <Notice tone="ok" className="mb-4">{msg.success}</Notice>}
+
+      <div className="grid gap-4 md:grid-cols-4 mb-4">
+        <Stat tone="lavender" label="In the fund" value={formatKsh(fund?.balance || 0)} className="md:col-span-1" />
+        <Stat label="Waiting for you" value={String(pendingClaims.length)} money={false} hint={pendingClaims.length === 1 ? 'request' : 'requests'} />
+        <Stat label="Paid out so far" value={formatKsh(paidTotal)} />
+        <Stat label="Limit per request" value={formatKsh(fund?.max_claim_amount || 0)} hint={`members add ${formatKsh(fund?.monthly_contribution || 0)} a month`} />
       </div>
 
-      {msg.error && (
-        <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          {msg.error}
-        </div>
-      )}
-
-      {msg.success && (
-        <div className="p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 text-green-700 dark:text-green-400 text-sm flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 shrink-0" />
-          {msg.success}
-        </div>
-      )}
-
-      {/* Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="sc-card p-6 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Welfare Pool Balance</p>
-          <p className="text-3xl font-bold text-[var(--ak-brand-ink)] mt-1">KSh {Number(fund?.balance || 0).toLocaleString('en-KE')}</p>
-        </div>
-        <div className="sc-card p-6 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Monthly Contribution</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">KSh {Number(fund?.monthly_contribution || 500).toLocaleString('en-KE')}</p>
-        </div>
-        <div className="sc-card p-6 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Pending Claims</p>
-          <p className="text-2xl font-bold text-amber-500 mt-1">{pendingClaimsCount}</p>
-        </div>
-      </div>
-
-      {/* Claims List Table */}
-      <div className="sc-card p-6 rounded-2xl border space-y-4">
-        <h3 className="text-lg font-bold text-[var(--text-primary)]">Welfare Claims Review</h3>
-
-        {claims.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)] py-6 text-center">No welfare claims submitted yet.</p>
+      <Panel>
+        <PanelTitle>Requests</PanelTitle>
+        {sorted.length === 0 ? (
+          <EmptyState title="No requests yet">When a member asks the fund for help, it appears here for officials to decide.</EmptyState>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm sc-table">
-              <thead>
-                <tr className="border-b border-[var(--border)]">
-                  <th className="py-3 px-4">Member</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4">Description</th>
-                  <th className="py-3 px-4">Claim Amount</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {claims.map(c => {
-                  const memberName = c.chama_memberships?.profiles?.full_name || 'Member';
-                  return (
-                    <tr key={c.id}>
-                      <td className="py-3 px-4 font-semibold text-[var(--text-primary)]">{memberName}</td>
-                      <td className="py-3 px-4 text-xs font-medium capitalize text-[var(--text-secondary)]">{c.reason}</td>
-                      <td className="py-3 px-4 text-xs text-[var(--text-muted)]">{c.description || 'N/A'}</td>
-                      <td className="py-3 px-4 font-bold text-[var(--text-primary)]">KSh {Number(c.amount).toLocaleString('en-KE')}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${
-                          c.status === 'paid' 
-                            ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400' 
-                            : c.status === 'approved' 
-                            ? 'bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400'
-                            : c.status === 'rejected'
-                            ? 'bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400'
-                            : 'bg-amber-100 dark:bg-amber-950/30 text-amber-600'
-                        }`}>
-                          {c.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right space-x-2">
-                        {c.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleAction(c.id, 'approve')}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handleAction(c.id, 'reject')}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-600 text-white hover:bg-red-700">
-                              Reject
-                            </button>
-                          </>
-                        )}
-                        {c.status === 'approved' && (
-                          <button
-                            onClick={() => handleAction(c.id, 'paid')}
-                            className="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">
-                            Disburse Funds
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ul className="mt-3 flex flex-col gap-3">
+            {sorted.map((c) => {
+              const st = ST[c.status] || { kind: 'neutral' as ChipKind, label: c.status };
+              const name = c.chama_memberships?.profiles?.full_name || 'A member';
+              return (
+                <li key={c.id} className={cn('rounded-[18px] p-4 sm:p-5 border', c.status === 'pending' ? 'bg-surface-2 border-line-strong/40' : 'border-line')}>
+                  <div className="flex flex-wrap items-start gap-4">
+                    <Avatar name={name} size={40} tone="lavender" />
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="text-[16px] font-semibold">{name}</div>
+                      <div className="text-[14px] text-ink-2">{REASONS[c.reason] || c.reason}</div>
+                      {c.description && <p className="text-[14px] text-ink-3 mt-1 max-w-[60ch]">&ldquo;{c.description}&rdquo;</p>}
+                    </div>
+                    <div className="text-right">
+                      <Money value={Number(c.amount)} className="text-[24px]" />
+                      <div className="mt-1"><Chip kind={st.kind}>{st.label}</Chip></div>
+                    </div>
+                  </div>
+                  {(c.status === 'pending' || c.status === 'approved') && (
+                    <div className="flex flex-wrap gap-2 mt-4 sm:pl-14">
+                      {c.status === 'pending' && (
+                        <>
+                          <Button size="sm" onClick={() => handleAction(c.id, 'approve')} disabled={Number(c.amount) > Number(fund?.balance || 0)}>Approve</Button>
+                          <Button size="sm" variant="outline" onClick={() => handleAction(c.id, 'reject')}>Decline</Button>
+                          {Number(c.amount) > Number(fund?.balance || 0) && <span className="text-[13px] text-amber-ink self-center">More than the fund holds</span>}
+                        </>
+                      )}
+                      {c.status === 'approved' && (
+                        <Button size="sm" variant="forest" onClick={() => { if (confirm(`Mark ${formatKsh(c.amount)} as paid to ${name}? Do this once the money has been sent.`)) handleAction(c.id, 'paid'); }}>Mark as paid</Button>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </div>
+      </Panel>
     </div>
   );
 }

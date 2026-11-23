@@ -132,7 +132,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <div className="w-full">
         <SkeletonDashboard />
       </div>
     )
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
           </p>
           <button
             onClick={load}
-            className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-xl font-medium">
+            className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-medium">
             Try Again
           </button>
         </div>

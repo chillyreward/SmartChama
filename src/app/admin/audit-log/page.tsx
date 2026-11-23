@@ -77,14 +77,14 @@ export default function AdminAuditLogPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
+      <div className="w-full ">
+        <div className="bg-surface border border-line rounded-[24px] h-96 animate-pulse "></div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
+    <div className="w-full min-h-full text-[var(--text-main)]">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6 md:mb-8">
         <div>
@@ -93,11 +93,11 @@ export default function AdminAuditLogPage() {
             <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Audit Log</span>
           </p>
-          <h1 className="text-[24px] md:text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Audit Log</h1>
+          <h1 className="text-[24px] md:font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Audit Log</h1>
           <p className="text-[14px] text-[var(--text-muted)] mt-1">Immutable record of all administrative actions</p>
         </div>
         <div className="w-full md:w-auto">
-          <button className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-2 w-full md:w-auto">
+          <button className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all flex items-center justify-center gap-2 w-full md:w-auto">
             <MIcon name="download"  className="text-[18px]" />
             Export Log
           </button>
@@ -111,12 +111,12 @@ export default function AdminAuditLogPage() {
         </p>
       </div>
 
-      <div className="card-bg border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden min-h-[400px] hover:shadow-md transition-all duration-200">
+      <div className="bg-surface border border-line rounded-[24px] overflow-hidden min-h-[400px] hover:shadow-md transition-all duration-200">
         <div className="overflow-x-auto">
           {/* Desktop Table View */}
           <table className="hidden md:table w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[13px] font-medium">
                 <th className="px-6 py-4">TIMESTAMP</th>
                 <th className="px-6 py-4">ADMINISTRATOR</th>
                 <th className="px-6 py-4">ACTION / TYPE</th>
@@ -139,7 +139,7 @@ export default function AdminAuditLogPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] shadow-sm">
+                        <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] ">
                           {log.admin_name.charAt(0)}
                         </div>
                         <span className="text-sm font-semibold text-[var(--text-main)]">{log.admin_name}</span>
@@ -177,7 +177,7 @@ export default function AdminAuditLogPage() {
                 <div key={log.id} className="py-4 first:pt-0 last:pb-0 flex flex-col gap-3">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] shadow-sm">
+                      <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] ">
                         {log.admin_name.charAt(0)}
                       </div>
                       <span className="text-sm font-semibold text-[var(--text-main)]">{log.admin_name}</span>

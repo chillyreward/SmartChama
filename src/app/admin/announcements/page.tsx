@@ -94,14 +94,14 @@ export default function AdminAnnouncementsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="card-bg border border-[var(--border)] rounded-2xl h-96 animate-pulse shadow-sm"></div>
+      <div className="w-full ">
+        <div className="bg-surface border border-line rounded-[24px] h-96 animate-pulse "></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
+    <div className="w-full relative min-h-full text-[var(--text-main)]">
       {toastMsg && (
         <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
           <MIcon name="check_circle"  className="text-[var(--ak-brand-ink)]" />
@@ -117,13 +117,13 @@ export default function AdminAnnouncementsPage() {
             <MIcon name="chevron_right"  className="text-[14px]" />
             <span>Announcements</span>
           </p>
-          <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">Announcements</h1>
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Announcements</h1>
           <p className="text-[14px] text-[var(--text-muted)] mt-1">Broadcast messages to all group members</p>
         </div>
         <div>
           <button 
             onClick={() => setShowModal(true)}
-            className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center gap-2"
+            className="bg-[var(--ak-solid)] hover:bg-primary text-on-primary px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-2"
           >
             <MIcon name="campaign"  className="text-[18px]" />
             New Announcement
@@ -133,22 +133,22 @@ export default function AdminAnnouncementsPage() {
 
       <div className="flex flex-col gap-4">
         {announcements.length === 0 ? (
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center text-[var(--text-muted)] shadow-sm">
+          <div className="bg-surface border border-line rounded-[24px] p-12 text-center text-[var(--text-muted)] ">
             <MIcon name="campaign"  className="text-[48px] mb-4 text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]" />
-            <div className="text-lg font-bold font-geist text-[var(--text-main)]">No announcements yet</div>
+            <div className="font-display font-normal text-[22px] text-[var(--text-main)]">No announcements yet</div>
             <div className="text-xs mt-1 text-[var(--text-muted)]">Send your first broadcast to the group.</div>
           </div>
         ) : (
           announcements.map(ann => (
-            <div key={ann.id} className="card-bg border border-[var(--border)] rounded-2xl p-6 shadow-sm relative group transition-all hover:shadow-md">
+            <div key={ann.id} className="bg-surface border border-line rounded-[24px] p-6 relative group transition-all hover:shadow-md">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex gap-3 items-center">
                   {ann.is_important && (
-                    <span className="bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab] border border-red-100 dark:border-red-900/30 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
+                    <span className="bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab] border border-red-100 dark:border-red-900/30 text-[13px] font-medium px-2 py-0.5 rounded">
                       Important
                     </span>
                   )}
-                  <h3 className="text-lg font-bold font-geist text-[var(--text-main)]">{ann.title}</h3>
+                  <h3 className="font-display font-normal text-[22px] text-[var(--text-main)]">{ann.title}</h3>
                 </div>
                 <button 
                   onClick={() => handleDelete(ann.id)}
@@ -163,7 +163,7 @@ export default function AdminAnnouncementsPage() {
               </p>
               
               <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)] text-xs text-[var(--text-muted)]">
-                <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] shadow-sm">
+                <div className="w-6 h-6 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-[10px] ">
                   {ann.author?.full_name ? ann.author.full_name.charAt(0) : 'A'}
                 </div>
                 <span>Posted by <span className="font-semibold text-[var(--text-main)]">{ann.author?.full_name || 'Admin'}</span></span>
@@ -178,8 +178,8 @@ export default function AdminAnnouncementsPage() {
       {/* NEW ANNOUNCEMENT MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
-          <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-lg shadow-2xl text-[var(--text-main)]">
-            <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Create Announcement</h2>
+          <div className="bg-surface border border-line rounded-[24px] p-6 w-full max-w-lg shadow-2xl text-[var(--text-main)]">
+            <h2 className="text-headline-sm font-bold text-[var(--text-main)] mb-6">Create Announcement</h2>
             
             <div className="space-y-4">
               <div>
@@ -218,7 +218,7 @@ export default function AdminAnnouncementsPage() {
 
             <div className="flex gap-3 mt-8">
               <button onClick={() => setShowModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded-lg py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
-              <button onClick={handleSend} disabled={!title || !message} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded-lg py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)] flex items-center justify-center gap-2 transition-all">
+              <button onClick={handleSend} disabled={!title || !message} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded-lg py-2 text-body-sm font-medium hover:opacity-90 flex items-center justify-center gap-2 transition-all">
                 <MIcon name="send"  className="text-[18px]" />
                 Send Now
               </button>

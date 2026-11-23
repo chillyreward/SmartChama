@@ -117,7 +117,7 @@ export default function KycReviewPage() {
                 <button
                   onClick={() => decide(it.id, 'verified')}
                   disabled={busyId === it.id}
-                  className="px-4 py-2 rounded-lg bg-[var(--ak-solid)] text-white text-[14px] font-semibold disabled:opacity-40"
+                  className="px-4 py-2 rounded-lg bg-primary text-on-primary text-[14px] font-semibold disabled:opacity-40"
                 >
                   Approve
                 </button>

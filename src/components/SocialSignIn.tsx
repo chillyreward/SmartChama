@@ -67,7 +67,7 @@ export default function SocialSignIn({ next = '/dashboard', disabled = false }: 
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" />
-        <span className="text-[12px] font-medium uppercase tracking-wider text-[var(--ak-text-3)]">or</span>
+        <span className="text-[12px] font-medium text-[var(--ak-text-3)]">or</span>
         <div className="flex-1 h-px bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" />
       </div>
       {enabled.includes('google') && (

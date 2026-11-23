@@ -178,7 +178,7 @@ export function ChatBot() {
                 key={q}
                 onClick={() => handleSend(q)}
                 disabled={typing}
-                className="flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors hover:bg-[var(--ak-solid)] hover:text-white disabled:opacity-50"
+                className="flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors hover:opacity-90 hover:text-white disabled:opacity-50"
                 style={{
                   backgroundColor: 'var(--bg-subtle)',
                   color: 'var(--text-secondary)',
@@ -205,7 +205,7 @@ export function ChatBot() {
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || typing}
-              className="w-10 h-10 rounded-xl bg-[var(--ak-solid)] text-white flex items-center justify-center hover:bg-[var(--ak-solid)] disabled:opacity-40 transition-colors flex-shrink-0">
+              className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center hover:opacity-90 disabled:opacity-40 transition-colors flex-shrink-0">
               <SendHorizontal size={18} aria-hidden="true" />
             </button>
           </div>

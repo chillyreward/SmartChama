@@ -43,7 +43,7 @@ export default function IdDocumentUpload({
 
   return (
     <div className="space-y-2">
-      <label htmlFor="id-document" className="block text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+      <label htmlFor="id-document" className="block text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>
         {label}
       </label>
       {preview && <img src={preview} alt="Your ID" className="w-full max-h-48 object-contain rounded-xl border" style={{ borderColor: 'var(--border)' }} />}

@@ -118,11 +118,11 @@ export default function AdminPenaltiesPage() {
   const unpaidTotal = penalties.filter(p => p.status === 'unpaid').reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
+    <div className="w-full space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em] flex items-center gap-2 text-[var(--text-primary)]">
             <ShieldAlert className="w-7 h-7 text-[var(--ak-brand-ink)]" />
             Member Penalties & Fines
           </h1>
@@ -132,7 +132,7 @@ export default function AdminPenaltiesPage() {
         </div>
         <button
           onClick={() => setShowImposeModal(true)}
-          className="px-4 py-2.5 rounded-xl font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors flex items-center gap-2 text-sm shadow-sm">
+          className="px-4 py-2.5 rounded-xl font-bold bg-primary text-on-primary hover:opacity-90 transition-colors flex items-center gap-2 text-sm ">
           <Plus className="w-4 h-4" /> Impose Penalty
         </button>
       </div>
@@ -153,23 +153,23 @@ export default function AdminPenaltiesPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="sc-card p-5 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Total Penalties</p>
+        <div className="bg-surface border border-line rounded-[24px] p-5">
+          <p className="text-[13px] text-ink-3">Total Penalties</p>
           <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">{penalties.length}</p>
         </div>
-        <div className="sc-card p-5 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Unpaid Fines Total</p>
+        <div className="bg-surface border border-line rounded-[24px] p-5">
+          <p className="text-[13px] text-ink-3">Unpaid Fines Total</p>
           <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">KSh {unpaidTotal.toLocaleString('en-KE')}</p>
         </div>
-        <div className="sc-card p-5 rounded-2xl border">
-          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Settled & Waived</p>
+        <div className="bg-surface border border-line rounded-[24px] p-5">
+          <p className="text-[13px] text-ink-3">Settled & Waived</p>
           <p className="text-2xl font-bold text-[var(--ak-brand-ink)] mt-1">{penalties.filter(p => p.status !== 'unpaid').length}</p>
         </div>
       </div>
 
       {/* Penalties List Table */}
-      <div className="sc-card p-6 rounded-2xl border space-y-4">
-        <h3 className="text-lg font-bold text-[var(--text-primary)]">Penalties Log</h3>
+      <div className="bg-surface border border-line rounded-[24px] p-6 space-y-4">
+        <h3 className="font-display font-normal text-[22px] text-[var(--text-primary)]">Penalties Log</h3>
         
         {penalties.length === 0 ? (
           <p className="text-sm text-[var(--text-muted)] py-6 text-center">No penalties recorded yet.</p>
@@ -200,10 +200,10 @@ export default function AdminPenaltiesPage() {
                       <td className="py-3 px-4">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${
                           p.status === 'paid' 
-                            ? 'bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400' 
+                            ? 'bg-tint text-brand' 
                             : p.status === 'waived' 
                             ? 'bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)]' 
-                            : 'bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400'
+                            : 'bg-danger-soft text-danger-ink'
                         }`}>
                           {p.status}
                         </span>
@@ -213,7 +213,7 @@ export default function AdminPenaltiesPage() {
                           <>
                             <button
                               onClick={() => handleAction(p.id, 'pay')}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary text-on-primary hover:opacity-90">
                               Mark Paid
                             </button>
                             <button
@@ -237,15 +237,15 @@ export default function AdminPenaltiesPage() {
       {showImposeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="sc-card w-full max-w-md p-6 rounded-2xl border space-y-4">
-            <h3 className="text-xl font-bold text-[var(--text-primary)]">Impose Fine / Penalty</h3>
+            <h3 className="font-display font-normal text-[22px] text-[var(--text-primary)]">Impose Fine / Penalty</h3>
 
             <form onSubmit={handleImpose} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1">Select Member</label>
+                <label className="block text-[13px] font-medium text-[var(--text-secondary)] mb-1">Select Member</label>
                 <select
                   value={selectedMember}
                   onChange={e => setSelectedMember(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
+                  className="w-full px-4 py-2.5 rounded-[14px] border bg-surface-2 text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
                   {members.map(m => (
                     <option key={m.id} value={m.id}>{m.profiles?.full_name || 'Member'}</option>
                   ))}
@@ -253,11 +253,11 @@ export default function AdminPenaltiesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1">Violation Type</label>
+                <label className="block text-[13px] font-medium text-[var(--text-secondary)] mb-1">Violation Type</label>
                 <select
                   value={penaltyType}
                   onChange={e => setPenaltyType(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
+                  className="w-full px-4 py-2.5 rounded-[14px] border bg-surface-2 text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
                   <option value="late_contribution">Late Contribution</option>
                   <option value="missed_meeting">Missed Meeting</option>
                   <option value="custom">Custom Violation</option>
@@ -265,25 +265,25 @@ export default function AdminPenaltiesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1">Fine Amount (KSh)</label>
+                <label className="block text-[13px] font-medium text-[var(--text-secondary)] mb-1">Fine Amount (KSh)</label>
                 <input
                   type="number"
                   required
                   min="10"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
+                  className="w-full px-4 py-2.5 rounded-[14px] border bg-surface-2 text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-1">Reason / Description</label>
+                <label className="block text-[13px] font-medium text-[var(--text-secondary)] mb-1">Reason / Description</label>
                 <textarea
                   rows={2}
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   placeholder="e.g. Late contribution for October"
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
+                  className="w-full px-4 py-2.5 rounded-[14px] border bg-surface-2 text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
@@ -297,7 +297,7 @@ export default function AdminPenaltiesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl text-sm font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
+                  className="px-5 py-2 rounded-xl text-sm font-bold bg-primary text-on-primary hover:opacity-90">
                   {submitting ? 'Imposing...' : 'Confirm Penalty'}
                 </button>
               </div>

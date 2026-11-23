@@ -105,7 +105,7 @@ export default function AdminNotificationsPage() {
   }
 
   return (
-    <div className="max-w-4xl p-6 md:p-8 font-inter text-[var(--text-main)]">
+    <div className="max-w-4xl p-6 md:p-8 text-[var(--text-main)]">
       {/* Page Header */}
       <div className="mb-8">
         <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
@@ -114,7 +114,7 @@ export default function AdminNotificationsPage() {
           <span>Notifications</span>
         </p>
         
-        <h1 className="text-[28px] font-bold text-[var(--text-main)] tracking-tight leading-tight">
+        <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">
           Admin Notifications
         </h1>
         <p className="text-[14px] text-[var(--text-muted)] mt-1">
@@ -156,7 +156,7 @@ export default function AdminNotificationsPage() {
           </p>
         </div>
       ) : (
-        <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] shadow-sm">
+        <div className="bg-surface border border-line rounded-[24px] overflow-hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] ">
           {filteredNotifications.map(notif => {
             const config = getIconConfig(notif.type)
             const isPersonal = notif.profile_id === session?.user?.id

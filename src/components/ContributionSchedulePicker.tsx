@@ -145,7 +145,7 @@ export default function ContributionSchedulePicker({
                   aria-pressed={on}
                   aria-label={prettyDate(d)}
                   className={`h-9 rounded-lg text-[13px] tabular-nums transition-colors ${
-                    on ? 'bg-[var(--ak-solid)] text-white font-semibold'
+                    on ? 'bg-primary text-on-primary font-semibold'
                       : past ? 'text-[#C4CCC7] dark:text-[#3A4740] cursor-not-allowed'
                       : 'text-[var(--ak-text)] dark:text-white hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)]'
                   } ${d === today && !on ? 'ring-1 ring-[var(--ak-brand-ink)]' : ''}`}

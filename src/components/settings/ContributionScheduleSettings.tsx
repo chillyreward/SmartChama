@@ -68,7 +68,7 @@ export default function ContributionScheduleSettings({ chamaId, onSaved }: { cha
   return (
     <section className="space-y-4 pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
       <div>
-        <h2 className="text-xl font-bold text-[var(--text-main)] font-geist">Contribution schedule</h2>
+        <h2 className="font-display font-normal text-[22px] text-[var(--text-main)] ">Contribution schedule</h2>
         {current && (
           <p className="text-[13px] text-[var(--text-muted)] mt-1">
             Now: {describeSchedule(current)}
@@ -94,7 +94,7 @@ export default function ContributionScheduleSettings({ chamaId, onSaved }: { cha
           type="button"
           onClick={save}
           disabled={saving || !current}
-          className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm disabled:opacity-50"
+          className="bg-primary text-on-primary px-6 py-2.5 rounded-full text-[13px] font-semibold hover:opacity-90 transition-colors disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Save schedule'}
         </button>
