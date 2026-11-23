@@ -108,16 +108,11 @@ export default function AdminNotificationsPage() {
     <div className="max-w-4xl p-6 md:p-8 text-[var(--text-main)]">
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-          <span>Admin Dashboard</span>
-          <MIcon name="chevron_right"  className="text-[14px]" />
-          <span>Notifications</span>
-        </p>
         
         <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">
           Admin Notifications
         </h1>
-        <p className="text-[14px] text-[var(--text-muted)] mt-1">
+        <p className="text-[15px] text-ink-2 mt-1.5">
           Manage system alerts, member action triggers, and logs.
         </p>
       </div>

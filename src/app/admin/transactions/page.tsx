@@ -133,13 +133,8 @@ export default function AdminTransactionsPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
-          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-            <span>Admin Dashboard</span>
-            <MIcon name="chevron_right"  className="text-[14px]" />
-            <span>Transactions</span>
-          </p>
-          <h1 className="text-[24px] md:font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">All Transactions</h1>
-          <p className="text-[13px] md:text-[14px] text-[var(--text-muted)] mt-1">Complete financial ledger for the group</p>
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Transactions</h1>
+          <p className="text-[15px] text-ink-2 mt-1.5">Every shilling in and out of the group.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           <button 
@@ -220,7 +215,7 @@ export default function AdminTransactionsPage() {
                 </tr>
               ) : (
                 filteredTx.map(tx => {
-                  const isIncoming = Number(tx.amount) > 0;
+                  const isIncoming = ['contribution', 'repayment', 'loan_repayment', 'penalty', 'interest', 'deposit', 'smartgrow_return'].includes(tx.type);
                   return (
                     <tr 
                       key={tx.id} 
@@ -238,7 +233,7 @@ export default function AdminTransactionsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <MIcon name={isIncoming ? 'arrow_downward' : 'arrow_upward'} className={`text-[16px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`} />
+                          <MIcon name={isIncoming ? 'arrow_downward' : 'arrow_upward'} className={`text-[16px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-ink'}`} />
                           <span className="text-sm font-semibold text-[var(--text-main)] capitalize">
                             {(tx.type === 'loan_repayment' ? 'repayment' : tx.type.startsWith('loan') ? 'payout' : tx.type).replace('_', ' ')}
                           </span>
@@ -258,8 +253,8 @@ export default function AdminTransactionsPage() {
                           {tx.status}
                         </span>
                       </td>
-                      <td className={`px-6 py-4 text-right font-mono font-bold whitespace-nowrap ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
-                        {isIncoming ? '+' : ''}KSh {formatCurrency(Number(tx.amount))}
+                      <td className={`px-6 py-4 text-right font-money text-[17px] whitespace-nowrap ${isIncoming ? 'text-[var(--brand-green)]' : 'text-ink'}`}>
+                        {isIncoming ? '+' : '−'}KSh {formatCurrency(Math.abs(Number(tx.amount)))}
                       </td>
                     </tr>
                   )
@@ -277,7 +272,7 @@ export default function AdminTransactionsPage() {
             </div>
           ) : (
             filteredTx.map(tx => {
-              const isIncoming = Number(tx.amount) > 0;
+              const isIncoming = ['contribution', 'repayment', 'loan_repayment', 'penalty', 'interest', 'deposit', 'smartgrow_return'].includes(tx.type);
               return (
                 <div 
                   key={tx.id} 
@@ -293,7 +288,7 @@ export default function AdminTransactionsPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2">
-                        <MIcon name={isIncoming ? 'arrow_downward' : 'arrow_upward'} className={`text-[14px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`} />
+                        <MIcon name={isIncoming ? 'arrow_downward' : 'arrow_upward'} className={`text-[14px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-ink'}`} />
                         <span className="font-semibold text-sm text-[var(--text-main)] capitalize">
                           {(tx.type === 'loan_repayment' ? 'repayment' : tx.type.startsWith('loan') ? 'payout' : tx.type).replace('_', ' ')}
                         </span>
@@ -303,8 +298,8 @@ export default function AdminTransactionsPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className={`font-mono font-bold text-sm ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
-                        {isIncoming ? '+' : ''}KSh {formatCurrency(Number(tx.amount))}
+                      <div className={`font-money text-[17px] ${isIncoming ? 'text-[var(--brand-green)]' : 'text-ink'}`}>
+                        {isIncoming ? '+' : '−'}KSh {formatCurrency(Math.abs(Number(tx.amount)))}
                       </div>
                       <div className="mt-1">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
@@ -387,7 +382,7 @@ export default function AdminTransactionsPage() {
             </div>
             
             <div className="flex flex-col items-center justify-center py-6 bg-gray-50 dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-2xl mb-8 ">
-              <div className={`text-[32px] font-bold font-mono ${selectedTransaction.isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
+              <div className={`text-[32px] font-bold font-mono ${selectedTransaction.isIncoming ? 'text-[var(--brand-green)]' : 'text-ink'}`}>
                 {selectedTransaction.isIncoming ? '+' : '-'} KSh {formatCurrency(Number(selectedTransaction.amount))}
               </div>
               <div className="mt-2">

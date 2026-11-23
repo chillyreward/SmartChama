@@ -88,13 +88,8 @@ export default function AdminAuditLogPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6 md:mb-8">
         <div>
-          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-            <span>Admin Dashboard</span>
-            <MIcon name="chevron_right"  className="text-[14px]" />
-            <span>Audit Log</span>
-          </p>
-          <h1 className="text-[24px] md:font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Audit Log</h1>
-          <p className="text-[14px] text-[var(--text-muted)] mt-1">Immutable record of all administrative actions</p>
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Audit Log</h1>
+          <p className="text-[15px] text-ink-2 mt-1.5">Every change officials make to members, rules and money, newest first.</p>
         </div>
         <div className="w-full md:w-auto">
           <button className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all flex items-center justify-center gap-2 w-full md:w-auto">

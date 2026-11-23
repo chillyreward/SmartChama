@@ -124,16 +124,16 @@ export default function AdminPenaltiesPage() {
         <div>
           <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em] flex items-center gap-2 text-[var(--text-primary)]">
             <ShieldAlert className="w-7 h-7 text-[var(--ak-brand-ink)]" />
-            Member Penalties & Fines
+            Penalties
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
-            Enforce rules, track late contribution fines, and manage penalty settlements.
+            Fines your rules apply, and any you add by hand. Mark them paid or waive them here.
           </p>
         </div>
         <button
           onClick={() => setShowImposeModal(true)}
           className="px-4 py-2.5 rounded-xl font-bold bg-primary text-on-primary hover:opacity-90 transition-colors flex items-center gap-2 text-sm ">
-          <Plus className="w-4 h-4" /> Impose Penalty
+          <Plus className="w-4 h-4" /> Add a fine
         </button>
       </div>
 

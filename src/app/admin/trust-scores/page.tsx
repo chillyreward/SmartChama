@@ -184,13 +184,8 @@ export default function AdminTrustScoresPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <p className="text-[12px] text-[var(--ak-text-3)] mb-1 flex items-center gap-1">
-            <span>Admin</span>
-            <MIcon name="chevron_right"  className="text-[14px]" />
-            <span>Credit Scores</span>
-          </p>
-          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">AI Credit Scores</h1>
-          <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Trust scores</h1>
+          <p className="text-[15px] text-ink-2 mt-1.5 flex items-center gap-1.5">
             <MIcon name="smart_toy"  className="text-[16px] text-[var(--ak-brand-ink)]" />
             Powered by Akibora AI · GPT-4o
           </p>

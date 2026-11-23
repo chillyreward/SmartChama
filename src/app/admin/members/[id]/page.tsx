@@ -109,14 +109,7 @@ export default function AdminMemberDetailPage() {
           <MIcon name="arrow_back"  className="text-[var(--text-muted)]" />
         </Link>
         <div>
-          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
-            <span>Admin Dashboard</span>
-            <MIcon name="chevron_right"  className="text-[14px]" />
-            <span>Members</span>
-            <MIcon name="chevron_right"  className="text-[14px]" />
-            <span>Profile</span>
-          </p>
-          <h1 className="text-[24px] md:font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Member Profile</h1>
+          <h1 className="font-display font-normal text-[30px] sm:text-[38px] leading-tight tracking-[-0.02em]">Member profile</h1>
         </div>
       </div>
 
