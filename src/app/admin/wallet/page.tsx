@@ -160,10 +160,8 @@ export default function AdminWalletPage() {
   const handleCancelConsent = async (req: any) => {
     if (await ask({ title: 'Cancel this request?', body: 'Members can no longer vote on it.', confirmLabel: 'Cancel request', cancelLabel: 'Keep it', danger: true })) {
       try {
-        await supabase
-          .from('withdrawal_consents')
-          .update({ status: 'rejected' })
-          .eq('id', req.id);
+        const { data, error } = await supabase.rpc('cancel_withdrawal', { p_consent_id: req.id });
+        if (error || !data?.success) throw new Error(data?.error || error?.message);
         setToastMsg("Request cancelled.");
         setTimeout(() => setToastMsg(""), 3000);
         fetchData();
