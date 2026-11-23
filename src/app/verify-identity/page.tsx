@@ -38,18 +38,18 @@ function VerifyIdentity() {
   const shown = outcome?.status ?? status
 
   return (
-    <main className="min-h-screen px-4 py-10 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+    <main className="min-h-screen px-4 py-10 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
       <div className="max-w-xl mx-auto space-y-6">
         <header className="space-y-2">
           <h1 className="text-[28px] font-bold">Verify your identity</h1>
-          <p className="text-[15px] text-[#4F5A53] dark:text-[#8FA196]">
+          <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
             Your group is ready to use. Before money can leave it (withdrawals and investments), we need
             to confirm who you are. It takes about two minutes.
           </p>
         </header>
 
         {status === null ? (
-          <p className="text-[14px] text-[#4F5A53] dark:text-[#8FA196]">Loading…</p>
+          <p className="text-[14px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">Loading…</p>
         ) : shown === 'verified' ? (
           <Result tone="good" title="You're verified" body={outcome?.message ?? 'Withdrawals and investments are unlocked for your group.'} next={next} />
         ) : shown === 'review' && !outcome ? (
@@ -64,7 +64,7 @@ function VerifyIdentity() {
               </p>
             )}
             <KycVerification onDone={(o) => { setOutcome(o); if (o.status !== 'rejected') setStatus(o.status) }} />
-            <Link href={next} className="block text-center text-[14px] text-[#4F5A53] dark:text-[#8FA196] hover:underline">
+            <Link href={next} className="block text-center text-[14px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:underline">
               Do this later
             </Link>
           </>
@@ -76,13 +76,13 @@ function VerifyIdentity() {
 
 function Result({ tone, title, body, next }: { tone: 'good' | 'wait'; title: string; body: string; next: string }) {
   return (
-    <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-6 space-y-3 text-center">
-      <span className="material-symbols-outlined text-[44px]" style={{ color: tone === 'good' ? '#22C55E' : '#D97706', fontVariationSettings: "'FILL' 1" }}>
+    <div className="rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-6 space-y-3 text-center">
+      <span className="material-symbols-outlined text-[44px]" style={{ color: tone === 'good' ? '#3FA673' : '#D97706', fontVariationSettings: "'FILL' 1" }}>
         {tone === 'good' ? 'verified_user' : 'hourglass_top'}
       </span>
       <h2 className="text-[20px] font-bold">{title}</h2>
-      <p className="text-[15px] text-[#4F5A53] dark:text-[#8FA196]">{body}</p>
-      <Link href={next} className="inline-block w-full py-3.5 rounded-xl bg-[#22C55E] text-white font-semibold">Continue</Link>
+      <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{body}</p>
+      <Link href={next} className="inline-block w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white font-semibold">Continue</Link>
     </div>
   )
 }

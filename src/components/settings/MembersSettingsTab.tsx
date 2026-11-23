@@ -164,7 +164,7 @@ export function MembersSettingsTab({
         <div
           className="fixed top-6 right-6 z-50 px-5 py-3 rounded-xl text-[14px] font-medium shadow-lg transition-all duration-300"
           style={{
-            backgroundColor: '#22C55E',
+            backgroundColor: '#3FA673',
             color: 'white'
           }}>
           {toast}
@@ -204,7 +204,7 @@ export function MembersSettingsTab({
                 setInviteResult(null)
                 setInviteError('')
               }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors">
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors">
               <span className="material-symbols-outlined text-[20px]">
                 person_add
               </span>
@@ -241,7 +241,7 @@ export function MembersSettingsTab({
                   value={inviteName}
                   onChange={e => setInviteName(e.target.value)}
                   placeholder="Grace Wanjiku"
-                  className="w-full px-4 py-2.5 rounded-xl border text-[14px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                  className="w-full px-4 py-2.5 rounded-xl border text-[14px] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                   style={{
                     backgroundColor: 'var(--bg-input)',
                     borderColor: 'var(--border)',
@@ -268,7 +268,7 @@ export function MembersSettingsTab({
                     onChange={e => setInvitePhone(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') handleSendInvite() }}
                     placeholder="712 345 678"
-                    className="flex-1 px-4 py-2.5 rounded-r-xl border text-[14px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                    className="flex-1 px-4 py-2.5 rounded-r-xl border text-[14px] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     style={{
                       backgroundColor: 'var(--bg-input)',
                       borderColor: 'var(--border)',
@@ -314,7 +314,7 @@ export function MembersSettingsTab({
               <button
                 onClick={handleSendInvite}
                 disabled={sending || !invitePhone.trim()}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[14px] font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[14px] font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 {sending ? (
                   <>
                     <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -341,14 +341,14 @@ export function MembersSettingsTab({
               border: '1px solid #BBF7D0'
             }}>
             <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-[22px] text-[#16A34A] flex-shrink-0 mt-0.5"
+              <span className="material-symbols-outlined text-[22px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5"
                 style={{
                   fontVariationSettings: "'FILL' 1"
                 }}>
                 check_circle
               </span>
               <div className="flex-1">
-                <p className="text-[14px] font-semibold text-[#166534] mb-1">
+                <p className="text-[14px] font-semibold text-[var(--ak-brand-ink)] mb-1">
                   {inviteResult.sms_sent ? 'SMS invite sent!' : 'Invite created'}
                 </p>
                 <p className="text-[13px] text-[#15803D]">
@@ -357,7 +357,7 @@ export function MembersSettingsTab({
                     : inviteResult.note || 'Share this invite code manually:'}
                 </p>
                 <div className="mt-3 flex items-center gap-3">
-                  <span className="text-[28px] font-bold tracking-widest text-[#16A34A] font-mono">
+                  <span className="text-[28px] font-bold tracking-widest text-[var(--ak-brand-ink)] font-mono">
                     {inviteResult.code}
                   </span>
                   <button
@@ -366,7 +366,7 @@ export function MembersSettingsTab({
                       setToast('Code copied!')
                       setTimeout(() => setToast(''), 2000)
                     }}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-medium text-[#166534] bg-white border border-[#BBF7D0] hover:bg-[#F0FDF4]">
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-medium text-[var(--ak-brand-ink)] bg-white border border-[#BBF7D0] hover:bg-[var(--ak-tint)]">
                     <span className="material-symbols-outlined text-[14px]">
                       content_copy
                     </span>
@@ -619,7 +619,7 @@ export function MembersSettingsTab({
                       </button>
                       <button
                         onClick={() => handleResendInvite(invite)}
-                        className="px-3 py-1.5 rounded-lg text-[12px] font-medium bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors">
+                        className="px-3 py-1.5 rounded-lg text-[12px] font-medium bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors">
                         Resend
                       </button>
                     </div>

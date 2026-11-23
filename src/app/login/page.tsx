@@ -203,7 +203,7 @@ export default function LoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="0712 345 678 or you@example.com"
                 required
-                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
+                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[var(--ak-brand-ink)] transition-colors"
                 style={{
                   backgroundColor: 'var(--bg-input)',
                   borderColor: 'var(--border)',
@@ -223,7 +223,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleForgotPassword}
                   className="text-[13px] font-medium hover:underline"
-                  style={{ color: '#22C55E' }}>
+                  style={{ color: '#3FA673' }}>
                   Forgot password?
                 </button>
               </div>
@@ -234,7 +234,7 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Enter password"
                   required
-                  className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E] transition-colors"
+                  className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] focus:outline-none focus:border-[var(--ak-brand-ink)] transition-colors"
                   style={{
                     backgroundColor: 'var(--bg-input)',
                     borderColor: 'var(--border)',
@@ -256,7 +256,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#22C55E] text-white py-4 rounded-xl mt-4 text-[16px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full bg-[var(--ak-solid)] text-white py-4 rounded-xl mt-4 text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
@@ -273,7 +273,7 @@ export default function LoginPage() {
             <Link
               href="/signup"
               className="font-semibold hover:underline"
-              style={{ color: '#22C55E' }}>
+              style={{ color: '#3FA673' }}>
               Create account
             </Link>
           </p>

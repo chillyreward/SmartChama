@@ -335,15 +335,15 @@ export default function AdminDashboardPage({
     <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter text-[var(--text-main)] relative">
       
       {toastMessage && (
-        <div className="fixed top-4 right-4 bg-[#161d16] text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMessage}</span>
         </div>
       )}
 
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Overview</span>
@@ -361,7 +361,7 @@ export default function AdminDashboardPage({
 
       {/* METRICS */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">TOTAL SAVINGS</div>
           <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">KSh {formatCurrency(metrics.totalSavings)}</div>
         </div>
@@ -382,7 +382,7 @@ export default function AdminDashboardPage({
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-purple-450 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
           <div className="text-label-caps text-[var(--text-muted)] mb-1 text-[10px] md:text-[12px] font-bold">GROUP Credit Score</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#22C55E] text-[24px] md:text-[28px]">verified</span>
+            <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-[24px] md:text-[28px]">verified</span>
             <div className="text-[20px] md:text-[28px] font-geist font-bold text-[var(--text-main)]">{metrics.avgTrust || 0}</div>
           </div>
         </div>
@@ -397,8 +397,8 @@ export default function AdminDashboardPage({
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorSavings" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22C55E" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#22C55E" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#3FA673" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#3FA673" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
@@ -413,13 +413,13 @@ export default function AdminDashboardPage({
                     formatter={(value: any) => [`KSh ${formatCurrency(value)}`, 'Total Savings']}
                     contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                   />
-                  <Area type="monotone" dataKey="amount" stroke="#22C55E" strokeWidth={3} fillOpacity={1} fill="url(#colorSavings)" />
+                  <Area type="monotone" dataKey="amount" stroke="#3FA673" strokeWidth={3} fillOpacity={1} fill="url(#colorSavings)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <span className="material-symbols-outlined text-[#E5E7EB] dark:text-[#2d3d2d] text-6xl mb-4">show_chart</span>
+              <span className="material-symbols-outlined text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-6xl mb-4">show_chart</span>
               <h3 className="text-headline-sm text-[var(--text-main)] font-bold">No contributions recorded yet.</h3>
               <p className="text-body-sm text-[var(--text-muted)] mt-2">Charts will appear once members start contributing.</p>
             </div>
@@ -444,7 +444,7 @@ export default function AdminDashboardPage({
 
             {pendingActions.late.length === 0 && (
               <div className="flex flex-col items-center justify-center py-6 text-center">
-                <span className="material-symbols-outlined text-[#22C55E] text-4xl mb-2">check_circle</span>
+                <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-4xl mb-2">check_circle</span>
                 <span className="text-body-sm text-[var(--text-main)] font-medium">All clear!</span>
                 <span className="text-xs text-[var(--text-muted)] mt-1">No pending actions require your attention.</span>
               </div>
@@ -461,7 +461,7 @@ export default function AdminDashboardPage({
           {topContributors.length > 0 ? (
             <div className="space-y-4">
               {topContributors.map((t, idx) => (
-                <div key={idx} className="flex items-center justify-between border-b border-gray-100 dark:border-[#2d3d2d] last:border-0 pb-3 last:pb-0">
+                <div key={idx} className="flex items-center justify-between border-b border-gray-100 dark:border-[var(--ak-line)] last:border-0 pb-3 last:pb-0">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-sm">
                       {t.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
@@ -479,7 +479,7 @@ export default function AdminDashboardPage({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-center bg-transparent rounded-xl border border-dashed border-[var(--border)]">
-              <span className="material-symbols-outlined text-[#E5E7EB] dark:text-[#2d3d2d] text-4xl mb-2">stars</span>
+              <span className="material-symbols-outlined text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-4xl mb-2">stars</span>
               <span className="text-body-sm text-[var(--text-muted)]">No contributions recorded this month.</span>
             </div>
           )}

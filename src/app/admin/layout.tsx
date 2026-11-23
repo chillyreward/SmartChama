@@ -3,9 +3,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import MobileHeader from "@/components/MobileHeader";
-import { MobileAdminTabBar } from "@/components/MobileAdminTabBar";
-import { Sidebar } from "@/components/Sidebar";
+import { AppFrame, FullScreenLoader } from '@/components/shell/AppFrame';
 import KycBanner from "@/components/KycBanner";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -30,41 +28,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isAdmin = member && adminRoles.includes(member.role);
 
   if (isLoading || !member || !group || !isAdmin) {
-    return (
-      <div className="flex h-screen items-center justify-center page-bg">
-        <div className="w-12 h-12 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
+    return <FullScreenLoader />;
   }
 
   return (
-    <div className="flex h-screen overflow-hidden page-bg font-inter text-[var(--text-main)]">
-      
-      {/* ONE sidebar, desktop only */}
-      <div className="hidden lg:flex flex-col flex-shrink-0 w-64">
-        <Sidebar variant="admin" />
-      </div>
-
-      {/* Main content area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        
-        {/* MOBILE HEADER (Only visible on mobile/tablet) */}
-        <div className="lg:hidden flex-shrink-0">
-          <MobileHeader isAdmin={true} />
-        </div>
-
-        {/* Scrollable page content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 pb-24 lg:pb-6 pt-16 lg:pt-6">
-          <KycBanner creatorId={(group as any)?.created_by} />
-          {children}
-        </main>
-
-        {/* MOBILE BOTTOM TAB BAR (Only visible on mobile/tablet) */}
-        <div className="lg:hidden">
-          <MobileAdminTabBar />
-        </div>
-
-      </div>
-    </div>
+    <AppFrame variant="admin" banner={<KycBanner creatorId={(group as any)?.created_by} />}>
+      {children}
+    </AppFrame>
   );
 }

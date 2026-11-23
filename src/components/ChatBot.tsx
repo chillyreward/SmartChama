@@ -1,5 +1,7 @@
-﻿'use client'
+'use client'
 import { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import { X, Sparkles, SendHorizontal } from 'lucide-react'
 
 interface Message {
   id: number
@@ -10,6 +12,9 @@ interface Message {
 
 export function ChatBot() {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname() || ''
+  // Inside the app the bottom tab bar sits at the foot of the screen on phones
+  const inApp = pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 0,
@@ -91,34 +96,34 @@ export function ChatBot() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#22C55E] text-white shadow-xl shadow-green-500/30 flex items-center justify-center hover:bg-[#16A34A] hover:scale-105 active:scale-95 transition-all duration-200"
-        aria-label="Open Akibora AI Assistant">
+        className={`fixed right-4 sm:right-6 z-40 w-14 h-14 rounded-full bg-lavender text-lavender-ink shadow-[0_10px_28px_rgba(0,0,0,.25)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform ${inApp ? 'bottom-[92px] lg:bottom-6' : 'bottom-6'}`}
+        aria-label={open ? 'Close the Akibora assistant' : 'Ask the Akibora assistant'}
+        aria-expanded={open}>
         {open ? (
-          <span className="material-symbols-outlined text-[28px]">close</span>
+          <X size={24} aria-hidden="true" />
         ) : (
-          <span className="material-symbols-outlined text-[28px]">chat</span>
+          <Sparkles size={24} aria-hidden="true" />
         )}
       </button>
 
       {/* Chat window */}
       {open && (
         <div
-          className="fixed bottom-24 right-4 sm:right-6 z-50 w-[calc(100vw-32px)] sm:w-[380px] h-[520px] rounded-2xl flex flex-col shadow-2xl overflow-hidden"
+          role="dialog" aria-label="Akibora assistant"
+          className={`fixed right-4 sm:right-6 z-50 w-[calc(100vw-32px)] sm:w-[380px] h-[min(520px,70dvh)] rounded-[24px] flex flex-col shadow-2xl overflow-hidden ${inApp ? 'bottom-[160px] lg:bottom-24' : 'bottom-24'}`}
           style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}>
 
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0" style={{ backgroundColor: '#22C55E' }}>
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                smart_toy
-              </span>
+          <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0" style={{ backgroundColor: '#0E1F18' }}>
+            <div className="w-9 h-9 rounded-full bg-lavender text-lavender-ink flex items-center justify-center">
+              <Sparkles size={18} aria-hidden="true" />
             </div>
             <div className="flex-1 text-left">
               <p className="text-white font-semibold text-[15px] leading-tight">Akibora Assistant</p>
-              <p className="text-white/70 text-[12px] leading-none mt-0.5">Powered by AI · Akibora only</p>
+              <p className="text-white/70 text-[12px] leading-none mt-0.5">Answers questions about using Akibora</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-white/80 hover:text-white">
-              <span className="material-symbols-outlined text-[22px]">close</span>
+            <button onClick={() => setOpen(false)} aria-label="Close" className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10">
+              <X size={20} aria-hidden="true" />
             </button>
           </div>
 
@@ -127,14 +132,14 @@ export function ChatBot() {
             {messages.map(msg => (
               <div key={msg.id} className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.from === 'bot' && (
-                  <div className="w-7 h-7 rounded-full bg-[#22C55E] flex items-center justify-center mr-2 mt-1 flex-shrink-0">
-                    <span className="material-symbols-outlined text-white text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+                  <div className="w-7 h-7 rounded-full bg-moss flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                    <Sparkles size={13} className="text-white" aria-hidden="true" />
                   </div>
                 )}
                 <div
                   className="max-w-[78%] rounded-2xl px-4 py-2.5 text-left"
                   style={{
-                    backgroundColor: msg.from === 'user' ? '#22C55E' : 'var(--bg-subtle)',
+                    backgroundColor: msg.from === 'user' ? '#3FA673' : 'var(--bg-subtle)',
                     color: msg.from === 'user' ? 'white' : 'var(--text-primary)',
                     borderRadius: msg.from === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px'
                   }}>
@@ -148,13 +153,13 @@ export function ChatBot() {
 
             {typing && (
               <div className="flex justify-start items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-[#22C55E] flex items-center justify-center">
-                  <span className="material-symbols-outlined text-white text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+                <div className="w-7 h-7 rounded-full bg-moss flex items-center justify-center">
+                  <Sparkles size={13} className="text-white" aria-hidden="true" />
                 </div>
                 <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: 'var(--bg-subtle)' }}>
                   <div className="flex gap-1 items-center">
                     {[0, 1, 2].map(i => (
-                      <div key={i} className="w-2 h-2 rounded-full bg-[#22C55E] animate-bounce"
+                      <div key={i} className="w-2 h-2 rounded-full bg-[var(--ak-solid)] animate-bounce"
                         style={{ animationDelay: `${i * 150}ms` }} />
                     ))}
                   </div>
@@ -173,7 +178,7 @@ export function ChatBot() {
                 key={q}
                 onClick={() => handleSend(q)}
                 disabled={typing}
-                className="flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors hover:bg-[#22C55E] hover:text-white disabled:opacity-50"
+                className="flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors hover:bg-[var(--ak-solid)] hover:text-white disabled:opacity-50"
                 style={{
                   backgroundColor: 'var(--bg-subtle)',
                   color: 'var(--text-secondary)',
@@ -194,14 +199,14 @@ export function ChatBot() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleSend() }}
               placeholder="Ask about Akibora..."
-              className="flex-1 px-4 py-2.5 rounded-xl text-[14px] focus:outline-none focus:border-[#22C55E] border"
+              className="flex-1 px-4 py-2.5 rounded-xl text-[14px] focus:outline-none focus:border-[var(--ak-brand-ink)] border"
               style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
             />
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || typing}
-              className="w-10 h-10 rounded-xl bg-[#22C55E] text-white flex items-center justify-center hover:bg-[#16A34A] disabled:opacity-40 transition-colors flex-shrink-0">
-              <span className="material-symbols-outlined text-[20px]">send</span>
+              className="w-10 h-10 rounded-xl bg-[var(--ak-solid)] text-white flex items-center justify-center hover:bg-[var(--ak-solid)] disabled:opacity-40 transition-colors flex-shrink-0">
+              <SendHorizontal size={18} aria-hidden="true" />
             </button>
           </div>
 

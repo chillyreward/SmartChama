@@ -48,7 +48,7 @@ export default function IdDocumentUpload({
       </label>
       {preview && <img src={preview} alt="Your ID" className="w-full max-h-48 object-contain rounded-xl border" style={{ borderColor: 'var(--border)' }} />}
       {value && !preview && (
-        <p className="text-[13px] font-semibold text-[#16A34A]">ID photo uploaded</p>
+        <p className="text-[13px] font-semibold text-[var(--ak-brand-ink)]">ID photo uploaded</p>
       )}
       <input
         id="id-document"
@@ -57,7 +57,7 @@ export default function IdDocumentUpload({
         capture="environment"
         disabled={busy}
         onChange={(e) => handleFile(e.target.files?.[0])}
-        className="block w-full text-[14px] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#F0FDF4] file:text-[#16A34A] file:font-semibold"
+        className="block w-full text-[14px] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--ak-tint)] file:text-[var(--ak-brand-ink)] file:font-semibold"
         style={{ color: 'var(--text-secondary)' }}
       />
       <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>

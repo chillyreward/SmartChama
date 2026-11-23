@@ -132,9 +132,9 @@ const HAMSTER_SVG: Record<Step['hamsterPose'], string> = {
       <ellipse cx="86" cy="70" rx="5" ry="16" fill="#C4956A" transform="rotate(-15 86 70)"/>
       <circle cx="92" cy="56" r="6" fill="#C4956A"/>
       <!-- Thought bubbles -->
-      <circle cx="105" cy="42" r="4" fill="#22C55E" opacity="0.6"/>
-      <circle cx="112" cy="30" r="6" fill="#22C55E" opacity="0.7"/>
-      <circle cx="116" cy="18" r="8" fill="#22C55E" opacity="0.8"/>
+      <circle cx="105" cy="42" r="4" fill="#3FA673" opacity="0.6"/>
+      <circle cx="112" cy="30" r="6" fill="#3FA673" opacity="0.7"/>
+      <circle cx="116" cy="18" r="8" fill="#3FA673" opacity="0.8"/>
       <text x="111" y="23" font-size="9" text-anchor="middle" fill="white">💡</text>
       <!-- Legs -->
       <ellipse cx="48" cy="104" rx="8" ry="6" fill="#C4956A"/>
@@ -144,12 +144,12 @@ const HAMSTER_SVG: Record<Step['hamsterPose'], string> = {
   celebrate: `
     <svg viewBox="0 0 130 130" fill="none" xmlns="http://www.w3.org/2000/svg">
       <!-- Confetti -->
-      <rect x="20" y="10" width="6" height="6" fill="#22C55E" rx="1" transform="rotate(20 20 10)"/>
+      <rect x="20" y="10" width="6" height="6" fill="#3FA673" rx="1" transform="rotate(20 20 10)"/>
       <rect x="100" y="15" width="5" height="5" fill="#F59E0B" rx="1" transform="rotate(-15 100 15)"/>
       <rect x="30" y="30" width="4" height="4" fill="#3B82F6" rx="1" transform="rotate(40 30 30)"/>
       <rect x="90" y="8" width="4" height="7" fill="#EF4444" rx="1" transform="rotate(10 90 8)"/>
       <circle cx="15" cy="45" r="3" fill="#8B5CF6"/>
-      <circle cx="108" cy="40" r="3" fill="#22C55E"/>
+      <circle cx="108" cy="40" r="3" fill="#3FA673"/>
       <!-- Body -->
       <ellipse cx="65" cy="88" rx="32" ry="28" fill="#C4956A"/>
       <ellipse cx="65" cy="93" rx="24" ry="20" fill="#E8C49A"/>
@@ -257,7 +257,7 @@ export default function HamsterOnboarding() {
           className={`
             relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden
             bg-white dark:bg-[#121215]
-            border border-[#22C55E]/20
+            border border-[var(--ak-brand-ink)]/20
             transition-all duration-300 ease-out
             ${animClass || 'opacity-100 scale-100'}
           `}
@@ -266,19 +266,19 @@ export default function HamsterOnboarding() {
           {/* Green progress bar */}
           <div className="h-1 bg-gray-100 dark:bg-[#1e1e22]">
             <div
-              className="h-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-[var(--ak-solid)] to-[var(--ak-solid)] transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
 
           {/* Hamster Stage */}
-          <div className="relative h-44 flex items-center justify-center bg-gradient-to-b from-[#F0FDF4] to-[#DCFCE7] dark:from-[#052E16]/60 dark:to-[#052E16]/30 overflow-hidden">
+          <div className="relative h-44 flex items-center justify-center bg-gradient-to-b from-[var(--ak-tint)] to-[var(--ak-tint)] dark:from-[#052E16]/60 dark:to-[#052E16]/30 overflow-hidden">
             {/* Walking dots trail */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 opacity-30">
               {[...Array(8)].map((_, i) => (
                 <div
                   key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-[#22C55E]"
+                  className="w-1.5 h-1.5 rounded-full bg-[var(--ak-solid)]"
                   style={{ opacity: i <= step ? 1 : 0.3 }}
                 />
               ))}
@@ -301,7 +301,7 @@ export default function HamsterOnboarding() {
             </div>
 
             {/* Step counter pill */}
-            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/80 dark:bg-black/40 text-[11px] font-bold text-[#22C55E] backdrop-blur-sm">
+            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/80 dark:bg-black/40 text-[11px] font-bold text-[var(--ak-brand-ink)] backdrop-blur-sm">
               {step + 1} / {STEPS.length}
             </div>
           </div>
@@ -330,7 +330,7 @@ export default function HamsterOnboarding() {
                 }}
                 aria-label={`Go to step ${i + 1}`}
                 className={`rounded-full transition-all duration-300 ${
-                  i === step ? 'w-6 h-2.5 bg-[#22C55E]' : 'w-2.5 h-2.5 bg-gray-200 dark:bg-[#27272A]'
+                  i === step ? 'w-6 h-2.5 bg-[var(--ak-solid)]' : 'w-2.5 h-2.5 bg-gray-200 dark:bg-[#27272A]'
                 }`}
               />
             ))}
@@ -350,7 +350,7 @@ export default function HamsterOnboarding() {
 
             <button
               onClick={next}
-              className="ml-auto flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white text-[14px] font-semibold transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95"
+              className="ml-auto flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white text-[14px] font-semibold transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95"
             >
               {isLast ? 'Get Started' : 'Next'}
               <span className="material-symbols-outlined text-[18px]">
@@ -363,7 +363,7 @@ export default function HamsterOnboarding() {
           <div className="text-center pb-5">
             <button
               onClick={dismiss}
-              className="text-[12px] text-[#71717A] hover:text-[#22C55E] transition-colors underline underline-offset-2"
+              className="text-[12px] text-[#71717A] hover:text-[var(--ak-brand-ink)] transition-colors underline underline-offset-2"
             >
               Skip tutorial
             </button>

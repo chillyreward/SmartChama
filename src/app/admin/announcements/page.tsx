@@ -102,8 +102,8 @@ export default function AdminAnnouncementsPage() {
   return (
     <div className="p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#161d16] dark:bg-[#E8F0E4] text-white dark:text-[#161d16] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
@@ -111,7 +111,7 @@ export default function AdminAnnouncementsPage() {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
         <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Announcements</span>
@@ -122,7 +122,7 @@ export default function AdminAnnouncementsPage() {
         <div>
           <button 
             onClick={() => setShowModal(true)}
-            className="bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center gap-2"
+            className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">campaign</span>
             New Announcement
@@ -133,7 +133,7 @@ export default function AdminAnnouncementsPage() {
       <div className="flex flex-col gap-4">
         {announcements.length === 0 ? (
           <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center text-[var(--text-muted)] shadow-sm">
-            <span className="material-symbols-outlined text-[48px] mb-4 text-[#9CA3AF] dark:text-[#5a6e5a]">campaign</span>
+            <span className="material-symbols-outlined text-[48px] mb-4 text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">campaign</span>
             <div className="text-lg font-bold font-geist text-[var(--text-main)]">No announcements yet</div>
             <div className="text-xs mt-1 text-[var(--text-muted)]">Send your first broadcast to the group.</div>
           </div>
@@ -176,7 +176,7 @@ export default function AdminAnnouncementsPage() {
 
       {/* NEW ANNOUNCEMENT MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
           <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-lg shadow-2xl text-[var(--text-main)]">
             <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Create Announcement</h2>
             
@@ -188,7 +188,7 @@ export default function AdminAnnouncementsPage() {
                   value={title} 
                   onChange={e => setTitle(e.target.value)} 
                   placeholder="e.g. Upcoming December Meeting"
-                  className="w-full border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg px-4 py-2 outline-none focus:border-[#22C55E]" 
+                  className="w-full border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg px-4 py-2 outline-none focus:border-[var(--ak-brand-ink)]" 
                 />
               </div>
               <div>
@@ -198,7 +198,7 @@ export default function AdminAnnouncementsPage() {
                   value={message} 
                   onChange={e => setMessage(e.target.value)} 
                   placeholder="Write your message here..."
-                  className="w-full border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg px-4 py-2 outline-none focus:border-[#22C55E] resize-none"
+                  className="w-full border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg px-4 py-2 outline-none focus:border-[var(--ak-brand-ink)] resize-none"
                 />
               </div>
               <label className="flex items-center gap-3 cursor-pointer">
@@ -206,7 +206,7 @@ export default function AdminAnnouncementsPage() {
                   type="checkbox" 
                   checked={isImportant}
                   onChange={e => setIsImportant(e.target.checked)}
-                  className="w-4 h-4 text-[#22C55E] rounded border-gray-300 dark:border-gray-700 bg-transparent focus:ring-[#22C55E]"
+                  className="w-4 h-4 text-[var(--ak-brand-ink)] rounded border-gray-300 dark:border-gray-700 bg-transparent focus:ring-[var(--ak-brand-ink)]"
                 />
                 <div>
                   <div className="text-sm font-semibold text-[var(--text-main)]">Mark as Important</div>
@@ -216,8 +216,8 @@ export default function AdminAnnouncementsPage() {
             </div>
 
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded-lg py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
-              <button onClick={handleSend} disabled={!title || !message} className="flex-1 bg-[#22C55E] disabled:opacity-50 text-white rounded-lg py-2 text-body-sm font-medium hover:bg-[#006e2f] flex items-center justify-center gap-2 transition-all">
+              <button onClick={() => setShowModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded-lg py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
+              <button onClick={handleSend} disabled={!title || !message} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded-lg py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)] flex items-center justify-center gap-2 transition-all">
                 <span className="material-symbols-outlined text-[18px]">send</span>
                 Send Now
               </button>

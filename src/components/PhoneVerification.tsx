@@ -18,7 +18,7 @@ type Props = {
 }
 
 const inputClass =
-  'w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]'
+  'w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]'
 
 export default function PhoneVerification({ currentPhone, verified, onVerified, label = 'Phone number', initialPhone = '', autoSend = false }: Props) {
   const [editing, setEditing] = useState(!currentPhone)
@@ -81,18 +81,18 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
 
   return (
     <div className="space-y-2">
-      <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#4F5A53] dark:text-[#8FA196]">
+      <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
         {label}
       </label>
 
       {!editing && currentPhone ? (
-        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[#E5E7EB] dark:border-[#1B2520]">
-          <span className="text-[15px] font-medium text-[#161d16] dark:text-white">{currentPhone}</span>
+        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--ak-line)] dark:border-[var(--ak-line)]">
+          <span className="text-[15px] font-medium text-[var(--ak-text)] dark:text-white">{currentPhone}</span>
           <span className="flex items-center gap-3">
             {verified !== false && (
-              <span className="text-[12px] font-semibold text-[#16A34A]">Verified</span>
+              <span className="text-[12px] font-semibold text-[var(--ak-brand-ink)]">Verified</span>
             )}
-            <button type="button" onClick={() => setEditing(true)} className="text-[13px] font-semibold text-[#22C55E] hover:underline">
+            <button type="button" onClick={() => setEditing(true)} className="text-[13px] font-semibold text-[var(--ak-brand-ink)] hover:underline">
               Change number
             </button>
           </span>
@@ -114,7 +114,7 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
             type="button"
             onClick={() => sendCode()}
             disabled={busy || phone.replace(/\D/g, '').length < 9}
-            className="shrink-0 px-4 rounded-xl bg-[#22C55E] text-white text-[14px] font-semibold disabled:opacity-50"
+            className="shrink-0 px-4 rounded-xl bg-[var(--ak-solid)] text-white text-[14px] font-semibold disabled:opacity-50"
           >
             {busy ? 'Sending…' : 'Send code'}
           </button>
@@ -138,16 +138,16 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
               type="button"
               onClick={verify}
               disabled={busy || code.length !== 6}
-              className="shrink-0 px-4 rounded-xl bg-[#22C55E] text-white text-[14px] font-semibold disabled:opacity-50"
+              className="shrink-0 px-4 rounded-xl bg-[var(--ak-solid)] text-white text-[14px] font-semibold disabled:opacity-50"
             >
               {busy ? 'Checking…' : 'Verify'}
             </button>
           </div>
           <div className="flex gap-4 text-[13px]">
-            <button type="button" onClick={() => sendCode()} disabled={busy} className="font-semibold text-[#22C55E] hover:underline disabled:opacity-50">
+            <button type="button" onClick={() => sendCode()} disabled={busy} className="font-semibold text-[var(--ak-brand-ink)] hover:underline disabled:opacity-50">
               Resend code
             </button>
-            <button type="button" onClick={() => { setSentTo(null); setInfo(''); setError('') }} className="text-[#4F5A53] dark:text-[#8FA196] hover:underline">
+            <button type="button" onClick={() => { setSentTo(null); setInfo(''); setError('') }} className="text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:underline">
               Use a different number
             </button>
           </div>
@@ -155,11 +155,11 @@ export default function PhoneVerification({ currentPhone, verified, onVerified, 
       )}
 
       {editing && currentPhone && !sentTo && (
-        <button type="button" onClick={() => { setEditing(false); setError('') }} className="text-[13px] text-[#4F5A53] dark:text-[#8FA196] hover:underline">
+        <button type="button" onClick={() => { setEditing(false); setError('') }} className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:underline">
           Keep {currentPhone}
         </button>
       )}
-      {info && <p className="text-[13px] text-[#4F5A53] dark:text-[#8FA196]">{info}</p>}
+      {info && <p className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{info}</p>}
       {error && <p className="text-[13px] text-red-500" role="alert">{error}</p>}
     </div>
   )

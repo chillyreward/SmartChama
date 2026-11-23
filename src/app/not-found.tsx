@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0B0F0C] flex items-center justify-center p-6 text-[#161d16] dark:text-[#E8F0E4]">
+    <div className="min-h-screen bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] flex items-center justify-center p-6 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
       <div className="text-center max-w-md">
         <div className="flex justify-center mb-6">
           <Image
@@ -17,26 +17,26 @@ export default function NotFound() {
           />
         </div>
 
-        <h1 className="text-[48px] font-bold text-[#161d16] dark:text-[#E8F0E4] leading-none mb-2 font-geist">
+        <h1 className="text-[48px] font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] leading-none mb-2 font-geist">
           404
         </h1>
-        <h2 className="text-[20px] font-semibold text-[#161d16] dark:text-[#E8F0E4] mb-3">
+        <h2 className="text-[20px] font-semibold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] mb-3">
           Page not found
         </h2>
-        <p className="text-[15px] text-[#60645f] dark:text-[#8FA88F] mb-8">
+        <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] mb-8">
           The page you are looking for does not exist or has been moved.
         </p>
 
         <div className="flex gap-3 justify-center">
           <a 
             href="/"
-            className="bg-[#22C55E] text-white px-6 py-3 rounded-lg text-[15px] font-semibold hover:bg-[#006e2f] transition-colors"
+            className="bg-[var(--ak-solid)] text-white px-6 py-3 rounded-lg text-[15px] font-semibold hover:bg-[var(--ak-solid)] transition-colors"
           >
             Go to Home
           </a>
           <a 
             href="/dashboard"
-            className="bg-white dark:bg-[#1a2218] border border-[#E5E7EB] dark:border-[#2d3d2d] text-[#161d16] dark:text-[#E8F0E4] px-6 py-3 rounded-lg text-[15px] font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors"
+            className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] px-6 py-3 rounded-lg text-[15px] font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-colors"
           >
             Dashboard
           </a>

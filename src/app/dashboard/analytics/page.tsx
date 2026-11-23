@@ -152,7 +152,7 @@ export default function AnalyticsPage() {
     });
 
     const memberStatus = [
-      { name: 'Paid', value: paid, color: '#22C55E' },
+      { name: 'Paid', value: paid, color: '#3FA673' },
       { name: 'Partial', value: partial, color: '#FCD34D' },
       { name: 'Unpaid', value: unpaid, color: '#FCA5A5' },
     ];
@@ -174,10 +174,10 @@ export default function AnalyticsPage() {
     return (
       <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[1,2,3,4].map(i => <div key={i} className="bg-white dark:bg-[#111111] border border-[var(--border)] rounded-lg p-6 h-32 animate-pulse shadow-sm"></div>)}
+          {[1,2,3,4].map(i => <div key={i} className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-lg p-6 h-32 animate-pulse shadow-sm"></div>)}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {[1,2].map(i => <div key={i} className="bg-white dark:bg-[#111111] border border-[var(--border)] rounded-lg p-6 h-64 animate-pulse shadow-sm"></div>)}
+          {[1,2].map(i => <div key={i} className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-lg p-6 h-64 animate-pulse shadow-sm"></div>)}
         </div>
       </div>
     );
@@ -227,7 +227,7 @@ export default function AnalyticsPage() {
 
       {/* Page Header */}
       <div className="mb-8 no-print">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Analytics</span>
@@ -246,7 +246,7 @@ export default function AnalyticsPage() {
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value as any)}
-              className="bg-white dark:bg-[#111111] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] outline-hidden cursor-pointer shadow-sm"
+              className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] outline-hidden cursor-pointer shadow-sm"
             >
               <option value="30days">Last 30 Days</option>
               <option value="3months">Last 3 Months</option>
@@ -254,7 +254,7 @@ export default function AnalyticsPage() {
             </select>
             <button 
               onClick={() => window.print()}
-              className="bg-[#22C55E] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[#006e2f] transition-all shadow-sm cursor-pointer"
+              className="bg-[var(--ak-solid)] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[var(--ak-solid)] transition-all shadow-sm cursor-pointer"
             >
               Export Report
             </button>
@@ -265,11 +265,11 @@ export default function AnalyticsPage() {
       {/* METRIC CARDS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
         {/* Card 1 */}
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">TOTAL SAVED (GROUP)</div>
           <div className="text-[20px] md:text-3xl font-bold text-[var(--text-main)] font-geist mb-2">KSh {formatCurrency(stats.totalSaved)}</div>
           <div>
-            <span className="inline-flex items-center bg-transparent text-[var(--brand-green)] border border-[#4ae176]/30 px-2 py-0.5 rounded text-[10px] md:text-[11px] font-semibold">
+            <span className="inline-flex items-center bg-transparent text-[var(--brand-green)] border border-[var(--ak-brand-ink)]/30 px-2 py-0.5 rounded text-[10px] md:text-[11px] font-semibold">
               ↑ 18% vs last year
             </span>
           </div>
@@ -285,7 +285,7 @@ export default function AnalyticsPage() {
         {/* Card 3 */}
         <div className="card-bg border border-[var(--border)] border-t-2 border-t-amber-400 rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-label-caps text-[var(--text-muted)] mb-4 text-[10px] md:text-[12px]">AVG CONTRIBUTION RATE</div>
-          <div className="text-[20px] md:text-3xl font-bold text-[#22C55E] font-geist mb-2">{stats.avgContributionRate}%</div>
+          <div className="text-[20px] md:text-3xl font-bold text-[var(--ak-brand-ink)] font-geist mb-2">{stats.avgContributionRate}%</div>
           <div className="text-[11px] md:text-[12px] text-[var(--text-muted)]">Expected target: 90%+</div>
         </div>
 
@@ -310,8 +310,8 @@ export default function AnalyticsPage() {
               <AreaChart data={savingsGrowthData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorSavings" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22C55E" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#22C55E" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#3FA673" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3FA673" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
@@ -321,7 +321,7 @@ export default function AnalyticsPage() {
                   formatter={(value: any) => [`KSh ${value.toLocaleString()}`, 'Total Saved']}
                   contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                 />
-                <Area type="monotone" dataKey="amount" stroke="#22C55E" strokeWidth={2} fillOpacity={1} fill="url(#colorSavings)" isAnimationActive={false} />
+                <Area type="monotone" dataKey="amount" stroke="#3FA673" strokeWidth={2} fillOpacity={1} fill="url(#colorSavings)" isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -341,7 +341,7 @@ export default function AnalyticsPage() {
                   contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                   cursor={{ fill: 'var(--color-bg-hover)' }}
                 />
-                <Bar dataKey="rate" fill="#22C55E" radius={[4, 4, 0, 0]} maxBarSize={40} isAnimationActive={false} />
+                <Bar dataKey="rate" fill="#3FA673" radius={[4, 4, 0, 0]} maxBarSize={40} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -420,13 +420,13 @@ export default function AnalyticsPage() {
                   stroke="none"
                   isAnimationActive={false}
                 >
-                  <Cell fill="#22C55E" />
+                  <Cell fill="#3FA673" />
                   <Cell fill="var(--color-border)" />
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-3xl font-bold font-geist text-[#22C55E] leading-none mt-2">{healthScore}</span>
+              <span className="text-3xl font-bold font-geist text-[var(--ak-brand-ink)] leading-none mt-2">{healthScore}</span>
               <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)] mt-1 text-center">{healthScore >= 80 ? 'Excellent' : healthScore >= 60 ? 'Good' : 'Needs Review'}<br/>Health</span>
             </div>
           </div>
@@ -443,15 +443,15 @@ export default function AnalyticsPage() {
                 <span className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">{stat.label}</span>
                 <span className="text-sm font-semibold text-[var(--text-main)]">{stat.value}</span>
               </div>
-              <div className="w-full h-2 bg-gray-100 dark:bg-[#1a2218] rounded-full overflow-hidden">
-                <div className="h-full bg-[#22C55E] transition-all duration-1000" style={{ width: stat.value }}></div>
+              <div className="w-full h-2 bg-gray-100 dark:bg-[var(--ak-surface)] rounded-full overflow-hidden">
+                <div className="h-full bg-[var(--ak-solid)] transition-all duration-1000" style={{ width: stat.value }}></div>
               </div>
             </div>
           ))}
         </div>
 
         <div className="flex justify-center">
-          <div className={`bg-transparent text-[var(--brand-green)] border px-4 py-2 rounded-lg inline-flex items-center gap-2 ${healthScore >= 80 ? 'border-[#4ae176]/30' : 'border-yellow-400/30'}`}>
+          <div className={`bg-transparent text-[var(--brand-green)] border px-4 py-2 rounded-lg inline-flex items-center gap-2 ${healthScore >= 80 ? 'border-[var(--ak-brand-ink)]/30' : 'border-yellow-400/30'}`}>
             <span className={`material-symbols-outlined text-sm ${healthScore >= 80 ? 'text-[var(--brand-green)]' : 'text-yellow-600'}`}>
               {healthScore >= 80 ? 'check_circle' : 'warning'}
             </span>

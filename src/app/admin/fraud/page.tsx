@@ -27,7 +27,7 @@ const severityConfig = {
 }
 
 const riskLevelConfig = {
-  Low: { color: 'text-[#22C55E]', bg: 'bg-green-50 dark:bg-green-950/20', icon: 'shield' },
+  Low: { color: 'text-[var(--ak-brand-ink)]', bg: 'bg-green-50 dark:bg-green-950/20', icon: 'shield' },
   Medium: { color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-950/20', icon: 'security' },
   High: { color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-950/20', icon: 'gpp_bad' },
   Critical: { color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-950/30', icon: 'emergency' },
@@ -86,21 +86,21 @@ export default function FraudDetectionPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <p className="text-[12px] text-[#9CA3AF] mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] mb-1 flex items-center gap-1">
             <span>Admin</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>AI Fraud Detection</span>
           </p>
           <h1 className="text-[26px] font-bold tracking-tight">AI Fraud Detection</h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[16px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+            <span className="material-symbols-outlined text-[16px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
             Powered by Akibora AI · Detects fraud before damage occurs
           </p>
         </div>
         <button
           onClick={runScan}
           disabled={scanning || !group}
-          className="flex items-center gap-2 bg-[#22C55E] text-white px-6 py-3 rounded-xl text-[14px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 bg-[var(--ak-solid)] text-white px-6 py-3 rounded-xl text-[14px] font-semibold hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50"
         >
           {scanning ? (
             <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Scanning...</>
@@ -120,15 +120,15 @@ export default function FraudDetectionPage() {
       {/* Empty state */}
       {!result && !scanning && (
         <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-[#22C55E]/10 flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-[32px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>radar</span>
+          <div className="w-16 h-16 rounded-full bg-[var(--ak-solid)]/10 flex items-center justify-center mx-auto mb-4">
+            <span className="material-symbols-outlined text-[32px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>radar</span>
           </div>
           <h2 className="text-[18px] font-bold mb-2">No scan run yet</h2>
           <p className="text-[14px] text-[var(--text-muted)] max-w-md mx-auto mb-6">
             The AI will analyse your group's transactions, contributions, and member behaviour for fraud patterns — including duplicates, fake contributions, suspicious reversals, and abnormal withdrawals.
           </p>
           <button onClick={runScan} disabled={!group}
-            className="bg-[#22C55E] text-white px-6 py-3 rounded-xl text-[14px] font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50">
+            className="bg-[var(--ak-solid)] text-white px-6 py-3 rounded-xl text-[14px] font-semibold hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50">
             Run First Scan
           </button>
         </div>
@@ -137,8 +137,8 @@ export default function FraudDetectionPage() {
       {/* Scanning state */}
       {scanning && (
         <div className="card-bg border border-[var(--border)] rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-[#22C55E]/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="material-symbols-outlined text-[32px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+          <div className="w-16 h-16 rounded-full bg-[var(--ak-solid)]/10 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <span className="material-symbols-outlined text-[32px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
           </div>
           <h2 className="text-[18px] font-bold mb-2">AI is scanning your group...</h2>
           <p className="text-[14px] text-[var(--text-muted)]">Checking transactions, contributions, and member patterns</p>
@@ -203,7 +203,7 @@ export default function FraudDetectionPage() {
           {/* No flags */}
           {result.flags.length === 0 && (
             <div className="card-bg border border-[var(--border)] rounded-2xl p-8 text-center">
-              <span className="material-symbols-outlined text-[40px] text-[#22C55E] block mb-2" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
+              <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)] block mb-2" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
               <h3 className="text-[16px] font-bold mb-1">No fraud patterns detected</h3>
               <p className="text-[14px] text-[var(--text-muted)]">Your group's activity looks clean. Run scans regularly to stay protected.</p>
             </div>
@@ -246,7 +246,7 @@ export default function FraudDetectionPage() {
                           )}
                           {flag.recommendation && (
                             <div className="mt-2 flex items-start gap-1.5">
-                              <span className="material-symbols-outlined text-[14px] text-[#22C55E] flex-shrink-0 mt-0.5">lightbulb</span>
+                              <span className="material-symbols-outlined text-[14px] text-[var(--ak-brand-ink)] flex-shrink-0 mt-0.5">lightbulb</span>
                               <p className="text-[12px] text-[var(--text-muted)]">{flag.recommendation}</p>
                             </div>
                           )}

@@ -80,11 +80,11 @@ export default function ContributionScheduleSettings({ chamaId, onSaved }: { cha
       {current ? (
         <ContributionSchedulePicker value={value} onChange={setValue} />
       ) : (
-        <div className="h-40 rounded-xl bg-gray-100 dark:bg-[#1a2218] animate-pulse" />
+        <div className="h-40 rounded-xl bg-gray-100 dark:bg-[var(--ak-surface)] animate-pulse" />
       )}
 
       {message && (
-        <p className={`text-[13px] ${message.ok ? 'text-[#16A34A]' : 'text-red-500'}`} role={message.ok ? 'status' : 'alert'}>
+        <p className={`text-[13px] ${message.ok ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`} role={message.ok ? 'status' : 'alert'}>
           {message.text}
         </p>
       )}
@@ -94,7 +94,7 @@ export default function ContributionScheduleSettings({ chamaId, onSaved }: { cha
           type="button"
           onClick={save}
           disabled={saving || !current}
-          className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm disabled:opacity-50"
+          className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Save schedule'}
         </button>

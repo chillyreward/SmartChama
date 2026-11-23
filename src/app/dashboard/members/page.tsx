@@ -78,8 +78,8 @@ export default function MembersPage() {
         if (isFlagged) flaggedCount++;
 
         const roleClass = ['admin', 'chairlady', 'treasurer', 'secretary'].includes(m.role)
-          ? "bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176]"
-          : "bg-gray-100 dark:bg-[#1a2218] text-[var(--text-muted)]";
+          ? "bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]"
+          : "bg-gray-100 dark:bg-[var(--ak-surface)] text-[var(--text-muted)]";
 
         return {
           ...m,
@@ -124,7 +124,7 @@ export default function MembersPage() {
   });
 
   const getTrustScoreStyles = (score: number) => {
-    if (score >= 80) return { text: "text-[var(--brand-green)]", bg: "bg-[#22C55E]" };
+    if (score >= 80) return { text: "text-[var(--brand-green)]", bg: "bg-[var(--ak-solid)]" };
     if (score >= 60) return { text: "text-yellow-600 dark:text-yellow-400", bg: "bg-yellow-400" };
     return { text: "text-red-500", bg: "bg-red-500" };
   };
@@ -155,7 +155,7 @@ export default function MembersPage() {
       
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Members</span>
@@ -175,11 +175,11 @@ export default function MembersPage() {
 
       {/* METRIC CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-8">
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">ACTIVE MEMBERS</div>
           <div className="flex items-center justify-between">
             <div className="text-[22px] md:text-3xl font-bold text-[var(--text-main)] font-geist">{stats.active}</div>
-            <span className="material-symbols-outlined text-gray-300 dark:text-[#5a6e5a] text-2xl hidden sm:inline">group</span>
+            <span className="material-symbols-outlined text-gray-300 dark:text-[var(--ak-text-2)] text-2xl hidden sm:inline">group</span>
           </div>
         </div>
 
@@ -188,7 +188,7 @@ export default function MembersPage() {
           <div className="flex items-end gap-3">
             <div className="text-[22px] md:text-3xl font-bold text-[var(--brand-green)] font-geist">{stats.newThisMonth}</div>
             {stats.newThisMonth > 0 && (
-              <div className="bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176] rounded-full px-3 py-0.5 text-xs font-semibold mb-1 hidden sm:block">
+              <div className="bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] rounded-full px-3 py-0.5 text-xs font-semibold mb-1 hidden sm:block">
                 +{stats.newThisMonth} joined
               </div>
             )}
@@ -217,16 +217,16 @@ export default function MembersPage() {
             placeholder="Search members by name or phone..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-72 border border-[var(--border)] rounded-lg px-4 py-2 pl-10 text-sm outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] text-[var(--text-main)] bg-transparent placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a] transition-all"
+            className="w-full md:w-72 border border-[var(--border)] rounded-lg px-4 py-2 pl-10 text-sm outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)] text-[var(--text-main)] bg-transparent placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] transition-all"
           />
         </div>
         
-        <div className="bg-[#F5F5F5] dark:bg-[#1f2a1f] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)]">
+        <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)]">
           {["All", "Active", "Admin", "Flagged"].map((f) => (
             <button 
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-md transition-all ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)]' : 'hover:text-[#161d16] dark:hover:text-[#E8F0E4]'}`}
+              className={`px-4 py-1.5 rounded-md transition-all ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)]' : 'hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)]'}`}
             >
               {f}
             </button>
@@ -238,12 +238,12 @@ export default function MembersPage() {
       <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
         
         {/* Mobile Card List */}
-        <div className="md:hidden flex flex-col divide-y divide-[#E5E7EB] dark:divide-[#2d3d2d]">
+        <div className="md:hidden flex flex-col divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
           {filteredMembers.length > 0 ? filteredMembers.map((member) => {
             const trustStyles = getTrustScoreStyles(member.trust);
             const isFlagged = member.status === "Flagged";
             return (
-              <div key={member.id} className="py-4 px-4 active:bg-[#f5f5f5] dark:active:bg-[#1f2a1f] transition-colors cursor-pointer" onClick={() => setSelectedMember(member)}>
+              <div key={member.id} className="py-4 px-4 active:bg-[var(--ak-surface-2)] dark:active:bg-[var(--ak-raised)] transition-colors cursor-pointer" onClick={() => setSelectedMember(member)}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
@@ -261,7 +261,7 @@ export default function MembersPage() {
                   </div>
                 </div>
                 
-                <div className="flex justify-between items-center mt-2 pt-2 border-t border-[#E5E7EB]/50 dark:border-[#2d3d2d]/50">
+                <div className="flex justify-between items-center mt-2 pt-2 border-t border-[var(--ak-line)]/50 dark:border-[var(--ak-line)]/50">
                   <div>
                     <p className="text-[11px] text-[var(--text-muted)] uppercase">Saved</p>
                     <p className="text-[13px] font-bold text-[var(--text-main)] font-mono">KSh {formatCurrency(member.totalSaved)}</p>
@@ -290,7 +290,7 @@ export default function MembersPage() {
                   <div className="flex flex-col items-end">
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedMember(member); }}
-                      className={`text-[13px] font-semibold hover:underline ${isFlagged ? "text-red-500" : "text-[#22C55E] dark:text-[#4ae176]"}`}
+                      className={`text-[13px] font-semibold hover:underline ${isFlagged ? "text-red-500" : "text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]"}`}
                     >
                       {isFlagged ? "Review" : "View"}
                     </button>
@@ -309,7 +309,7 @@ export default function MembersPage() {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
                 <th className="px-6 py-4">MEMBER</th>
                 <th className="px-6 py-4">ROLE</th>
                 <th className="px-6 py-4">PHONE</th>
@@ -320,13 +320,13 @@ export default function MembersPage() {
                 <th className="px-6 py-4">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+            <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
               {filteredMembers.length > 0 ? filteredMembers.map((member) => {
                 const trustStyles = getTrustScoreStyles(member.trust);
                 const isFlagged = member.status === "Flagged";
                 
                 return (
-                  <tr key={member.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                  <tr key={member.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
@@ -381,7 +381,7 @@ export default function MembersPage() {
                           Flagged
                         </span>
                       ) : (
-                        <span className="bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176] rounded px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap border border-[#4ae176] dark:border-[#1a3a1a]">
+                        <span className="bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] rounded px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap border border-[var(--ak-brand-ink)] dark:border-[var(--ak-line)]">
                           Active
                         </span>
                       )}
@@ -389,7 +389,7 @@ export default function MembersPage() {
                     <td className="px-6 py-4">
                       <button 
                         onClick={() => setSelectedMember(member)}
-                        className={`text-sm font-semibold hover:underline whitespace-nowrap ${isFlagged ? "text-red-500" : "text-[#22C55E] dark:text-[#4ae176]"}`}
+                        className={`text-sm font-semibold hover:underline whitespace-nowrap ${isFlagged ? "text-red-500" : "text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]"}`}
                       >
                         {isFlagged ? "Review" : "View"}
                       </button>
@@ -411,7 +411,7 @@ export default function MembersPage() {
       {/* OVERLAY FOR SIDE DRAWER */}
       {selectedMember && (
         <div 
-          className="fixed inset-0 bg-[#0B0F0C]/40 backdrop-blur-sm z-20 transition-opacity"
+          className="fixed inset-0 bg-[var(--ak-page)]/40 backdrop-blur-sm z-20 transition-opacity"
           onClick={() => setSelectedMember(null)}
         />
       )}
@@ -428,7 +428,7 @@ export default function MembersPage() {
             <div className="flex justify-end mb-4">
               <button 
                 onClick={() => setSelectedMember(null)}
-                className="text-[var(--text-muted)] hover:text-[#161d16] dark:hover:text-[#E8F0E4] bg-[#F5F5F5] dark:bg-[#1a2218] p-2 rounded-full"
+                className="text-[var(--text-muted)] hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)] bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] p-2 rounded-full"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -485,7 +485,7 @@ export default function MembersPage() {
                         <svg viewBox="0 0 36 36" className="w-24 h-24 absolute inset-0 transform -rotate-90">
                           {/* Background Circle */}
                           <path
-                            className="text-gray-100 dark:text-[#2d3d2d]"
+                            className="text-gray-100 dark:text-[var(--ak-text-2)]"
                             strokeWidth="3"
                             stroke="currentColor"
                             fill="none"
@@ -528,7 +528,7 @@ export default function MembersPage() {
             </div>
 
             {/* Contribution streak */}
-            <div className="bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] rounded-xl p-4 mb-6 flex items-start gap-3 shadow-sm">
+            <div className="bg-gray-50 dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-xl p-4 mb-6 flex items-start gap-3 shadow-sm">
               <span className="material-symbols-outlined text-[var(--brand-green)]">local_fire_department</span>
               <div>
                 <div className="text-sm font-semibold text-[var(--text-main)] mb-0.5">{selectedMember.contribution_streak || 0} consecutive months</div>
@@ -538,13 +538,13 @@ export default function MembersPage() {
 
             {/* Action buttons */}
             <div className="flex flex-col gap-3 mt-8">
-              <button className="flex items-center justify-center gap-2 bg-transparent border border-[var(--border)] text-[var(--text-main)] w-full rounded-lg py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm">
+              <button className="flex items-center justify-center gap-2 bg-transparent border border-[var(--border)] text-[var(--text-main)] w-full rounded-lg py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm">
                 <span className="material-symbols-outlined text-lg">chat</span>
                 Send Message
               </button>
               {currentMember?.role === 'admin' && (
                 <>
-                  <button className="flex items-center justify-center gap-2 bg-transparent border border-[var(--border)] text-[var(--text-main)] w-full rounded-lg py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm">
+                  <button className="flex items-center justify-center gap-2 bg-transparent border border-[var(--border)] text-[var(--text-main)] w-full rounded-lg py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm">
                     <span className="material-symbols-outlined text-lg">manage_accounts</span>
                     Edit Role
                   </button>

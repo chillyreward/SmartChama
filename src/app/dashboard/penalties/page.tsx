@@ -70,7 +70,7 @@ export default function MemberPenaltiesPage() {
     <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-          <ShieldAlert className="w-7 h-7 text-[#22C55E]" />
+          <ShieldAlert className="w-7 h-7 text-[var(--ak-brand-ink)]" />
           My Fines & Penalties
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -110,7 +110,7 @@ export default function MemberPenaltiesPage() {
 
         {penalties.length === 0 ? (
           <div className="text-center py-8 space-y-2">
-            <CheckCircle className="w-10 h-10 text-[#22C55E] mx-auto" />
+            <CheckCircle className="w-10 h-10 text-[var(--ak-brand-ink)] mx-auto" />
             <p className="text-base font-bold text-[var(--text-primary)]">Clean Record!</p>
             <p className="text-xs text-[var(--text-muted)]">You have no fines or penalties in this Chama.</p>
           </div>
@@ -137,7 +137,7 @@ export default function MemberPenaltiesPage() {
                   {p.status === 'unpaid' && (
                     <button
                       onClick={() => handlePay(p.id)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[#22C55E] text-white hover:bg-[#16A34A]">
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
                       Pay Fine
                     </button>
                   )}

@@ -43,7 +43,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
     <>
       <button
         onClick={() => setShowQR(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[#22C55E] transition-colors"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--ak-brand-ink)] transition-colors"
         type="button"
       >
         <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
@@ -89,7 +89,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
               {/* Group Code */}
               <div className="bg-[var(--bg-page)] border border-[var(--border)] rounded-lg p-3 mb-4">
                 <p className="text-xs text-[var(--text-secondary)] mb-1">Group Code</p>
-                <p className="text-2xl font-bold font-mono text-[#22C55E] tracking-[0.3em]">
+                <p className="text-2xl font-bold font-mono text-[var(--ak-brand-ink)] tracking-[0.3em]">
                   {groupCode}
                 </p>
               </div>
@@ -98,7 +98,7 @@ export default function InviteQR({ groupCode, chamaName }: Props) {
               <div className="flex gap-2">
                 <button
                   onClick={handleCopyLink}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[#22C55E] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] hover:border-[var(--ak-brand-ink)] transition-colors"
                   type="button"
                 >
                   <span className="material-symbols-outlined text-[18px]">

@@ -30,10 +30,10 @@ export async function toJpeg(source: Blob | HTMLCanvasElement): Promise<Blob> {
   )
 }
 
-const box = 'rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-5 space-y-4'
-const label = 'block text-[11px] font-semibold uppercase tracking-wider text-[#4F5A53] dark:text-[#8FA196]'
-const input = 'w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]'
-const primary = 'w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] disabled:opacity-50'
+const box = 'rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-5 space-y-4'
+const label = 'block text-[11px] font-semibold uppercase tracking-wider text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]'
+const input = 'w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]'
+const primary = 'w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] disabled:opacity-50'
 
 function PhotoPicker({ id, title, hint, value, onChange }: {
   id: string; title: string; hint: string; value: Blob | null; onChange: (b: Blob | null) => void
@@ -49,8 +49,8 @@ function PhotoPicker({ id, title, hint, value, onChange }: {
   return (
     <div className="space-y-2">
       <label htmlFor={id} className={label}>{title}</label>
-      <p className="text-[13px] text-[#4F5A53] dark:text-[#8FA196]">{hint}</p>
-      {preview && <img src={preview} alt={title} className="w-full max-h-56 object-contain rounded-xl border border-[#E5E7EB] dark:border-[#1B2520]" />}
+      <p className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{hint}</p>
+      {preview && <img src={preview} alt={title} className="w-full max-h-56 object-contain rounded-xl border border-[var(--ak-line)] dark:border-[var(--ak-line)]" />}
       <input
         id={id}
         type="file"
@@ -60,7 +60,7 @@ function PhotoPicker({ id, title, hint, value, onChange }: {
           const f = e.target.files?.[0]
           onChange(f ? await toJpeg(f) : null)
         }}
-        className="block w-full text-[14px] text-[#4F5A53] dark:text-[#8FA196] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#F0FDF4] file:text-[#16A34A] file:font-semibold"
+        className="block w-full text-[14px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--ak-tint)] file:text-[var(--ak-brand-ink)] file:font-semibold"
       />
     </div>
   )
@@ -111,7 +111,7 @@ function SelfieCamera({ value, onChange }: { value: Blob | null; onChange: (b: B
   return (
     <div className="space-y-2">
       <span className={label}>Live selfie</span>
-      <p className="text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
+      <p className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
         Face the camera in good light, no hat or sunglasses. We compare it with the photo on your ID.
       </p>
       {state === 'live' ? (
@@ -121,11 +121,11 @@ function SelfieCamera({ value, onChange }: { value: Blob | null; onChange: (b: B
         </div>
       ) : preview ? (
         <div className="space-y-3">
-          <img src={preview} alt="Your selfie" className="w-full max-h-72 object-contain rounded-xl border border-[#E5E7EB] dark:border-[#1B2520]" />
-          <button type="button" onClick={start} className="text-[14px] font-semibold text-[#22C55E] hover:underline">Retake</button>
+          <img src={preview} alt="Your selfie" className="w-full max-h-72 object-contain rounded-xl border border-[var(--ak-line)] dark:border-[var(--ak-line)]" />
+          <button type="button" onClick={start} className="text-[14px] font-semibold text-[var(--ak-brand-ink)] hover:underline">Retake</button>
         </div>
       ) : (
-        <button type="button" onClick={start} className="w-full py-3 rounded-xl border-2 border-[#22C55E] text-[#22C55E] font-semibold">
+        <button type="button" onClick={start} className="w-full py-3 rounded-xl border-2 border-[var(--ak-brand-ink)] text-[var(--ak-brand-ink)] font-semibold">
           Open camera
         </button>
       )}
@@ -201,7 +201,7 @@ export default function KycVerification({ onDone }: { onDone?: (outcome: KycOutc
               role="radio"
               aria-checked={docType === value}
               onClick={() => { setDocType(value); setBack(null) }}
-              className={`py-3 rounded-xl border text-[14px] font-semibold ${docType === value ? 'border-[#22C55E] bg-[#F0FDF4] dark:bg-[#0E2E1B] text-[#16A34A]' : 'border-[#E5E7EB] dark:border-[#1B2520] text-[#4F5A53] dark:text-[#8FA196]'}`}
+              className={`py-3 rounded-xl border text-[14px] font-semibold ${docType === value ? 'border-[var(--ak-brand-ink)] bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)]' : 'border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]'}`}
             >
               {text}
             </button>
@@ -238,12 +238,12 @@ export default function KycVerification({ onDone }: { onDone?: (outcome: KycOutc
         <SelfieCamera value={selfie} onChange={setSelfie} />
       </div>
 
-      <label className="flex items-start gap-3 text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
-        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-4 h-4 accent-[#22C55E]" />
+      <label className="flex items-start gap-3 text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-4 h-4 accent-[var(--ak-solid)]" />
         <span>
           I agree that Akibora may use my ID document and selfie to confirm my identity, including an automated
           comparison of my face with my ID photo. They are stored privately and used only for verification and fraud
-          prevention, as described in the <a href="/privacy" target="_blank" className="text-[#22C55E] underline">privacy policy</a>.
+          prevention, as described in the <a href="/privacy" target="_blank" className="text-[var(--ak-brand-ink)] underline">privacy policy</a>.
         </span>
       </label>
 

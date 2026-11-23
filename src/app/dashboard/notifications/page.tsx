@@ -106,7 +106,7 @@ export default function NotificationsPage() {
     <div className="max-w-4xl p-6 md:p-8 font-inter text-[var(--text-main)]">
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Notifications</span>
@@ -129,7 +129,7 @@ export default function NotificationsPage() {
             className={`px-4 py-2 rounded-lg text-[14px] font-medium transition-colors whitespace-nowrap ${
               activeTab === tab
                 ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]'
-                : 'text-[#60645f] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1f2a1f]'
+                : 'text-[var(--ak-text-2)] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)]'
             }`}
           >
             {tab}
@@ -139,7 +139,7 @@ export default function NotificationsPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <span className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></span>
+          <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
         </div>
       ) : filteredNotifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-[var(--border)] rounded-2xl card-bg">
@@ -148,15 +148,15 @@ export default function NotificationsPage() {
               notifications_off
             </span>
           </div>
-          <h2 className="text-[18px] font-semibold text-[#161d16] dark:text-white mb-2">
+          <h2 className="text-[18px] font-semibold text-[var(--ak-text)] dark:text-white mb-2">
             No notifications yet
           </h2>
-          <p className="text-[14px] text-[#60645f] dark:text-gray-400 max-w-sm">
+          <p className="text-[14px] text-[var(--ak-text-2)] dark:text-gray-400 max-w-sm">
             Notifications about your contributions and group activity will appear here.
           </p>
         </div>
       ) : (
-        <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden divide-y divide-[#E5E7EB] dark:divide-[#2d3d2d] shadow-sm">
+        <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] shadow-sm">
           {filteredNotifications.map(notif => {
             const config = getIconConfig(notif.type)
             return (
@@ -164,7 +164,7 @@ export default function NotificationsPage() {
                 key={notif.id}
                 className={`p-4 flex gap-4 transition-colors ${
                   !notif.read
-                    ? 'bg-[#edf6ea]/30 dark:bg-[#1a2a1a]/10 border-l-4 border-[#22C55E]'
+                    ? 'bg-[var(--ak-tint)]/30 dark:bg-[var(--ak-surface)]/10 border-l-4 border-[var(--ak-brand-ink)]'
                     : 'card-bg border-l-4 border-transparent'
                 }`}
               >
@@ -175,14 +175,14 @@ export default function NotificationsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-4">
-                    <h4 className={`text-[14px] text-[#161d16] dark:text-white truncate ${!notif.read ? 'font-bold' : 'font-medium'}`}>
+                    <h4 className={`text-[14px] text-[var(--ak-text)] dark:text-white truncate ${!notif.read ? 'font-bold' : 'font-medium'}`}>
                       {notif.title}
                     </h4>
-                    <span className="text-[12px] text-[#9ca3af] dark:text-gray-500 font-mono whitespace-nowrap">
+                    <span className="text-[12px] text-[var(--ak-text-3)] dark:text-gray-500 font-mono whitespace-nowrap">
                       {timeAgo(notif.created_at)}
                     </span>
                   </div>
-                  <p className="text-[14px] text-[#60645f] dark:text-gray-400 mt-1 leading-relaxed">
+                  <p className="text-[14px] text-[var(--ak-text-2)] dark:text-gray-400 mt-1 leading-relaxed">
                     {notif.message}
                   </p>
                 </div>

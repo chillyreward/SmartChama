@@ -246,18 +246,18 @@ export default function OnboardingClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0B0F0C] flex items-center justify-center">
-        <span className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></span>
+      <div className="min-h-screen bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] flex items-center justify-center">
+        <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex font-inter bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+    <div className="min-h-screen flex font-inter bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
       {/* LEFT PANEL */}
-      <div className="hidden md:flex w-1/2 bg-[#0B0F0C] flex-col justify-between p-12 relative overflow-hidden shrink-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#22C55E]/10 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#006e2f]/20 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="hidden md:flex w-1/2 bg-[var(--ak-page)] flex-col justify-between p-12 relative overflow-hidden shrink-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[var(--ak-solid)]/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[var(--ak-solid)]/20 rounded-full blur-[100px] pointer-events-none"></div>
         
         <div className="relative z-10">
           <Link href="/" className="inline-block mb-12">
@@ -288,8 +288,8 @@ export default function OnboardingClient() {
           </p>
           
           <div className="flex gap-2 mt-12">
-            <div className={`h-1.5 w-12 rounded-full ${step >= 1 ? 'bg-[#22C55E]' : 'bg-white/20'}`}></div>
-            <div className={`h-1.5 w-12 rounded-full ${step >= 2 ? 'bg-[#22C55E]' : 'bg-white/20'}`}></div>
+            <div className={`h-1.5 w-12 rounded-full ${step >= 1 ? 'bg-[var(--ak-solid)]' : 'bg-white/20'}`}></div>
+            <div className={`h-1.5 w-12 rounded-full ${step >= 2 ? 'bg-[var(--ak-solid)]' : 'bg-white/20'}`}></div>
           </div>
         </div>
 
@@ -299,9 +299,9 @@ export default function OnboardingClient() {
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="w-full md:w-1/2 flex flex-col bg-[#FAFAFA] dark:bg-[#0B0F0C] relative">
+      <div className="w-full md:w-1/2 flex flex-col bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] relative">
         <div className="absolute top-6 right-6 z-10">
-          <button onClick={handleLogout} className="text-body-sm text-[#60645f] dark:text-[#8FA88F] hover:text-[#161d16] dark:hover:text-[#E8F0E4] font-medium transition-colors">
+          <button onClick={handleLogout} className="text-body-sm text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)] font-medium transition-colors">
             Sign out
           </button>
         </div>
@@ -310,7 +310,7 @@ export default function OnboardingClient() {
           <div className="absolute top-6 left-6 z-10 md:hidden">
             <button 
               onClick={() => setStep(1)} 
-              className="text-[#60645f] dark:text-[#8FA88F] hover:text-[#161d16] dark:hover:text-[#E8F0E4] flex items-center gap-1 text-body-sm font-medium"
+              className="text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)] flex items-center gap-1 text-body-sm font-medium"
             >
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
               Back
@@ -319,7 +319,7 @@ export default function OnboardingClient() {
         )}
         
         <div className="flex-1 flex items-center justify-center p-6 sm:p-8 pb-28 md:pb-8">
-          <div className="w-full max-w-md bg-transparent md:bg-white md:dark:bg-[#161d16] md:border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-2xl p-0 md:p-8 sm:p-10 md:shadow-sm">
+          <div className="w-full max-w-md bg-transparent md:bg-white md:dark:bg-[var(--ak-surface)] md:border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-2xl p-0 md:p-8 sm:p-10 md:shadow-sm">
             {error && (
               <div className="mb-6 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded text-[#991b1b] dark:text-red-400 text-body-sm text-center">
                 {error}
@@ -328,35 +328,35 @@ export default function OnboardingClient() {
 
             {/* Mobile Step Indicator */}
             <div className="md:hidden flex justify-center gap-2 mb-6">
-              <div className={`h-1.5 w-8 rounded-full ${step >= 1 ? 'bg-[#22C55E]' : 'bg-[#E5E7EB] dark:bg-[#2d3d2d]'}`}></div>
-              <div className={`h-1.5 w-8 rounded-full ${step >= 2 ? 'bg-[#22C55E]' : 'bg-[#E5E7EB] dark:bg-[#2d3d2d]'}`}></div>
+              <div className={`h-1.5 w-8 rounded-full ${step >= 1 ? 'bg-[var(--ak-solid)]' : 'bg-[var(--ak-raised)] dark:bg-[var(--ak-raised)]'}`}></div>
+              <div className={`h-1.5 w-8 rounded-full ${step >= 2 ? 'bg-[var(--ak-solid)]' : 'bg-[var(--ak-raised)] dark:bg-[var(--ak-raised)]'}`}></div>
             </div>
 
             {step === 1 && (
               <>
                 <div className="mb-8">
-                  <h1 className="text-[28px] font-geist font-bold text-[#161d16] dark:text-[#E8F0E4]">Complete Profile</h1>
-                  <p className="text-body-md text-[#60645f] dark:text-[#8FA88F] mt-1">Please provide your contact details.</p>
+                  <h1 className="text-[28px] font-geist font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">Complete Profile</h1>
+                  <p className="text-body-md text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] mt-1">Please provide your contact details.</p>
                 </div>
 
                 <form id="onboarding-profile-form" onSubmit={handleProfileSubmit} className="flex flex-col gap-5">
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Full Name</label>
+                    <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Full Name</label>
                     <input 
                       type="text" 
                       required
                       value={profileForm.full_name}
                       onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
                       placeholder="e.g. Grace Wanjiku"
-                      className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                      className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Phone Number</label>
-                    <div className="flex border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg focus-within:border-[#22C55E] focus-within:ring-1 focus-within:ring-[#22C55E] overflow-hidden bg-white dark:bg-[#1a2218]">
-                      <div className="bg-[#FAFAFA] dark:bg-[#1f2a1f] border-r border-[#E5E7EB] dark:border-[#2d3d2d] px-3 py-3 flex items-center justify-center">
-                        <span className="text-body-sm text-[#60645f] dark:text-[#8FA88F] font-bold">+254</span>
+                    <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Phone Number</label>
+                    <div className="flex border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg focus-within:border-[var(--ak-brand-ink)] focus-within:ring-1 focus-within:ring-[var(--ak-brand-ink)] overflow-hidden bg-white dark:bg-[var(--ak-surface)]">
+                      <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)] border-r border-[var(--ak-line)] dark:border-[var(--ak-line)] px-3 py-3 flex items-center justify-center">
+                        <span className="text-body-sm text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] font-bold">+254</span>
                       </div>
                       <input 
                         type="tel" 
@@ -364,7 +364,7 @@ export default function OnboardingClient() {
                         value={profileForm.phone}
                         onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
                         placeholder="712 345 678"
-                        className="flex-1 px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-transparent focus:outline-none placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a]"
+                        className="flex-1 px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-transparent focus:outline-none placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)]"
                       />
                     </div>
                   </div>
@@ -372,7 +372,7 @@ export default function OnboardingClient() {
                   <button 
                     type="submit" 
                     disabled={saving}
-                    className="hidden md:flex w-full bg-[#22C55E] text-white py-3.5 rounded-lg text-body-sm font-semibold hover:bg-[#006e2f] transition-colors mt-2 disabled:opacity-70 justify-center items-center"
+                    className="hidden md:flex w-full bg-[var(--ak-solid)] text-white py-3.5 rounded-lg text-body-sm font-semibold hover:bg-[var(--ak-solid)] transition-colors mt-2 disabled:opacity-70 justify-center items-center"
                   >
                     {saving ? 'Saving...' : 'Continue'}
                   </button>
@@ -383,17 +383,17 @@ export default function OnboardingClient() {
             {step === 2 && (
               <>
                 <div className="mb-6">
-                  <h1 className="text-[28px] font-geist font-bold text-[#161d16] dark:text-[#E8F0E4]">Get Started with a Chama</h1>
-                  <p className="text-body-md text-[#60645f] dark:text-[#8FA88F] mt-1">Join an existing group with an invite code, or create a new one.</p>
+                  <h1 className="text-[28px] font-geist font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">Get Started with a Chama</h1>
+                  <p className="text-body-md text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] mt-1">Join an existing group with an invite code, or create a new one.</p>
                 </div>
 
                 {/* JOIN EXISTING GROUP SECTION */}
-                <div className="border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-xl p-5 mb-8 bg-white dark:bg-[#1a2218]">
+                <div className="border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-xl p-5 mb-8 bg-white dark:bg-[var(--ak-surface)]">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-[#22C55E]">group_add</span>
-                    <h2 className="text-[16px] font-bold text-[#161d16] dark:text-[#E8F0E4]">Join an Existing Group</h2>
+                    <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">group_add</span>
+                    <h2 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">Join an Existing Group</h2>
                   </div>
-                  <p className="text-[13px] text-[#60645f] dark:text-[#8FA88F] mb-4">
+                  <p className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] mb-4">
                     Have a 6-character group invite code from your Chama admin? Enter it below:
                   </p>
 
@@ -411,12 +411,12 @@ export default function OnboardingClient() {
                       value={groupCode}
                       onChange={(e) => setGroupCode(e.target.value.toUpperCase())}
                       placeholder="ENTER CODE (e.g. AB12CD)"
-                      className="flex-1 tracking-widest font-mono font-bold uppercase border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#0B0F0C] placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                      className="flex-1 tracking-widest font-mono font-bold uppercase border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-page)] placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     />
                     <button 
                       type="submit" 
                       disabled={joining || !groupCode.trim()}
-                      className="bg-[#22C55E] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#16A34A] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
+                      className="bg-[var(--ak-solid)] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
                     >
                       {joining ? 'Joining...' : 'Join Group'}
                     </button>
@@ -426,28 +426,28 @@ export default function OnboardingClient() {
                 {/* VISUAL DIVIDER */}
                 <div className="relative flex items-center justify-center my-8">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#E5E7EB] dark:border-[#2d3d2d]" />
+                    <div className="w-full border-t border-[var(--ak-line)] dark:border-[var(--ak-line)]" />
                   </div>
-                  <div className="relative px-4 bg-white dark:bg-[#0B0F0C] text-[11px] font-bold uppercase tracking-widest text-[#60645f] dark:text-[#8FA88F]">
+                  <div className="relative px-4 bg-white dark:bg-[var(--ak-page)] text-[11px] font-bold uppercase tracking-widest text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                     — OR CREATE A NEW GROUP —
                   </div>
                 </div>
 
                 <form id="onboarding-chama-form" onSubmit={handleCreateChama} className="flex flex-col gap-5">
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Group Name</label>
+                    <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Group Name</label>
                     <input 
                       type="text" 
                       required
                       value={chamaForm.name}
                       onChange={(e) => setChamaForm({...chamaForm, name: e.target.value})}
                       placeholder="e.g. Vision 2030 Investment Group"
-                      className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                      className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Default Contribution (KSh)</label>
+                    <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Default Contribution (KSh)</label>
                     <input 
                       type="number" 
                       required
@@ -455,16 +455,16 @@ export default function OnboardingClient() {
                       value={chamaForm.contribution_amount}
                       onChange={(e) => setChamaForm({...chamaForm, contribution_amount: e.target.value})}
                       placeholder="e.g. 5000"
-                      className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                      className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Frequency</label>
+                    <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Frequency</label>
                     <select 
                       value={chamaForm.contribution_frequency}
                       onChange={(e) => setChamaForm({...chamaForm, contribution_frequency: e.target.value})}
-                      className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                      className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     >
                       <option value="weekly">Weekly</option>
                       <option value="monthly">Monthly</option>
@@ -472,8 +472,8 @@ export default function OnboardingClient() {
                   </div>
 
                   {/* PAYMENT SETUP */}
-                  <div className="border-t border-[#E5E7EB] dark:border-[#2d3d2d] pt-5 mt-5">
-                    <label className="block text-[13px] font-bold text-[#161d16] dark:text-[#E8F0E4] mb-3 text-left">
+                  <div className="border-t border-[var(--ak-line)] dark:border-[var(--ak-line)] pt-5 mt-5">
+                    <label className="block text-[13px] font-bold text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] mb-3 text-left">
                       Where will members send money?
                     </label>
 
@@ -483,14 +483,14 @@ export default function OnboardingClient() {
                         { value: 'paybill', label: 'Paybill Number' },
                         { value: 'phone', label: 'Phone Number (Send Money)' }
                       ].map(option => (
-                        <label key={option.value} className="flex items-center gap-3 cursor-pointer text-body-sm text-[#161d16] dark:text-[#E8F0E4]">
+                        <label key={option.value} className="flex items-center gap-3 cursor-pointer text-body-sm text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
                           <input 
                             type="radio" 
                             name="payment_type"
                             value={option.value}
                             checked={chamaForm.payment_type === option.value}
                             onChange={(e) => setChamaForm({...chamaForm, payment_type: e.target.value})}
-                            className="text-[#22C55E] focus:ring-[#22C55E]"
+                            className="text-[var(--ak-brand-ink)] focus:ring-[var(--ak-brand-ink)]"
                           />
                           <span>{option.label}</span>
                         </label>
@@ -500,25 +500,25 @@ export default function OnboardingClient() {
                     {chamaForm.payment_type === 'till' && (
                       <div className="space-y-4 text-left">
                         <div>
-                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Till Number (5-6 digits)</label>
+                          <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Till Number (5-6 digits)</label>
                           <input 
                             type="text" 
                             required
                             value={chamaForm.till_number}
                             onChange={(e) => setChamaForm({...chamaForm, till_number: e.target.value})}
                             placeholder="e.g. 543210"
-                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                            className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Name</label>
+                          <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Account Name</label>
                           <input 
                             type="text" 
                             required
                             value={chamaForm.account_name}
                             onChange={(e) => setChamaForm({...chamaForm, account_name: e.target.value})}
                             placeholder="e.g. VISION 2030 CHAMA"
-                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                            className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                           />
                         </div>
                       </div>
@@ -527,36 +527,36 @@ export default function OnboardingClient() {
                     {chamaForm.payment_type === 'paybill' && (
                       <div className="space-y-4 text-left">
                         <div>
-                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Paybill Number</label>
+                          <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Paybill Number</label>
                           <input 
                             type="text" 
                             required
                             value={chamaForm.paybill_number}
                             onChange={(e) => setChamaForm({...chamaForm, paybill_number: e.target.value})}
                             placeholder="e.g. 247247"
-                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                            className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Number</label>
+                          <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Account Number</label>
                           <input 
                             type="text" 
                             required
                             value={chamaForm.account_number}
                             onChange={(e) => setChamaForm({...chamaForm, account_number: e.target.value})}
                             placeholder="e.g. CHAMA2030"
-                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                            className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Name</label>
+                          <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Account Name</label>
                           <input 
                             type="text" 
                             required
                             value={chamaForm.account_name}
                             onChange={(e) => setChamaForm({...chamaForm, account_name: e.target.value})}
                             placeholder="e.g. VISION 2030 CHAMA"
-                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                            className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                           />
                         </div>
                       </div>
@@ -565,25 +565,25 @@ export default function OnboardingClient() {
                     {chamaForm.payment_type === 'phone' && (
                       <div className="space-y-4 text-left">
                         <div>
-                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Phone Number</label>
+                          <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Phone Number</label>
                           <input 
                             type="tel" 
                             required
                             value={chamaForm.phone_number}
                             onChange={(e) => setChamaForm({...chamaForm, phone_number: e.target.value})}
                             placeholder="e.g. +254712345678"
-                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                            className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-semibold text-[#60645f] dark:text-[#8FA88F] uppercase tracking-wider mb-2">Account Name</label>
+                          <label className="block text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] uppercase tracking-wider mb-2">Account Name</label>
                           <input 
                             type="text" 
                             required
                             value={chamaForm.account_name}
                             onChange={(e) => setChamaForm({...chamaForm, account_name: e.target.value})}
                             placeholder="e.g. Grace Wanjiku"
-                            className="w-full border border-[#E5E7EB] dark:border-[#2d3d2d] rounded-lg px-4 py-3 text-[#161d16] dark:text-[#E8F0E4] bg-white dark:bg-[#1a2218] focus:outline-none focus:border-[#22C55E]"
+                            className="w-full border border-[var(--ak-line)] dark:border-[var(--ak-line)] rounded-lg px-4 py-3 text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-surface)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                           />
                         </div>
                       </div>
@@ -593,7 +593,7 @@ export default function OnboardingClient() {
                   <button 
                     type="submit" 
                     disabled={saving}
-                    className="hidden md:flex w-full bg-[#22C55E] text-white py-3.5 rounded-lg text-body-sm font-semibold hover:bg-[#006e2f] transition-colors mt-2 disabled:opacity-70 justify-center items-center gap-2"
+                    className="hidden md:flex w-full bg-[var(--ak-solid)] text-white py-3.5 rounded-lg text-body-sm font-semibold hover:bg-[var(--ak-solid)] transition-colors mt-2 disabled:opacity-70 justify-center items-center gap-2"
                   >
                     {saving ? 'Creating...' : (
                       <>
@@ -609,12 +609,12 @@ export default function OnboardingClient() {
         </div>
 
         {/* Fixed Continue Button on Mobile */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-safe bg-white dark:bg-[#0B0F0C] border-t border-[#E5E7EB] dark:border-[#1a2a1a] z-20">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-safe bg-white dark:bg-[var(--ak-page)] border-t border-[var(--ak-line)] dark:border-[var(--ak-line)] z-20">
           <button 
             type="submit"
             form={step === 1 ? 'onboarding-profile-form' : 'onboarding-chama-form'}
             disabled={saving}
-            className="w-full bg-[#22C55E] text-white py-4 rounded-xl text-[16px] font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-[var(--ak-solid)] text-white py-4 rounded-xl text-[16px] font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {saving ? 'Processing...' : step === 1 ? 'Continue' : 'Create Group'}
           </button>

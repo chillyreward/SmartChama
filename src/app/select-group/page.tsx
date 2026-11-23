@@ -68,7 +68,7 @@ export default function SelectGroupPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-page)' }}>
-        <div className="w-10 h-10 rounded-full border-4 border-[#22C55E]/20 border-t-[#22C55E] animate-spin" />
+        <div className="w-10 h-10 rounded-full border-4 border-[var(--ak-brand-ink)]/20 border-t-[var(--ak-brand-ink)] animate-spin" />
       </div>
     )
   }
@@ -99,10 +99,10 @@ export default function SelectGroupPage() {
               key={m.id}
               onClick={() => selectGroup(m)}
               disabled={selecting !== null}
-              className="w-full p-4 rounded-2xl border text-left transition-all hover:border-[#22C55E] disabled:opacity-60"
+              className="w-full p-4 rounded-2xl border text-left transition-all hover:border-[var(--ak-brand-ink)] disabled:opacity-60"
               style={{
                 backgroundColor: 'var(--bg-card)',
-                borderColor: isSelecting ? '#22C55E' : 'var(--border)'
+                borderColor: isSelecting ? '#3FA673' : 'var(--border)'
               }}>
               <div className="flex items-center justify-between">
                 <div>
@@ -119,7 +119,7 @@ export default function SelectGroupPage() {
                   </div>
                 </div>
                 {isSelecting ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-[#22C55E]/30 border-t-[#22C55E] animate-spin" />
+                  <div className="w-5 h-5 rounded-full border-2 border-[var(--ak-brand-ink)]/30 border-t-[var(--ak-brand-ink)] animate-spin" />
                 ) : (
                   <span className="material-symbols-outlined text-[20px]" style={{ color: 'var(--text-muted)' }}>
                     chevron_right

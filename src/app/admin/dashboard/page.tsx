@@ -150,7 +150,7 @@ export default function AdminDashboard() {
           </p>
           <button
             onClick={load}
-            className="bg-[#22C55E] text-white px-6 py-2.5 rounded-xl font-medium">
+            className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-xl font-medium">
             Try Again
           </button>
         </div>

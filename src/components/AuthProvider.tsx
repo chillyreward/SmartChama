@@ -18,7 +18,7 @@ interface AuthContextType {
   refreshMemberData: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   member: null,

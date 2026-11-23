@@ -77,7 +77,7 @@ export function InviteModal({
   }
 
   const channelConfig = {
-    sms: { icon: 'sms', label: 'SMS', color: '#22C55E', desc: 'Send a text message' },
+    sms: { icon: 'sms', label: 'SMS', color: '#3FA673', desc: 'Send a text message' },
     whatsapp: { icon: 'chat', label: 'WhatsApp', color: '#25D366', desc: 'Send via WhatsApp' }
   }
 
@@ -147,7 +147,7 @@ export function InviteModal({
               </label>
               <input type="text" value={name} onChange={e => setName(e.target.value)}
                 placeholder="Grace Wanjiku"
-                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[#22C55E]"
+                className="w-full px-4 py-3 rounded-xl border text-[15px] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 style={inputStyle} />
             </div>
 

@@ -134,7 +134,7 @@ export default function TermsPage() {
             Your contribution records are visible to the administrators of your savings group. Other group members can see contribution statuses.
           </p>
           <p>
-            You may request a copy of your data or request deletion of your account at any time by contacting <a href="mailto:privacy@akibora.co.ke" className="text-[#006e2f] hover:underline">privacy@akibora.co.ke</a>. Note that contribution and transaction records that form part of a group's financial history cannot be deleted as they affect other members' records.
+            You may request a copy of your data or request deletion of your account at any time by contacting <a href="mailto:privacy@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">privacy@akibora.co.ke</a>. Note that contribution and transaction records that form part of a group's financial history cannot be deleted as they affect other members' records.
           </p>
         </>
       )
@@ -181,7 +181,7 @@ export default function TermsPage() {
             Our total liability to any user shall not exceed the amount paid by that user to Akibora in the 12 months preceding the event giving rise to the claim.
           </p>
           <p className="mt-6">
-            For questions about these terms, contact <a href="mailto:legal@akibora.co.ke" className="text-[#006e2f] hover:underline">legal@akibora.co.ke</a>
+            For questions about these terms, contact <a href="mailto:legal@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">legal@akibora.co.ke</a>
           </p>
         </>
       )
@@ -189,25 +189,25 @@ export default function TermsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col font-inter text-on-surface">
+    <div className="min-h-screen bg-[var(--ak-surface-2)] flex flex-col font-inter text-on-surface">
       <LandingNav />
 
       <main className="flex-1 py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-[40px] font-geist font-bold text-[#161d16] mb-2">Terms of Service</h1>
-          <p className="text-body-sm text-[#60645f] mb-10">Last updated: June 2025</p>
+          <h1 className="text-[40px] font-geist font-bold text-[var(--ak-text)] mb-2">Terms of Service</h1>
+          <p className="text-body-sm text-[var(--ak-text-2)] mb-10">Last updated: June 2025</p>
 
-          <p className="text-[18px] text-[#3d4a3d] leading-relaxed mb-12">
+          <p className="text-[18px] text-[var(--ak-text-2)] leading-relaxed mb-12">
             These Terms of Service govern your use of Akibora, operated by Akibora Technologies Ltd, a company registered in Kenya. By creating an account or using our platform, you agree to these terms in full. Please read them carefully before proceeding.
           </p>
 
           <div className="space-y-12">
             {sections.map((section, idx) => (
               <section key={idx}>
-                <h2 className="text-[24px] font-geist font-bold text-[#161d16] mb-4">
+                <h2 className="text-[24px] font-geist font-bold text-[var(--ak-text)] mb-4">
                   {section.title}
                 </h2>
-                <div className="text-[16px] text-[#3d4a3d] leading-relaxed space-y-4">
+                <div className="text-[16px] text-[var(--ak-text-2)] leading-relaxed space-y-4">
                   {section.content}
                 </div>
               </section>

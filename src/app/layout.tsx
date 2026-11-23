@@ -1,25 +1,49 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
-import { Inter, Geist } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import dynamic from 'next/dynamic';
-import LoadingScreen from "@/components/LoadingScreen";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
 const ChatBot = dynamic(() => import('@/components/ChatBot').then(mod => ({ default: mod.ChatBot })));
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+// Self-hosted so builds never depend on reaching Google Fonts.
+const onest = localFont({
+  src: "../fonts/onest-latin-wght-normal.woff2",
+  variable: "--font-onest",
+  weight: "100 900",
+  display: "swap",
+});
+const newsreader = localFont({
+  src: [
+    { path: "../fonts/newsreader-latin-opsz-normal.woff2", style: "normal" },
+    { path: "../fonts/newsreader-latin-opsz-italic.woff2", style: "italic" },
+  ],
+  variable: "--font-newsreader",
+  weight: "200 800",
+  display: "swap",
+});
+const jetbrains = localFont({
+  src: "../fonts/jetbrains-mono-latin-wght-normal.woff2",
+  variable: "--font-jetbrains",
+  weight: "100 800",
+  display: "swap",
+});
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://smartchama.vercel.app';
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  userScalable: false,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#E4EEE6' },
+    { media: '(prefers-color-scheme: dark)', color: '#0E1F18' },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -27,9 +51,9 @@ export const metadata: Metadata = {
     default: 'Akibora',
     template: '%s | Akibora'
   },
-  description: 'Digital savings management for African savings groups.',
+  description: 'Akibora keeps a chama\'s contributions, merry-go-round and welfare fund in one shared record, paid over M-Pesa.',
   alternates: {
-    canonical: 'https://smartchama.vercel.app',
+    canonical: SITE_URL,
   },
   manifest: '/site.webmanifest',
   appleWebApp: {
@@ -83,18 +107,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-        
-        {/* Theme color changes with light/dark mode */}
-        <meta 
-          name="theme-color" 
-          content="#22C55E"
-          media="(prefers-color-scheme: light)"
-        />
-        <meta 
-          name="theme-color" 
-          content="#000000"
-          media="(prefers-color-scheme: dark)"
-        />
 
         {/* Apple PWA specific */}
         <meta 
@@ -109,12 +121,6 @@ export default function RootLayout({
           name="apple-mobile-web-app-title" 
           content="Akibora" 
         />
-
-        {/* Microsoft tiles */}
-        <meta 
-          name="msapplication-TileColor" 
-          content="#22C55E" 
-        />
         <meta 
           name="msapplication-tap-highlight" 
           content="no" 
@@ -125,22 +131,8 @@ export default function RootLayout({
           name="format-detection" 
           content="telephone=no" 
         />
-
-        {/* Theme detection and splash screen control script */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              document.documentElement.classList.add('dark');
-              var isFirst = !sessionStorage.getItem('sc-initial-load');
-              if (!isFirst) {
-                document.documentElement.classList.add('sc-splash-hidden');
-              }
-            })();
-          `
-        }} />
       </head>
-      <body className={`${inter.variable} ${geist.variable} font-inter antialiased`}>
-        <LoadingScreen />
+      <body className={`${onest.variable} ${newsreader.variable} ${jetbrains.variable} font-sans antialiased bg-page text-ink`}>
         <LanguageProvider>
           <AuthProvider>
             <ThemeProvider>

@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       title: "1. What data we collect",
       content: (
         <>
-          <p className="font-bold text-[#161d16] mb-2">When you create an account:</p>
+          <p className="font-bold text-[var(--ak-text)] mb-2">When you create an account:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Full name</li>
             <li>Phone number (used for M-Pesa)</li>
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
             <li>County and occupation</li>
           </ul>
 
-          <p className="font-bold text-[#161d16] mt-6 mb-2">When you use the platform:</p>
+          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">When you use the platform:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Contribution amounts and dates</li>
             <li>Credit Score and its components</li>
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
             <li>SMS delivery records</li>
           </ul>
 
-          <p className="font-bold text-[#161d16] mt-6 mb-2">From M-Pesa:</p>
+          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">From M-Pesa:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Payment confirmation details</li>
             <li>M-Pesa receipt numbers</li>
@@ -61,14 +61,14 @@ export default function PrivacyPage() {
       title: "3. Who can see your data",
       content: (
         <>
-          <p className="font-bold text-[#161d16] mb-2">Your group administrator can see:</p>
+          <p className="font-bold text-[var(--ak-text)] mb-2">Your group administrator can see:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Your contribution history and status</li>
             <li>Your Credit Score</li>
             <li>Your contact details</li>
           </ul>
 
-          <p className="font-bold text-[#161d16] mt-6 mb-2">Other group members can see:</p>
+          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">Other group members can see:</p>
           <ul className="list-disc pl-5 space-y-2 my-4">
             <li>Whether you have paid your contribution</li>
             <li>Your name and role in the group</li>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
             Akibora staff can access your data only when needed to provide support or investigate a reported issue.
           </p>
 
-          <p className="font-bold text-[#161d16] mt-6 mb-2">Third parties:</p>
+          <p className="font-bold text-[var(--ak-text)] mt-6 mb-2">Third parties:</p>
           <p className="mb-2">
             We do not sell your data. We share data with third parties only in these circumstances:
           </p>
@@ -117,7 +117,7 @@ export default function PrivacyPage() {
             <li>Request a machine-readable export of your data</li>
           </ul>
           <p>
-            To exercise any of these rights, contact <a href="mailto:privacy@akibora.co.ke" className="text-[#006e2f] hover:underline">privacy@akibora.co.ke</a>. We will respond within 14 days.
+            To exercise any of these rights, contact <a href="mailto:privacy@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">privacy@akibora.co.ke</a>. We will respond within 14 days.
           </p>
         </>
       )
@@ -169,9 +169,9 @@ export default function PrivacyPage() {
         <>
           <p className="mb-2">
             For privacy questions or to exercise your rights, contact:<br/>
-            <a href="mailto:privacy@akibora.co.ke" className="text-[#006e2f] hover:underline">privacy@akibora.co.ke</a>
+            <a href="mailto:privacy@akibora.co.ke" className="text-[var(--ak-brand-ink)] hover:underline">privacy@akibora.co.ke</a>
           </p>
-          <p className="mt-6 text-[#60645f]">
+          <p className="mt-6 text-[var(--ak-text-2)]">
             Akibora Technologies Ltd<br/>
             Nairobi, Kenya
           </p>
@@ -181,25 +181,25 @@ export default function PrivacyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col font-inter text-on-surface">
+    <div className="min-h-screen bg-[var(--ak-surface-2)] flex flex-col font-inter text-on-surface">
       <LandingNav />
 
       <main className="flex-1 py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-[40px] font-geist font-bold text-[#161d16] mb-2">Privacy Policy</h1>
-          <p className="text-body-sm text-[#60645f] mb-10">Last updated: June 2025</p>
+          <h1 className="text-[40px] font-geist font-bold text-[var(--ak-text)] mb-2">Privacy Policy</h1>
+          <p className="text-body-sm text-[var(--ak-text-2)] mb-10">Last updated: June 2025</p>
 
-          <p className="text-[18px] text-[#3d4a3d] leading-relaxed mb-12">
+          <p className="text-[18px] text-[var(--ak-text-2)] leading-relaxed mb-12">
             Akibora Technologies Ltd is committed to protecting your privacy. This policy explains what data we collect, how we use it, and what rights you have over it.
           </p>
 
           <div className="space-y-12">
             {sections.map((section, idx) => (
               <section key={idx}>
-                <h2 className="text-[24px] font-geist font-bold text-[#161d16] mb-4">
+                <h2 className="text-[24px] font-geist font-bold text-[var(--ak-text)] mb-4">
                   {section.title}
                 </h2>
-                <div className="text-[16px] text-[#3d4a3d] leading-relaxed">
+                <div className="text-[16px] text-[var(--ak-text-2)] leading-relaxed">
                   {section.content}
                 </div>
               </section>

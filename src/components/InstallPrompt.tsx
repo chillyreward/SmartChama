@@ -100,7 +100,7 @@ export function InstallPrompt() {
           {platform === 'android' && deferredPrompt && (
             <button
               onClick={handleInstall}
-              className="w-full py-2.5 rounded-xl text-[14px] font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors"
+              className="w-full py-2.5 rounded-xl text-[14px] font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors"
             >
               Install App
             </button>

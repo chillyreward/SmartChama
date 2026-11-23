@@ -57,7 +57,7 @@ function SignupForm() {
 
   // Password strength
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
-  const strengthColors = ['', '#EF4444', '#F59E0B', '#22C55E']
+  const strengthColors = ['', '#EF4444', '#F59E0B', '#3FA673']
   const strengthLabels = ['', 'Weak', 'Good', 'Strong']
 
   async function handleStep1() {
@@ -235,12 +235,12 @@ function SignupForm() {
             Request Pending Approval
           </h1>
           <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-            Your request to join <span className="font-semibold text-[#22C55E]">{targetChamaName}</span> has been sent to the group admin. You will be able to access the dashboard once approved.
+            Your request to join <span className="font-semibold text-[var(--ak-brand-ink)]">{targetChamaName}</span> has been sent to the group admin. You will be able to access the dashboard once approved.
           </p>
 
           <Link
             href="/login"
-            className="w-full inline-block py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0 text-center"
+            className="w-full inline-block py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors border-0 text-center"
           >
             Return to Login
           </Link>
@@ -252,19 +252,19 @@ function SignupForm() {
   // CONFIRM-EMAIL SCREEN — shown when Supabase requires email confirmation
   if (pendingConfirmation) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
         <div className="w-full max-w-md text-center">
-          <div className="w-20 h-20 rounded-full bg-[#F0FDF4] dark:bg-[#0E2E1B] flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-[40px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] flex items-center justify-center mx-auto mb-6">
+            <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>
               mark_email_unread
             </span>
           </div>
           <h1 className="text-[28px] font-bold mb-2">Confirm your email</h1>
-          <p className="text-[15px] mb-8 text-[#4F5A53] dark:text-[#8FA196]">
-            We sent a link to <strong className="text-[#161d16] dark:text-white">{email.trim()}</strong>.
+          <p className="text-[15px] mb-8 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
+            We sent a link to <strong className="text-[var(--ak-text)] dark:text-white">{email.trim()}</strong>.
             Open it to activate your account and we&apos;ll finish {isAdminSignup ? 'creating your group' : 'adding you to your group'}.
           </p>
-          <Link href="/login" className="inline-block w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors">
+          <Link href="/login" className="inline-block w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors">
             Go to Sign In
           </Link>
         </div>
@@ -277,16 +277,16 @@ function SignupForm() {
   if (postStep) {
     const finish = () => { setPostStep(null); setSuccess(true) }
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
         <div className="w-full max-w-xl space-y-6 py-10">
           <div className="space-y-1">
-            <p className="text-[12px] font-semibold uppercase tracking-widest text-[#22C55E]">
+            <p className="text-[12px] font-semibold uppercase tracking-widest text-[var(--ak-brand-ink)]">
               Step {postStep === 'phone' ? 3 : 4} of 4 · {groupName} is created
             </p>
             <h1 className="text-[28px] font-bold">
               {postStep === 'phone' ? 'Verify your phone number' : 'Verify your identity'}
             </h1>
-            <p className="text-[15px] text-[#4F5A53] dark:text-[#8FA196]">
+            <p className="text-[15px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
               {postStep === 'phone'
                 ? "We'll text you a code. Your number is used for M-Pesa prompts, SMS sign-in and USSD."
                 : 'Add your ID number, a photo of your national ID or passport, and a live selfie. Withdrawals and investments unlock once you are verified.'}
@@ -294,7 +294,7 @@ function SignupForm() {
           </div>
 
           {postStep === 'phone' ? (
-            <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-5 space-y-4">
+            <div className="rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-5 space-y-4">
               <PhoneVerification
                 currentPhone={verifiedPhone || null}
                 onVerified={(p) => { setVerifiedPhone(p); setPostStep('identity') }}
@@ -302,9 +302,9 @@ function SignupForm() {
               />
             </div>
           ) : kycMessage ? (
-            <div className="rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-6 space-y-4 text-center">
+            <div className="rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-6 space-y-4 text-center">
               <p className="text-[15px]">{kycMessage}</p>
-              <button onClick={finish} className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white font-semibold">Continue</button>
+              <button onClick={finish} className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white font-semibold">Continue</button>
             </div>
           ) : (
             <KycVerification onDone={(o) => { if (o.status === 'rejected') return; setKycMessage(o.message) }} />
@@ -313,7 +313,7 @@ function SignupForm() {
           <button
             type="button"
             onClick={() => (postStep === 'phone' ? setPostStep('identity') : finish())}
-            className="block mx-auto text-[14px] text-[#4F5A53] dark:text-[#8FA196] hover:underline"
+            className="block mx-auto text-[14px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)] hover:underline"
           >
             {postStep === 'phone' ? 'Skip for now' : 'Do this later'}
           </button>
@@ -325,11 +325,11 @@ function SignupForm() {
   // SUCCESS SCREEN FOR ADMIN — shows the group code prominently
   if (success && createdGroupCode) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
         <div className="w-full max-w-md text-center">
           
-          <div className="w-20 h-20 rounded-full bg-[#F0FDF4] dark:bg-[#0E2E1B] flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-[40px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] flex items-center justify-center mx-auto mb-6">
+            <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>
               check_circle
             </span>
           </div>
@@ -337,19 +337,19 @@ function SignupForm() {
           <h1 className="text-[28px] font-bold mb-2">
             Group Created!
           </h1>
-          <p className="text-[15px] mb-8 text-[#4F5A53] dark:text-[#8FA196]">
-            Share this code with your members so they can join <strong className="text-[#161d16] dark:text-white">{groupName}</strong>
+          <p className="text-[15px] mb-8 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
+            Share this code with your members so they can join <strong className="text-[var(--ak-text)] dark:text-white">{groupName}</strong>
           </p>
 
           {/* GROUP CODE DISPLAY */}
-          <div className="rounded-2xl p-8 mb-6 bg-white dark:bg-[#0E1410] border-2 border-[#22C55E]">
-            <p className="text-[12px] font-semibold uppercase tracking-widest mb-3 text-[#4F5A53] dark:text-[#8FA196]">
+          <div className="rounded-2xl p-8 mb-6 bg-white dark:bg-[var(--ak-page)] border-2 border-[var(--ak-brand-ink)]">
+            <p className="text-[12px] font-semibold uppercase tracking-widest mb-3 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
               Your Group Code
             </p>
-            <p className="text-[52px] font-bold tracking-[0.2em] text-[#22C55E] font-mono mb-3">
+            <p className="text-[52px] font-bold tracking-[0.2em] text-[var(--ak-brand-ink)] font-mono mb-3">
               {createdGroupCode}
             </p>
-            <p className="text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
+            <p className="text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
               This code never expires. Save it and share it with your members.
             </p>
           </div>
@@ -359,24 +359,24 @@ function SignupForm() {
               navigator.clipboard.writeText(createdGroupCode)
               alert('Group code copied to clipboard!')
             }}
-            className="w-full py-3 rounded-xl border-2 border-[#22C55E] text-[#22C55E] font-semibold mb-3 hover:bg-[#22C55E] hover:text-white transition-all bg-transparent">
+            className="w-full py-3 rounded-xl border-2 border-[var(--ak-brand-ink)] text-[var(--ak-brand-ink)] font-semibold mb-3 hover:bg-[var(--ak-solid)] hover:text-white transition-all bg-transparent">
             Copy Group Code
           </button>
 
           {kycMessage ? (
             <button
               onClick={() => router.push('/admin/dashboard')}
-              className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0">
+              className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors border-0">
               Go to Admin Dashboard
             </button>
           ) : (
             <>
               <button
                 onClick={() => router.push('/verify-identity?next=/admin/dashboard')}
-                className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] transition-colors border-0">
+                className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] transition-colors border-0">
                 Verify your identity
               </button>
-              <p className="mt-3 text-[13px] text-[#4F5A53] dark:text-[#8FA196]">
+              <p className="mt-3 text-[13px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                 Needed before withdrawals or investments: your ID or passport and a selfie.
               </p>
             </>
@@ -388,10 +388,10 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+    <div className="min-h-screen bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 h-14 border-b border-[#E5E7EB] dark:border-[#1B2520]">
+      <div className="flex items-center justify-between px-6 h-14 border-b border-[var(--ak-line)] dark:border-[var(--ak-line)]">
         <Link href="/" className="flex items-center gap-2">
           <Image 
             src="/favicon.svg"
@@ -403,19 +403,19 @@ function SignupForm() {
             Akibora
           </span>
         </Link>
-        <Link href="/login" className="text-[14px] font-medium text-[#22C55E]">
+        <Link href="/login" className="text-[14px] font-medium text-[var(--ak-brand-ink)]">
           Sign In
         </Link>
       </div>
 
       {/* Role selector tabs */}
-      <div className="flex border-b border-[#E5E7EB] dark:border-[#1B2520]">
+      <div className="flex border-b border-[var(--ak-line)] dark:border-[var(--ak-line)]">
         <Link
           href="/signup?role=admin"
           className="flex-1 py-3 text-center text-[14px] font-semibold transition-all"
           style={{
             backgroundColor: isAdminSignup ? 'rgba(34, 197, 94, 0.05)' : 'transparent',
-            color: isAdminSignup ? '#22C55E' : '#8FA196',
+            color: isAdminSignup ? '#3FA673' : '#8FA196',
             borderBottom: isAdminSignup ? '2px solid #22C55E' : '2px solid transparent'
           }}>
           Create a Group (Admin)
@@ -425,7 +425,7 @@ function SignupForm() {
           className="flex-1 py-3 text-center text-[14px] font-semibold transition-all"
           style={{
             backgroundColor: !isAdminSignup ? 'rgba(34, 197, 94, 0.05)' : 'transparent',
-            color: !isAdminSignup ? '#22C55E' : '#8FA196',
+            color: !isAdminSignup ? '#3FA673' : '#8FA196',
             borderBottom: !isAdminSignup ? '2px solid #22C55E' : '2px solid transparent'
           }}>
           Join a Group (Member)
@@ -438,7 +438,7 @@ function SignupForm() {
           {!isAdminSignup && (
             <>
               <h1 className="text-[26px] font-bold mb-1">Join your chama</h1>
-              <p className="text-[14px] mb-6 text-[#4F5A53] dark:text-[#8FA196]">
+              <p className="text-[14px] mb-6 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                 Sign up with your phone number. You&apos;ll need the code from your group admin.
               </p>
               <MemberPhoneSignup initialCode={groupCode} onDone={handleMemberDone} />
@@ -452,13 +452,13 @@ function SignupForm() {
           {isAdminSignup && (<>
           {/* Step indicator */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold bg-[#22C55E] text-white">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold bg-[var(--ak-solid)] text-white">
               {step === 1 ? '1' : '✓'}
             </div>
-            <div className="flex-1 h-0.5 bg-[#E5E7EB] dark:bg-[#1B2520]" style={{ backgroundColor: step === 2 ? '#22C55E' : undefined }} />
+            <div className="flex-1 h-0.5 bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" style={{ backgroundColor: step === 2 ? '#3FA673' : undefined }} />
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold"
               style={{
-                backgroundColor: step === 2 ? '#22C55E' : 'var(--border)',
+                backgroundColor: step === 2 ? '#3FA673' : 'var(--border)',
                 color: step === 2 ? 'white' : '#8FA196'
               }}>
               2
@@ -472,7 +472,7 @@ function SignupForm() {
                 ? 'Set up your group'
                 : 'Enter your group code'}
           </h1>
-          <p className="text-[14px] mb-6 text-[#4F5A53] dark:text-[#8FA196]">
+          <p className="text-[14px] mb-6 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
             {step === 1 
               ? isAdminSignup 
                 ? 'You will be creating a new chama as the admin.'
@@ -493,7 +493,7 @@ function SignupForm() {
             <div className="space-y-4">
               
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                   Full Name
                 </label>
                 <input
@@ -501,12 +501,12 @@ function SignupForm() {
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
                   placeholder="Grace Wanjiku"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                   Email Address
                 </label>
                 <input
@@ -515,12 +515,12 @@ function SignupForm() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                   Password
                 </label>
                 <div className="relative">
@@ -530,12 +530,12 @@ function SignupForm() {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="Minimum 8 characters"
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                    className="w-full px-4 py-3 pr-12 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-[#8FA196] cursor-pointer">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 text-[var(--ak-text-3)] cursor-pointer">
                     <span className="material-symbols-outlined text-[20px]">
                       {showPassword ? 'visibility_off' : 'visibility'}
                     </span>
@@ -562,7 +562,7 @@ function SignupForm() {
               </div>
 
               <div>
-                <label htmlFor="confirm-password" className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                <label htmlFor="confirm-password" className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                   Confirm password
                 </label>
                 <input
@@ -572,7 +572,7 @@ function SignupForm() {
                   onChange={e => setConfirmPassword(e.target.value)}
                   placeholder="Type the password again"
                   autoComplete="new-password"
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
                 {confirmPassword && confirmPassword !== password && (
                   <p className="mt-1.5 text-[12px] text-red-500">Passwords don&apos;t match yet.</p>
@@ -581,7 +581,7 @@ function SignupForm() {
 
               <button
                 onClick={handleStep1}
-                className="w-full py-3.5 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold mt-2 hover:bg-[#16A34A] transition-colors border-0">
+                className="w-full py-3.5 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold mt-2 hover:bg-[var(--ak-solid)] transition-colors border-0">
                 Continue
               </button>
 
@@ -596,7 +596,7 @@ function SignupForm() {
             <div className="space-y-4">
               
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                   Group Name
                 </label>
                 <input
@@ -605,16 +605,16 @@ function SignupForm() {
                   onChange={e => setGroupName(e.target.value)}
                   placeholder="Nairobi Women Investment Group"
                   autoFocus
-                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-3 rounded-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                   Contribution amount (KSh)
                 </label>
                 <div className="flex">
-                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] bg-[#FAFAFA] dark:bg-[#0B0F0C] border-[#E5E7EB] dark:border-[#1B2520] text-[#4F5A53] dark:text-[#8FA196]">
+                  <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                     KSh
                   </div>
                   <input
@@ -623,13 +623,13 @@ function SignupForm() {
                     onChange={e => setContributionAmount(e.target.value)}
                     placeholder="5000"
                     min="1"
-                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white focus:outline-none focus:border-[#22C55E]"
+                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white focus:outline-none focus:border-[var(--ak-brand-ink)]"
                   />
                 </div>
               </div>
 
               <div>
-                <span className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[#4F5A53] dark:text-[#8FA196]">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                   Contribution schedule
                 </span>
                 <ContributionSchedulePicker value={schedule} onChange={setSchedule} />
@@ -638,13 +638,13 @@ function SignupForm() {
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setStep(1)}
-                  className="px-6 py-3 rounded-xl border text-[15px] font-medium bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white">
+                  className="px-6 py-3 rounded-xl border text-[15px] font-medium bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white">
                   Back
                 </button>
                 <button
                   onClick={handleAdminSignup}
                   disabled={loading || !groupName.trim() || !contributionAmount || !scheduleComplete(schedule)}
-                  className="flex-1 py-3 rounded-xl bg-[#22C55E] text-white text-[16px] font-semibold hover:bg-[#16A34A] disabled:opacity-50 transition-colors border-0">
+                  className="flex-1 py-3 rounded-xl bg-[var(--ak-solid)] text-white text-[16px] font-semibold hover:bg-[var(--ak-solid)] disabled:opacity-50 transition-colors border-0">
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -659,9 +659,9 @@ function SignupForm() {
 
           </>)}
 
-          <p className="text-center text-[13px] mt-6 text-[#4F5A53] dark:text-[#8FA196]">
+          <p className="text-center text-[13px] mt-6 text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
             Already have an account?{' '}
-            <Link href="/login" className="font-semibold text-[#22C55E] hover:underline">
+            <Link href="/login" className="font-semibold text-[var(--ak-brand-ink)] hover:underline">
               Sign In
             </Link>
           </p>
@@ -675,8 +675,8 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] dark:bg-[#0B0F0C]">
-        <div className="w-10 h-10 rounded-full border-4 border-[#22C55E]/20 border-t-[#22C55E] animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)]">
+        <div className="w-10 h-10 rounded-full border-4 border-[var(--ak-brand-ink)]/20 border-t-[var(--ak-brand-ink)] animate-spin" />
       </div>
     }>
       <SignupForm />

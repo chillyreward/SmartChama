@@ -185,7 +185,7 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="p-8">
-        <div className="h-96 bg-white dark:bg-[#111111] border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
+        <div className="h-96 bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
       </div>
     );
   }
@@ -193,7 +193,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="p-6 max-w-[1280px] mx-auto w-full font-inter min-h-full text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in">
+        <div className="fixed top-4 right-4 bg-[var(--ak-solid)] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-fade-in">
           <span className="material-symbols-outlined text-[20px]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
@@ -201,7 +201,7 @@ export default function AdminSettingsPage() {
 
       {/* HEADER */}
       <div className="mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Settings</span>
@@ -224,7 +224,7 @@ export default function AdminSettingsPage() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-semibold transition-colors text-left ${
                 activeTab === t.id
                   ? 'bg-transparent text-[var(--brand-green)]'
-                  : 'text-[#3d4a3d] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1f2a1f]'
+                  : 'text-[var(--ak-text-2)] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)]'
               }`}
             >
               <span className="material-symbols-outlined text-[20px]">{t.icon}</span>
@@ -301,7 +301,7 @@ export default function AdminSettingsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
+                  className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
                 >
                   {saving ? 'Saving...' : 'Save Chama Rules'}
                 </button>
@@ -413,7 +413,7 @@ export default function AdminSettingsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
+                  className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
                 >
                   {saving ? 'Saving...' : 'Save Payment Config'}
                 </button>
@@ -428,7 +428,7 @@ export default function AdminSettingsPage() {
                 <h2 className="text-xl font-bold text-[var(--text-main)] font-geist">Chama Invitations</h2>
                 <button
                   onClick={() => setShowInviteModal(true)}
-                  className="bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5"
+                  className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-md">person_add</span>
                   Invite Member

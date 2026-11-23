@@ -88,7 +88,7 @@ export default function MemberMerryGoRoundPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-          <RefreshCw className="w-7 h-7 text-[#22C55E]" />
+          <RefreshCw className="w-7 h-7 text-[var(--ak-brand-ink)]" />
           Merry-Go-Round
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -121,16 +121,16 @@ export default function MemberMerryGoRoundPage() {
       ) : (
         <div className="space-y-6">
           {/* Status Banner */}
-          <div className="sc-card p-6 md:p-8 rounded-2xl border bg-gradient-to-br from-green-500/10 via-transparent to-transparent space-y-6 border-[#22C55E]/20">
+          <div className="sc-card p-6 md:p-8 rounded-2xl border bg-gradient-to-br from-green-500/10 via-transparent to-transparent space-y-6 border-[var(--ak-brand-ink)]/20">
             <div className="flex flex-wrap justify-between items-start gap-4">
               <div>
-                <span className="text-xs font-bold text-[#22C55E] uppercase tracking-wider">Round {cycle.current_round} of {cycle.total_rounds}</span>
+                <span className="text-xs font-bold text-[var(--ak-brand-ink)] uppercase tracking-wider">Round {cycle.current_round} of {cycle.total_rounds}</span>
                 <h2 className="text-2xl font-bold text-[var(--text-primary)] mt-1">{cycle.name}</h2>
               </div>
               {myRoundItem && (
                 <div className="text-right bg-[var(--bg-card)] border border-[var(--border)] px-4 py-2 rounded-xl">
                   <p className="text-xs text-[var(--text-muted)]">Your Turn</p>
-                  <p className="text-sm font-bold text-[#22C55E]">Round {myRoundItem.round_number} ({myRoundItem.scheduled_date || 'TBD'})</p>
+                  <p className="text-sm font-bold text-[var(--ak-brand-ink)]">Round {myRoundItem.round_number} ({myRoundItem.scheduled_date || 'TBD'})</p>
                 </div>
               )}
             </div>
@@ -139,7 +139,7 @@ export default function MemberMerryGoRoundPage() {
             {currentRecipient && (
               <div className="p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--border)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#22C55E]/10 text-[#22C55E] flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-full bg-[var(--ak-solid)]/10 text-[var(--ak-brand-ink)] flex items-center justify-center font-bold">
                     <Gift className="w-5 h-5" />
                   </div>
                   <div>
@@ -159,7 +159,7 @@ export default function MemberMerryGoRoundPage() {
                     <button
                       onClick={handleContribute}
                       disabled={contributing}
-                      className="px-6 py-2.5 rounded-xl font-bold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors disabled:opacity-50 w-full sm:w-auto text-sm">
+                      className="px-6 py-2.5 rounded-xl font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50 w-full sm:w-auto text-sm">
                       {contributing ? 'Recording...' : `Pay KSh ${Number(cycle.amount_per_member).toLocaleString('en-KE')}`}
                     </button>
                   )}
@@ -171,7 +171,7 @@ export default function MemberMerryGoRoundPage() {
           {/* Full Schedule List */}
           <div className="sc-card p-6 rounded-2xl border space-y-4">
             <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#22C55E]" />
+              <Calendar className="w-5 h-5 text-[var(--ak-brand-ink)]" />
               Payout Schedule
             </h3>
             <div className="divide-y divide-[var(--border)]">
@@ -184,7 +184,7 @@ export default function MemberMerryGoRoundPage() {
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                         item.status === 'paid' 
-                          ? 'bg-green-100 dark:bg-green-950/30 text-[#22C55E]' 
+                          ? 'bg-green-100 dark:bg-green-950/30 text-[var(--ak-brand-ink)]' 
                           : isCurrent 
                           ? 'bg-amber-100 dark:bg-amber-950/30 text-amber-600' 
                           : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'
@@ -194,7 +194,7 @@ export default function MemberMerryGoRoundPage() {
                       <div>
                         <p className="text-sm text-[var(--text-primary)] flex items-center gap-2">
                           {item.chama_memberships?.profiles?.full_name || 'Member'}
-                          {isMe && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#22C55E]/10 text-[#22C55E]">You</span>}
+                          {isMe && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--ak-solid)]/10 text-[var(--ak-brand-ink)]">You</span>}
                         </p>
                         <p className="text-xs text-[var(--text-muted)]">{item.scheduled_date || 'TBD'}</p>
                       </div>

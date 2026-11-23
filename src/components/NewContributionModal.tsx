@@ -186,7 +186,7 @@ export function NewContributionModal({
             {/* Info box */}
             <div className="rounded-xl p-4 mb-5 flex gap-3"
               style={{ backgroundColor: 'transparent', borderLeft: '3px solid #22C55E' }}>
-              <span className="material-symbols-outlined text-[20px] flex-shrink-0" style={{ color: '#22C55E' }}>info</span>
+              <span className="material-symbols-outlined text-[20px] flex-shrink-0" style={{ color: '#3FA673' }}>info</span>
               <p className="text-[13px]" style={{ color: 'var(--text-muted)' }}>
                 You will receive an M-Pesa prompt on your phone. Enter your PIN to complete the payment.
               </p>
@@ -237,7 +237,7 @@ export function NewContributionModal({
                     onChange={e => setPhone(e.target.value)}
                     placeholder="712 345 678"
                     required
-                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-main)' }}
                   />
                 </div>
@@ -258,7 +258,7 @@ export function NewContributionModal({
                     onChange={e => setAmount(e.target.value)}
                     placeholder="5000"
                     required
-                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E]"
+                    className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)]"
                     style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border)', color: 'var(--text-main)' }}
                   />
                 </div>
@@ -278,7 +278,7 @@ export function NewContributionModal({
               <button
                 type="submit"
                 form="contribution-form"
-                className="w-full py-4 rounded-xl text-[16px] font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] active:scale-[0.98] transition-all">
+                className="w-full py-4 rounded-xl text-[16px] font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] active:scale-[0.98] transition-all">
                 Send M-Pesa Request
               </button>
             </form>
@@ -288,8 +288,8 @@ export function NewContributionModal({
         {/* STEP: SENDING */}
         {step === 'sending' && (
           <div className="py-8 flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#F0FDF4] dark:bg-[#052e16] flex items-center justify-center animate-pulse">
-              <span className="material-symbols-outlined text-[32px] text-[#22C55E]">send</span>
+            <div className="w-16 h-16 rounded-full bg-[var(--ak-tint)] dark:bg-[#052e16] flex items-center justify-center animate-pulse">
+              <span className="material-symbols-outlined text-[32px] text-[var(--ak-brand-ink)]">send</span>
             </div>
             <h3 className="text-[18px] font-semibold">Sending request...</h3>
             <p className="text-[14px]" style={{ color: 'var(--text-muted)' }}>Connecting to M-Pesa</p>
@@ -299,8 +299,8 @@ export function NewContributionModal({
         {/* STEP: WAITING FOR PIN */}
         {step === 'waiting' && (
           <div className="py-8 flex flex-col items-center gap-4 text-center">
-            <div className="w-20 h-20 rounded-full bg-[#F0FDF4] dark:bg-[#052e16] flex items-center justify-center">
-              <span className="material-symbols-outlined text-[40px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[#052e16] flex items-center justify-center">
+              <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 phone_android
               </span>
             </div>
@@ -309,9 +309,9 @@ export function NewContributionModal({
               An M-Pesa prompt has been sent to your phone. Enter your PIN to complete the payment.
             </p>
             <div className="flex items-center gap-2 mt-2">
-              <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="w-2 h-2 rounded-full bg-[var(--ak-solid)] animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 rounded-full bg-[var(--ak-solid)] animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 rounded-full bg-[var(--ak-solid)] animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
             <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>Waiting for M-Pesa confirmation...</p>
             <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>
@@ -323,8 +323,8 @@ export function NewContributionModal({
         {/* STEP: SUCCESS */}
         {step === 'success' && (
           <div className="py-8 flex flex-col items-center gap-4 text-center">
-            <div className="w-20 h-20 rounded-full bg-[#F0FDF4] dark:bg-[#052e16] flex items-center justify-center">
-              <span className="material-symbols-outlined text-[40px] text-[#22C55E]" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <div className="w-20 h-20 rounded-full bg-[var(--ak-tint)] dark:bg-[#052e16] flex items-center justify-center">
+              <span className="material-symbols-outlined text-[40px] text-[var(--ak-brand-ink)]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 check_circle
               </span>
             </div>
@@ -340,7 +340,7 @@ export function NewContributionModal({
             )}
             <button
               onClick={onClose}
-              className="mt-2 w-full py-4 rounded-xl text-[16px] font-semibold bg-[#22C55E] text-white">
+              className="mt-2 w-full py-4 rounded-xl text-[16px] font-semibold bg-[var(--ak-solid)] text-white">
               Done
             </button>
           </div>

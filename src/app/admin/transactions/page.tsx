@@ -132,7 +132,7 @@ export default function AdminTransactionsPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Transactions</span>
@@ -157,7 +157,7 @@ export default function AdminTransactionsPage() {
           </button>
           <button 
             onClick={handleExportCSV}
-            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-3 py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">download</span>
             CSV
@@ -174,11 +174,11 @@ export default function AdminTransactionsPage() {
             placeholder="Search by ref, type or member..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg pl-10 pr-4 py-2 text-xs outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] transition-all placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a]"
+            className="w-full border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg pl-10 pr-4 py-2 text-xs outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)] transition-all placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)]"
           />
         </div>
         
-        <div className="bg-[#F5F5F5] dark:bg-[#1f2a1f] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)] self-start md:self-auto overflow-x-auto w-full md:w-auto">
+        <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)] self-start md:self-auto overflow-x-auto w-full md:w-auto">
           {['All', 'Incoming', 'Outgoing'].map(f => (
             <button 
               key={f}
@@ -186,7 +186,7 @@ export default function AdminTransactionsPage() {
               className={`px-4 py-1.5 rounded-md transition-all ${
                 filter === f 
                   ? 'card-bg shadow-sm text-[var(--text-main)]' 
-                  : 'hover:text-[#161d16] dark:hover:text-[#E8F0E4]'
+                  : 'hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)]'
               }`}
             >
               {f}
@@ -201,7 +201,7 @@ export default function AdminTransactionsPage() {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
                 <th className="px-6 py-4">DATE</th>
                 <th className="px-6 py-4">TYPE</th>
                 <th className="px-6 py-4">MEMBER</th>
@@ -210,7 +210,7 @@ export default function AdminTransactionsPage() {
                 <th className="px-6 py-4 text-right">AMOUNT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+            <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
               {filteredTx.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
@@ -230,14 +230,14 @@ export default function AdminTransactionsPage() {
                         displayTime: new Date(tx.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
                         member_name: tx.membership?.profile?.full_name || 'System'
                       })}
-                      className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] cursor-pointer transition-colors"
+                      className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] cursor-pointer transition-colors"
                     >
                       <td className="px-6 py-4 text-sm text-[var(--text-muted)] whitespace-nowrap">
                         {new Date(tx.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <span className={`material-symbols-outlined text-[16px] ${isIncoming ? 'text-[#22C55E]' : 'text-red-500'}`}>
+                          <span className={`material-symbols-outlined text-[16px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`}>
                             {isIncoming ? 'arrow_downward' : 'arrow_upward'}
                           </span>
                           <span className="text-sm font-semibold text-[var(--text-main)] capitalize">
@@ -271,7 +271,7 @@ export default function AdminTransactionsPage() {
         </div>
 
         {/* Mobile Card List View */}
-        <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+        <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
           {filteredTx.length === 0 ? (
             <div className="p-6 text-center text-[var(--text-muted)] text-sm">
               No transactions found.
@@ -289,12 +289,12 @@ export default function AdminTransactionsPage() {
                     displayTime: new Date(tx.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
                     member_name: tx.membership?.profile?.full_name || 'System'
                   })}
-                  className="p-4 flex flex-col gap-2 hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] cursor-pointer transition-colors"
+                  className="p-4 flex flex-col gap-2 hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] cursor-pointer transition-colors"
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`material-symbols-outlined text-[14px] ${isIncoming ? 'text-[#22C55E]' : 'text-red-500'}`}>
+                        <span className={`material-symbols-outlined text-[14px] ${isIncoming ? 'text-[var(--ak-brand-ink)]' : 'text-red-500'}`}>
                           {isIncoming ? 'arrow_downward' : 'arrow_upward'}
                         </span>
                         <span className="font-semibold text-sm text-[var(--text-main)] capitalize">
@@ -320,7 +320,7 @@ export default function AdminTransactionsPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center text-xs text-[var(--text-muted)] border-t border-dashed border-[#f5f5f5] dark:border-[#2d3d2d] pt-1.5 mt-1">
+                  <div className="flex justify-between items-center text-xs text-[var(--text-muted)] border-t border-dashed border-[var(--ak-line)] dark:border-[var(--ak-line)] pt-1.5 mt-1">
                     <div>
                       <span className="font-medium">Member:</span> {tx.membership?.profile?.full_name || '—'}
                     </div>
@@ -345,14 +345,14 @@ export default function AdminTransactionsPage() {
             <button 
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm"
+              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm"
             >
               Previous
             </button>
             <button 
               onClick={() => setPage(p => p + 1)}
               disabled={!hasMore}
-              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm"
+              className="px-4 py-2 border border-[var(--border)] bg-transparent text-[var(--text-main)] rounded-lg text-xs font-semibold disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm"
             >
               Next
             </button>
@@ -362,7 +362,7 @@ export default function AdminTransactionsPage() {
       {/* OVERLAY FOR SIDE DRAWER */}
       {selectedTransaction && (
         <div 
-          className="fixed inset-0 bg-[#0B0F0C]/40 backdrop-blur-sm z-40 transition-opacity"
+          className="fixed inset-0 bg-[var(--ak-page)]/40 backdrop-blur-sm z-40 transition-opacity"
           onClick={() => setSelectedTransaction(null)}
         />
       )}
@@ -383,13 +383,13 @@ export default function AdminTransactionsPage() {
               </div>
               <button 
                 onClick={() => setSelectedTransaction(null)}
-                className="text-[var(--text-muted)] hover:text-[#161d16] dark:hover:text-[#E8F0E4] bg-[#F5F5F5] dark:bg-[#1a2218] p-2 rounded-full -mr-2"
+                className="text-[var(--text-muted)] hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)] bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] p-2 rounded-full -mr-2"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
             
-            <div className="flex flex-col items-center justify-center py-6 bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] rounded-2xl mb-8 shadow-sm">
+            <div className="flex flex-col items-center justify-center py-6 bg-gray-50 dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-2xl mb-8 shadow-sm">
               <div className={`text-[32px] font-geist font-bold font-mono ${selectedTransaction.isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
                 {selectedTransaction.isIncoming ? '+' : '-'} KSh {formatCurrency(Number(selectedTransaction.amount))}
               </div>
@@ -404,7 +404,7 @@ export default function AdminTransactionsPage() {
             </div>
 
             {/* Details List */}
-            <div className="flex flex-col divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] border-t border-b border-[var(--border)]">
+            <div className="flex flex-col divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] border-t border-b border-[var(--border)]">
               <div className="flex justify-between py-4">
                 <span className="text-sm text-[var(--text-muted)]">Reference</span>
                 <span className="text-sm font-mono text-[var(--text-main)] font-semibold">{selectedTransaction.reference || '—'}</span>
@@ -417,7 +417,7 @@ export default function AdminTransactionsPage() {
                 <span className="text-sm text-[var(--text-muted)]">M-Pesa Code</span>
                 <div className="flex items-center gap-2">
                   {selectedTransaction.status === "confirmed" && selectedTransaction.reference && (
-                    <span className="bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176] border border-[#4ae176] dark:border-[#1a3a1a] text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded">
+                    <span className="bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] border border-[var(--ak-brand-ink)] dark:border-[var(--ak-line)] text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded">
                       Verified
                     </span>
                   )}
@@ -464,7 +464,7 @@ export default function AdminTransactionsPage() {
                   link.click();
                   document.body.removeChild(link);
                 }}
-                className="flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#006e2f] text-white w-full rounded-lg py-3 text-sm font-bold transition-all shadow-sm cursor-pointer"
+                className="flex items-center justify-center gap-2 bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white w-full rounded-lg py-3 text-sm font-bold transition-all shadow-sm cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px]">download</span>
                 Download Receipt

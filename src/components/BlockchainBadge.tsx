@@ -42,7 +42,7 @@ export default function BlockchainBadge({
         <div
           className={`
             inline-flex items-center gap-1.5
-            bg-[#22C55E]
+            bg-[var(--ak-solid)]
             text-white rounded-full
             ${sizeClasses[size]}
             font-medium
@@ -59,7 +59,7 @@ export default function BlockchainBadge({
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="View QR Code"
           >
-            <QrCode size={iconSizes[size]} className="text-[#22C55E]" />
+            <QrCode size={iconSizes[size]} className="text-[var(--ak-brand-ink)]" />
           </button>
         )}
 
@@ -72,7 +72,7 @@ export default function BlockchainBadge({
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             title="View on Blockchain Explorer"
           >
-            <ExternalLink size={iconSizes[size]} className="text-[#22C55E]" />
+            <ExternalLink size={iconSizes[size]} className="text-[var(--ak-brand-ink)]" />
           </a>
         )}
       </div>
@@ -91,7 +91,7 @@ export default function BlockchainBadge({
 
             {/* Content */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-[#22C55E] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-[var(--ak-solid)] rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-white" />
               </div>
 
@@ -125,7 +125,7 @@ export default function BlockchainBadge({
                   href={explorerUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[#22C55E] hover:text-emerald-700 font-medium"
+                  className="inline-flex items-center gap-2 text-[var(--ak-brand-ink)] hover:text-emerald-700 font-medium"
                 >
                   View on Polygon Explorer
                   <ExternalLink size={16} />

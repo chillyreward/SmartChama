@@ -12,6 +12,10 @@ export default function ContributionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  // /dashboard/contributions?pay=1 opens the payment sheet straight away
+  useEffect(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('pay') === '1') setShowModal(true);
+  }, []);
 
   const [collectionStats, setCollectionStats] = useState({
     collected: 0, target: 0, progress: 0, membersPaid: 0, totalMembers: 0,
@@ -172,7 +176,7 @@ export default function ContributionsPage() {
       <div className="flex flex-col items-center justify-center pt-20 text-[var(--text-main)]">
         <span className="material-symbols-outlined text-red-500 text-5xl mb-4">error_outline</span>
         <p className="text-red-500 text-sm">{error}</p>
-        <button onClick={fetchData} className="mt-4 text-[#22C55E] hover:underline">Retry</button>
+        <button onClick={fetchData} className="mt-4 text-[var(--ak-brand-ink)] hover:underline">Retry</button>
       </div>
     );
   }
@@ -183,7 +187,7 @@ export default function ContributionsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <p className="text-[12px] text-[#9CA3AF] mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] mb-1 flex items-center gap-1">
             <span>Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Contributions</span>
@@ -193,14 +197,14 @@ export default function ContributionsPage() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-[#22C55E] text-white px-5 py-2.5 rounded-xl text-[14px] font-semibold hover:bg-[#16A34A] transition-colors self-start">
+          className="flex items-center gap-2 bg-[var(--ak-solid)] text-white px-5 py-2.5 rounded-xl text-[14px] font-semibold hover:bg-[var(--ak-solid)] transition-colors self-start">
           <span className="material-symbols-outlined text-[18px]">add</span>
           New Contribution
         </button>
       </div>
 
       {/* This month summary */}
-      <div className="bg-[#0B0F0C] border border-[#163822] rounded-2xl p-6 md:p-8 mb-6 text-white">
+      <div className="bg-[var(--ak-page)] border border-[#163822] rounded-2xl p-6 md:p-8 mb-6 text-white">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <div className="text-[11px] font-bold tracking-wider text-gray-400 mb-2">THIS MONTH'S COLLECTION</div>
@@ -213,7 +217,7 @@ export default function ContributionsPage() {
               <span className="text-[13px] text-white font-medium">{collectionStats.progress}%</span>
             </div>
             <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-[#22C55E] transition-all duration-700" style={{ width: `${collectionStats.progress}%` }} />
+              <div className="h-full bg-[var(--ak-solid)] transition-all duration-700" style={{ width: `${collectionStats.progress}%` }} />
             </div>
             <div className="text-[12px] text-gray-400 text-right">
               {collectionStats.membersPaid} of {collectionStats.totalMembers} members paid
@@ -234,7 +238,7 @@ export default function ContributionsPage() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: any) => [`KSh ${Number(v).toLocaleString('en-KE')}`, 'Collected']}
                   contentStyle={{ borderRadius: 12, backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }} />
-                <Bar dataKey="amount" fill="#22C55E" radius={[6, 6, 0, 0]} barSize={36} />
+                <Bar dataKey="amount" fill="#3FA673" radius={[6, 6, 0, 0]} barSize={36} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -250,7 +254,7 @@ export default function ContributionsPage() {
           <h2 className="text-[17px] font-bold mb-5">Member Status This Month</h2>
           <div className="overflow-y-auto flex-1 max-h-64 rounded-xl border border-[var(--border)]">
             <table className="w-full text-left text-[13px]">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)]">
+              <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)]">
                 <tr>
                   <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Member</th>
                   <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Paid</th>
@@ -285,14 +289,14 @@ export default function ContributionsPage() {
             <span className="material-symbols-outlined text-[40px] text-[var(--text-muted)] block mb-2">receipt_long</span>
             <p className="text-[14px] text-[var(--text-muted)]">No contributions recorded yet.</p>
             <button onClick={() => setShowModal(true)}
-              className="mt-4 inline-flex items-center gap-2 bg-[#22C55E] text-white px-4 py-2 rounded-lg text-[13px] font-semibold">
+              className="mt-4 inline-flex items-center gap-2 bg-[var(--ak-solid)] text-white px-4 py-2 rounded-lg text-[13px] font-semibold">
               <span className="material-symbols-outlined text-[16px]">add</span>Make First Contribution
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
-              <thead className="bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)]">
+              <thead className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)]">
                 <tr>
                   <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Date</th>
                   <th className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Amount</th>

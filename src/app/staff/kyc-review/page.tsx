@@ -55,13 +55,13 @@ export default function KycReviewPage() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-8 bg-[#FAFAFA] dark:bg-[#0B0F0C] text-[#161d16] dark:text-[#E8F0E4]">
+    <main className="min-h-screen px-4 py-8 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)]">
       <div className="max-w-5xl mx-auto space-y-6">
         <header className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 className="text-[26px] font-bold">Identity checks to review</h1>
-          <button onClick={load} className="text-[14px] font-semibold text-[#22C55E] hover:underline">Refresh</button>
+          <button onClick={load} className="text-[14px] font-semibold text-[var(--ak-brand-ink)] hover:underline">Refresh</button>
         </header>
-        <p className="text-[14px] text-[#4F5A53] dark:text-[#8FA196]">
+        <p className="text-[14px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
           Approve only when the selfie clearly shows the same person as the ID photo and the document number matches the
           document. The person sees the rejection reason you write.
         </p>
@@ -70,18 +70,18 @@ export default function KycReviewPage() {
         {items === null ? (
           <p>Loading…</p>
         ) : items.length === 0 ? (
-          <p className="rounded-xl border border-[#E5E7EB] dark:border-[#1B2520] p-6 text-center">Nothing waiting for review.</p>
+          <p className="rounded-xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] p-6 text-center">Nothing waiting for review.</p>
         ) : (
           items.map((it) => (
-            <article key={it.id} className="rounded-2xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-5 space-y-4">
+            <article key={it.id} className="rounded-2xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-5 space-y-4">
               <div className="flex flex-wrap justify-between gap-2 text-[14px]">
                 <div>
                   <p className="text-[17px] font-semibold">{it.name || 'Unnamed'}</p>
-                  <p className="text-[#4F5A53] dark:text-[#8FA196]">{it.email} {it.phone ? `· ${it.phone}` : ''}</p>
+                  <p className="text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{it.email} {it.phone ? `· ${it.phone}` : ''}</p>
                 </div>
                 <div className="text-right">
                   <p>{it.document_type === 'national_id' ? 'National ID' : 'Passport'} <strong className="font-mono">{it.document_number}</strong></p>
-                  <p className="text-[#4F5A53] dark:text-[#8FA196]">
+                  <p className="text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                     Face match: {it.face_match_score != null ? `${it.face_match_score}%` : 'not run'} · {new Date(it.created_at).toLocaleString('en-KE')}
                   </p>
                 </div>
@@ -93,7 +93,7 @@ export default function KycReviewPage() {
                   .map(([title, url]) => (
                     <figure key={title as string} className="space-y-1">
                       <img src={url as string} alt={title as string} className="w-full h-56 object-contain rounded-lg bg-[#F3F4F6] dark:bg-black" />
-                      <figcaption className="text-[12px] text-[#4F5A53] dark:text-[#8FA196]">{title}</figcaption>
+                      <figcaption className="text-[12px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{title}</figcaption>
                     </figure>
                   ))}
               </div>
@@ -105,7 +105,7 @@ export default function KycReviewPage() {
                   value={reasons[it.id] ?? ''}
                   onChange={(e) => setReasons((r) => ({ ...r, [it.id]: e.target.value }))}
                   placeholder="Reason if rejecting, e.g. selfie too dark"
-                  className="flex-1 min-w-[220px] px-3 py-2 rounded-lg border border-[#E5E7EB] dark:border-[#1B2520] bg-transparent text-[14px]"
+                  className="flex-1 min-w-[220px] px-3 py-2 rounded-lg border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-transparent text-[14px]"
                 />
                 <button
                   onClick={() => decide(it.id, 'rejected')}
@@ -117,7 +117,7 @@ export default function KycReviewPage() {
                 <button
                   onClick={() => decide(it.id, 'verified')}
                   disabled={busyId === it.id}
-                  className="px-4 py-2 rounded-lg bg-[#22C55E] text-white text-[14px] font-semibold disabled:opacity-40"
+                  className="px-4 py-2 rounded-lg bg-[var(--ak-solid)] text-white text-[14px] font-semibold disabled:opacity-40"
                 >
                   Approve
                 </button>

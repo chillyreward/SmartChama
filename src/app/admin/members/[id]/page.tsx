@@ -74,7 +74,7 @@ export default function AdminMemberDetailPage() {
     return (
       <div className="p-8 text-center text-[var(--text-main)]">
         <h2 className="text-[22px] font-geist font-bold">Member not found</h2>
-        <Link href="/admin/members" className="text-[#22C55E] dark:text-[#4ae176] mt-4 inline-block hover:underline font-semibold">
+        <Link href="/admin/members" className="text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] mt-4 inline-block hover:underline font-semibold">
           ← Back to Members
         </Link>
       </div>
@@ -87,7 +87,7 @@ export default function AdminMemberDetailPage() {
 
   const roleColors: Record<string, string> = {
     'admin': 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab] border border-red-200 dark:border-red-900/30',
-    'chairlady': 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border border-[#edf6ea] dark:border-[#1a2a1a]',
+    'chairlady': 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)] border border-[var(--ak-line)] dark:border-[var(--ak-line)]',
     'treasurer': 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/30',
     'secretary': 'bg-yellow-50 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900/30',
     'member': 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
@@ -96,19 +96,19 @@ export default function AdminMemberDetailPage() {
   return (
     <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#161d16] dark:bg-[#E8F0E4] text-white dark:text-[#161d16] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
 
       {/* HEADER */}
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/admin/members" className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-[#1f2a1f] flex items-center justify-center transition-colors border border-[var(--border)] card-bg">
+        <Link href="/admin/members" className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)] flex items-center justify-center transition-colors border border-[var(--border)] card-bg">
           <span className="material-symbols-outlined text-[var(--text-muted)]">arrow_back</span>
         </Link>
         <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Members</span>
@@ -120,9 +120,9 @@ export default function AdminMemberDetailPage() {
       </div>
 
       {/* PROFILE CARD */}
-      <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 shadow-sm hover:shadow-md transition-all duration-200">
+      <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 shadow-sm hover:shadow-md transition-all duration-200">
         <div className="flex items-center gap-6 w-full md:w-auto">
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-transparent text-[var(--brand-green)] flex items-center justify-center rounded-full text-2xl md:text-[32px] font-bold shadow-sm border border-[#22C55E]/20 shrink-0">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-transparent text-[var(--brand-green)] flex items-center justify-center rounded-full text-2xl md:text-[32px] font-bold shadow-sm border border-[var(--ak-brand-ink)]/20 shrink-0">
             {getInitials(member.profile?.full_name)}
           </div>
           <div>
@@ -136,20 +136,20 @@ export default function AdminMemberDetailPage() {
                 {member.profile?.phone_number || 'No phone'}
               </span>
             </div>
-            <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a] mt-1 md:mt-2">
+            <div className="text-xs text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] mt-1 md:mt-2">
               Joined {new Date(member.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
             </div>
           </div>
         </div>
 
         <div className="flex gap-4 w-full md:w-auto">
-          <div className="flex-1 bg-[#FAFAFA] dark:bg-[#0f1410] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[130px] shadow-sm">
+          <div className="flex-1 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[130px] shadow-sm">
             <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">CREDIT SCORE</div>
             <div className={`text-[20px] md:text-[28px] font-geist font-bold mt-1 ${member.trust_score >= 80 ? 'text-[var(--brand-green)]' : member.trust_score >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
               {member.trust_score || 0}
             </div>
           </div>
-          <div className="flex-1 bg-[#FAFAFA] dark:bg-[#0f1410] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[150px] shadow-sm">
+          <div className="flex-1 bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-2xl p-3 md:p-4 text-center md:min-w-[150px] shadow-sm">
             <div className="text-[9px] md:text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">TOTAL SAVED</div>
             <div className="text-[20px] md:text-[28px] font-geist font-bold mt-1 text-[var(--brand-green)] whitespace-nowrap">
               KSh {formatCurrency(totalSaved)}
@@ -172,19 +172,19 @@ export default function AdminMemberDetailPage() {
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-y-auto flex-1 p-0">
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)]">
+              <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)]">
                 <tr>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">DATE</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">AMOUNT</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] text-right">STATUS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+              <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
                 {contributions.length === 0 ? (
                   <tr><td colSpan={3} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No contributions found.</td></tr>
                 ) : (
                   contributions.map(c => (
-                    <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors">
+                    <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-colors">
                       <td className="px-6 py-4 text-sm text-[var(--text-main)]">
                         {new Date(c.created_at).toLocaleDateString('en-GB')}
                       </td>
@@ -207,12 +207,12 @@ export default function AdminMemberDetailPage() {
           </div>
 
           {/* Mobile Card List View */}
-          <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] overflow-y-auto flex-1">
+          <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] overflow-y-auto flex-1">
             {contributions.length === 0 ? (
               <div className="p-6 text-center text-[var(--text-muted)] text-sm">No contributions found.</div>
             ) : (
               contributions.map(c => (
-                <div key={c.id} className="p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-colors">
+                <div key={c.id} className="p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-colors">
                   <div>
                     <div className="text-xs text-[var(--text-muted)]">
                       {new Date(c.created_at).toLocaleDateString('en-GB')}

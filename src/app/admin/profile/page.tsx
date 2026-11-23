@@ -170,7 +170,7 @@ export default function AdminProfilePage() {
   if (loading) {
     return (
       <div className="p-8 flex justify-center items-center">
-        <span className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></span>
+        <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
       </div>
     )
   }
@@ -181,7 +181,7 @@ export default function AdminProfilePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
         <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Profile</span>
@@ -196,7 +196,7 @@ export default function AdminProfilePage() {
         <div>
           <button
             onClick={() => router.push('/dashboard')}
-            className="bg-transparent border border-[var(--border)] text-[#161d16] dark:text-[#e8f0e4] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all flex items-center gap-2 shadow-sm"
+            className="bg-transparent border border-[var(--border)] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all flex items-center gap-2 shadow-sm"
           >
             <span className="material-symbols-outlined text-[18px]">switch_account</span>
             Switch to Member View
@@ -205,7 +205,7 @@ export default function AdminProfilePage() {
       </div>
 
       {successMsg && (
-        <div className="bg-transparent text-[var(--brand-green)]/30 border border-[#bccbb9] dark:border-[#2d3d2d] text-[var(--brand-green)] p-4 rounded-lg text-[14px] font-medium mb-6 animate-fade-in">
+        <div className="bg-transparent text-[var(--brand-green)]/30 border border-[#bccbb9] dark:border-[var(--ak-line)] text-[var(--brand-green)] p-4 rounded-lg text-[14px] font-medium mb-6 animate-fade-in">
           {successMsg}
         </div>
       )}
@@ -223,9 +223,9 @@ export default function AdminProfilePage() {
           <div className="card-bg border border-[var(--border)] border-t-2 border-t-red-500 p-6 rounded-2xl text-center shadow-sm hover:shadow-md transition-all duration-200">
             <div className="relative w-24 h-24 mx-auto mb-4 group cursor-pointer">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover border-2 border-[#006e2f]" />
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover border-2 border-[var(--ak-brand-ink)]" />
               ) : (
-                <div className="w-full h-full rounded-full bg-[#006e2f] text-white flex items-center justify-center font-bold text-2xl">
+                <div className="w-full h-full rounded-full bg-[var(--ak-solid)] text-white flex items-center justify-center font-bold text-2xl">
                   {getInitials(fullName)}
                 </div>
               )}
@@ -236,7 +236,7 @@ export default function AdminProfilePage() {
               </label>
             </div>
 
-            <h3 className="text-[18px] font-bold text-[#161d16] dark:text-white truncate font-geist">{fullName || 'Admin User'}</h3>
+            <h3 className="text-[18px] font-bold text-[var(--ak-text)] dark:text-white truncate font-geist">{fullName || 'Admin User'}</h3>
             <div className="mt-2">
               <span className="bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-red-450 text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full border border-red-200/50 dark:border-red-900/30">
                 Group Administrator
@@ -246,18 +246,18 @@ export default function AdminProfilePage() {
             <div className="border-t border-[var(--border)] mt-6 pt-4 text-left space-y-2 text-[13px]">
               <div className="flex justify-between">
                 <span className="text-[var(--text-muted)]">Phone:</span>
-                <span className="text-[#161d16] dark:text-[#e8f0e4] font-medium">{phone || 'Not set'}</span>
+                <span className="text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] font-medium">{phone || 'Not set'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[var(--text-muted)]">Email:</span>
-                <span className="text-[#161d16] dark:text-[#e8f0e4] font-medium truncate max-w-[120px]">{email}</span>
+                <span className="text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] font-medium truncate max-w-[120px]">{email}</span>
               </div>
             </div>
           </div>
 
           {/* Managed Groups */}
-          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
-            <h3 className="text-[15px] font-bold text-[#161d16] dark:text-white mb-4 font-geist">
+          <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
+            <h3 className="text-[15px] font-bold text-[var(--ak-text)] dark:text-white mb-4 font-geist">
               Chamas You Administer
             </h3>
             {managedChamas.length === 0 ? (
@@ -267,12 +267,12 @@ export default function AdminProfilePage() {
             ) : (
               <div className="space-y-3">
                 {managedChamas.map(ch => (
-                  <div key={ch.id} className="flex justify-between items-center bg-gray-50 dark:bg-[#1a2218] border border-[var(--border)] p-3 rounded-lg">
+                  <div key={ch.id} className="flex justify-between items-center bg-gray-50 dark:bg-[var(--ak-surface)] border border-[var(--border)] p-3 rounded-lg">
                     <div>
-                      <h4 className="text-[13px] font-bold text-[#161d16] dark:text-white">{ch.name}</h4>
+                      <h4 className="text-[13px] font-bold text-[var(--ak-text)] dark:text-white">{ch.name}</h4>
                       <span className="text-[11px] text-[var(--text-muted)]">{ch.county} County</span>
                     </div>
-                    <span className="bg-green-100 dark:bg-green-950/20 text-[#166534] dark:text-[#4ae176] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                    <span className="bg-green-100 dark:bg-green-950/20 text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
                       {ch.status}
                     </span>
                   </div>
@@ -284,14 +284,14 @@ export default function AdminProfilePage() {
 
         {/* Right Side: Form Inputs */}
         <div className="lg:col-span-2">
-          <form onSubmit={handleSave} className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 space-y-6">
-            <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white border-b border-[var(--border)] pb-3 font-geist">
+          <form onSubmit={handleSave} className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 space-y-6">
+            <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-[var(--border)] pb-3 font-geist">
               Personal Information
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                   Full Name
                 </label>
                 <input
@@ -299,7 +299,7 @@ export default function AdminProfilePage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden outline-none transition-all"
+                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden outline-none transition-all"
                 />
               </div>
 
@@ -309,19 +309,19 @@ export default function AdminProfilePage() {
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                   Email Address
                 </label>
                 <input
                   type="email"
                   disabled
                   value={email}
-                  className="w-full bg-gray-50 dark:bg-[#1a2218]/30 border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                  className="w-full bg-gray-50 dark:bg-[var(--ak-surface)]/30 border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-gray-500 dark:text-gray-400 cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5 flex items-center justify-between">
+                <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5 flex items-center justify-between">
                   National ID
                   {nationalId && (
                     <span className="text-[11px] text-[var(--brand-green)] font-bold flex items-center gap-0.5">
@@ -333,19 +333,19 @@ export default function AdminProfilePage() {
                   type="text"
                   value={nationalId}
                   onChange={(e) => setNationalId(e.target.value)}
-                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden outline-none transition-all"
+                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden outline-none transition-all"
                   placeholder="Enter National ID"
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                   County
                 </label>
                 <select
                   value={county}
                   onChange={(e) => setCounty(e.target.value)}
-                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden outline-none transition-all"
+                  className="w-full bg-transparent border border-[var(--border)] rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden outline-none transition-all"
                 >
                   {countiesList.map(c => (
                     <option key={c} value={c}>{c}</option>
@@ -359,7 +359,7 @@ export default function AdminProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-[#22C55E] hover:bg-[#1ea94e] text-white px-6 py-2.5 rounded-lg text-[14px] font-semibold transition-colors shadow-sm disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+                className="bg-[var(--ak-solid)] hover:bg-[#1ea94e] text-white px-6 py-2.5 rounded-lg text-[14px] font-semibold transition-colors shadow-sm disabled:bg-gray-300 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
               >
                 {saving ? 'Saving changes...' : 'Save Profile'}
               </button>

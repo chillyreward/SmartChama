@@ -131,7 +131,7 @@ export default function AdminMerryGoRoundPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-            <RefreshCw className="w-7 h-7 text-[#22C55E]" />
+            <RefreshCw className="w-7 h-7 text-[var(--ak-brand-ink)]" />
             Merry-Go-Round (Rotating Savings)
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -161,11 +161,11 @@ export default function AdminMerryGoRoundPage() {
           <div className="sc-card p-6 rounded-2xl border space-y-4">
             <div className="flex flex-wrap justify-between items-center gap-4 border-b pb-4 border-[var(--border)]">
               <div>
-                <span className="text-xs font-semibold text-[#22C55E] uppercase tracking-wider">Active Cycle</span>
+                <span className="text-xs font-semibold text-[var(--ak-brand-ink)] uppercase tracking-wider">Active Cycle</span>
                 <h2 className="text-xl font-bold text-[var(--text-primary)]">{cycle.name}</h2>
               </div>
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-950/30 text-[#22C55E]">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-950/30 text-[var(--ak-brand-ink)]">
                   Round {cycle.current_round} of {cycle.total_rounds}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)] capitalize">
@@ -181,7 +181,7 @@ export default function AdminMerryGoRoundPage() {
               </div>
               <div className="p-4 rounded-xl bg-[var(--bg-muted)]">
                 <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Total Pot / Round</p>
-                <p className="text-xl font-bold text-[#22C55E] mt-1">KSh {(Number(cycle.amount_per_member) * cycle.total_rounds).toLocaleString('en-KE')}</p>
+                <p className="text-xl font-bold text-[var(--ak-brand-ink)] mt-1">KSh {(Number(cycle.amount_per_member) * cycle.total_rounds).toLocaleString('en-KE')}</p>
               </div>
               <div className="p-4 rounded-xl bg-[var(--bg-muted)]">
                 <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Current Round Status</p>
@@ -214,7 +214,7 @@ export default function AdminMerryGoRoundPage() {
                         <td className="py-3 px-4">
                           <span className="inline-flex items-center gap-1.5">
                             Round {item.round_number}
-                            {isCurrent && <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />}
+                            {isCurrent && <span className="w-2 h-2 rounded-full bg-[var(--ak-solid)] animate-pulse" />}
                           </span>
                         </td>
                         <td className="py-3 px-4 font-semibold text-[var(--text-primary)]">{recipientName}</td>
@@ -234,7 +234,7 @@ export default function AdminMerryGoRoundPage() {
                           {item.status !== 'paid' && (
                             <button
                               onClick={() => handlePayout(item.round_number)}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors">
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors">
                               Release Payout
                             </button>
                           )}
@@ -252,7 +252,7 @@ export default function AdminMerryGoRoundPage() {
         <div className="sc-card p-6 md:p-8 rounded-2xl border max-w-2xl mx-auto space-y-6">
           <div className="border-b pb-4 border-[var(--border)]">
             <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <Plus className="w-5 h-5 text-[#22C55E]" />
+              <Plus className="w-5 h-5 text-[var(--ak-brand-ink)]" />
               Start New Merry-Go-Round Cycle
             </h2>
             <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -269,7 +269,7 @@ export default function AdminMerryGoRoundPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. 2026 Round 1"
-                className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]"
+                className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
               />
             </div>
 
@@ -282,7 +282,7 @@ export default function AdminMerryGoRoundPage() {
                   min="100"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
@@ -291,7 +291,7 @@ export default function AdminMerryGoRoundPage() {
                 <select
                   value={frequency}
                   onChange={e => setFrequency(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]">
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
                   <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
                 </select>
@@ -315,7 +315,7 @@ export default function AdminMerryGoRoundPage() {
             <button
               type="submit"
               disabled={creating}
-              className="w-full py-3.5 rounded-xl font-bold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full py-3.5 rounded-xl font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
               {creating ? 'Launching...' : 'Launch Cycle'}
             </button>
           </form>

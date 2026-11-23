@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
       style={{ backgroundColor: 'var(--bg-page)' }}
     >
       {/* Background Gradients */}
-      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#22C55E] via-emerald-500 to-[#16A34A]"></div>
+      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[var(--ak-solid)] via-emerald-500 to-[var(--ak-solid)]"></div>
 
       <div className="w-full max-w-md relative z-10">
         
@@ -112,7 +112,7 @@ export default function AdminLoginPage() {
             className="p-3 rounded-2xl shadow-xl transition-colors"
             style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
           >
-            <Crown className="w-8 h-8 text-[#22C55E]" />
+            <Crown className="w-8 h-8 text-[var(--ak-brand-ink)]" />
           </div>
         </div>
 
@@ -127,8 +127,8 @@ export default function AdminLoginPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
                 style={{ backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)' }}
               >
-                <Crown className="w-4 h-4 text-[#22C55E]" />
-                <span className="text-xs font-bold text-[#22C55E] uppercase tracking-wider">Admin Access</span>
+                <Crown className="w-4 h-4 text-[var(--ak-brand-ink)]" />
+                <span className="text-xs font-bold text-[var(--ak-brand-ink)] uppercase tracking-wider">Admin Access</span>
               </div>
               <h1 
                 className="text-2xl font-bold mb-2 font-geist"
@@ -165,7 +165,7 @@ export default function AdminLoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@example.com"
-                    className="w-full rounded-xl px-4 py-4 outline-none focus:border-[#22C55E] transition-all"
+                    className="w-full rounded-xl px-4 py-4 outline-none focus:border-[var(--ak-brand-ink)] transition-all"
                     style={{
                       backgroundColor: 'var(--bg-input)',
                       borderColor: 'var(--border)',
@@ -191,7 +191,7 @@ export default function AdminLoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full rounded-xl px-4 py-4 outline-none focus:border-[#22C55E] transition-all"
+                    className="w-full rounded-xl px-4 py-4 outline-none focus:border-[var(--ak-brand-ink)] transition-all"
                     style={{
                       backgroundColor: 'var(--bg-input)',
                       borderColor: 'var(--border)',
@@ -213,7 +213,7 @@ export default function AdminLoginPage() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                className="w-full bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (
                   <>
@@ -227,10 +227,10 @@ export default function AdminLoginPage() {
 
             <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border)' }}>
               <p className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Don't have an admin account? <Link href="/admin/signup" className="text-[#22C55E] hover:underline font-bold">Create Chama</Link>
+                Don't have an admin account? <Link href="/admin/signup" className="text-[var(--ak-brand-ink)] hover:underline font-bold">Create Chama</Link>
               </p>
               <p className="text-center text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-                Member login? <Link href="/login" className="text-[#22C55E] hover:underline font-bold">Click here</Link>
+                Member login? <Link href="/login" className="text-[var(--ak-brand-ink)] hover:underline font-bold">Click here</Link>
               </p>
             </div>
           </div>

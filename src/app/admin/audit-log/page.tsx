@@ -87,7 +87,7 @@ export default function AdminAuditLogPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6 md:mb-8">
         <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Audit Log</span>
@@ -96,7 +96,7 @@ export default function AdminAuditLogPage() {
           <p className="text-[14px] text-[var(--text-muted)] mt-1">Immutable record of all administrative actions</p>
         </div>
         <div className="w-full md:w-auto">
-          <button className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm flex items-center justify-center gap-2 w-full md:w-auto">
+          <button className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-2 w-full md:w-auto">
             <span className="material-symbols-outlined text-[18px]">download</span>
             Export Log
           </button>
@@ -115,7 +115,7 @@ export default function AdminAuditLogPage() {
           {/* Desktop Table View */}
           <table className="hidden md:table w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
                 <th className="px-6 py-4">TIMESTAMP</th>
                 <th className="px-6 py-4">ADMINISTRATOR</th>
                 <th className="px-6 py-4">ACTION / TYPE</th>
@@ -123,7 +123,7 @@ export default function AdminAuditLogPage() {
                 <th className="px-6 py-4 text-right">REFERENCE</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+            <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
               {logs.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-muted)] text-sm">
@@ -132,7 +132,7 @@ export default function AdminAuditLogPage() {
                 </tr>
               ) : (
                 logs.map(log => (
-                  <tr key={log.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                  <tr key={log.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                     <td className="px-6 py-4 text-xs text-[var(--text-muted)] whitespace-nowrap">
                       {new Date(log.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </td>
@@ -166,7 +166,7 @@ export default function AdminAuditLogPage() {
           </table>
 
           {/* Mobile Card List View */}
-          <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] p-4">
+          <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] p-4">
             {logs.length === 0 ? (
               <div className="text-center py-8 text-[var(--text-muted)] text-sm">
                 No admin actions recorded yet.

@@ -270,14 +270,14 @@ export default function AdminMembersPage() {
 
   const roleColors: Record<string, string> = {
     'admin': 'bg-red-50 dark:bg-red-950/20 text-[#ba1a1a] dark:text-[#ffb4ab] border-red-150 dark:border-red-900/30',
-    'chairlady': 'bg-transparent text-[var(--brand-green)] border-[#edf6ea] dark:border-[#1a2a1a]',
+    'chairlady': 'bg-transparent text-[var(--brand-green)] border-[var(--ak-line)] dark:border-[var(--ak-line)]',
     'treasurer': 'bg-blue-50 dark:bg-blue-950/20 text-blue-750 dark:text-blue-300 border-blue-150 dark:border-blue-900/30',
     'secretary': 'bg-yellow-50 dark:bg-yellow-950/20 text-yellow-755 dark:text-yellow-300 border-yellow-150 dark:border-yellow-900/30',
     'member': 'bg-gray-50 dark:bg-gray-800 text-[var(--text-muted)] border-gray-200 dark:border-gray-700'
   };
 
   const statusColors: Record<string, string> = {
-    'active': 'bg-transparent text-[var(--brand-green)] border border-[#22C55E]',
+    'active': 'bg-transparent text-[var(--brand-green)] border border-[var(--ak-brand-ink)]',
     'flagged': 'bg-red-50 dark:bg-red-950/20 text-red-750 dark:text-red-400 border border-red-200 dark:border-red-900/30',
     'pending': 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 border border-amber-250 dark:border-amber-900/30',
     'inactive': 'bg-gray-100 dark:bg-gray-800 text-gray-500 border border-gray-200'
@@ -294,15 +294,15 @@ export default function AdminMembersPage() {
   return (
     <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full relative font-inter text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#161d16] dark:bg-[#E8F0E4] text-white dark:text-[#161d16] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
 
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Members</span>
@@ -339,7 +339,7 @@ export default function AdminMembersPage() {
             </button>
             <button
               onClick={() => setShowInviteModal(true)}
-              className="bg-[#22C55E] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-1.5 hover:bg-[#006e2f] transition-all font-semibold text-xs shadow-sm cursor-pointer"
+              className="bg-[var(--ak-solid)] text-white rounded-lg px-4 py-2 flex items-center justify-center gap-1.5 hover:bg-[var(--ak-solid)] transition-all font-semibold text-xs shadow-sm cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">person_add</span>
               Invite Member
@@ -350,11 +350,11 @@ export default function AdminMembersPage() {
 
       {/* METRIC CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-8">
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl p-4 md:p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200">
           <div className="text-[10px] md:text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">TOTAL MEMBERS</div>
           <div className="flex items-center justify-between">
             <div className="text-[22px] md:text-3xl font-bold text-[var(--text-main)] font-geist">{totalCount}</div>
-            <span className="material-symbols-outlined text-gray-300 dark:text-[#5a6e5a] text-2xl md:text-3xl">group</span>
+            <span className="material-symbols-outlined text-gray-300 dark:text-[var(--ak-text-2)] text-2xl md:text-3xl">group</span>
           </div>
         </div>
 
@@ -362,7 +362,7 @@ export default function AdminMembersPage() {
           <div className="text-[10px] md:text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase mb-2">ACTIVE MEMBERS</div>
           <div className="flex items-center justify-between">
             <div className="text-[22px] md:text-3xl font-bold text-[var(--brand-green)] font-geist">{activeCount}</div>
-            <span className="material-symbols-outlined text-gray-300 dark:text-[#5a6e5a] text-2xl md:text-3xl">how_to_reg</span>
+            <span className="material-symbols-outlined text-gray-300 dark:text-[var(--ak-text-2)] text-2xl md:text-3xl">how_to_reg</span>
           </div>
         </div>
 
@@ -384,16 +384,16 @@ export default function AdminMembersPage() {
             placeholder="Search members by name or phone..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-72 border border-[var(--border)] rounded-lg px-4 py-2 pl-10 text-sm outline-none focus:border-[#22C55E] focus:ring-1 focus:ring-[#22C55E] text-[var(--text-main)] bg-transparent placeholder:text-[#9CA3AF] dark:placeholder:text-[#4a5e4a] transition-all"
+            className="w-full md:w-72 border border-[var(--border)] rounded-lg px-4 py-2 pl-10 text-sm outline-none focus:border-[var(--ak-brand-ink)] focus:ring-1 focus:ring-[var(--ak-brand-ink)] text-[var(--text-main)] bg-transparent placeholder:text-[var(--ak-text-3)] dark:placeholder:text-[var(--ak-text-2)] transition-all"
           />
         </div>
         
-        <div className="bg-[#F5F5F5] dark:bg-[#1f2a1f] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)] self-start md:self-auto overflow-x-auto w-full md:w-auto">
+        <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)] p-1 rounded-lg flex gap-1 text-sm font-semibold text-[var(--text-muted)] self-start md:self-auto overflow-x-auto w-full md:w-auto">
           {["All", "Active", "Admin", "Pending", "Flagged"].map((f) => (
             <button 
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-md transition-all cursor-pointer ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)] font-bold' : 'hover:text-[#161d16] dark:hover:text-[#E8F0E4]'}`}
+              className={`px-4 py-1.5 rounded-md transition-all cursor-pointer ${filter === f ? 'card-bg shadow-sm text-[var(--text-main)] font-bold' : 'hover:text-[var(--ak-text)] dark:hover:text-[var(--ak-brand-ink)]'}`}
             >
               {f}
             </button>
@@ -407,7 +407,7 @@ export default function AdminMembersPage() {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <tr className="bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
                 <th className="px-6 py-4">MEMBER</th>
                 <th className="px-6 py-4">ROLE</th>
                 <th className="px-6 py-4">PHONE</th>
@@ -418,20 +418,20 @@ export default function AdminMembersPage() {
                 <th className="px-6 py-4 text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+            <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
               {filteredMembers.length > 0 ? (
                 filteredMembers.map((m) => (
-                  <tr key={m.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                  <tr key={m.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[#22C55E]/10">
+                        <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[var(--ak-brand-ink)]/10">
                           {getInitials(m.profile?.full_name)}
                         </div>
                         <div>
                           <div className="font-semibold text-[var(--text-main)] text-sm whitespace-nowrap">
                             {m.profile?.full_name || 'Unnamed Member'}
                           </div>
-                          <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a]">{m.profile?.email || '—'}</div>
+                          <div className="text-xs text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">{m.profile?.email || '—'}</div>
                         </div>
                       </div>
                     </td>
@@ -451,7 +451,7 @@ export default function AdminMembersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5">
-                        <span className={`material-symbols-outlined text-[16px] ${m.trust_score >= 80 ? 'text-[#22C55E]' : m.trust_score >= 50 ? 'text-yellow-500' : 'text-error'}`}>
+                        <span className={`material-symbols-outlined text-[16px] ${m.trust_score >= 80 ? 'text-[var(--ak-brand-ink)]' : m.trust_score >= 50 ? 'text-yellow-500' : 'text-error'}`}>
                           verified
                         </span>
                         <span className="text-body-sm font-bold text-[var(--text-main)]">{m.trust_score || 0}</span>
@@ -468,7 +468,7 @@ export default function AdminMembersPage() {
                           <button
                             onClick={() => handleApprove(m)}
                             disabled={processingId === m.id}
-                            className="bg-[#22C55E] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#16A34A] transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                            className="bg-[var(--ak-solid)] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[var(--ak-solid)] transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
                           >
                             {processingId === m.id ? (
                               <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -492,7 +492,7 @@ export default function AdminMembersPage() {
                         </div>
                       ) : (
                         <select 
-                          className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[#22C55E]"
+                          className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[var(--ak-brand-ink)]"
                           value=""
                           onChange={(e) => {
                             const val = e.target.value;
@@ -527,20 +527,20 @@ export default function AdminMembersPage() {
         </div>
 
         {/* Mobile Card List View */}
-        <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+        <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
           {filteredMembers.length > 0 ? (
             filteredMembers.map((m) => (
-              <div key={m.id} className="p-4 flex flex-col gap-2 hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+              <div key={m.id} className="p-4 flex flex-col gap-2 hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[#22C55E]/10">
+                    <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-[var(--ak-brand-ink)]/10">
                       {getInitials(m.profile?.full_name)}
                     </div>
                     <div>
                       <div className="font-semibold text-[var(--text-main)] text-sm">
                         {m.profile?.full_name || 'Unnamed Member'}
                       </div>
-                      <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a]">{m.profile?.email || '—'}</div>
+                      <div className="text-xs text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">{m.profile?.email || '—'}</div>
                     </div>
                   </div>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold border capitalize ${roleColors[m.role] || roleColors['member']}`}>
@@ -548,7 +548,7 @@ export default function AdminMembersPage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-dashed border-[#f5f5f5] dark:border-[#2d3d2d] my-1">
+                <div className="grid grid-cols-2 gap-2 text-xs py-2 border-t border-b border-dashed border-[var(--ak-line)] dark:border-[var(--ak-line)] my-1">
                   <div>
                     <span className="text-[var(--text-muted)] block">Phone:</span>
                     <span className="font-medium text-[var(--text-main)]">{m.profile?.phone_number || '—'}</span>
@@ -560,7 +560,7 @@ export default function AdminMembersPage() {
                   <div>
                     <span className="text-[var(--text-muted)] block">CREDIT SCORE:</span>
                     <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px] text-[#22C55E]">verified</span>
+                      <span className="material-symbols-outlined text-[14px] text-[var(--ak-brand-ink)]">verified</span>
                       <span className="font-bold text-[var(--text-main)]">{m.trust_score || 0}</span>
                     </div>
                   </div>
@@ -575,7 +575,7 @@ export default function AdminMembersPage() {
                 <div className="flex justify-between items-center text-xs text-[var(--text-muted)] pt-1">
                   <span className="text-[11px]">Joined: {new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                   <select 
-                    className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[#22C55E]"
+                    className="bg-transparent border border-[var(--border)] rounded px-2.5 py-1 text-xs font-semibold text-[var(--text-main)] outline-none cursor-pointer hover:border-[var(--ak-brand-ink)]"
                     value=""
                     onChange={(e) => {
                       const val = e.target.value;
@@ -616,13 +616,13 @@ export default function AdminMembersPage() {
       )}
 
       {showRoleModal && selectedMember && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
           <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
             <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Edit Role for {selectedMember.profile?.full_name}</h2>
             <select 
               value={newRole} 
               onChange={e => setNewRole(e.target.value)} 
-              className="w-full border border-[var(--border)] rounded px-4 py-3 text-[var(--text-main)] outline-none focus:border-[#22C55E] bg-transparent"
+              className="w-full border border-[var(--border)] rounded px-4 py-3 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)] bg-transparent"
             >
               <option value="member">Member</option>
               <option value="secretary">Secretary</option>
@@ -631,15 +631,15 @@ export default function AdminMembersPage() {
               <option value="chairlady">Chairlady</option>
             </select>
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowRoleModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
-              <button onClick={handleUpdateRole} className="flex-1 bg-[#22C55E] text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Update</button>
+              <button onClick={() => setShowRoleModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
+              <button onClick={handleUpdateRole} className="flex-1 bg-[var(--ak-solid)] text-white rounded py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)]">Update</button>
             </div>
           </div>
         </div>
       )}
 
       {showFlagModal && selectedMember && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
           <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
             <h2 className="text-headline-sm font-geist font-bold text-error mb-2 flex items-center gap-2">
               <span className="material-symbols-outlined">flag</span> Flag Member
@@ -655,7 +655,7 @@ export default function AdminMembersPage() {
             />
 
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowFlagModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
+              <button onClick={() => setShowFlagModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
               <button onClick={handleFlag} className="flex-1 bg-error text-white rounded py-2 text-body-sm font-medium hover:bg-red-700">Flag Member</button>
             </div>
           </div>

@@ -46,7 +46,7 @@ export default function SavingsPage() {
       value: `KES ${totalSavings.toLocaleString('en-KE')}`, 
       change: contributions.length > 0 ? `From ${contributions.filter(c => c.status === 'confirmed').length} contribution(s)` : "No entries", 
       positive: true, 
-      accent: "border-t-[#22C55E]" 
+      accent: "border-t-[var(--ak-brand-ink)]" 
     },
     { 
       label: "Interest Earned", 
@@ -154,7 +154,7 @@ export default function SavingsPage() {
       <div className="no-print">
         {/* Page Header */}
         <div className="mb-8">
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Savings</span>
@@ -173,7 +173,7 @@ export default function SavingsPage() {
             <div className="flex gap-3 w-full md:w-auto">
               <button 
                 onClick={() => window.print()}
-                className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-[#22C55E] text-white rounded-lg text-sm font-semibold hover:bg-[#006e2f] transition-all">
+                className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-[var(--ak-solid)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--ak-solid)] transition-all">
                 <Download className="w-4 h-4" />
                 Export Statement
               </button>
@@ -209,12 +209,12 @@ export default function SavingsPage() {
             <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
               <h2 className="text-xl font-bold text-[var(--text-main)]">Transaction History</h2>
               <div className="flex gap-2">
-                <button className="p-2 rounded-lg bg-[#F5F5F5] dark:bg-[#1a2218] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[#edf6ea] dark:hover:bg-[#1a3a1a] transition-all">
+                <button className="p-2 rounded-lg bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)] transition-all">
                   <Filter className="w-5 h-5" />
                 </button>
                 <button 
                   onClick={() => window.print()}
-                  className="p-2 rounded-lg bg-[#F5F5F5] dark:bg-[#1a2218] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[#edf6ea] dark:hover:bg-[#1a3a1a] transition-all">
+                  className="p-2 rounded-lg bg-[var(--ak-surface-2)] dark:bg-[var(--ak-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)] transition-all">
                   <Download className="w-5 h-5" />
                 </button>
               </div>
@@ -232,9 +232,9 @@ export default function SavingsPage() {
               ) : (
                 <>
                   {/* Mobile Card List */}
-                  <div className="md:hidden flex flex-col divide-y divide-[#E5E7EB] dark:divide-[#2d3d2d]">
+                  <div className="md:hidden flex flex-col divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
                     {contributions.map((tx, idx) => (
-                      <div key={idx} className="py-4 px-4 active:bg-[#f5f5f5] dark:active:bg-[#1f2a1f] transition-colors">
+                      <div key={idx} className="py-4 px-4 active:bg-[var(--ak-surface-2)] dark:active:bg-[var(--ak-raised)] transition-colors">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-transparent text-[var(--brand-green)] flex items-center justify-center text-xs font-bold shadow-sm">
@@ -244,13 +244,13 @@ export default function SavingsPage() {
                           </div>
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                             tx.status === 'confirmed' 
-                              ? 'bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176]' 
+                              ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' 
                               : 'bg-orange-100 dark:bg-orange-900/30 text-orange-850 dark:text-orange-400'
                           }`}>
                             {tx.status}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-[#E5E7EB]/50 dark:border-[#2d3d2d]/50">
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-[var(--ak-line)]/50 dark:border-[var(--ak-line)]/50">
                           <span className="text-[12px] text-[var(--text-muted)]">
                             {tx.payment_method === 'mpesa' ? `M-Pesa STK (${tx.mpesa_receipt || 'No receipt'})` : `Cash/Manual Entry`}
                           </span>
@@ -263,7 +263,7 @@ export default function SavingsPage() {
                   {/* Desktop Table */}
                   <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                      <thead className="bg-gray-50 dark:bg-[#0f1410] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+                      <thead className="bg-gray-50 dark:bg-[var(--ak-page)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
                         <tr>
                           <th className="px-6 py-4">Date</th>
                           <th className="px-6 py-4">Method</th>
@@ -272,9 +272,9 @@ export default function SavingsPage() {
                           <th className="px-6 py-4">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+                      <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
                         {contributions.map((tx, idx) => (
-                          <tr key={idx} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                          <tr key={idx} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                             <td className="px-6 py-4 text-sm text-[var(--text-muted)] whitespace-nowrap">
                               {new Date(tx.created_at).toLocaleDateString('en-KE')}
                             </td>
@@ -286,7 +286,7 @@ export default function SavingsPage() {
                             <td className="px-6 py-4">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                                 tx.status === 'confirmed' 
-                                  ? 'bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176]' 
+                                  ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' 
                                   : 'bg-orange-100 dark:bg-orange-900/30 text-orange-850 dark:text-orange-400'
                               }`}>
                                 {tx.status}

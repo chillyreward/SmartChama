@@ -39,7 +39,7 @@ export default function CurrencyConverter({ amountKES }: Props) {
               onClick={() => setSelectedCurrency(c.code)}
               className={`px-2 py-1 rounded-md text-xs font-bold transition-colors ${
                 selectedCurrency === c.code
-                  ? 'bg-[#22C55E] text-white'
+                  ? 'bg-[var(--ak-solid)] text-white'
                   : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >

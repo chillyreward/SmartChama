@@ -27,7 +27,7 @@ export default function ContributionChart({ data, title = "Contributions", heigh
       {title && <h3 className="text-headline-sm font-geist text-on-surface mb-4">{title}</h3>}
       <div className="flex items-center gap-6 mb-6">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#006e2f]"></div>
+          <div className="w-3 h-3 rounded-full bg-[var(--ak-solid)]"></div>
           <span className="text-body-sm text-secondary">Actual Contributions</span>
         </div>
         <div className="flex items-center gap-2">

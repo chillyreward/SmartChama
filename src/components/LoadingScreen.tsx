@@ -122,7 +122,7 @@ export default function LoadingScreen({
             backgroundColor: 'var(--border, #E5E7EB)' 
           }}>
           <div
-            className="h-full rounded-full bg-[#22C55E] transition-all duration-75 ease-linear"
+            className="h-full rounded-full bg-[var(--ak-solid)] transition-all duration-75 ease-linear"
             style={{ 
               width: `${progress}%` 
             }}

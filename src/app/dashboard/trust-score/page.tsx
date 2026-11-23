@@ -79,7 +79,7 @@ export default function TrustScorePage() {
     <div className="max-w-4xl p-4 md:p-8 font-inter text-[var(--text-main)]">
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Credit Score</span>
@@ -111,7 +111,7 @@ export default function TrustScorePage() {
                 cx="96"
                 cy="96"
                 r={radius}
-                className="stroke-[#22C55E]"
+                className="stroke-[var(--ak-brand-ink)]"
                 strokeWidth={strokeWidth}
                 fill="transparent"
                 strokeDasharray={circumference}
@@ -144,11 +144,11 @@ export default function TrustScorePage() {
             Your score is computed in real-time based on on-time contributions, contribution streak, group tenure, and active participation.
           </p>
           <div className="flex gap-4 justify-center md:justify-start pt-2">
-            <div className="bg-gray-50 dark:bg-[#1a2218] px-4 py-2 rounded-lg border border-[var(--border)]">
+            <div className="bg-gray-50 dark:bg-[var(--ak-surface)] px-4 py-2 rounded-lg border border-[var(--border)]">
               <div className="text-[11px] text-[var(--text-muted)] uppercase font-semibold">Streak</div>
               <div className="text-[16px] font-bold text-[var(--brand-green)] font-mono">{streak} months</div>
             </div>
-            <div className="bg-gray-50 dark:bg-[#1a2218] px-4 py-2 rounded-lg border border-[var(--border)]">
+            <div className="bg-gray-50 dark:bg-[var(--ak-surface)] px-4 py-2 rounded-lg border border-[var(--border)]">
               <div className="text-[11px] text-[var(--text-muted)] uppercase font-semibold">Decentralized Trust</div>
               <div className="text-[16px] font-bold text-[var(--brand-green)] font-mono">100% Secure</div>
             </div>
@@ -162,7 +162,7 @@ export default function TrustScorePage() {
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
         <div className="card-bg border border-[var(--border)] p-3 md:p-4 rounded-2xl shadow-xs">
-          <span className="material-symbols-outlined text-[#22C55E] text-[24px]">payments</span>
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-[24px]">payments</span>
           <h4 className="text-[13px] font-bold text-[var(--text-main)] mt-2">Contributions</h4>
           <div className="text-[18px] font-extrabold text-[var(--brand-green)] font-mono mt-1">
             {contributionScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 55</span>
@@ -173,7 +173,7 @@ export default function TrustScorePage() {
         </div>
 
         <div className="card-bg border border-[var(--border)] p-3 md:p-4 rounded-2xl shadow-xs">
-          <span className="material-symbols-outlined text-[#22C55E] text-[24px]">calendar_today</span>
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-[24px]">calendar_today</span>
           <h4 className="text-[13px] font-bold text-[var(--text-main)] mt-2">Group Tenure</h4>
           <div className="text-[18px] font-extrabold text-[var(--brand-green)] font-mono mt-1">
             {tenureScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 25</span>
@@ -184,7 +184,7 @@ export default function TrustScorePage() {
         </div>
 
         <div className="card-bg border border-[var(--border)] p-3 md:p-4 rounded-2xl shadow-xs">
-          <span className="material-symbols-outlined text-[#22C55E] text-[24px]">military_tech</span>
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)] text-[24px]">military_tech</span>
           <h4 className="text-[13px] font-bold text-[var(--text-main)] mt-2">Participation</h4>
           <div className="text-[18px] font-extrabold text-[var(--brand-green)] font-mono mt-1">
             {participationScore} <span className="text-[12px] text-[var(--text-muted)] font-normal">/ 20</span>
@@ -202,10 +202,10 @@ export default function TrustScorePage() {
         </h3>
         {loadingHistory ? (
           <div className="flex justify-center h-48 items-center">
-            <span className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></span>
+            <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
           </div>
         ) : scoreHistory.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-center bg-gray-50 dark:bg-[#1a2218] rounded-xl p-4">
+          <div className="flex flex-col items-center justify-center h-48 text-center bg-gray-50 dark:bg-[var(--ak-surface)] rounded-xl p-4">
             <span className="material-symbols-outlined text-gray-300 dark:text-gray-650 text-[36px] mb-2">timeline</span>
             <p className="text-[13px] text-[var(--text-muted)]">
               Your score history will appear here as you contribute over time.
@@ -222,7 +222,7 @@ export default function TrustScorePage() {
                   formatter={(value: any) => [`${value} Points`, 'Score']}
                   contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)' }}
                 />
-                <Line type="monotone" dataKey="score" stroke="#22C55E" strokeWidth={3} activeDot={{ r: 6 }} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="score" stroke="#3FA673" strokeWidth={3} activeDot={{ r: 6 }} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -233,19 +233,19 @@ export default function TrustScorePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <div className="card-bg border border-[var(--border)] p-4 md:p-6 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
           <h3 className="text-[16px] font-bold text-[var(--text-main)] mb-4 font-geist flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#22C55E]">lock_open</span>
+            <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">lock_open</span>
             What your score unlocks
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[#2d3d2d] pb-2">
+            <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[var(--ak-line)] pb-2">
               <span className="text-[var(--text-muted)]">0-39: Limited</span>
               <span className="text-red-500 font-semibold font-mono">Building your record</span>
             </div>
-            <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[#2d3d2d] pb-2">
+            <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[var(--ak-line)] pb-2">
               <span className="text-[var(--text-muted)]">40-59: Fair</span>
               <span className="text-amber-500 font-semibold font-mono">Reliable member</span>
             </div>
-            <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[#2d3d2d] pb-2">
+            <div className="flex justify-between items-center text-[13px] border-b border-gray-100 dark:border-[var(--ak-line)] pb-2">
               <span className="text-[var(--text-muted)]">60-79: Good</span>
               <span className="text-blue-500 font-semibold font-mono">Trusted member</span>
             </div>
@@ -258,7 +258,7 @@ export default function TrustScorePage() {
 
         <div className="card-bg border border-[var(--border)] p-4 md:p-6 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
           <h3 className="text-[16px] font-bold text-[var(--text-main)] mb-4 font-geist flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#22C55E]">bolt</span>
+            <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">bolt</span>
             How to improve your score
           </h3>
           <ul className="text-[13px] text-[var(--text-muted)] space-y-3">

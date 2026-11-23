@@ -1,170 +1,273 @@
 @import "tailwindcss";
 
+/* next-themes toggles a `.dark` class on <html>; make Tailwind's dark: variant follow it
+   (Tailwind v4 otherwise follows the OS setting, which fought the in-app toggle). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   AKIBORA TOKENS
+   Dark  = deep forest green with a little white.
+   Light = light green with a little white.
+   Use the Tailwind names below (bg-page, bg-surface, text-ink, text-ink-2,
+   border-line, bg-primary text-on-primary, font-display ...) in new code.
+   ============================================================ */
 :root {
   color-scheme: light;
-  --bg-page: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-sidebar: #FAFAFA;
-  --bg-input: #F4F4F5;
-  --bg-hover: #ECFDF5;
-  --bg-hover-light: #F4F4F5;
-  --bg-hover-dark: #1F2937;
-  --bg-subtle: #DCFCE7;
-  --bg-muted: #F4F4F5;
-  --border: #E4E4E7;
-  --border-strong: #22C55E;
-  --text-primary: #09090B;
-  --text-secondary: #3F3F46;
-  --text-muted: #71717A;
-  /* hover text stays dark in light mode, bright in dark mode */
-  --text-hover: #16A34A;
-  --text-main: #1e293b;
-  --color-border: var(--border);
-  --color-bg-card: var(--bg-card);
-  --color-text-primary: var(--text-primary);
-  --brand-green: #22C55E;
-  --brand-green-dark: #16A34A;
+  --ak-page: #E4EEE6;
+  --ak-surface: #F6FAF6;
+  --ak-surface-2: #EDF4EE;
+  --ak-raised: #DDE9DF;
+  --ak-line: #C6D8CA;
+  --ak-line-strong: #2F5A45;
+  --ak-text: #0F241A;
+  --ak-text-2: #2B4637;
+  --ak-text-3: #4C6858;
+  --ak-brand-ink: #1F6B4A;
+  --ak-primary: #0E1F18;
+  --ak-on-primary: #F3F8F4;
+  --ak-tint: #D3E6D8;
+  --ak-shell: #0E1F18;           /* sidebar stays forest in both themes */
+  --ak-shell-2: #1A3428;
+  --ak-shell-text: #EEF4EF;
+  --ak-shell-muted: #A9C2B3;
+  --ak-amber-bg: #FBE7C4;
+  --ak-amber-ink: #6B4108;
+  --ak-danger: #B8463A;
+  --ak-danger-bg: #F8DCD8;
+  --ak-danger-ink: #7A2318;
+  --ak-shadow: 0 1px 2px rgba(15, 36, 26, .06), 0 8px 24px rgba(15, 36, 26, .06);
 }
 
 .dark {
   color-scheme: dark;
-  --bg-page: #09090B;
-  --bg-card: #121215;
-  --bg-sidebar: #0D0D10;
-  --bg-input: #18181B;
-  --bg-hover: #14291D;
-  --bg-hover-light: #1F2937;
-  --bg-hover-dark: #111827;
-  --bg-subtle: #052E16;
-  --bg-muted: #18181B;
-  --border: #27272A;
-  --border-strong: #22C55E;
-  --text-primary: #FAFAFA;
-  --text-secondary: #D4D4D8;
-  --text-muted: #A1A1AA;
-  /* hover text is bright green in dark mode */
-  --text-hover: #4ADE80;
-  --text-main: #f8fafc;
-  --color-border: var(--border);
-  --color-bg-card: var(--bg-card);
-  --color-text-primary: var(--text-primary);
-  --brand-green: #22C55E;
-  --brand-green-dark: #16A34A;
+  --ak-page: #0E1F18;
+  --ak-surface: #13291F;
+  --ak-surface-2: #1A3428;
+  --ak-raised: #1F3D30;
+  --ak-line: #234235;
+  --ak-line-strong: #3D6B54;
+  --ak-text: #EEF4EF;
+  --ak-text-2: #B5CBBE;
+  --ak-text-3: #8FAA9B;
+  --ak-brand-ink: #7CE3A6;
+  --ak-primary: #7CE3A6;
+  --ak-on-primary: #0E1F18;
+  --ak-tint: #183326;
+  --ak-shell: #0B1913;
+  --ak-shell-2: #17301F;
+  --ak-amber-bg: #3A2A10;
+  --ak-amber-ink: #F3C77A;
+  --ak-danger: #F08A7E;
+  --ak-danger-bg: #3A1714;
+  --ak-danger-ink: #F6B3AA;
+  --ak-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px rgba(0, 0, 0, .25);
 }
 
-body {
-  background-color: var(--bg-page);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
+@theme inline {
+  --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  /* legacy font utilities used across older pages */
+  --font-inter: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  --font-geist: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+
+  --color-page: var(--ak-page);
+  --color-surface: var(--ak-surface);
+  --color-surface-2: var(--ak-surface-2);
+  --color-raised: var(--ak-raised);
+  --color-line: var(--ak-line);
+  --color-line-strong: var(--ak-line-strong);
+  --color-ink: var(--ak-text);
+  --color-ink-2: var(--ak-text-2);
+  --color-ink-3: var(--ak-text-3);
+  --color-brand: var(--ak-brand-ink);
+  --color-primary: var(--ak-primary);
+  --color-on-primary: var(--ak-on-primary);
+  --color-tint: var(--ak-tint);
+  --color-shell: var(--ak-shell);
+  --color-shell-2: var(--ak-shell-2);
+  --color-shell-ink: var(--ak-shell-text);
+  --color-shell-muted: var(--ak-shell-muted);
+  --color-amber-soft: var(--ak-amber-bg);
+  --color-amber-ink: var(--ak-amber-ink);
+  --color-danger: var(--ak-danger);
+  --color-danger-soft: var(--ak-danger-bg);
+  --color-danger-ink: var(--ak-danger-ink);
+
+  /* fixed brand colours (same in both themes) */
+  --color-forest: #0E1F18;
+  --color-canopy: #1A3428;
+  --color-moss: #2F5A45;
+  --color-mint: #7CE3A6;
+  --color-sage: #D5E3D7;
+  --color-sage-ink: #0F241A;
+  --color-lavender: #C7BAF5;
+  --color-lavender-ink: #1B1535;
+  --color-amber: #E8A33D;
+
+  --radius-panel: 28px;
+  --radius-card: 20px;
+  --shadow-soft: var(--ak-shadow);
 }
 
-/* Base UI Components */
-.sc-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
+/* Older pages use Tailwind's grey and green scales directly. Re-tint them toward the
+   forest palette so un-migrated screens still sit inside the brand. */
+@theme {
+  --color-gray-50: #F1F6F2;
+  --color-gray-100: #E4EEE6;
+  --color-gray-200: #D3E1D6;
+  --color-gray-300: #B6CBBB;
+  --color-gray-400: #8FAA9B;
+  --color-gray-500: #6A8577;
+  --color-gray-600: #4C6858;
+  --color-gray-700: #2F5A45;
+  --color-gray-800: #1A3428;
+  --color-gray-900: #13291F;
+  --color-gray-950: #0E1F18;
+  --color-slate-50: #F1F6F2;
+  --color-slate-100: #E4EEE6;
+  --color-slate-200: #D3E1D6;
+  --color-slate-300: #B6CBBB;
+  --color-slate-400: #8FAA9B;
+  --color-slate-500: #6A8577;
+  --color-slate-600: #4C6858;
+  --color-slate-700: #2F5A45;
+  --color-slate-800: #1A3428;
+  --color-slate-900: #13291F;
+  --color-slate-950: #0E1F18;
+  --color-zinc-50: #F1F6F2;
+  --color-zinc-100: #E4EEE6;
+  --color-zinc-200: #D3E1D6;
+  --color-zinc-300: #B6CBBB;
+  --color-zinc-400: #8FAA9B;
+  --color-zinc-500: #6A8577;
+  --color-zinc-600: #4C6858;
+  --color-zinc-700: #2F5A45;
+  --color-zinc-800: #1A3428;
+  --color-zinc-900: #13291F;
+  --color-zinc-950: #0E1F18;
+  --color-green-50: #EAF5EE;
+  --color-green-100: #D3E6D8;
+  --color-green-200: #B4E9CA;
+  --color-green-300: #9BE6BB;
+  --color-green-400: #7CE3A6;
+  --color-green-500: #3FA673;
+  --color-green-600: #24704C;
+  --color-green-700: #1F6B4A;
+  --color-green-800: #1A3428;
+  --color-green-900: #13291F;
+  --color-green-950: #0E1F18;
+  --color-emerald-50: #EAF5EE;
+  --color-emerald-100: #D3E6D8;
+  --color-emerald-400: #7CE3A6;
+  --color-emerald-500: #3FA673;
+  --color-emerald-600: #24704C;
+  --color-emerald-700: #1F6B4A;
 }
 
-.sc-sidebar {
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
-  color: var(--text-primary);
+/* ---------- legacy variable names (older pages) ---------- */
+:root, .dark {
+  --bg-page: var(--ak-page);
+  --bg-card: var(--ak-surface);
+  --bg-sidebar: var(--ak-surface);
+  --bg-input: var(--ak-surface-2);
+  --bg-hover: var(--ak-raised);
+  --bg-hover-light: var(--ak-raised);
+  --bg-hover-dark: var(--ak-raised);
+  --bg-subtle: var(--ak-tint);
+  --bg-muted: var(--ak-surface-2);
+  --bg-primary: var(--ak-page);
+  --border: var(--ak-line);
+  --border-color: var(--ak-line);
+  --border-strong: var(--ak-line-strong);
+  --text-primary: var(--ak-text);
+  --text-secondary: var(--ak-text-2);
+  --text-muted: var(--ak-text-3);
+  --text-hover: var(--ak-brand-ink);
+  --text-main: var(--ak-text);
+  --color-border: var(--ak-line);
+  --color-bg-card: var(--ak-surface);
+  --color-text-primary: var(--ak-text);
+  --brand-green: var(--ak-brand-ink);
+  --brand-green-dark: var(--ak-brand-ink);
+  /* interim names used by the colour migration of older pages */
+  --ak-solid: #24704C;
 }
 
-.sc-table th {
-  background-color: var(--bg-muted);
-  color: var(--text-secondary);
+@layer base {
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    background-color: var(--ak-page);
+    color: var(--ak-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01";
+  }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  :focus-visible { outline: 2px solid var(--ak-brand-ink); outline-offset: 2px; }
+  ::selection { background: #7CE3A6; color: #0E1F18; }
 }
 
-.sc-table tr:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
+/* ---------- small utilities ---------- */
+@utility num { font-variant-numeric: lining-nums tabular-nums; }
+@utility font-money {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.015em;
 }
 
-/* Nav link hover — ensures text stays readable in both modes */
-.nav-link-hover:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-hover);
+/* The woven ring (kiondo weave). Size it with width/height; set --ring-inner / --ring-outer
+   as percentages of the radius to pick the band. */
+.ak-weave {
+  --ring-a: #2F5A45;
+  --ring-b: #18332A;
+  --ring-inner: 82%;
+  --ring-outer: 100%;
+  border-radius: 9999px;
+  background: repeating-conic-gradient(from 2deg, var(--ring-a) 0deg 3deg, var(--ring-b) 3deg 6deg);
+  -webkit-mask: radial-gradient(circle closest-side, transparent calc(var(--ring-inner) - .5%), #000 var(--ring-inner), #000 var(--ring-outer), transparent var(--ring-outer));
+          mask: radial-gradient(circle closest-side, transparent calc(var(--ring-inner) - .5%), #000 var(--ring-inner), #000 var(--ring-outer), transparent var(--ring-outer));
 }
+:root:not(.dark) .ak-weave.ak-weave-adapt { --ring-a: #2F5A45; --ring-b: #A9C3B0; }
 
-/* Fix: light-mode dropdown panels use card bg, not white */
-.sc-dropdown {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-}
+@keyframes ak-pulse { 0% { box-shadow: 0 0 0 0 rgba(124,227,166,.55); } 100% { box-shadow: 0 0 0 16px rgba(124,227,166,0); } }
+.ak-pulse { animation: ak-pulse 2.4s ease-out infinite; }
 
-.sc-dropdown-item:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-hover);
-}
+/* ---------- legacy component classes (older pages) ---------- */
+.sc-card, .card-bg { background-color: var(--ak-surface); border: 1px solid var(--ak-line); color: var(--ak-text); }
+.sc-sidebar, .sidebar-bg { background-color: var(--ak-surface); border-color: var(--ak-line); color: var(--ak-text); }
+.sc-table th { background-color: var(--ak-surface-2); color: var(--ak-text-2); }
+.sc-table tr:hover { background-color: var(--ak-raised); color: var(--ak-text); }
+.nav-link-hover:hover { background-color: var(--ak-raised); color: var(--ak-brand-ink); }
+.sc-dropdown { background-color: var(--ak-surface); border: 1px solid var(--ak-line); color: var(--ak-text); }
+.sc-dropdown-item:hover { background-color: var(--ak-raised); color: var(--ak-brand-ink); }
+.page-bg { background-color: var(--ak-page); color: var(--ak-text); }
+.text-theme-primary { color: var(--ak-text); }
+.text-theme-secondary { color: var(--ak-text-2); }
+.text-theme-muted { color: var(--ak-text-3); }
+.bg-theme-card { background-color: var(--ak-surface); }
+.bg-theme-page { background-color: var(--ak-page); }
+.border-theme { border-color: var(--ak-line); }
 
-.page-bg { background-color: var(--bg-page); color: var(--text-primary); }
-.card-bg { background-color: var(--bg-card); border-color: var(--border); color: var(--text-primary); }
-.sidebar-bg { background-color: var(--bg-sidebar); border-color: var(--border); color: var(--text-primary); }
-
-.text-theme-primary { color: var(--text-primary); }
-.text-theme-secondary { color: var(--text-secondary); }
-.text-theme-muted { color: var(--text-muted); }
-.bg-theme-card { background-color: var(--bg-card); }
-.bg-theme-page { background-color: var(--bg-page); }
-.border-theme { border-color: var(--border); }
-
-/* Custom Animations */
 @keyframes elephantWalk {
-  0%   { transform: translateY(0px) rotate(0deg); }
-  25%  { transform: translateY(-2px) rotate(0.5deg); }
-  50%  { transform: translateY(0px) rotate(0deg); }
-  75%  { transform: translateY(-1px) rotate(-0.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0%, 50%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-2px) rotate(.5deg); }
+  75% { transform: translateY(-1px) rotate(-.5deg); }
 }
+.elephant-walk { animation: elephantWalk .8s ease-in-out infinite; }
 
-.elephant-walk {
-  animation: elephantWalk 0.8s ease-in-out infinite;
-}
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.animate-slide-up { animation: slideUp .25s ease-out forwards; }
 
-@keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
 
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out forwards;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--ak-page); }
+::-webkit-scrollbar-thumb { background: var(--ak-line); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ak-line-strong); }
 
-/* Safe area support for iOS */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-.pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-page);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #22C55E;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }

@@ -95,10 +95,10 @@ export default function ContributionSchedulePicker({
       role="radio"
       aria-checked={value.mode === mode}
       onClick={() => pick(mode)}
-      className={`text-left p-3 rounded-xl border transition-colors ${value.mode === mode ? 'border-[#22C55E] bg-[#F0FDF4] dark:bg-[#0E2E1B]' : 'border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410]'}`}
+      className={`text-left p-3 rounded-xl border transition-colors ${value.mode === mode ? 'border-[var(--ak-brand-ink)] bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)]' : 'border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)]'}`}
     >
-      <span className="block text-[14px] font-semibold text-[#161d16] dark:text-white">{title}</span>
-      <span className="block text-[12px] text-[#4F5A53] dark:text-[#8FA196]">{hint}</span>
+      <span className="block text-[14px] font-semibold text-[var(--ak-text)] dark:text-white">{title}</span>
+      <span className="block text-[12px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">{hint}</span>
     </button>
   )
 
@@ -113,22 +113,22 @@ export default function ContributionSchedulePicker({
       </div>
 
       {value.mode !== 'daily' && (
-        <div className="rounded-xl border border-[#E5E7EB] dark:border-[#1B2520] bg-white dark:bg-[#0E1410] p-3 space-y-3">
+        <div className="rounded-xl border border-[var(--ak-line)] dark:border-[var(--ak-line)] bg-white dark:bg-[var(--ak-page)] p-3 space-y-3">
           <div className="flex items-center justify-between">
             <button type="button" onClick={() => shift(-1)} disabled={atCurrentMonth} aria-label="Previous month"
-              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[#F0FDF4] dark:hover:bg-[#0E2E1B] disabled:opacity-30">
+              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)] disabled:opacity-30">
               <span className="material-symbols-outlined text-[20px]">chevron_left</span>
             </button>
-            <span className="text-[14px] font-semibold text-[#161d16] dark:text-white">{monthLabel}</span>
+            <span className="text-[14px] font-semibold text-[var(--ak-text)] dark:text-white">{monthLabel}</span>
             <button type="button" onClick={() => shift(1)} aria-label="Next month"
-              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[#F0FDF4] dark:hover:bg-[#0E2E1B]">
+              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)]">
               <span className="material-symbols-outlined text-[20px]">chevron_right</span>
             </button>
           </div>
 
           <div className="grid grid-cols-7 gap-1 text-center">
             {WEEKDAYS.map((w) => (
-              <span key={w} className="text-[11px] font-semibold text-[#8FA196] py-1">{w}</span>
+              <span key={w} className="text-[11px] font-semibold text-[var(--ak-text-3)] py-1">{w}</span>
             ))}
             {cells.map((day, i) => {
               if (day === null) return <span key={`b${i}`} />
@@ -144,10 +144,10 @@ export default function ContributionSchedulePicker({
                   aria-pressed={on}
                   aria-label={prettyDate(d)}
                   className={`h-9 rounded-lg text-[13px] tabular-nums transition-colors ${
-                    on ? 'bg-[#22C55E] text-white font-semibold'
+                    on ? 'bg-[var(--ak-solid)] text-white font-semibold'
                       : past ? 'text-[#C4CCC7] dark:text-[#3A4740] cursor-not-allowed'
-                      : 'text-[#161d16] dark:text-white hover:bg-[#F0FDF4] dark:hover:bg-[#0E2E1B]'
-                  } ${d === today && !on ? 'ring-1 ring-[#22C55E]' : ''}`}
+                      : 'text-[var(--ak-text)] dark:text-white hover:bg-[var(--ak-tint)] dark:hover:bg-[var(--ak-tint)]'
+                  } ${d === today && !on ? 'ring-1 ring-[var(--ak-brand-ink)]' : ''}`}
                 >
                   {day}
                 </button>
@@ -156,22 +156,22 @@ export default function ContributionSchedulePicker({
           </div>
 
           {recurring ? (
-            <p className="text-[12px] text-[#4F5A53] dark:text-[#8FA196]">
+            <p className="text-[12px] text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
               {value.dates[0]
-                ? <>First contribution on <span className="font-semibold text-[#16A34A]">{prettyDate(value.dates[0])}</span>, then every {RECURRING[value.mode]} on the same day{Number(value.dates[0].slice(8)) > 28 ? ' (the last day in shorter months)' : ''}.</>
+                ? <>First contribution on <span className="font-semibold text-[var(--ak-brand-ink)]">{prettyDate(value.dates[0])}</span>, then every {RECURRING[value.mode]} on the same day{Number(value.dates[0].slice(8)) > 28 ? ' (the last day in shorter months)' : ''}.</>
                 : <>Tap the first due date. It repeats every {RECURRING[value.mode]} from there.</>}
             </p>
           ) : value.dates.length > 0 ? (
             <div className="space-y-2">
-              <p className="text-[12px] font-semibold text-[#4F5A53] dark:text-[#8FA196]">
+              <p className="text-[12px] font-semibold text-[var(--ak-text-2)] dark:text-[var(--ak-text-3)]">
                 {value.dates.length} contribution date{value.dates.length === 1 ? '' : 's'}
               </p>
               <div className="flex flex-wrap gap-2">
                 {value.dates.map((d) => (
-                  <span key={d} className="inline-flex items-center gap-1 pl-3 pr-1 py-1 rounded-full bg-[#F0FDF4] dark:bg-[#0E2E1B] text-[12px] text-[#16A34A]">
+                  <span key={d} className="inline-flex items-center gap-1 pl-3 pr-1 py-1 rounded-full bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[12px] text-[var(--ak-brand-ink)]">
                     {prettyDate(d)}
                     <button type="button" onClick={() => toggle(d)} aria-label={`Remove ${prettyDate(d)}`}
-                      className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-[#DCFCE7] dark:hover:bg-[#14532D]">
+                      className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-[var(--ak-tint)] dark:hover:bg-[#14532D]">
                       <span className="material-symbols-outlined text-[14px]">close</span>
                     </button>
                   </span>
@@ -179,7 +179,7 @@ export default function ContributionSchedulePicker({
               </div>
             </div>
           ) : (
-            <p className="text-[12px] text-[#8FA196]">Tap the dates when members should contribute. You can add more later.</p>
+            <p className="text-[12px] text-[var(--ak-text-3)]">Tap the dates when members should contribute. You can add more later.</p>
           )}
         </div>
       )}

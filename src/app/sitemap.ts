@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
+import { SITE } from '@/lib/site';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://smartchama.vercel.app';
+  const baseUrl = SITE.url;
   const now = new Date();
 
   return [

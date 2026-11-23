@@ -67,7 +67,7 @@ export default function AdminWelfarePage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-          <Heart className="w-7 h-7 text-[#22C55E]" />
+          <Heart className="w-7 h-7 text-[var(--ak-brand-ink)]" />
           Welfare & Emergency Fund
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -93,7 +93,7 @@ export default function AdminWelfarePage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="sc-card p-6 rounded-2xl border">
           <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Welfare Pool Balance</p>
-          <p className="text-3xl font-bold text-[#22C55E] mt-1">KSh {Number(fund?.balance || 0).toLocaleString('en-KE')}</p>
+          <p className="text-3xl font-bold text-[var(--ak-brand-ink)] mt-1">KSh {Number(fund?.balance || 0).toLocaleString('en-KE')}</p>
         </div>
         <div className="sc-card p-6 rounded-2xl border">
           <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Monthly Contribution</p>
@@ -151,7 +151,7 @@ export default function AdminWelfarePage() {
                           <>
                             <button
                               onClick={() => handleAction(c.id, 'approve')}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#22C55E] text-white hover:bg-[#16A34A]">
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
                               Approve
                             </button>
                             <button

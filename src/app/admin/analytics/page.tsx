@@ -78,7 +78,7 @@ export default function AdminAnalyticsPage() {
     });
 
     setStatusBreakdown([
-      { name: 'Confirmed', value: byStatus.confirmed, color: '#22C55E' },
+      { name: 'Confirmed', value: byStatus.confirmed, color: '#3FA673' },
       { name: 'Pending', value: byStatus.pending, color: '#3B82F6' },
       { name: 'Late', value: byStatus.late, color: '#EF4444' }
     ]);
@@ -141,7 +141,7 @@ export default function AdminAnalyticsPage() {
 
       {/* Page Header */}
       <div className="mb-8 no-print">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Admin Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Analytics</span>
@@ -160,7 +160,7 @@ export default function AdminAnalyticsPage() {
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value as any)}
-              className="bg-white dark:bg-[#111111] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] outline-hidden cursor-pointer shadow-sm"
+              className="bg-white dark:bg-[var(--ak-surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-main)] outline-hidden cursor-pointer shadow-sm"
             >
               <option value="30days">Last 30 Days</option>
               <option value="3months">Last 3 Months</option>
@@ -168,7 +168,7 @@ export default function AdminAnalyticsPage() {
             </select>
             <button 
               onClick={() => window.print()}
-              className="bg-[#22C55E] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[#006e2f] transition-all shadow-sm cursor-pointer"
+              className="bg-[var(--ak-solid)] text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-[var(--ak-solid)] transition-all shadow-sm cursor-pointer"
             >
               Export Report
             </button>
@@ -221,20 +221,20 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* CONTRIBUTION STATS */}
-        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[#22C55E] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 flex flex-col justify-between">
+        <div className="card-bg border border-[var(--border)] border-t-2 border-t-[var(--ak-brand-ink)] rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6 flex flex-col justify-between">
           <div>
             <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Contribution Compliance</h2>
             
             <div className="mb-8">
               <div className="flex justify-between items-end mb-2">
-                <div className="text-3xl font-bold text-[#22C55E] font-geist">
+                <div className="text-3xl font-bold text-[var(--ak-brand-ink)] font-geist">
                   {contributionStats.total > 0 ? Math.round((contributionStats.confirmed / contributionStats.total) * 100) : 0}%
                 </div>
                 <div className="text-[11px] font-bold tracking-wider text-[var(--text-muted)] uppercase">RECOVERY RATE IN PERIOD</div>
               </div>
-              <div className="w-full bg-gray-100 dark:bg-[#1a2218] rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-gray-100 dark:bg-[var(--ak-surface)] rounded-full h-3 overflow-hidden">
                 <div 
-                  className="bg-[#22C55E] h-3 rounded-full transition-all duration-500" 
+                  className="bg-[var(--ak-solid)] h-3 rounded-full transition-all duration-500" 
                   style={{ width: `${contributionStats.total > 0 ? (contributionStats.confirmed / contributionStats.total) * 100 : 0}%` }}
                 ></div>
               </div>
@@ -242,7 +242,7 @@ export default function AdminAnalyticsPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-transparent text-[var(--brand-green)] border border-[#22C55E]/20 dark:border-[#22C55E]/10 rounded-xl">
+            <div className="p-4 bg-transparent text-[var(--brand-green)] border border-[var(--ak-brand-ink)]/20 dark:border-[var(--ak-brand-ink)]/10 rounded-xl">
               <div className="text-[11px] font-bold tracking-wider text-[var(--brand-green)] uppercase mb-1">CONFIRMED FUNDS</div>
               <div className="font-mono font-bold text-[var(--text-main)] text-lg">KSh {formatCurrency(contributionStats.confirmed)}</div>
             </div>
@@ -258,7 +258,7 @@ export default function AdminAnalyticsPage() {
         <h2 className="text-xl font-bold text-[var(--text-main)] font-geist mb-6">Top Contributors In Period</h2>
         <div className="flex flex-col gap-4">
           {topMembers.map((m, idx) => (
-            <div key={idx} className="flex justify-between items-center p-4 border border-[var(--border)] rounded-xl hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-all">
+            <div key={idx} className="flex justify-between items-center p-4 border border-[var(--border)] rounded-xl hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-all">
               <div className="flex items-center gap-4">
                 <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-xs ${
                   idx === 0 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400' :
@@ -270,7 +270,7 @@ export default function AdminAnalyticsPage() {
                 </div>
                 <div className="font-semibold text-[var(--text-main)]">{m.name}</div>
               </div>
-              <div className="font-mono font-bold text-[#22C55E] text-lg">KSh {formatCurrency(m.total)}</div>
+              <div className="font-mono font-bold text-[var(--ak-brand-ink)] text-lg">KSh {formatCurrency(m.total)}</div>
             </div>
           ))}
           {topMembers.length === 0 && (

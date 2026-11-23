@@ -123,7 +123,7 @@ export default function AdminPenaltiesPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-            <ShieldAlert className="w-7 h-7 text-[#22C55E]" />
+            <ShieldAlert className="w-7 h-7 text-[var(--ak-brand-ink)]" />
             Member Penalties & Fines
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -132,7 +132,7 @@ export default function AdminPenaltiesPage() {
         </div>
         <button
           onClick={() => setShowImposeModal(true)}
-          className="px-4 py-2.5 rounded-xl font-bold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors flex items-center gap-2 text-sm shadow-sm">
+          className="px-4 py-2.5 rounded-xl font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors flex items-center gap-2 text-sm shadow-sm">
           <Plus className="w-4 h-4" /> Impose Penalty
         </button>
       </div>
@@ -163,7 +163,7 @@ export default function AdminPenaltiesPage() {
         </div>
         <div className="sc-card p-5 rounded-2xl border">
           <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Settled & Waived</p>
-          <p className="text-2xl font-bold text-[#22C55E] mt-1">{penalties.filter(p => p.status !== 'unpaid').length}</p>
+          <p className="text-2xl font-bold text-[var(--ak-brand-ink)] mt-1">{penalties.filter(p => p.status !== 'unpaid').length}</p>
         </div>
       </div>
 
@@ -213,7 +213,7 @@ export default function AdminPenaltiesPage() {
                           <>
                             <button
                               onClick={() => handleAction(p.id, 'pay')}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#22C55E] text-white hover:bg-[#16A34A]">
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
                               Mark Paid
                             </button>
                             <button
@@ -245,7 +245,7 @@ export default function AdminPenaltiesPage() {
                 <select
                   value={selectedMember}
                   onChange={e => setSelectedMember(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]">
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
                   {members.map(m => (
                     <option key={m.id} value={m.id}>{m.profiles?.full_name || 'Member'}</option>
                   ))}
@@ -257,7 +257,7 @@ export default function AdminPenaltiesPage() {
                 <select
                   value={penaltyType}
                   onChange={e => setPenaltyType(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]">
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
                   <option value="late_contribution">Late Contribution</option>
                   <option value="missed_meeting">Missed Meeting</option>
                   <option value="custom">Custom Violation</option>
@@ -272,7 +272,7 @@ export default function AdminPenaltiesPage() {
                   min="10"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
@@ -283,7 +283,7 @@ export default function AdminPenaltiesPage() {
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   placeholder="e.g. Late contribution for October"
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
@@ -297,7 +297,7 @@ export default function AdminPenaltiesPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl text-sm font-bold bg-[#22C55E] text-white hover:bg-[#16A34A]">
+                  className="px-5 py-2 rounded-xl text-sm font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
                   {submitting ? 'Imposing...' : 'Confirm Penalty'}
                 </button>
               </div>

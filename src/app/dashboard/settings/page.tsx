@@ -201,7 +201,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="p-8 flex justify-center items-center">
-        <span className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></span>
+        <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
       </div>
     )
   }
@@ -211,7 +211,7 @@ export default function SettingsPage() {
       
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>Dashboard</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Settings</span>
@@ -226,7 +226,7 @@ export default function SettingsPage() {
       </div>
 
       {toastMsg && (
-        <div className="bg-transparent text-[var(--brand-green)] border border-[#bccbb9] dark:border-[#2d3d2d] p-4 rounded-xl text-[14px] font-medium mb-6">
+        <div className="bg-transparent text-[var(--brand-green)] border border-[#bccbb9] dark:border-[var(--ak-line)] p-4 rounded-xl text-[14px] font-medium mb-6">
           {toastMsg}
         </div>
       )}
@@ -252,7 +252,7 @@ export default function SettingsPage() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-semibold transition-colors text-left ${
                 activeTab === t.name
                   ? 'bg-transparent text-[var(--brand-green)] text-[var(--brand-green)]'
-                  : 'text-[#3d4a3d] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1f2a1f]'
+                  : 'text-[var(--ak-text-2)] dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[var(--ak-raised)]'
               }`}
             >
               <span className="material-symbols-outlined text-[20px]">{t.icon}</span>
@@ -268,7 +268,7 @@ export default function SettingsPage() {
           {activeTab === 'Profile Details' && (
             <div>
               <div className="border-b border-gray-100 dark:border-gray-800 pb-4 mb-6">
-                <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white font-geist">
+                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white font-geist">
                   Profile Details
                 </h3>
               </div>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                       Full Name
                     </label>
                     <input
@@ -285,7 +285,7 @@ export default function SettingsPage() {
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                     />
                   </div>
 
@@ -294,37 +294,37 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                       Email Address
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                       National ID
                     </label>
                     <input
                       type="text"
                       value={nationalId}
                       onChange={(e) => setNationalId(e.target.value)}
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                       County
                     </label>
                     <select
                       value={county}
                       onChange={(e) => setCounty(e.target.value)}
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                     >
                       <option value="">Select County</option>
                       {countiesList.map(c => (
@@ -334,7 +334,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                       Occupation
                     </label>
                     <input
@@ -342,7 +342,7 @@ export default function SettingsPage() {
                       value={occupation}
                       onChange={(e) => setOccupation(e.target.value)}
                       placeholder="e.g. Entrepreneur, Farmer"
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                     />
                   </div>
 
@@ -352,7 +352,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="bg-[#22C55E] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
+                    className="bg-[var(--ak-solid)] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
                   >
                     {saving ? 'Saving...' : 'Save Profile'}
                   </button>
@@ -364,7 +364,7 @@ export default function SettingsPage() {
           {/* NOTIFICATIONS TAB */}
           {activeTab === 'Notifications' && (
             <div>
-              <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mb-6 font-geist">
+              <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mb-6 font-geist">
                 Communication Preferences
               </h3>
               
@@ -380,13 +380,13 @@ export default function SettingsPage() {
                 ].map(pref => (
                   <div key={pref.key} className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-3">
                     <div>
-                      <h4 className="text-[14px] font-bold text-[#161d16] dark:text-white">{pref.label}</h4>
-                      <p className="text-[12px] text-[#60645f] dark:text-gray-400 mt-0.5">{pref.desc}</p>
+                      <h4 className="text-[14px] font-bold text-[var(--ak-text)] dark:text-white">{pref.label}</h4>
+                      <p className="text-[12px] text-[var(--ak-text-2)] dark:text-gray-400 mt-0.5">{pref.desc}</p>
                     </div>
                     
                     <div
                       className={`w-10 h-6 rounded-full relative cursor-pointer transition-colors duration-200 shrink-0 ${
-                        notifPrefs[pref.key] ? 'bg-[#22C55E]' : 'bg-gray-200 dark:bg-gray-700'
+                        notifPrefs[pref.key] ? 'bg-[var(--ak-solid)]' : 'bg-gray-200 dark:bg-gray-700'
                       }`}
                       onClick={() => handleTogglePref(pref.key)}
                     >
@@ -410,13 +410,13 @@ export default function SettingsPage() {
               
               {/* Change Password */}
               <form onSubmit={handleChangePassword} className="space-y-4">
-                <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
+                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
                   Change Password
                 </h3>
 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                    <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                       Current Password
                     </label>
                     <input
@@ -424,13 +424,13 @@ export default function SettingsPage() {
                       required
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                      className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                      <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                         New Password
                       </label>
                       <input
@@ -438,11 +438,11 @@ export default function SettingsPage() {
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                        className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                       />
                     </div>
                     <div>
-                      <label className="block text-[13px] font-semibold text-[#161d16] dark:text-white mb-1.5">
+                      <label className="block text-[13px] font-semibold text-[var(--ak-text)] dark:text-white mb-1.5">
                         Confirm New Password
                       </label>
                       <input
@@ -450,14 +450,14 @@ export default function SettingsPage() {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-white dark:bg-[#1a1f1b] border border-[#E5E7EB] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[#161d16] dark:text-[#e8f0e4] focus:border-[#22C55E] focus:outline-hidden"
+                        className="w-full bg-white dark:bg-[var(--ak-surface)] border border-[var(--ak-line)] dark:border-gray-700 rounded-lg px-3 py-2 text-[14px] text-[var(--ak-text)] dark:text-[var(--ak-brand-ink)] focus:border-[var(--ak-brand-ink)] focus:outline-hidden"
                       />
                     </div>
                   </div>
 
                   {newPassword && (
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] font-semibold text-[#60645f] dark:text-gray-400">
+                      <div className="flex justify-between text-[11px] font-semibold text-[var(--ak-text-2)] dark:text-gray-400">
                         <span>Password Strength:</span>
                         <span>{passwordStrength.label}</span>
                       </div>
@@ -472,7 +472,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="bg-[#22C55E] text-white px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-[#006e2f] transition-colors shadow-sm cursor-pointer"
+                    className="bg-[var(--ak-solid)] text-white px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-[var(--ak-solid)] transition-colors shadow-sm cursor-pointer"
                   >
                     Change Password
                   </button>
@@ -481,14 +481,14 @@ export default function SettingsPage() {
 
               {/* Two-Factor Authentication */}
               <div className="space-y-3">
-                <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
+                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
                   Two-Factor Authentication (2FA)
                 </h3>
-                <div className="bg-gray-50 dark:bg-[#1f2620]/30 border border-[#E5E7EB] dark:border-gray-800 p-4 rounded-xl flex gap-3 items-start">
+                <div className="bg-gray-50 dark:bg-[#1f2620]/30 border border-[var(--ak-line)] dark:border-gray-800 p-4 rounded-xl flex gap-3 items-start">
                   <span className="material-symbols-outlined text-[var(--brand-green)]">security</span>
                   <div>
-                    <h4 className="text-[14px] font-bold text-[#161d16] dark:text-white">Enhanced Verification</h4>
-                    <p className="text-[12px] text-[#60645f] dark:text-gray-400 mt-0.5 leading-relaxed">
+                    <h4 className="text-[14px] font-bold text-[var(--ak-text)] dark:text-white">Enhanced Verification</h4>
+                    <p className="text-[12px] text-[var(--ak-text-2)] dark:text-gray-400 mt-0.5 leading-relaxed">
                       Two-factor authentication via SMS is available. Enable OTP login to activate. Contact administrator to verify mobile setup.
                     </p>
                   </div>
@@ -497,20 +497,20 @@ export default function SettingsPage() {
 
               {/* Sessions */}
               <div className="space-y-4">
-                <h3 className="text-[16px] font-bold text-[#161d16] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
+                <h3 className="text-[16px] font-bold text-[var(--ak-text)] dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3 font-geist">
                   Active Sessions
                 </h3>
                 
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center bg-gray-50 dark:bg-[#1f2620]/30 border border-[#E5E7EB] dark:border-gray-800 p-3 rounded-lg text-[13px]">
+                  <div className="flex justify-between items-center bg-gray-50 dark:bg-[#1f2620]/30 border border-[var(--ak-line)] dark:border-gray-800 p-3 rounded-lg text-[13px]">
                     <div className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-secondary">devices</span>
                       <div>
-                        <div className="font-bold text-[#161d16] dark:text-white">Current Session Device</div>
-                        <div className="text-[11px] text-[#60645f] dark:text-gray-400">IP: Client Address • Last active just now</div>
+                        <div className="font-bold text-[var(--ak-text)] dark:text-white">Current Session Device</div>
+                        <div className="text-[11px] text-[var(--ak-text-2)] dark:text-gray-400">IP: Client Address • Last active just now</div>
                       </div>
                     </div>
-                    <span className="bg-green-100 dark:bg-green-950/20 text-[#166534] dark:text-[#4ae176] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                    <span className="bg-green-100 dark:bg-green-950/20 text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
                       Active
                     </span>
                   </div>
@@ -518,7 +518,7 @@ export default function SettingsPage() {
                   <div className="flex justify-end pt-2">
                     <button
                       onClick={handleSignOutAll}
-                      className="bg-white dark:bg-[#1a1f1b] border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-red-50 dark:hover:bg-red-950/10 transition-colors cursor-pointer"
+                      className="bg-white dark:bg-[var(--ak-surface)] border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-red-50 dark:hover:bg-red-950/10 transition-colors cursor-pointer"
                     >
                       Sign Out All Devices
                     </button>

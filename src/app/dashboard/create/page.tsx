@@ -50,7 +50,7 @@ export default function CreateChamaPage() {
                   type="text" 
                   required 
                   placeholder="e.g. Family Savings" 
-                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[#22C55E] transition-all"
+                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[var(--ak-brand-ink)] transition-all"
                   style={{
                     backgroundColor: 'var(--bg-input)',
                     borderColor: 'var(--border)',
@@ -66,7 +66,7 @@ export default function CreateChamaPage() {
                   type="number" 
                   required 
                   placeholder="e.g. 5000" 
-                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[#22C55E] transition-all"
+                  className="w-full rounded-xl px-4 py-3 outline-none focus:border-[var(--ak-brand-ink)] transition-all"
                   style={{
                     backgroundColor: 'var(--bg-input)',
                     borderColor: 'var(--border)',
@@ -79,7 +79,7 @@ export default function CreateChamaPage() {
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-4 rounded-xl transition-all shadow-md"
+                className="w-full bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white font-bold py-4 rounded-xl transition-all shadow-md"
               >
                 {isLoading ? "Creating Group..." : "Create Chama"}
               </button>
@@ -93,10 +93,10 @@ export default function CreateChamaPage() {
             className="rounded-3xl p-8 text-center relative overflow-hidden shadow-xl"
             style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)' }}
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-[#22C55E]"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-[var(--ak-solid)]"></div>
             
             <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Check className="w-8 h-8 text-[#22C55E]" />
+              <Check className="w-8 h-8 text-[var(--ak-brand-ink)]" />
             </div>
 
             <h2 className="text-2xl font-bold mb-2 font-geist" style={{ color: 'var(--text-primary)' }}>Chama Created!</h2>
@@ -104,7 +104,7 @@ export default function CreateChamaPage() {
 
             <div className="rounded-2xl p-6 mb-8" style={{ backgroundColor: 'var(--bg-input)', border: '1px solid var(--border)' }}>
               <p className="text-xs uppercase tracking-widest mb-2 font-bold" style={{ color: 'var(--text-muted)' }}>GROUP PIN</p>
-              <div className="text-5xl font-mono font-black text-[#22C55E] tracking-widest flex items-center justify-center gap-4">
+              <div className="text-5xl font-mono font-black text-[var(--ak-brand-ink)] tracking-widest flex items-center justify-center gap-4">
                 {pin}
                 <button onClick={() => navigator.clipboard.writeText(pin)} className="p-2 rounded-lg hover:opacity-80">
                   <Copy className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
@@ -114,7 +114,7 @@ export default function CreateChamaPage() {
 
             <button 
               onClick={() => router.push("/dashboard?role=admin")}
-              className="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-4 rounded-xl transition-all shadow-md"
+              className="w-full bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white font-bold py-4 rounded-xl transition-all shadow-md"
             >
               Go to Group Dashboard
             </button>

@@ -91,7 +91,7 @@ export default function MemberWelfarePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-geist flex items-center gap-2 text-[var(--text-primary)]">
-            <Heart className="w-7 h-7 text-[#22C55E]" />
+            <Heart className="w-7 h-7 text-[var(--ak-brand-ink)]" />
             Welfare & Emergency Fund
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -100,7 +100,7 @@ export default function MemberWelfarePage() {
         </div>
         <button
           onClick={() => setShowClaimModal(true)}
-          className="px-4 py-2.5 rounded-xl font-bold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors flex items-center gap-2 text-sm">
+          className="px-4 py-2.5 rounded-xl font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)] transition-colors flex items-center gap-2 text-sm">
           <Plus className="w-4 h-4" /> Request Emergency Claim
         </button>
       </div>
@@ -120,11 +120,11 @@ export default function MemberWelfarePage() {
       )}
 
       {/* Welfare Overview Card */}
-      <div className="sc-card p-6 md:p-8 rounded-2xl border bg-gradient-to-br from-green-500/10 via-transparent to-transparent border-[#22C55E]/20 space-y-4">
+      <div className="sc-card p-6 md:p-8 rounded-2xl border bg-gradient-to-br from-green-500/10 via-transparent to-transparent border-[var(--ak-brand-ink)]/20 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
           <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
             <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Group Welfare Balance</p>
-            <p className="text-2xl font-bold text-[#22C55E] mt-1">KSh {Number(fund?.balance || 0).toLocaleString('en-KE')}</p>
+            <p className="text-2xl font-bold text-[var(--ak-brand-ink)] mt-1">KSh {Number(fund?.balance || 0).toLocaleString('en-KE')}</p>
           </div>
           <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
             <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Monthly Contribution</p>
@@ -180,7 +180,7 @@ export default function MemberWelfarePage() {
                 <select
                   value={category}
                   onChange={e => setCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]">
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]">
                   <option value="bereavement">Bereavement Support</option>
                   <option value="medical">Medical / Hospitalization</option>
                   <option value="wedding">Wedding Contribution</option>
@@ -198,7 +198,7 @@ export default function MemberWelfarePage() {
                   max={fund?.max_claim_amount || 50000}
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
@@ -209,7 +209,7 @@ export default function MemberWelfarePage() {
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Provide context for your claim..."
-                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[#22C55E]"
+                  className="w-full px-4 py-2.5 rounded-xl border bg-[var(--bg-input)] text-[var(--text-primary)] border-[var(--border)] focus:outline-none focus:border-[var(--ak-brand-ink)]"
                 />
               </div>
 
@@ -223,7 +223,7 @@ export default function MemberWelfarePage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl text-sm font-bold bg-[#22C55E] text-white hover:bg-[#16A34A]">
+                  className="px-5 py-2 rounded-xl text-sm font-bold bg-[var(--ak-solid)] text-white hover:bg-[var(--ak-solid)]">
                   {submitting ? 'Submitting...' : 'Submit Claim'}
                 </button>
               </div>

@@ -180,7 +180,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
 
   const getRiskColor = (risk: string) => {
     switch(risk) {
-      case 'low': return { strip: 'bg-[#22C55E]', badge: 'bg-[#dcfce7] text-[#166534]' };
+      case 'low': return { strip: 'bg-[var(--ak-solid)]', badge: 'bg-[var(--ak-tint)] text-[var(--ak-brand-ink)]' };
       case 'medium': return { strip: 'bg-yellow-400', badge: 'bg-[#fef9c3] text-[#854d0e]' };
       case 'high': return { strip: 'bg-red-400', badge: 'bg-red-100 text-red-800' };
       default: return { strip: 'bg-gray-400', badge: 'bg-gray-100 text-gray-800' };
@@ -188,7 +188,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
   };
 
   if (loading) {
-    return <div className="p-8 flex justify-center"><div className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></div></div>;
+    return <div className="p-8 flex justify-center"><div className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></div></div>;
   }
 
   const calcProjected = (rate: number) => {
@@ -203,7 +203,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
   return (
     <div className="p-4 md:p-8 max-w-[1280px] mx-auto font-inter pb-24 text-[var(--text-main)]">
       {toast && (
-        <div className="fixed top-4 right-4 bg-[#22C55E] text-white px-4 py-3 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
+        <div className="fixed top-4 right-4 bg-[var(--ak-solid)] text-white px-4 py-3 rounded shadow-lg z-50 flex items-center gap-2 animate-fade-in">
           <span className="material-symbols-outlined">check_circle</span>
           <span className="text-body-sm font-medium">{toast}</span>
         </div>
@@ -211,7 +211,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
 
       {/* Page Header */}
       <div className="mb-6 md:mb-8">
-        <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+        <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
           <span>{isAdminRoute ? 'Admin Dashboard' : 'Dashboard'}</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>SmartGrow</span>
@@ -223,9 +223,9 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
       </div>
 
       {/* HEADER SECTION */}
-      <div className="bg-[#0B0F0C] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8 mb-8 md:mb-12 shadow-sm border border-white/5">
+      <div className="bg-[var(--ak-page)] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8 mb-8 md:mb-12 shadow-sm border border-white/5">
         <div className="max-w-xl">
-          <div className="text-label-caps text-[#22C55E] tracking-widest mb-3 md:mb-4">SMARTGROW</div>
+          <div className="text-label-caps text-[var(--ak-brand-ink)] tracking-widest mb-3 md:mb-4">SMARTGROW</div>
           <h1 className="text-[28px] md:text-[36px] font-geist font-bold text-white mb-4 leading-tight">Grow your group's idle funds.</h1>
           <p className="text-[14px] md:text-[16px] text-gray-400 leading-relaxed mb-6">
             Akibora partners with regulated Kenyan investment providers to help your group put idle funds to work. All products are licensed by the Capital Markets Authority or Central Bank of Kenya.
@@ -234,7 +234,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
             onClick={() => {
               document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="bg-[#22C55E] text-white px-6 py-3 rounded-lg text-headline-sm font-semibold flex items-center gap-2 hover:bg-[#1ea94e] transition-colors cursor-pointer"
+            className="bg-[var(--ak-solid)] text-white px-6 py-3 rounded-lg text-headline-sm font-semibold flex items-center gap-2 hover:bg-[#1ea94e] transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined">trending_up</span>
             Get Started
@@ -251,7 +251,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                <div className="flex justify-between items-end">
                  <div>
                    <div className="text-label-caps text-gray-400 mb-1">TOTAL RETURNS</div>
-                   <div className="text-[20px] font-geist font-bold text-[#22C55E]">KSh {formatCurrency(totalReturns)}</div>
+                   <div className="text-[20px] font-geist font-bold text-[var(--ak-brand-ink)]">KSh {formatCurrency(totalReturns)}</div>
                  </div>
                  <div className="text-right">
                    <div className="text-label-caps text-gray-400 mb-1">ACTIVE</div>
@@ -266,7 +266,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                <p className="text-body-sm text-gray-500 mt-3">
                  Idle funds in your wallet earn nothing. Even a short-term money market fund earning 9 to 11 percent annually grows your group meaningfully over time.
                </p>
-               <div className="text-label-caps text-[#22C55E] mt-4">Minimum to start: KSh 1,000</div>
+               <div className="text-label-caps text-[var(--ak-brand-ink)] mt-4">Minimum to start: KSh 1,000</div>
             </div>
           )}
         </div>
@@ -282,7 +282,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
             const colors = getRiskColor(product.risk_level);
             const canInvest = (wallet?.balance || 0) >= product.min_amount;
             return (
-              <div key={product.id} className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-md hover:border-[#22C55E] dark:hover:border-[#22C55E] transition-all">
+              <div key={product.id} className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-md hover:border-[var(--ak-brand-ink)] dark:hover:border-[var(--ak-brand-ink)] transition-all">
                 <div className={`w-full ${colors.strip} h-2`}></div>
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-3">
@@ -323,7 +323,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                       canInvest ? (
                         <button 
                           onClick={() => setSelectedProduct(product)}
-                          className="w-full bg-[#22C55E] text-white rounded-lg py-2.5 text-body-sm font-bold hover:bg-[#1ea94e] transition-colors cursor-pointer"
+                          className="w-full bg-[var(--ak-solid)] text-white rounded-lg py-2.5 text-body-sm font-bold hover:bg-[#1ea94e] transition-colors cursor-pointer"
                         >
                           Invest Now
                         </button>
@@ -331,7 +331,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                         <div className="w-full relative group">
                           <button 
                             disabled 
-                            className="w-full bg-[#E5E7EB] dark:bg-[#2d3d2d] text-[var(--text-muted)] rounded-lg py-2.5 text-body-sm font-bold cursor-not-allowed"
+                            className="w-full bg-[var(--ak-raised)] dark:bg-[var(--ak-raised)] text-[var(--text-muted)] rounded-lg py-2.5 text-body-sm font-bold cursor-not-allowed"
                           >
                             Insufficient funds
                           </button>
@@ -361,7 +361,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
         <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Active Investments</h2>
         {investments.length === 0 ? (
           <div className="card-bg border border-[var(--border)] rounded-2xl p-12 flex flex-col items-center justify-center text-center shadow-sm">
-            <span className="material-symbols-outlined text-[#E5E7EB] dark:text-[#2d3d2d] text-[48px] mb-4">savings</span>
+            <span className="material-symbols-outlined text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] text-[48px] mb-4">savings</span>
             <h3 className="text-headline-sm font-geist font-bold text-[var(--text-main)]">No active investments</h3>
             <p className="text-body-sm text-[var(--text-muted)] mt-2 max-w-sm">
               Your group has not made any investments yet. Choose a product above to get started.
@@ -371,7 +371,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           <div className="card-bg border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
             {/* Desktop Table View */}
             <table className="hidden md:table w-full text-left border-collapse min-w-[700px]">
-              <thead className="bg-[#FAFAFA] dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)]">
+              <thead className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)]">
                 <tr>
                   <th className="py-4 px-6 text-label-caps font-bold">PRODUCT</th>
                   <th className="py-4 px-6 text-label-caps font-bold">PROVIDER</th>
@@ -381,19 +381,19 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                   <th className="py-4 px-6 text-label-caps font-bold">STATUS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+              <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
                 {investments.map(inv => {
                   const p = inv.smartgrow_products;
                   const d = new Date(inv.start_date);
                   return (
-                    <tr key={inv.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                    <tr key={inv.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                       <td className="py-4 px-6 text-body-sm font-bold text-[var(--text-main)]">{p?.name || 'Unknown'}</td>
                       <td className="py-4 px-6 text-body-sm text-[var(--text-muted)]">{p?.provider}</td>
                       <td className="py-4 px-6 text-body-sm font-mono font-bold text-[var(--text-main)]">KSh {formatCurrency(inv.amount)}</td>
                       <td className="py-4 px-6 text-body-sm text-[var(--text-muted)]">{d.toLocaleDateString()}</td>
                       <td className="py-4 px-6 text-body-sm font-mono font-bold text-[var(--brand-green)]">{p?.expected_return_min}%</td>
                       <td className="py-4 px-6">
-                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${inv.status === 'active' ? 'bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176]' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
+                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${inv.status === 'active' ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
                           {inv.status}
                         </span>
                       </td>
@@ -404,7 +404,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
             </table>
 
             {/* Mobile Card List View */}
-            <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] p-4">
+            <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] p-4">
               {investments.map(inv => {
                 const p = inv.smartgrow_products;
                 const d = new Date(inv.start_date);
@@ -415,12 +415,12 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                         <div className="text-sm font-bold text-[var(--text-main)]">{p?.name || 'Unknown'}</div>
                         <div className="text-xs text-[var(--text-muted)] mt-0.5">{p?.provider}</div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inv.status === 'active' ? 'bg-[#dcfce7] dark:bg-[#1a3a1a] text-[#166534] dark:text-[#4ae176]' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inv.status === 'active' ? 'bg-[var(--ak-tint)] dark:bg-[var(--ak-tint)] text-[var(--ak-brand-ink)] dark:text-[var(--ak-brand-ink)]' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
                         {inv.status}
                       </span>
                     </div>
                     
-                    <div className="flex justify-between items-center bg-[#FAFAFA] dark:bg-[#1f2a1f]/30 p-2.5 rounded-lg border border-[var(--border)] text-xs">
+                    <div className="flex justify-between items-center bg-[var(--ak-surface-2)] dark:bg-[var(--ak-raised)]/30 p-2.5 rounded-lg border border-[var(--border)] text-xs">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[10px] text-[var(--text-muted)] uppercase font-semibold">Invested</span>
                         <span className="font-mono font-bold text-[var(--text-main)]">KSh {formatCurrency(inv.amount)}</span>
@@ -450,7 +450,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
               <h2 className="text-[24px] font-geist font-bold text-[var(--text-main)]">Invest in {selectedProduct.name}</h2>
               <p className="text-body-sm text-[var(--text-muted)] mb-6">{selectedProduct.provider}</p>
 
-              <div className="bg-transparent text-[var(--brand-green)] border border-[#22C55E] dark:border-[#22C55E]/30 rounded-xl p-4 flex items-start gap-3 mb-6">
+              <div className="bg-transparent text-[var(--brand-green)] border border-[var(--ak-brand-ink)] dark:border-[var(--ak-brand-ink)]/30 rounded-xl p-4 flex items-start gap-3 mb-6">
                 <span className="material-symbols-outlined text-[var(--brand-green)] mt-0.5">info</span>
                 <p className="text-body-sm text-[var(--text-main)]">
                   This investment will be made from your total recorded pool. All members will be notified.
@@ -460,7 +460,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
               <form onSubmit={handleInvest} className="flex flex-col gap-5">
                 <div>
                   <label className="block text-label-caps text-[var(--text-muted)] font-bold mb-2">INVESTMENT AMOUNT</label>
-                  <div className="flex border border-[var(--border)] rounded-lg overflow-hidden focus-within:border-[#22C55E] focus-within:ring-1 focus-within:ring-[#22C55E]">
+                  <div className="flex border border-[var(--border)] rounded-lg overflow-hidden focus-within:border-[var(--ak-brand-ink)] focus-within:ring-1 focus-within:ring-[var(--ak-brand-ink)]">
                     <div className="bg-transparent border-r border-[var(--border)] px-3 py-3 flex items-center">
                       <span className="text-body-sm font-bold text-[var(--text-muted)]">KSh</span>
                     </div>
@@ -477,7 +477,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                   </div>
                   <p className="text-body-sm text-[var(--text-muted)] mt-1 flex justify-between">
                     <span>Available tracked pool: KSh {formatCurrency(wallet?.balance || 0)}</span>
-                    <button type="button" className="text-[#22C55E] cursor-pointer hover:underline font-bold focus:outline-none focus:ring-1 focus:ring-[#22C55E] rounded" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</button>
+                    <button type="button" className="text-[var(--ak-brand-ink)] cursor-pointer hover:underline font-bold focus:outline-none focus:ring-1 focus:ring-[var(--ak-brand-ink)] rounded" onClick={() => setInvestAmount(wallet?.balance?.toString() || '0')}>Max</button>
                   </p>
                 </div>
 
@@ -487,7 +487,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                     required
                     value={investDuration}
                     onChange={e => setInvestDuration(e.target.value)}
-                    className="w-full border border-[var(--border)] bg-transparent rounded-lg px-4 py-3 text-[var(--text-main)] focus:outline-none focus:border-[#22C55E] dark:bg-[#111111]"
+                    className="w-full border border-[var(--border)] bg-transparent rounded-lg px-4 py-3 text-[var(--text-main)] focus:outline-none focus:border-[var(--ak-brand-ink)] dark:bg-[var(--ak-surface)]"
                   >
                     <option value="" disabled>Select duration</option>
                     {selectedProduct.type === 'money_market' && <option value="ongoing">Ongoing (withdraw anytime)</option>}
@@ -501,7 +501,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                 </div>
 
                 {investAmount && Number(investAmount) >= selectedProduct.min_amount && (
-                  <div className="bg-[#FAFAFA] dark:bg-[#0f1410] border border-[var(--border)] rounded-lg p-4 mt-2">
+                  <div className="bg-[var(--ak-surface-2)] dark:bg-[var(--ak-page)] border border-[var(--border)] rounded-lg p-4 mt-2">
                     <div className="text-label-caps text-[var(--text-muted)] font-bold mb-3">PROJECTED RETURNS (1 YEAR)</div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-body-sm text-[var(--text-main)]">At {selectedProduct.expected_return_min}% p.a.</span>
@@ -521,14 +521,14 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
                   <button 
                     type="button" 
                     onClick={() => { setSelectedProduct(null); setInvestAmount(''); setInvestDuration(''); }}
-                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-[var(--text-main)] bg-transparent border border-[var(--border)] hover:bg-gray-50 dark:hover:bg-[#1f2a1f]"
+                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-[var(--text-main)] bg-transparent border border-[var(--border)] hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     disabled={investing}
-                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-white bg-[#22C55E] hover:bg-[#1ea94e] flex items-center gap-2 cursor-pointer"
+                    className="px-6 py-3 rounded-lg text-body-sm font-bold text-white bg-[var(--ak-solid)] hover:bg-[#1ea94e] flex items-center gap-2 cursor-pointer"
                   >
                     {investing ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : null}
                     {investing ? 'Confirming...' : 'Confirm Investment'}

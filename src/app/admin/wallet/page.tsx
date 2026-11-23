@@ -173,7 +173,7 @@ export default function AdminWalletPage() {
   if (loading) {
     return (
       <div className="p-6 max-w-[1280px] mx-auto w-full font-inter">
-        <div className="h-48 bg-[#0B0F0C] rounded-2xl animate-pulse mb-6 shadow-sm"></div>
+        <div className="h-48 bg-[var(--ak-page)] rounded-2xl animate-pulse mb-6 shadow-sm"></div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
           <div className="h-96 card-bg border border-[var(--border)] rounded-2xl animate-pulse shadow-sm"></div>
@@ -185,8 +185,8 @@ export default function AdminWalletPage() {
   return (
     <div className="p-4 md:p-6 max-w-[1280px] mx-auto w-full font-inter relative min-h-full text-[var(--text-main)]">
       {toastMsg && (
-        <div className="fixed top-4 right-4 bg-[#161d16] dark:bg-[#E8F0E4] text-white dark:text-[#161d16] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
-          <span className="material-symbols-outlined text-[#22C55E]">check_circle</span>
+        <div className="fixed top-4 right-4 bg-[var(--ak-surface)] dark:bg-[var(--ak-tint)] text-white dark:text-[var(--ak-text)] px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in-down">
+          <span className="material-symbols-outlined text-[var(--ak-brand-ink)]">check_circle</span>
           <span className="text-body-sm font-medium">{toastMsg}</span>
         </div>
       )}
@@ -194,7 +194,7 @@ export default function AdminWalletPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6 md:mb-8">
         <div>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#5a6e5a] font-medium mb-1 flex items-center gap-1">
+          <p className="text-[12px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] font-medium mb-1 flex items-center gap-1">
             <span>Admin Dashboard</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span>Wallet</span>
@@ -205,14 +205,14 @@ export default function AdminWalletPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           <button 
             onClick={() => setShowWithdrawModal(true)}
-            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#1f2a1f] transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
+            className="bg-transparent border border-[var(--border)] text-[var(--text-main)] px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)] transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">arrow_outward</span>
             Request Withdrawal
           </button>
           <button 
             onClick={() => setShowDepositModal(true)}
-            className="bg-[#22C55E] hover:bg-[#006e2f] text-white px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
+            className="bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white px-4 py-2.5 md:py-2 rounded-lg text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Deposit Funds
@@ -221,7 +221,7 @@ export default function AdminWalletPage() {
       </div>
 
       {/* HERO WALLET CARD */}
-      <div className="w-full bg-[#0B0F0C] rounded-2xl p-6 md:p-8 mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8 shadow-sm">
+      <div className="w-full bg-[var(--ak-page)] rounded-2xl p-6 md:p-8 mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-8 shadow-sm">
         <div className="flex-1">
           <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">RECORDED CONTRIBUTIONS (TRACKED POOL)</div>
           <div className="text-[36px] md:text-[52px] font-geist font-bold text-white mt-2 leading-none">
@@ -237,7 +237,7 @@ export default function AdminWalletPage() {
           </div>
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">EMERGENCY RESERVE</div>
-            <div className="text-lg md:text-xl font-bold text-[#22C55E] font-mono">
+            <div className="text-lg md:text-xl font-bold text-[var(--ak-brand-ink)] font-mono">
               KSh {formatCurrency(wallet?.emergency_reserve || 0)}
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function AdminWalletPage() {
           <div className="overflow-y-auto flex-1 p-0">
             {/* Desktop Table View */}
             <table className="hidden md:table w-full text-left border-collapse min-w-[500px]">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-3">REQUESTED BY</th>
                   <th className="px-6 py-3">AMOUNT</th>
@@ -263,7 +263,7 @@ export default function AdminWalletPage() {
                   <th className="px-6 py-3 text-right">ACTION</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+              <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
                 {withdrawals.length === 0 ? (
                   <tr><td colSpan={5} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No withdrawal requests found.</td></tr>
                 ) : (
@@ -271,7 +271,7 @@ export default function AdminWalletPage() {
                     const totalVoters = req.total_eligible_voters || 3;
                     const threshold = Math.floor(totalVoters / 2) + 1;
                     return (
-                      <tr key={req.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                      <tr key={req.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                         <td className="px-6 py-4">
                           <div className="text-sm font-semibold text-[var(--text-main)]">{req.profiles?.full_name || 'Admin'}</div>
                           <div className="text-xs text-[var(--text-muted)] mt-0.5 max-w-[150px] truncate">{req.reason}</div>
@@ -298,7 +298,7 @@ export default function AdminWalletPage() {
                             </button>
                           )}
                           {req.status === 'approved' && (
-                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[#22C55E] hover:bg-[#006e2f] text-white rounded text-xs font-bold shadow-sm">
+                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white rounded text-xs font-bold shadow-sm">
                               Execute WD
                             </button>
                           )}
@@ -311,7 +311,7 @@ export default function AdminWalletPage() {
             </table>
 
             {/* Mobile Card List View */}
-            <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] p-4">
+            <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] p-4">
               {withdrawals.length === 0 ? (
                 <div className="text-center py-8 text-[var(--text-muted)] text-sm">No withdrawal requests found.</div>
               ) : (
@@ -345,7 +345,7 @@ export default function AdminWalletPage() {
                             </button>
                           )}
                           {req.status === 'approved' && (
-                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[#22C55E] hover:bg-[#006e2f] text-white rounded text-xs font-bold shadow-sm">
+                            <button onClick={() => handleExecuteWithdrawal(req)} className="px-3 py-1 bg-[var(--ak-solid)] hover:bg-[var(--ak-solid)] text-white rounded text-xs font-bold shadow-sm">
                               Execute WD
                             </button>
                           )}
@@ -367,21 +367,21 @@ export default function AdminWalletPage() {
           <div className="overflow-y-auto flex-1 p-0">
             {/* Desktop Table View */}
             <table className="hidden md:table w-full text-left border-collapse min-w-[500px]">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-[#0f1410] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
+              <thead className="sticky top-0 bg-gray-50 dark:bg-[var(--ak-page)] border-b border-[var(--border)] text-[var(--text-muted)] text-[11px] font-bold uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-3">DATE</th>
                   <th className="px-6 py-3">ACTION</th>
                   <th className="px-6 py-3 text-right">AMOUNT</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f]">
+              <tbody className="divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)]">
                 {walletLog.length === 0 ? (
                   <tr><td colSpan={3} className="px-6 py-8 text-center text-[var(--text-muted)] text-sm">No recent transactions.</td></tr>
                 ) : (
                   walletLog.map(log => {
                     const isIncoming = Number(log.amount) > 0;
                     return (
-                      <tr key={log.id} className="hover:bg-[#FAFAFA] dark:hover:bg-[#1f2a1f] transition-colors">
+                      <tr key={log.id} className="hover:bg-[var(--ak-surface-2)] dark:hover:bg-[var(--ak-raised)] transition-colors">
                         <td className="px-6 py-4 text-xs text-[var(--text-muted)] whitespace-nowrap">
                           {new Date(log.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                         </td>
@@ -390,7 +390,7 @@ export default function AdminWalletPage() {
                             {(log.type === 'loan_repayment' ? 'repayment' : log.type.startsWith('loan') ? 'payout' : log.type).replace('_', ' ')}
                           </div>
                           {log.chama_memberships?.profiles?.full_name && (
-                            <div className="text-xs text-[#9CA3AF] dark:text-[#5a6e5a] mt-0.5">{log.chama_memberships.profiles.full_name}</div>
+                            <div className="text-xs text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)] mt-0.5">{log.chama_memberships.profiles.full_name}</div>
                           )}
                         </td>
                         <td className={`px-6 py-4 text-right font-mono font-bold ${isIncoming ? 'text-[var(--brand-green)]' : 'text-red-500'}`}>
@@ -404,7 +404,7 @@ export default function AdminWalletPage() {
             </table>
 
             {/* Mobile Card List View */}
-            <div className="md:hidden divide-y divide-[#f5f5f5] dark:divide-[#1f2a1f] p-4">
+            <div className="md:hidden divide-y divide-[var(--ak-line)] dark:divide-[var(--ak-line)] p-4">
               {walletLog.length === 0 ? (
                 <div className="text-center py-8 text-[var(--text-muted)] text-sm">No recent transactions.</div>
               ) : (
@@ -423,7 +423,7 @@ export default function AdminWalletPage() {
                           {log.chama_memberships?.profiles?.full_name && (
                             <>
                               <span className="text-[10px] text-gray-300">•</span>
-                              <span className="text-[10px] text-[#9CA3AF] dark:text-[#5a6e5a]">{log.chama_memberships.profiles.full_name}</span>
+                              <span className="text-[10px] text-[var(--ak-text-3)] dark:text-[var(--ak-text-2)]">{log.chama_memberships.profiles.full_name}</span>
                             </>
                           )}
                         </div>
@@ -443,18 +443,18 @@ export default function AdminWalletPage() {
 
       {/* DEPOSIT MODAL */}
       {showDepositModal && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
           <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
             <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Deposit Funds</h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
-                <input type="number" value={depAmount} onChange={e => setDepAmount(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" />
+                <input type="number" value={depAmount} onChange={e => setDepAmount(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" />
               </div>
               <div>
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Payment Method</label>
-                <select value={depMethod} onChange={e => setDepMethod(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]">
+                <select value={depMethod} onChange={e => setDepMethod(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]">
                   <option value="Bank Transfer">Bank Transfer</option>
                   <option value="Cash Deposit">Cash Deposit</option>
                   <option value="M-Pesa">M-Pesa Paybill</option>
@@ -462,17 +462,17 @@ export default function AdminWalletPage() {
               </div>
               <div>
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reference Code</label>
-                <input type="text" value={depRef} onChange={e => setDepRef(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E] font-mono" />
+                <input type="text" value={depRef} onChange={e => setDepRef(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)] font-mono" />
               </div>
               <div>
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Notes</label>
-                <input type="text" value={depNotes} onChange={e => setDepNotes(e.target.value)} placeholder="Optional" className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" />
+                <input type="text" value={depNotes} onChange={e => setDepNotes(e.target.value)} placeholder="Optional" className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" />
               </div>
             </div>
 
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowDepositModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
-              <button onClick={handleDeposit} disabled={!depAmount || !depRef} className="flex-1 bg-[#22C55E] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Deposit</button>
+              <button onClick={() => setShowDepositModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
+              <button onClick={handleDeposit} disabled={!depAmount || !depRef} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)]">Deposit</button>
             </div>
           </div>
         </div>
@@ -480,14 +480,14 @@ export default function AdminWalletPage() {
 
       {/* WITHDRAWAL MODAL */}
       {showWithdrawModal && (
-        <div className="fixed inset-0 bg-[#0B0F0C]/50 dark:bg-[#0B0F0C]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
+        <div className="fixed inset-0 bg-[var(--ak-page)]/50 dark:bg-[var(--ak-page)]/75 flex items-center justify-center z-50 p-4 transition-opacity backdrop-blur-sm">
           <div className="card-bg border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm shadow-2xl text-[var(--text-main)]">
             <h2 className="text-headline-sm font-geist font-bold text-[var(--text-main)] mb-6">Request Withdrawal</h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Amount (KSh)</label>
-                <input type="number" value={withAmount} onChange={e => setWithAmount(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E]" />
+                <input type="number" value={withAmount} onChange={e => setWithAmount(e.target.value)} className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)]" />
               </div>
               <div>
                 <label className="block text-label-caps text-[var(--text-muted)] mb-2 font-semibold">Reason for Withdrawal</label>
@@ -496,14 +496,14 @@ export default function AdminWalletPage() {
                   value={withReason} 
                   onChange={e => setWithReason(e.target.value)} 
                   placeholder="e.g. Member exit, project funding..."
-                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[#22C55E] resize-none"
+                  className="w-full border border-[var(--border)] bg-transparent rounded px-4 py-2 text-[var(--text-main)] outline-none focus:border-[var(--ak-brand-ink)] resize-none"
                 />
               </div>
             </div>
 
             <div className="flex gap-3 mt-8">
-              <button onClick={() => setShowWithdrawModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1f2a1f]">Cancel</button>
-              <button onClick={handleWithdrawalRequest} disabled={!withAmount || !withReason} className="flex-1 bg-[#22C55E] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[#006e2f]">Submit Request</button>
+              <button onClick={() => setShowWithdrawModal(false)} className="flex-1 bg-transparent border border-[var(--border)] rounded py-2 text-body-sm font-medium hover:bg-gray-50 dark:hover:bg-[var(--ak-raised)]">Cancel</button>
+              <button onClick={handleWithdrawalRequest} disabled={!withAmount || !withReason} className="flex-1 bg-[var(--ak-solid)] disabled:opacity-50 text-white rounded py-2 text-body-sm font-medium hover:bg-[var(--ak-solid)]">Submit Request</button>
             </div>
           </div>
         </div>

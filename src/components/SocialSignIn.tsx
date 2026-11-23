@@ -66,13 +66,13 @@ export default function SocialSignIn({ next = '/dashboard', disabled = false }: 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-[#E5E7EB] dark:bg-[#1B2520]" />
-        <span className="text-[12px] font-medium uppercase tracking-wider text-[#8FA196]">or</span>
-        <div className="flex-1 h-px bg-[#E5E7EB] dark:bg-[#1B2520]" />
+        <div className="flex-1 h-px bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" />
+        <span className="text-[12px] font-medium uppercase tracking-wider text-[var(--ak-text-3)]">or</span>
+        <div className="flex-1 h-px bg-[var(--ak-raised)] dark:bg-[var(--ak-surface)]" />
       </div>
       {enabled.includes('google') && (
         <button type="button" onClick={() => go('google')} disabled={disabled || !!busy}
-          className={`${base} hover:border-[#22C55E] bg-white dark:bg-[#0E1410] border-[#E5E7EB] dark:border-[#1B2520] text-[#161d16] dark:text-white`}>
+          className={`${base} hover:border-[var(--ak-brand-ink)] bg-white dark:bg-[var(--ak-page)] border-[var(--ak-line)] dark:border-[var(--ak-line)] text-[var(--ak-text)] dark:text-white`}>
           <GoogleIcon />
           {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
         </button>

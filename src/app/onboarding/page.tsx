@@ -424,7 +424,7 @@ export default function OnboardingPage() {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 rounded-xl bg-[#22C55E] text-white font-semibold"
+            className="w-full py-3 rounded-xl bg-[var(--ak-solid)] text-white font-semibold"
           >
             Check again
           </button>
@@ -497,7 +497,7 @@ export default function OnboardingPage() {
                 backgroundColor: 
                   i <= (step === 0 ? 0 : 
                         step === 1 ? 1 : 2)
-                  ? '#22C55E' 
+                  ? '#3FA673' 
                   : 'var(--border)'
               }}
             />
@@ -553,7 +553,7 @@ export default function OnboardingPage() {
                 className="w-full p-5 
                   rounded-2xl border-2 
                   text-left transition-all
-                  hover:border-[#22C55E]"
+                  hover:border-[var(--ak-brand-ink)]"
                 style={{
                   borderColor: 
                     'var(--border)',
@@ -575,7 +575,7 @@ export default function OnboardingPage() {
                     <span className="
                       material-symbols-outlined 
                       text-[24px] 
-                      text-[#22C55E]">
+                      text-[var(--ak-brand-ink)]">
                       add_circle
                     </span>
                   </div>
@@ -607,7 +607,7 @@ export default function OnboardingPage() {
                 className="w-full p-5 
                   rounded-2xl border-2 
                   text-left transition-all
-                  hover:border-[#22C55E]"
+                  hover:border-[var(--ak-brand-ink)]"
                 style={{
                   borderColor: 
                     'var(--border)',
@@ -629,7 +629,7 @@ export default function OnboardingPage() {
                     <span className="
                       material-symbols-outlined 
                       text-[24px] 
-                      text-[#22C55E]">
+                      text-[var(--ak-brand-ink)]">
                       group_add
                     </span>
                   </div>
@@ -725,7 +725,7 @@ export default function OnboardingPage() {
                     py-3 rounded-xl border 
                     text-[15px]
                     focus:outline-none 
-                    focus:border-[#22C55E]"
+                    focus:border-[var(--ak-brand-ink)]"
                   style={{
                     backgroundColor: 
                       'var(--bg-input)',
@@ -782,13 +782,13 @@ export default function OnboardingPage() {
                     py-3 rounded-xl border 
                     text-[15px]
                     focus:outline-none 
-                    focus:border-[#22C55E]
+                    focus:border-[var(--ak-brand-ink)]
                     appearance-none"
                   style={{
                     backgroundColor: 
                       'var(--bg-input)',
                     borderColor: county 
-                      ? '#22C55E' 
+                      ? '#3FA673' 
                       : 'var(--border)',
                     color: county 
                       ? 'var(--text-primary)' 
@@ -860,7 +860,7 @@ export default function OnboardingPage() {
                     py-3 rounded-xl border 
                     text-[15px]
                     focus:outline-none 
-                    focus:border-[#22C55E]"
+                    focus:border-[var(--ak-brand-ink)]"
                   style={{
                     backgroundColor: 
                       'var(--bg-input)',
@@ -884,8 +884,8 @@ export default function OnboardingPage() {
               className="w-full mt-6 
                 py-4 rounded-xl 
                 text-[16px] font-semibold 
-                bg-[#22C55E] text-white
-                hover:bg-[#16A34A]
+                bg-[var(--ak-solid)] text-white
+                hover:bg-[var(--ak-solid)]
                 disabled:opacity-50
                 transition-colors">
               {loading 
@@ -961,13 +961,13 @@ export default function OnboardingPage() {
                     py-3 rounded-xl border 
                     text-[15px]
                     focus:outline-none 
-                    focus:border-[#22C55E]"
+                    focus:border-[var(--ak-brand-ink)]"
                   style={{
                     backgroundColor: 
                       'var(--bg-input)',
                     borderColor: 
                       groupName 
-                        ? '#22C55E' 
+                        ? '#3FA673' 
                         : 'var(--border)',
                     color: 
                       'var(--text-primary)'
@@ -1021,13 +1021,13 @@ export default function OnboardingPage() {
                       rounded-r-xl border 
                       text-[15px]
                       focus:outline-none 
-                      focus:border-[#22C55E]"
+                      focus:border-[var(--ak-brand-ink)]"
                     style={{
                       backgroundColor: 
                         'var(--bg-input)',
                       borderColor: 
                         contributionAmount 
-                          ? '#22C55E' 
+                          ? '#3FA673' 
                           : 'var(--border)',
                       color: 
                         'var(--text-primary)'
@@ -1075,7 +1075,7 @@ export default function OnboardingPage() {
                     py-3 rounded-xl border 
                     text-[15px]
                     focus:outline-none 
-                    focus:border-[#22C55E]
+                    focus:border-[var(--ak-brand-ink)]
                     appearance-none"
                   style={{
                     backgroundColor: 
@@ -1135,7 +1135,7 @@ export default function OnboardingPage() {
                     py-3 rounded-xl border 
                     text-[15px] resize-none
                     focus:outline-none 
-                    focus:border-[#22C55E]"
+                    focus:border-[var(--ak-brand-ink)]"
                   style={{
                     backgroundColor: 
                       'var(--bg-input)',
@@ -1164,7 +1164,7 @@ export default function OnboardingPage() {
                 items-center gap-2 mb-1">
                 <span style={{ 
                   color: groupName 
-                    ? '#22C55E' 
+                    ? '#3FA673' 
                     : 'var(--text-muted)' 
                 }}>
                   {groupName ? '✓' : '○'} 
@@ -1178,7 +1178,7 @@ export default function OnboardingPage() {
                 <span style={{ 
                   color: 
                     contributionAmount 
-                      ? '#22C55E' 
+                      ? '#3FA673' 
                       : 'var(--text-muted)' 
                 }}>
                   {contributionAmount 
@@ -1192,7 +1192,7 @@ export default function OnboardingPage() {
                 items-center gap-2">
                 <span style={{
                   color: scheduleComplete(schedule)
-                    ? '#22C55E'
+                    ? '#3FA673'
                     : 'var(--text-muted)'
                 }}>
                   {scheduleComplete(schedule) ? '✓' : '○'}{' '}
@@ -1211,8 +1211,8 @@ export default function OnboardingPage() {
               className="w-full mt-6 
                 py-4 rounded-xl 
                 text-[16px] font-semibold 
-                bg-[#22C55E] text-white
-                hover:bg-[#16A34A]
+                bg-[var(--ak-solid)] text-white
+                hover:bg-[var(--ak-solid)]
                 disabled:opacity-50
                 disabled:cursor-not-allowed
                 transition-colors">
@@ -1302,13 +1302,13 @@ export default function OnboardingPage() {
                   font-mono tracking-[0.3em]
                   text-center uppercase
                   focus:outline-none 
-                  focus:border-[#22C55E]"
+                  focus:border-[var(--ak-brand-ink)]"
                 style={{
                   backgroundColor: 
                     'var(--bg-input)',
                   borderColor: 
                     inviteCode 
-                      ? '#22C55E' 
+                      ? '#3FA673' 
                       : 'var(--border)',
                   color: 
                     'var(--text-primary)'
@@ -1325,8 +1325,8 @@ export default function OnboardingPage() {
               className="w-full mt-6 
                 py-4 rounded-xl 
                 text-[16px] font-semibold 
-                bg-[#22C55E] text-white
-                hover:bg-[#16A34A]
+                bg-[var(--ak-solid)] text-white
+                hover:bg-[var(--ak-solid)]
                 disabled:opacity-50
                 transition-colors">
               {loading 

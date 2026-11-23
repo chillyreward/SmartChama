@@ -55,7 +55,7 @@ export default function GroupActivityPage() {
             description: `${c.membership?.profile?.full_name ?? 'Someone'} contributed KSh ${c.amount}`,
             date: new Date(c.created_at),
             icon: 'payments',
-            color: 'text-[#22C55E]',
+            color: 'text-[var(--ak-brand-ink)]',
             bg: 'bg-emerald-500/10'
           })));
         }
@@ -93,7 +93,7 @@ export default function GroupActivityPage() {
   if (isLoading || loading) {
     return (
       <div className="p-8 h-full flex items-center justify-center">
-        <span className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin"></span>
+        <span className="w-8 h-8 border-4 border-[var(--ak-brand-ink)] border-t-transparent rounded-full animate-spin"></span>
       </div>
     );
   }

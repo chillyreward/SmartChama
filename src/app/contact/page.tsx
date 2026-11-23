@@ -1,214 +1,96 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import LandingNav from "@/components/LandingNav";
-import LandingFooter from "@/components/LandingFooter";
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { PublicPage } from '@/components/landing/PublicPage';
+import { buttonClass, cn } from '@/components/ui';
+import { SITE, PLANS } from '@/lib/site';
+
+const FAQS = [
+  {
+    q: 'How do I start a group?',
+    a: 'Choose "Start a group", sign up with your phone number, and confirm your ID as the founding official. Then name the group and set the contribution amount and schedule. You get a group code to share with members.',
+  },
+  {
+    q: 'How do members join?',
+    a: 'Members sign up with a verified phone number and enter the group code, or scan the group QR. An official approves each request before the member can see the group.',
+  },
+  {
+    q: 'How do payments work?',
+    a: 'When a member pays, they get an M-Pesa prompt on their phone and enter their PIN. The contribution is recorded once M-Pesa confirms it. Officials can also log cash or bank payments, and their name is kept on the entry.',
+  },
+  {
+    q: 'What is the trust score?',
+    a: 'A number from 0 to 100 that reflects how reliably you contribute: paying on time, your streak, and how long you have been in the group. You can download it as a credit passport and choose who to share it with.',
+  },
+  {
+    q: 'Does it work on a basic phone?',
+    a: 'There is a USSD menu for checking balances and dates on any phone. Paying, the merry-go-round and the full record are on the web app and the Android app.',
+  },
+  {
+    q: 'What will it cost?',
+    a: `We haven't launched yet. The plans we intend to offer are ${PLANS.map((p) => `${p.name} (${p.price}${p.per ? ' ' + p.per : ''})`).join(', ')}.`,
+  },
+];
+
+const TOPICS = ['A question about Akibora', 'Help with my account', 'Trying Akibora with our chama', 'Something else'];
 
 export default function ContactPage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [open, setOpen] = useState<number | null>(0);
+  const [name, setName] = useState('');
+  const [topic, setTopic] = useState(TOPICS[0]);
+  const [message, setMessage] = useState('');
 
-  const faqs = [
-    {
-      q: "How do I register my chama on Akibora?",
-      a: "Registering your group takes less than five minutes. Click Get Started on our homepage, create your account with your phone number and email, then follow the steps to create your group. You will set your group name, contribution amount, due date, and basic rules. Once your group is created, you can invite members using their phone numbers. They will receive an SMS with a link to join."
-    },
-    {
-      q: "Does Akibora work with M-Pesa?",
-      a: "Yes. Akibora is built around M-Pesa. When a member makes a contribution, they receive an M-Pesa STK push directly on their phone. They enter their PIN and the payment is confirmed automatically. The contribution appears in the group ledger within seconds. No manual recording is required."
-    },
-    {
-      q: "What is a CREDIT SCORE?",
-      a: "Your CREDIT SCORE is a number between 0 and 100 that reflects your financial reliability within your savings group. It is calculated from four factors: how consistently you contribute, your contribution streak, how long you have been in the group, and your overall participation rate. With your permission, a strong score can demonstrate your financial discipline to banks and SACCOs."
-    },
-    {
-      q: "Can I use Akibora on a feature phone?",
-      a: "Yes. Akibora has a USSD interface that works on any phone including basic feature phones with no internet. Dial our USSD code, enter your group PIN, and you can check your balance, view upcoming contribution dates, and receive payment confirmations. The full dashboard is available on smartphones via our web app."
-    },
-    {
-      q: "How secure is Akibora?",
-      a: "Akibora uses multiple layers of security. All data is encrypted in transit and at rest. Critical financial records are anchored to a blockchain, meaning they cannot be altered after the fact. We use Supabase for our database, which includes row-level security so each member can only see their own data. Admin access requires separate authentication. We do not store M-Pesa PINs or any payment credentials."
-    },
-    {
-      q: "What happens if someone does not pay?",
-      a: "Akibora sends automated payment reminders via SMS three days before the contribution due date, on the due date, and three days after. If a member is still unpaid after the grace period, they are marked as late in the system. Admins can apply penalties according to the group rules. The member's CREDIT SCORE is also affected by late or missed payments."
-    },
-    {
-      q: "Can we share our financial record with a bank or SACCO?",
-      a: "Yes, but only if you choose to. Akibora has a consent-based lender visibility feature. When you turn it on, vetted financial institutions can view your contribution history and CREDIT SCORE. You can turn this off at any time. No data is shared without your explicit permission."
-    },
-    {
-      q: "What does Akibora cost?",
-      a: "Akibora has a free plan that supports groups of up to 20 members with full contribution tracking, merry-go-round schedules, and M-Pesa integration. Larger groups and advanced features are available on our Growth plan at KSh 999 per month. Enterprise pricing is available for organisations managing multiple groups. See our pricing page for full details."
-    },
-    {
-      q: "How do I invite members to my group?",
-      a: "Once your group is created, go to the Members section of your admin dashboard and click Invite Member. Enter the member's phone number or email address. They will receive an SMS with a unique link. When they click the link, they are taken to the signup page where their group is already pre-selected. After signing up, they appear in your members list and can start contributing immediately."
-    }
-  ];
+  const mailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(topic + (name ? ` (from ${name})` : ''))}&body=${encodeURIComponent(message)}`;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col font-inter text-on-surface">
-      <LandingNav />
+    <PublicPage title="Talk to the team." intro={<>Write to us at <a href={`mailto:${SITE.contactEmail}`} className="text-brand underline underline-offset-4">{SITE.contactEmail}</a>. We&apos;re a small team, so a reply may take a day or two.</>} cta={false}>
+      <section className="max-w-[1280px] mx-auto px-5 sm:px-8 pb-24 grid lg:grid-cols-[1fr_1.1fr] gap-10">
+        <form
+          className="rounded-[24px] bg-surface border border-line p-6 sm:p-8 flex flex-col gap-5 self-start"
+          onSubmit={(e) => { e.preventDefault(); window.location.href = mailto; }}
+        >
+          <h2 className="font-display text-[28px]">Write a message</h2>
+          <p className="text-[14px] text-ink-3 -mt-3">This opens your email app with the message ready to send.</p>
+          <label className="flex flex-col gap-2 text-[14px] font-medium">
+            Your name
+            <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="h-12 px-4 rounded-[14px] bg-surface-2 border border-line text-[16px] font-normal focus:outline-none focus:border-line-strong" />
+          </label>
+          <label className="flex flex-col gap-2 text-[14px] font-medium">
+            What it&apos;s about
+            <select value={topic} onChange={(e) => setTopic(e.target.value)} className="h-12 px-4 rounded-[14px] bg-surface-2 border border-line text-[16px] font-normal focus:outline-none focus:border-line-strong">
+              {TOPICS.map((t) => <option key={t}>{t}</option>)}
+            </select>
+          </label>
+          <label className="flex flex-col gap-2 text-[14px] font-medium">
+            Message
+            <textarea required value={message} onChange={(e) => setMessage(e.target.value)} rows={5} className="px-4 py-3 rounded-[14px] bg-surface-2 border border-line text-[16px] font-normal focus:outline-none focus:border-line-strong" />
+          </label>
+          <button type="submit" className={buttonClass('primary', 'lg', 'self-start')}>Open in my email app</button>
+        </form>
 
-      {/* HERO */}
-      <section className="bg-white border-b border-[#E5E7EB] py-16 px-6">
-        <div className="max-w-7xl mx-auto text-center md:text-left">
-          <h1 className="text-[48px] font-geist font-bold text-[var(--text-primary)] mb-4">Get in touch</h1>
-          <p className="text-[18px] text-[#60645f] max-w-xl leading-relaxed">
-            Whether you are a group looking to get started, a financial institution interested in our data, or a developer wanting to build on our platform, we want to hear from you.
-          </p>
-        </div>
-      </section>
-
-      {/* TWO COLUMN LAYOUT */}
-      <section className="bg-[#FAFAFA] py-24 px-6 border-b border-[#E5E7EB]">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16">
-          
-          {/* LEFT - Contact Details */}
-          <div>
-            <h2 className="text-[32px] font-geist font-bold text-[#161d16] mb-10">Contact information</h2>
-            
-            <div className="flex flex-col gap-6 mb-12">
-              <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 flex gap-4 hover:border-[#006e2f] transition-colors">
-                <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">mail</span>
-                <div>
-                  <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">General enquiries</div>
-                  <a href="mailto:hello@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">hello@akibora.co.ke</a>
-                  <p className="text-body-sm text-[#60645f] leading-relaxed">For questions about the platform, pricing, and getting started.</p>
-                </div>
-              </div>
-
-              <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 flex gap-4 hover:border-[#006e2f] transition-colors">
-                <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">support_agent</span>
-                <div>
-                  <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">Member support</div>
-                  <a href="mailto:support@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">support@akibora.co.ke</a>
-                  <p className="text-body-sm text-[#60645f] leading-relaxed">For help with your account, contributions, or payments. We respond within 4 hours on business days.</p>
-                </div>
-              </div>
-
-              <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 flex gap-4 hover:border-[#006e2f] transition-colors">
-                <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">handshake</span>
-                <div>
-                  <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">Partnerships</div>
-                  <a href="mailto:partners@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">partners@akibora.co.ke</a>
-                  <p className="text-body-sm text-[#60645f] leading-relaxed">For banks, SACCOs, and financial institutions interested in accessing Akibora financial identity data.</p>
-                </div>
-              </div>
-
-              <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 flex gap-4 hover:border-[#006e2f] transition-colors">
-                <span className="material-symbols-outlined text-[#006e2f] text-[24px] mt-1 shrink-0">code</span>
-                <div>
-                  <div className="text-label-caps text-[#60645f] tracking-wider font-bold mb-1 uppercase">Developer enquiries</div>
-                  <a href="mailto:dev@akibora.co.ke" className="text-body-sm text-[#161d16] font-bold hover:underline mb-2 block">dev@akibora.co.ke</a>
-                  <p className="text-body-sm text-[#60645f] leading-relaxed">For API access, integrations, and technical partnerships.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-6">
-              <div className="flex gap-4">
-                <span className="material-symbols-outlined text-[#006e2f] text-[24px]">location_on</span>
-                <div>
-                  <h3 className="font-bold text-[#161d16] mb-1">Nairobi, Kenya</h3>
-                  <p className="text-body-sm text-[#60645f]">We work across Nairobi and serve groups across all 47 counties.</p>
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <span className="material-symbols-outlined text-[#006e2f] text-[24px]">schedule</span>
-                <div>
-                  <h3 className="font-bold text-[#161d16] mb-1">Monday to Friday, 8am to 6pm EAT</h3>
-                  <p className="text-body-sm text-[#60645f]">WhatsApp support available 7am to 9pm daily.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT - Contact Form */}
-          <div>
-            <div className="bg-white border border-[#E5E7EB] rounded-xl p-8 shadow-sm">
-              <h2 className="text-[28px] font-geist font-bold text-[#161d16] mb-8">Send us a message</h2>
-              
-              <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
-                <div>
-                  <label className="block text-label-caps text-[#60645f] font-bold mb-2 uppercase">Full Name</label>
-                  <input type="text" required className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-[#161d16] focus:outline-none focus:ring-1 focus:ring-[#006e2f] focus:border-[#006e2f] transition-colors" />
-                </div>
-                
-                <div>
-                  <label className="block text-label-caps text-[#60645f] font-bold mb-2 uppercase">Email</label>
-                  <input type="email" required className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-[#161d16] focus:outline-none focus:ring-1 focus:ring-[#006e2f] focus:border-[#006e2f] transition-colors" />
-                </div>
-                
-                <div>
-                  <label className="block text-label-caps text-[#60645f] font-bold mb-2 uppercase">Phone (optional)</label>
-                  <div className="flex border border-[#E5E7EB] rounded focus-within:ring-1 focus-within:ring-[#006e2f] focus-within:border-[#006e2f] transition-colors overflow-hidden">
-                    <div className="bg-[#FAFAFA] border-r border-[#E5E7EB] px-3 flex items-center justify-center text-[#60645f] font-medium">+254</div>
-                    <input type="tel" className="w-full px-4 py-3 text-[#161d16] focus:outline-none" />
+        <div>
+          <h2 className="font-display text-[30px] mb-4">Common questions</h2>
+          <div className="flex flex-col gap-2">
+            {FAQS.map((f, i) => {
+              const isOpen = open === i;
+              return (
+                <div key={f.q} className={cn('rounded-[18px] border', isOpen ? 'bg-sage text-sage-ink border-sage' : 'border-line')}>
+                  <h3>
+                    <button type="button" aria-expanded={isOpen} aria-controls={`faq-${i}`} onClick={() => setOpen(isOpen ? null : i)} className="w-full min-h-[58px] px-5 py-3 flex items-center gap-4 text-left">
+                      <span className="flex-1 text-[16px] font-medium">{f.q}</span>
+                      <ChevronDown size={18} aria-hidden="true" className={cn('shrink-0 transition-transform', isOpen && 'rotate-180')} />
+                    </button>
+                  </h3>
+                  <div id={`faq-${i}`} hidden={!isOpen}>
+                    <p className="px-5 pb-5 text-[15px] leading-relaxed text-[#2B4637] max-w-[60ch]">{f.a}</p>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-label-caps text-[#60645f] font-bold mb-2 uppercase">Subject</label>
-                  <select className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-[#161d16] focus:outline-none focus:ring-1 focus:ring-[#006e2f] focus:border-[#006e2f] transition-colors bg-white">
-                    <option>General enquiry</option>
-                    <option>Technical support</option>
-                    <option>Partnership</option>
-                    <option>Press</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-label-caps text-[#60645f] font-bold mb-2 uppercase">Message</label>
-                  <textarea rows={6} required placeholder="Tell us how we can help..." className="w-full border border-[#E5E7EB] rounded px-4 py-3 text-[#161d16] focus:outline-none focus:ring-1 focus:ring-[#006e2f] focus:border-[#006e2f] transition-colors resize-y"></textarea>
-                </div>
-
-                <button type="submit" className="w-full bg-[#006e2f] hover:bg-[#005321] transition-colors text-white rounded py-3 text-headline-sm font-bold mt-2">
-                  Send Message
-                </button>
-
-                <p className="text-body-sm text-[#60645f] text-center mt-2">
-                  We typically respond within one business day.
-                </p>
-              </form>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
-
-      {/* FAQ SECTION */}
-      <section className="bg-white py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-[32px] font-geist font-bold text-[#161d16] mb-10 text-center">Frequently asked questions</h2>
-          
-          <div className="border-t border-[#E5E7EB]">
-            {faqs.map((faq, idx) => (
-              <div key={idx} className="border-b border-[#E5E7EB]">
-                <button 
-                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full py-6 flex items-center justify-between text-left focus:outline-none group"
-                >
-                  <span className="text-headline-sm font-geist font-bold text-[#161d16] group-hover:text-[#006e2f] transition-colors">
-                    {faq.q}
-                  </span>
-                  <span className={`material-symbols-outlined text-[#60645f] transition-transform duration-300 ${openFaq === idx ? 'rotate-90' : ''}`}>
-                    chevron_right
-                  </span>
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 ${openFaq === idx ? 'max-h-96 pb-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <p className="text-body-lg text-[#3d4a3d] leading-relaxed">
-                    {faq.a}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <LandingFooter />
-    </div>
+    </PublicPage>
   );
 }
