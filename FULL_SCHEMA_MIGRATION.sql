@@ -2724,3 +2724,78 @@ CREATE POLICY "officials_remove_announcements" ON announcements FOR DELETE TO au
 -- ============================================================
 -- DONE.
 -- ============================================================
+
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- PART 15: LOCKDOWN (2026-11-24)
+-- Applied to the live project on 2026-11-23/24. Closes old routes around the
+-- rules above and adds officials' cancel for withdrawal requests.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Old helpers from before the v2 schema. Server-only now (some may not exist on a fresh install).
+DO $$
+DECLARE f TEXT;
+BEGIN
+  FOREACH f IN ARRAY ARRAY[
+    'increment_wallet_balance(uuid, numeric)',
+    'decrement_wallet_balance_safe(uuid, numeric, text)',
+    'get_admin_dashboard_data(uuid)',
+    'get_member_summary_metrics(uuid)',
+    'check_user_has_active_membership(uuid)',
+    'generate_group_code()',
+    'handle_updated_at()'
+  ] LOOP
+    IF to_regprocedure(f) IS NOT NULL THEN
+      EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC, anon, authenticated', f);
+      EXECUTE format('ALTER FUNCTION %s SET search_path = public', f);
+    END IF;
+  END LOOP;
+END $$;
+REVOKE ALL ON FUNCTION get_user_dashboard_data(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION get_user_dashboard_data(uuid) TO authenticated;
+
+-- Over-broad read rules from early migrations (each has a scoped rule above)
+DROP POLICY IF EXISTS "chamas_v2_public_name_lookup" ON chamas_v2;
+DROP POLICY IF EXISTS "Public can view active tokens" ON invite_tokens;
+DROP POLICY IF EXISTS "Authenticated select group_activity" ON group_activity;
+DROP POLICY IF EXISTS "Authenticated select withdrawal_consents" ON withdrawal_consents;
+DROP POLICY IF EXISTS "Authenticated select chama_payment_config" ON chama_payment_config;
+
+-- Someone waiting for approval can see the group they asked to join
+DROP POLICY IF EXISTS "applicants_see_their_group" ON chamas_v2;
+CREATE POLICY "applicants_see_their_group" ON chamas_v2 FOR SELECT TO authenticated
+USING (EXISTS (SELECT 1 FROM chama_memberships m WHERE m.chama_id = chamas_v2.id AND m.profile_id = auth.uid() AND m.status = 'pending'));
+CREATE INDEX IF NOT EXISTS idx_memberships_profile_status ON chama_memberships(profile_id, status);
+
+-- Tables only the server touches
+DO $$
+DECLARE t TEXT;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['otp_codes','outbox','idempotency_keys','login_attempts','platform_admins','compliance_config','contribution_reminders'] LOOP
+    IF to_regclass('public.' || t) IS NOT NULL THEN EXECUTE format('REVOKE ALL ON public.%I FROM anon, authenticated', t); END IF;
+  END LOOP;
+  FOREACH t IN ARRAY ARRAY['profile_private','kyc_verifications','fraud_flags','audit_log'] LOOP
+    IF to_regclass('public.' || t) IS NOT NULL THEN EXECUTE format('REVOKE ALL ON public.%I FROM anon', t); END IF;
+  END LOOP;
+END $$;
+
+-- Officials (or whoever asked) cancel a withdrawal request that hasn't been paid out
+CREATE OR REPLACE FUNCTION cancel_withdrawal(p_consent_id UUID)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE v_consent withdrawal_consents%ROWTYPE;
+BEGIN
+  SELECT * INTO v_consent FROM withdrawal_consents WHERE id = p_consent_id FOR UPDATE;
+  IF NOT FOUND OR NOT (check_is_chama_admin(v_consent.chama_id, auth.uid()) OR v_consent.requested_by = auth.uid()) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Request not found');
+  END IF;
+  IF v_consent.status NOT IN ('pending', 'approved') THEN
+    RETURN jsonb_build_object('success', false, 'error', 'This request is already closed');
+  END IF;
+  UPDATE withdrawal_consents SET status = 'cancelled' WHERE id = p_consent_id;
+  INSERT INTO audit_log (chama_id, actor_id, action, target_type, target_id, details)
+  VALUES (v_consent.chama_id, auth.uid(), 'withdrawal_cancelled', 'withdrawal_consent', p_consent_id, jsonb_build_object('amount', v_consent.amount));
+  RETURN jsonb_build_object('success', true);
+END;
+$$;
+REVOKE ALL ON FUNCTION cancel_withdrawal(UUID) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION cancel_withdrawal(UUID) TO authenticated;
