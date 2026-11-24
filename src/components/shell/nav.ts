@@ -86,6 +86,7 @@ export const ADMIN_NAV: NavGroup[] = [
       { name: 'Audit log', href: '/admin/audit-log', icon: ScrollText },
       { name: 'Group settings', href: '/admin/settings', icon: Settings },
       { name: 'Your profile', href: '/admin/profile', icon: UserRound },
+      { name: 'Help', href: '/admin/support', icon: LifeBuoy },
     ],
   },
 ];

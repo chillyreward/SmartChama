@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ChevronDown, Mail, Sparkles } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { SITE } from '@/lib/site';
+import { startTour } from '@/components/tour/AppTour';
 import { Field, PageHeader, Panel, PanelTitle, buttonClass, cn, inputClass, textareaClass } from '@/components/ui';
 
 const MEMBER_FAQ = [
@@ -33,7 +34,11 @@ export function HelpCenter({ variant = 'member' }: { variant?: 'member' | 'admin
 
   return (
     <div>
-      <PageHeader title="Help" subtitle="Answers to common questions, and a way to reach the Akibora team." />
+      <PageHeader
+        title="Help"
+        subtitle="Answers to common questions, and a way to reach the Akibora team."
+        actions={<button type="button" onClick={startTour} className={buttonClass('outline')}>Take the tour again</button>}
+      />
       <div className="grid lg:grid-cols-[1.4fr_1fr] gap-4 items-start">
         <Panel aria-labelledby="faq-h">
           <PanelTitle id="faq-h">Common questions</PanelTitle>

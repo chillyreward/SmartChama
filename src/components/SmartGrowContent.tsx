@@ -6,42 +6,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
 
-const SEED_PRODUCTS = [
-  {
-    name: "Money Market Fund", provider: "CIC Asset Management", type: "money_market",
-    min_amount: 5000, expected_return_min: 9.0, expected_return_max: 11.0,
-    risk_level: "low", liquidity_days: 3,
-    description: "A low-risk fund that invests in short-term government securities and bank deposits. Regulated by the Capital Markets Authority of Kenya.",
-    regulatory_body: "CMA Kenya", is_active: true
-  },
-  {
-    name: "Money Market Fund", provider: "Sanlam Investments Kenya", type: "money_market",
-    min_amount: 1000, expected_return_min: 8.5, expected_return_max: 10.5,
-    risk_level: "low", liquidity_days: 2,
-    description: "Accessible money market fund with low minimum investment. Suitable for groups with smaller idle balances.",
-    regulatory_body: "CMA Kenya", is_active: true
-  },
-  {
-    name: "91-Day Treasury Bill", provider: "Central Bank of Kenya", type: "government_security",
-    min_amount: 50000, expected_return_min: 13.0, expected_return_max: 16.0,
-    risk_level: "low", liquidity_days: 91,
-    description: "Short-term government debt securities issued by the Central Bank of Kenya. Considered the safest investment in Kenya. Interest rate set by weekly CBK auction.",
-    regulatory_body: "CBK", is_active: true
-  },
-  {
-    name: "Fixed Deposit Account", provider: "Equity Bank Kenya", type: "fixed_deposit",
-    min_amount: 20000, expected_return_min: 7.0, expected_return_max: 9.0,
-    risk_level: "low", liquidity_days: 180,
-    description: "A fixed deposit account for savings groups held at Equity Bank. Interest paid at maturity. Protected by Kenya Deposit Insurance.",
-    regulatory_body: "CBK / KDIC", is_active: true
-  },
-  {
-    name: "Chama Sacco Share Capital", provider: "Various Licensed SACCOs", type: "sacco",
-    min_amount: 10000, expected_return_min: 8.0, expected_return_max: 12.0,
-    risk_level: "medium", liquidity_days: 365,
-    description: "Invest in share capital of a licensed SACCO. Earn dividends annually and access SACCO services as a group shareholder. Regulated by SASRA.",
-    regulatory_body: "SASRA", is_active: true
-  }
+// What SmartGrow is meant to offer once Akibora has signed agreements with
+// licensed providers. No provider names until a partnership is real.
+const PLANNED = [
+  { name: 'Money market funds', body: 'Low-risk funds run by fund managers licensed by the Capital Markets Authority. Money is usually back in a few days.', regulator: 'CMA' },
+  { name: 'Treasury bills and bonds', body: 'Government securities sold through the Central Bank of Kenya. Fixed terms from 91 days.', regulator: 'CBK' },
+  { name: 'Fixed deposits', body: 'A licensed bank holds the group\'s money for an agreed term at an agreed rate. Covered by KDIC up to its limit.', regulator: 'CBK / KDIC' },
+  { name: 'SACCO shares', body: 'The group buys shares in a licensed SACCO and earns a yearly dividend.', regulator: 'SASRA' },
 ];
 
 export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRoute?: boolean }) {
@@ -208,13 +179,41 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
     <div>
       <PageHeader
         title="SmartGrow"
-        subtitle={isAdminRoute
-          ? 'Put money the group isn\'t using to work in regulated Kenyan products. Every member sees each investment you make.'
-          : 'Where your group\'s spare money is invested, and what each option pays. Your officials make the investments.'}
+        subtitle={products.length === 0
+          ? 'A way for groups to put money they are not using into regulated Kenyan products. It is not open yet.'
+          : isAdminRoute
+            ? 'Put money the group isn\'t using to work in regulated Kenyan products. Every member sees each investment you make.'
+            : 'Where your group\'s spare money is invested, and what each option pays. Your officials make the investments.'}
       />
+
+      {products.length === 0 && (
+        <>
+          <Panel tone="sage" className="rounded-[28px] sm:p-8 mb-6">
+            <h2 className="font-display text-[28px] leading-tight">SmartGrow isn&apos;t open yet</h2>
+            <p className="text-[16px] leading-relaxed text-[#2B4637] mt-3 max-w-[62ch]">
+              We are still talking to licensed providers. Until an agreement is signed, no group money can be invested through Akibora,
+              and your group&apos;s balance stays where it is. When it opens, officials will choose an option and every member will see it here.
+            </p>
+          </Panel>
+          <h2 className="font-display text-[26px] mb-1">What we plan to offer</h2>
+          <p className="text-[14px] text-ink-3 mb-4">Only products from providers licensed in Kenya. Nothing here is available to buy yet.</p>
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            {PLANNED.map((p) => (
+              <Panel key={p.name} as="article">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-display text-[22px] leading-tight">{p.name}</h3>
+                  <Chip kind="neutral">{p.regulator}</Chip>
+                </div>
+                <p className="text-[15px] text-ink-2 mt-2 leading-relaxed">{p.body}</p>
+              </Panel>
+            ))}
+          </div>
+        </>
+      )}
 
       {toast && <Notice tone="ok" className="mb-4">{toast}</Notice>}
 
+      {products.length > 0 && (<>
       <Panel tone="forest" className="rounded-[28px] sm:p-8 mb-6">
         <div className="grid sm:grid-cols-3 gap-6">
           <div>
@@ -266,7 +265,9 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           );
         })}
       </div>
+      </>)}
 
+      {(products.length > 0 || investments.length > 0) && (
       <Panel aria-labelledby="inv-h">
         <PanelTitle id="inv-h">The group&apos;s investments</PanelTitle>
         {investments.length === 0 ? (
@@ -290,6 +291,7 @@ export default function SmartGrowContent({ isAdminRoute = false }: { isAdminRout
           </TableWrap>
         )}
       </Panel>
+      )}
 
       <Modal
         open={!!selectedProduct}

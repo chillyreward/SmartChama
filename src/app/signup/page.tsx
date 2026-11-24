@@ -28,6 +28,7 @@ function SignupForm() {
   const [step, setStep] = useState<1 | 2>(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [existingAccount, setExistingAccount] = useState(false)
 
   // Step 1 fields (both paths)
   const [fullName, setFullName] = useState('')
@@ -104,7 +105,7 @@ function SignupForm() {
 
     if (authError || !authData.user) {
       if (authError?.message.toLowerCase().includes('already registered')) {
-        setError('An account with this email already exists. Please sign in instead.')
+        accountExists()
       } else {
         setError(authError?.message || 'Could not create account.')
       }
@@ -113,11 +114,19 @@ function SignupForm() {
 
     // With confirmation on, Supabase hides "email taken" by returning a user with no identities
     if (authData.user.identities && authData.user.identities.length === 0) {
-      setError('An account with this email already exists. Please sign in instead.')
+      accountExists()
       return null
     }
 
     return { hasSession: !!authData.session }
+  }
+
+  // Email already has an account: keep the group they just described so it is
+  // waiting for them after they sign in, and offer a one-tap way there.
+  function accountExists() {
+    try { if (groupName.trim()) localStorage.setItem('sc_pending_group', JSON.stringify(pendingGroup())) } catch { /* ignore */ }
+    setExistingAccount(true)
+    setError('')
   }
 
   function pendingGroup() {
@@ -385,6 +394,12 @@ function SignupForm() {
       <StepDots step={step} total={4} />
 
       {error && <Notice tone="danger" className="mb-5">{error}</Notice>}
+      {existingAccount && (
+        <Notice tone="info" className="mb-5" title="You already have an Akibora account">
+          <p>{email.trim()} is already signed up. One account works for every group you are in, so sign in and {groupName.trim() ? <>we&apos;ll set up <b>{groupName.trim()}</b> from there.</> : 'carry on from there.'}</p>
+          <Link href={`/login?redirect=${encodeURIComponent(groupName.trim() ? '/onboarding?intent=create' : '/dashboard')}`} className="inline-flex mt-3 h-10 px-4 items-center rounded-full bg-primary text-on-primary text-[14px] font-semibold">Sign in to continue</Link>
+        </Notice>
+      )}
 
       {step === 1 && (
         <form onSubmit={(e) => { e.preventDefault(); handleStep1() }} className="space-y-5">

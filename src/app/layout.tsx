@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { FeedbackHost } from "@/components/ui/Feedback";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const ChatBot = dynamic(() => import('@/components/ChatBot').then(mod => ({ default: mod.ChatBot })));
 
@@ -132,6 +133,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${onest.variable} ${newsreader.variable} ${jetbrains.variable} font-sans antialiased bg-page text-ink`}>
+        <LoadingScreen />
         <LanguageProvider>
           <AuthProvider>
             <ThemeProvider>

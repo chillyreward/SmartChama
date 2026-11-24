@@ -1,390 +1,125 @@
 'use client';
-import { MIcon } from '@/components/ui/MIcon';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, X } from 'lucide-react';
+import { Hammy, type HammyPose } from '@/components/tour/Hammy';
+import { ButtonLink } from '@/components/ui';
 
-interface Step {
-  title: string;
-  body: string;
-  icon: string;
-  hamsterPose: 'wave' | 'run' | 'think' | 'celebrate';
-}
+type Step = { title: string; body: string; pose: HammyPose };
 
 const STEPS: Step[] = [
   {
-    title: "Karibu Akibora! 👋",
-    body: "I'm Hammy, your Akibora guide. Let me show you how to manage your chama savings in under 2 minutes.",
-    icon: "🐹",
-    hamsterPose: "wave",
+    title: 'Karibu Akibora',
+    body: "I'm Hammy. Give me thirty seconds and I'll show you how a chama runs here.",
+    pose: 'wave',
   },
   {
-    title: "Create or Join a Chama",
-    body: "If you're a group chair, create a digital chama in minutes. Members join using a unique invite code — no paper forms needed.",
-    icon: "🏠",
-    hamsterPose: "run",
+    title: 'Start or join a group',
+    body: 'An official creates the group and gets a group code. Members join with that code and an official approves each one.',
+    pose: 'run',
   },
   {
-    title: "Collect Contributions via M-Pesa",
-    body: "Akibora sends an M-Pesa STK Push directly to each member's phone. Payments are recorded automatically — no manual tracking.",
-    icon: "💚",
-    hamsterPose: "think",
+    title: 'Pay with M-Pesa',
+    body: 'On the due date you get an M-Pesa prompt on your phone. When it goes through, the payment appears in the shared record. Officials can record cash too.',
+    pose: 'think',
   },
   {
-    title: "Run Your Merry-Go-Round",
-    body: "Set the payout order and record each member's turn. Every payment is tracked automatically, and trust scores grow with each contribution.",
-    icon: "🏦",
-    hamsterPose: "run",
+    title: 'Everyone sees the same record',
+    body: 'Contributions, the merry-go-round order, the welfare fund and every withdrawal vote, in one place the whole group can check.',
+    pose: 'run',
   },
   {
-    title: "Merry-Go-Round Schedules",
-    body: "Set up a rotating payout schedule. Every member knows exactly when it's their turn. No disputes, no forgotten lists.",
-    icon: "🔄",
-    hamsterPose: "think",
+    title: 'Your saving becomes proof',
+    body: 'Each month you pay on time raises your trust score. Download it as a credit passport when a SACCO or lender asks.',
+    pose: 'think',
   },
   {
-    title: "You're Ready!",
-    body: "Start your chama for free today. No credit card. No complicated setup. Hammy will be here if you need help.",
-    icon: "🎉",
-    hamsterPose: "celebrate",
+    title: "That's the tour",
+    body: 'Inside the app I can walk you round again from the Help page.',
+    pose: 'celebrate',
   },
 ];
 
-const HAMSTER_SVG: Record<Step['hamsterPose'], string> = {
-  wave: `
-    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Body -->
-      <ellipse cx="60" cy="80" rx="32" ry="28" fill="#C4956A"/>
-      <ellipse cx="60" cy="85" rx="24" ry="20" fill="#E8C49A"/>
-      <!-- Head -->
-      <circle cx="60" cy="52" r="26" fill="#C4956A"/>
-      <!-- Face -->
-      <ellipse cx="60" cy="58" rx="18" ry="14" fill="#E8C49A"/>
-      <!-- Eyes -->
-      <circle cx="52" cy="50" r="4" fill="#1a1a1a"/>
-      <circle cx="68" cy="50" r="4" fill="#1a1a1a"/>
-      <circle cx="53" cy="49" r="1.5" fill="white"/>
-      <circle cx="69" cy="49" r="1.5" fill="white"/>
-      <!-- Nose -->
-      <ellipse cx="60" cy="56" rx="3" ry="2" fill="#D4607A"/>
-      <!-- Cheek pouches -->
-      <ellipse cx="46" cy="57" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <ellipse cx="74" cy="57" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <!-- Ears -->
-      <circle cx="38" cy="33" r="10" fill="#C4956A"/>
-      <circle cx="38" cy="33" r="6" fill="#E8A0A0"/>
-      <circle cx="82" cy="33" r="10" fill="#C4956A"/>
-      <circle cx="82" cy="33" r="6" fill="#E8A0A0"/>
-      <!-- Waving arm -->
-      <ellipse cx="92" cy="65" rx="6" ry="14" fill="#C4956A" transform="rotate(-40 92 65)"/>
-      <circle cx="100" cy="55" r="6" fill="#C4956A"/>
-      <!-- Other arm -->
-      <ellipse cx="28" cy="75" rx="6" ry="12" fill="#C4956A"/>
-      <!-- Legs -->
-      <ellipse cx="48" cy="104" rx="8" ry="6" fill="#C4956A"/>
-      <ellipse cx="72" cy="104" rx="8" ry="6" fill="#C4956A"/>
-      <!-- Tail -->
-      <ellipse cx="88" cy="92" rx="8" ry="5" fill="#E8C49A"/>
-    </svg>
-  `,
-  run: `
-    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="65" cy="78" rx="30" ry="24" fill="#C4956A"/>
-      <ellipse cx="65" cy="82" rx="22" ry="17" fill="#E8C49A"/>
-      <circle cx="60" cy="50" r="26" fill="#C4956A"/>
-      <ellipse cx="60" cy="56" rx="18" ry="14" fill="#E8C49A"/>
-      <circle cx="52" cy="48" r="4" fill="#1a1a1a"/>
-      <circle cx="68" cy="48" r="4" fill="#1a1a1a"/>
-      <circle cx="53" cy="47" r="1.5" fill="white"/>
-      <circle cx="69" cy="47" r="1.5" fill="white"/>
-      <ellipse cx="60" cy="54" rx="3" ry="2" fill="#D4607A"/>
-      <ellipse cx="46" cy="55" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <ellipse cx="74" cy="55" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <circle cx="37" cy="32" r="10" fill="#C4956A"/>
-      <circle cx="37" cy="32" r="6" fill="#E8A0A0"/>
-      <circle cx="82" cy="32" r="10" fill="#C4956A"/>
-      <circle cx="82" cy="32" r="6" fill="#E8A0A0"/>
-      <!-- Running arms -->
-      <ellipse cx="86" cy="68" rx="5" ry="13" fill="#C4956A" transform="rotate(30 86 68)"/>
-      <ellipse cx="34" cy="68" rx="5" ry="13" fill="#C4956A" transform="rotate(-30 34 68)"/>
-      <!-- Running legs -->
-      <ellipse cx="50" cy="100" rx="7" ry="8" fill="#C4956A" transform="rotate(-20 50 100)"/>
-      <ellipse cx="76" cy="102" rx="7" ry="8" fill="#C4956A" transform="rotate(20 76 102)"/>
-    </svg>
-  `,
-  think: `
-    <svg viewBox="0 0 130 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="60" cy="80" rx="32" ry="28" fill="#C4956A"/>
-      <ellipse cx="60" cy="85" rx="24" ry="20" fill="#E8C49A"/>
-      <circle cx="60" cy="50" r="26" fill="#C4956A"/>
-      <ellipse cx="60" cy="56" rx="18" ry="14" fill="#E8C49A"/>
-      <circle cx="51" cy="47" r="4" fill="#1a1a1a"/>
-      <circle cx="70" cy="47" r="4" fill="#1a1a1a"/>
-      <!-- Thinking eyes — looking up right -->
-      <circle cx="52" cy="46" r="1.5" fill="white"/>
-      <circle cx="71" cy="46" r="1.5" fill="white"/>
-      <ellipse cx="60" cy="54" rx="3" ry="2" fill="#D4607A"/>
-      <ellipse cx="46" cy="57" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <ellipse cx="74" cy="57" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <circle cx="37" cy="30" r="10" fill="#C4956A"/>
-      <circle cx="37" cy="30" r="6" fill="#E8A0A0"/>
-      <circle cx="82" cy="30" r="10" fill="#C4956A"/>
-      <circle cx="82" cy="30" r="6" fill="#E8A0A0"/>
-      <!-- Chin rest arm -->
-      <ellipse cx="86" cy="70" rx="5" ry="16" fill="#C4956A" transform="rotate(-15 86 70)"/>
-      <circle cx="92" cy="56" r="6" fill="#C4956A"/>
-      <!-- Thought bubbles -->
-      <circle cx="105" cy="42" r="4" fill="#3FA673" opacity="0.6"/>
-      <circle cx="112" cy="30" r="6" fill="#3FA673" opacity="0.7"/>
-      <circle cx="116" cy="18" r="8" fill="#3FA673" opacity="0.8"/>
-      <text x="111" y="23" font-size="9" text-anchor="middle" fill="white">💡</text>
-      <!-- Legs -->
-      <ellipse cx="48" cy="104" rx="8" ry="6" fill="#C4956A"/>
-      <ellipse cx="72" cy="104" rx="8" ry="6" fill="#C4956A"/>
-    </svg>
-  `,
-  celebrate: `
-    <svg viewBox="0 0 130 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Confetti -->
-      <rect x="20" y="10" width="6" height="6" fill="#3FA673" rx="1" transform="rotate(20 20 10)"/>
-      <rect x="100" y="15" width="5" height="5" fill="#F59E0B" rx="1" transform="rotate(-15 100 15)"/>
-      <rect x="30" y="30" width="4" height="4" fill="#3B82F6" rx="1" transform="rotate(40 30 30)"/>
-      <rect x="90" y="8" width="4" height="7" fill="#EF4444" rx="1" transform="rotate(10 90 8)"/>
-      <circle cx="15" cy="45" r="3" fill="#8B5CF6"/>
-      <circle cx="108" cy="40" r="3" fill="#3FA673"/>
-      <!-- Body -->
-      <ellipse cx="65" cy="88" rx="32" ry="28" fill="#C4956A"/>
-      <ellipse cx="65" cy="93" rx="24" ry="20" fill="#E8C49A"/>
-      <!-- Head -->
-      <circle cx="65" cy="58" r="26" fill="#C4956A"/>
-      <ellipse cx="65" cy="64" rx="18" ry="14" fill="#E8C49A"/>
-      <!-- Happy eyes -->
-      <path d="M 55 55 Q 57 52 59 55" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M 70 55 Q 72 52 74 55" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <!-- Big smile -->
-      <path d="M 53 65 Q 65 75 77 65" stroke="#D4607A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <ellipse cx="51" cy="63" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <ellipse cx="79" cy="63" rx="7" ry="5" fill="#E8C49A" opacity="0.7"/>
-      <circle cx="42" cy="38" r="10" fill="#C4956A"/>
-      <circle cx="42" cy="38" r="6" fill="#E8A0A0"/>
-      <circle cx="88" cy="38" r="10" fill="#C4956A"/>
-      <circle cx="88" cy="38" r="6" fill="#E8A0A0"/>
-      <!-- Both arms up -->
-      <ellipse cx="30" cy="68" rx="5" ry="14" fill="#C4956A" transform="rotate(35 30 68)"/>
-      <circle cx="22" cy="57" r="6" fill="#C4956A"/>
-      <ellipse cx="100" cy="68" rx="5" ry="14" fill="#C4956A" transform="rotate(-35 100 68)"/>
-      <circle cx="108" cy="57" r="6" fill="#C4956A"/>
-      <!-- Star in paw -->
-      <text x="17" y="60" font-size="10">⭐</text>
-      <text x="105" y="60" font-size="10">🎊</text>
-      <!-- Legs -->
-      <ellipse cx="53" cy="112" rx="8" ry="6" fill="#C4956A"/>
-      <ellipse cx="77" cy="112" rx="8" ry="6" fill="#C4956A"/>
-    </svg>
-  `,
-};
-
-const STORAGE_KEY = 'sc_hamster_seen_v1';
+const KEY = 'ak_hammy_seen_v2';
 
 export default function HamsterOnboarding() {
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const [animClass, setAnimClass] = useState('');
 
   useEffect(() => {
-    // Only show to first-time visitors
     try {
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        // Small delay so page loads first
-        const t = setTimeout(() => setVisible(true), 1200);
-        return () => clearTimeout(t);
-      }
+      if (localStorage.getItem(KEY)) return;
     } catch {
-      // localStorage blocked — silently skip
-    }
-  }, []);
-
-  const dismiss = useCallback(() => {
-    setAnimClass('opacity-0 scale-95');
-    setTimeout(() => {
-      setVisible(false);
-      try { localStorage.setItem(STORAGE_KEY, '1'); } catch { /* ignore */ }
-    }, 300);
-  }, []);
-
-  const next = useCallback(() => {
-    if (step >= STEPS.length - 1) {
-      dismiss();
       return;
     }
-    setAnimClass('opacity-0 translate-x-4');
-    setTimeout(() => {
-      setStep(s => s + 1);
-      setAnimClass('opacity-100 translate-x-0');
-    }, 200);
-  }, [step, dismiss]);
+    // Wait for the first-load screen to finish
+    const t = setTimeout(() => setOpen(true), 2100);
+    return () => clearTimeout(t);
+  }, []);
 
-  const prev = useCallback(() => {
-    if (step <= 0) return;
-    setAnimClass('opacity-0 -translate-x-4');
-    setTimeout(() => {
-      setStep(s => s - 1);
-      setAnimClass('opacity-100 translate-x-0');
-    }, 200);
-  }, [step]);
+  const close = useCallback(() => {
+    setOpen(false);
+    try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+  }, []);
 
-  if (!visible) return null;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight') setStep((s) => Math.min(s + 1, STEPS.length - 1));
+      if (e.key === 'ArrowLeft') setStep((s) => Math.max(s - 1, 0));
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, close]);
 
-  const current = STEPS[step];
-  const isLast = step === STEPS.length - 1;
-  const progress = ((step + 1) / STEPS.length) * 100;
+  if (!open) return null;
+  const s = STEPS[step];
+  const last = step === STEPS.length - 1;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm transition-opacity duration-300"
-        onClick={dismiss}
-        aria-hidden="true"
-      />
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="hammy-title">
+      <button type="button" aria-label="Close the tour" className="absolute inset-0 bg-[#08120D]/60 backdrop-blur-[2px]" onClick={close} />
 
-      {/* Modal */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Akibora onboarding tutorial"
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      >
-        <div
-          className={`
-            relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden
-            bg-white dark:bg-[#121215]
-            border border-[var(--ak-brand-ink)]/20
-            transition-all duration-300 ease-out
-            ${animClass || 'opacity-100 scale-100'}
-          `}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Green progress bar */}
-          <div className="h-1 bg-gray-100 dark:bg-[#1e1e22]">
-            <div
-              className="h-full bg-gradient-to-r from-[var(--ak-solid)] to-[var(--ak-solid)] transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+      <div className="ak-toast-in relative w-full sm:max-w-[440px] rounded-t-[28px] sm:rounded-[28px] bg-surface text-ink overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,.35)] pb-safe">
+        <div className="relative bg-forest text-[#EEF4EF] h-[176px] flex items-end justify-center overflow-hidden">
+          <div className="absolute inset-x-0 bottom-0 h-10 bg-canopy" aria-hidden="true" />
+          <Hammy pose={s.pose} size={128} className="relative -mb-1" />
+          <span className="absolute top-4 left-4 text-[13px] text-[#A9C2B3]">{step + 1} of {STEPS.length}</span>
+          <button type="button" onClick={close} aria-label="Close the tour" className="absolute top-2.5 right-2.5 w-10 h-10 rounded-full flex items-center justify-center text-[#A9C2B3] hover:bg-[#1A3428] hover:text-white">
+            <X size={20} />
+          </button>
+        </div>
 
-          {/* Hamster Stage */}
-          <div className="relative h-44 flex items-center justify-center bg-gradient-to-b from-[var(--ak-tint)] to-[var(--ak-tint)] dark:from-[#052E16]/60 dark:to-[#052E16]/30 overflow-hidden">
-            {/* Walking dots trail */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 opacity-30">
-              {[...Array(8)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-[var(--ak-solid)]"
-                  style={{ opacity: i <= step ? 1 : 0.3 }}
-                />
-              ))}
-            </div>
+        <div className="px-6 sm:px-7 pt-6">
+          <h2 id="hammy-title" className="font-display text-[28px] leading-tight tracking-[-0.02em]">{s.title}</h2>
+          <p className="text-[16px] text-ink-2 leading-relaxed mt-2 min-h-[78px]">{s.body}</p>
+        </div>
 
-            {/* Hamster SVG — animates based on pose */}
-            <div
-              className={`
-                w-32 h-32 select-none
-                ${current.hamsterPose === 'run' ? 'animate-[hamsterRun_0.5s_ease-in-out_infinite]' : ''}
-                ${current.hamsterPose === 'wave' ? 'animate-[hamsterWave_1s_ease-in-out_infinite]' : ''}
-                ${current.hamsterPose === 'celebrate' ? 'animate-[hamsterCelebrate_0.6s_ease-in-out_infinite]' : ''}
-              `}
-              dangerouslySetInnerHTML={{ __html: HAMSTER_SVG[current.hamsterPose] }}
-            />
+        <div className="flex gap-1.5 px-6 sm:px-7 mt-4" aria-hidden="true">
+          {STEPS.map((_, i) => (
+            <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? 'w-7 bg-brand' : i < step ? 'w-3 bg-brand/50' : 'w-3 bg-line-strong'}`} />
+          ))}
+        </div>
 
-            {/* Floating icon badge */}
-            <div className="absolute top-4 right-4 text-3xl select-none">
-              {current.icon}
-            </div>
-
-            {/* Step counter pill */}
-            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/80 dark:bg-black/40 text-[11px] font-bold text-[var(--ak-brand-ink)] backdrop-blur-sm">
-              {step + 1} / {STEPS.length}
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="px-8 pt-6 pb-4">
-            <h2 className="font-display font-normal text-[22px] text-[#09090B] dark:text-white mb-2 leading-tight">
-              {current.title}
-            </h2>
-            <p className="text-[15px] text-[#3F3F46] dark:text-[#D4D4D8] leading-relaxed">
-              {current.body}
-            </p>
-          </div>
-
-          {/* Dot indicators */}
-          <div className="flex justify-center gap-2 pt-2 pb-2">
-            {STEPS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  setAnimClass(i > step ? 'opacity-0 translate-x-4' : 'opacity-0 -translate-x-4');
-                  setTimeout(() => {
-                    setStep(i);
-                    setAnimClass('opacity-100 translate-x-0');
-                  }, 180);
-                }}
-                aria-label={`Go to step ${i + 1}`}
-                className={`rounded-full transition-all duration-300 ${
-                  i === step ? 'w-6 h-2.5 bg-[var(--ak-solid)]' : 'w-2.5 h-2.5 bg-gray-200 dark:bg-[#27272A]'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-3 px-8 pb-8 pt-3">
-            {step > 0 && (
-              <button
-                onClick={prev}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-medium text-[#3F3F46] dark:text-[#D4D4D8] hover:bg-gray-100 dark:hover:bg-[#1e1e22] transition-colors"
-              >
-                <MIcon name="arrow_back"  className="text-[18px]" />
-                Back
-              </button>
-            )}
-
-            <button
-              onClick={next}
-              className="ml-auto flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--ak-solid)] hover:bg-primary text-on-primary text-[14px] font-semibold transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95"
-            >
-              {isLast ? 'Get Started' : 'Next'}
-              <MIcon name={isLast ? 'rocket_launch' : 'arrow_forward'}  className="text-[18px]" />
+        <div className="flex items-center gap-2 px-6 sm:px-7 py-6">
+          {step > 0 ? (
+            <button type="button" onClick={() => setStep(step - 1)} className="h-11 px-4 rounded-full inline-flex items-center gap-1.5 text-[15px] font-medium hover:bg-raised">
+              <ArrowLeft size={17} aria-hidden="true" />Back
             </button>
-          </div>
-
-          {/* Skip link */}
-          <div className="text-center pb-5">
-            <button
-              onClick={dismiss}
-              className="text-[12px] text-[#71717A] hover:text-[var(--ak-brand-ink)] transition-colors underline underline-offset-2"
-            >
-              Skip tutorial
+          ) : (
+            <button type="button" onClick={close} className="h-11 px-4 rounded-full text-[15px] text-ink-2 hover:bg-raised">Skip</button>
+          )}
+          <span className="flex-1" />
+          {last ? (
+            <ButtonLink href="/signup?role=admin" onClick={close}>Start a group</ButtonLink>
+          ) : (
+            <button type="button" onClick={() => setStep(step + 1)} className="h-11 px-5 rounded-full inline-flex items-center gap-1.5 bg-primary text-on-primary text-[15px] font-semibold hover:opacity-90">
+              Next<ArrowRight size={17} aria-hidden="true" />
             </button>
-          </div>
+          )}
         </div>
       </div>
-
-      {/* Inline keyframe styles */}
-      <style>{`
-        @keyframes hamsterRun {
-          0%, 100% { transform: translateY(0) rotate(-1deg) scaleX(1); }
-          50% { transform: translateY(-6px) rotate(1deg) scaleX(0.97); }
-        }
-        @keyframes hamsterWave {
-          0%, 100% { transform: rotate(-3deg); }
-          50% { transform: rotate(3deg); }
-        }
-        @keyframes hamsterCelebrate {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-10px) scale(1.05); }
-        }
-      `}</style>
-    </>
+    </div>
   );
 }

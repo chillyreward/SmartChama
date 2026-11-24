@@ -294,3 +294,57 @@
 @keyframes ak-toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .ak-toast-in { animation: ak-toast-in 180ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .ak-toast-in { animation: none; } }
+
+/* ── Phones: tables become labelled cards, so nothing scrolls sideways ── */
+@media (max-width: 639px) {
+  .ak-table-stack { overflow-x: visible; margin-inline: 0; }
+  .ak-table-stack table { min-width: 0 !important; width: 100%; }
+  .ak-table-stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .ak-table-stack tbody tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 14px; padding: 14px 2px; }
+  .ak-table-stack tbody td { display: block; padding: 0 !important; width: auto !important; min-width: 0; text-align: left !important; overflow-wrap: anywhere; }
+  .ak-table-stack tbody td:first-child { grid-column: 1 / -1; }
+  .ak-table-stack tbody td[data-label]:not([data-label=""]):not(:first-child)::before {
+    content: attr(data-label); display: block; font-size: 12px; line-height: 1.3; color: var(--ak-text-3); margin-bottom: 3px;
+  }
+  .ak-table-stack tbody td:last-child:not(:first-child) { grid-column: 1 / -1; }
+  .ak-table-stack tbody td:last-child select, .ak-table-stack tbody td:last-child button { width: 100%; }
+}
+
+/* ── Glass: clear, frosted bars that let the page show through ── */
+.ak-glass {
+  background: color-mix(in srgb, var(--ak-page) 62%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  border-color: color-mix(in srgb, var(--ak-line) 70%, transparent);
+}
+.ak-glass-forest {
+  background: color-mix(in srgb, #0E1F18 72%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 32px rgba(0,0,0,.28);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ak-glass { background: var(--ak-page); }
+  .ak-glass-forest { background: #0E1F18; }
+}
+
+/* ── First-load screen ── */
+@keyframes ak-load-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ak-load-rise { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes ak-coin-drop { 0% { opacity: 0; transform: translateY(-26px); } 55% { opacity: 1; transform: translateY(2px); } 75% { transform: translateY(-3px); } 100% { opacity: 1; transform: none; } }
+.ak-load-rise { animation: ak-load-rise 420ms cubic-bezier(.2,.8,.2,1) both; }
+.ak-load-fill { transform-origin: left; animation: ak-load-fill 1100ms cubic-bezier(.65,0,.35,1) both; }
+.ak-coin-drop { animation: ak-coin-drop 520ms cubic-bezier(.3,1.4,.5,1) both; }
+
+/* ── Guided tour spotlight ── */
+.ak-tour-hole { position: fixed; z-index: 9998; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(8, 18, 13, .66); transition: all 260ms cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+.ak-tour-hole::after { content: ''; position: absolute; inset: -4px; border-radius: 20px; border: 2px solid #7CE3A6; }
+
+/* Hammy the guide */
+@keyframes ak-hammy-run { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+@keyframes ak-hammy-wave { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes ak-hammy-celebrate { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.05); } }
+.ak-hammy-run { animation: ak-hammy-run .55s ease-in-out infinite; }
+.ak-hammy-wave { animation: ak-hammy-wave 1s ease-in-out infinite; transform-origin: 50% 80%; }
+.ak-hammy-celebrate { animation: ak-hammy-celebrate .6s ease-in-out infinite; }
+.ak-hammy svg { width: 100%; height: 100%; display: block; }

@@ -36,7 +36,7 @@ export default function LandingNav() {
     <header
       className={cn(
         'sticky top-0 z-50 text-ink transition-colors',
-        scrolled || open ? 'bg-page/90 backdrop-blur-md border-b border-line' : 'bg-page border-b border-transparent',
+        scrolled || open ? 'ak-glass border-b' : 'bg-transparent border-b border-transparent',
       )}
     >
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between gap-4">
@@ -81,7 +81,7 @@ export default function LandingNav() {
       </div>
 
       {open && (
-        <div id="mobile-menu" className="lg:hidden border-t border-line bg-page px-5 pb-6 pt-2">
+        <div id="mobile-menu" className="lg:hidden border-t border-line px-5 pb-6 pt-2 max-h-[calc(100dvh-72px)] overflow-y-auto">
           <nav aria-label="Mobile" className="flex flex-col">
             {LINKS.map((l) => (
               <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="py-3.5 font-display text-[24px] border-b border-line">

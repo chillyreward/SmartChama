@@ -1,269 +1,144 @@
-'use client'
-import { MIcon } from '@/components/ui/MIcon';
-import { useState } from 'react'
+'use client';
 
-type Channel = 'sms' | 'whatsapp'
+import { useState } from 'react';
+import { Check, Copy, MessageCircle, MessageSquareText } from 'lucide-react';
+import { Button, Field, Modal, Notice, cn, inputClass } from '@/components/ui';
 
-export function InviteModal({ 
-  onClose,
-  chamaId,
-  chamaName,
-  adminId
-}: {
-  onClose: () => void
-  chamaId: string
-  chamaName: string
-  adminId: string
-}) {
-  const [phone, setPhone] = useState('')
-  const [name, setName] = useState('')
-  const [channel, setChannel] = useState<Channel>('sms')
-  const [step, setStep] = useState<'form' | 'sending' | 'sent'>('form')
-  const [result, setResult] = useState<any>(null)
-  const [error, setError] = useState('')
+type Channel = 'sms' | 'whatsapp';
+type Result = { code?: string; sms_sent?: boolean; email_sent?: boolean; whatsapp_url?: string; note?: string; phone?: string };
 
-  function validatePhone(p: string) {
-    const digits = p.replace(/\D/g, '')
-    return digits.length >= 9
-  }
+export function InviteModal({ onClose, chamaId, chamaName, adminId }: { onClose: () => void; chamaId: string; chamaName: string; adminId: string }) {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [channel, setChannel] = useState<Channel>('sms');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [result, setResult] = useState<Result | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  async function handleSend() {
-    if (!validatePhone(phone)) {
-      setError('Please enter a valid phone number.')
-      return
-    }
+  const digits = phone.replace(/\D/g, '');
+  const emailOk = /^\S+@\S+\.\S+$/.test(email.trim());
+  const canSend = digits.length >= 9 || emailOk;
 
-    setStep('sending')
-    setError('')
-
+  async function send() {
+    if (!canSend) { setError('Add a phone number or an email address.'); return; }
+    setBusy(true);
+    setError('');
     try {
       const res = await fetch('/api/invites/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone: phone.trim(),
+          phone: digits.length >= 9 ? phone.trim() : null,
+          email: emailOk ? email.trim() : null,
           name: name.trim() || null,
           chama_id: chamaId,
           invited_by: adminId,
-          channel
-        })
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Could not send invite. Please try again.')
-        setStep('form')
-        return
-      }
-
-      setResult(data)
-      setStep('sent')
+          channel,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'The invite was not sent. Try again.'); return; }
+      setResult(data);
+      if (data.whatsapp_url) window.open(data.whatsapp_url, '_blank', 'noopener');
     } catch {
-      setError('An unexpected error occurred. Please try again.')
-      setStep('form')
+      setError('No connection. Check your internet and try again.');
+    } finally {
+      setBusy(false);
     }
   }
 
-  const cardStyle = {
-    backgroundColor: 'var(--bg-card)',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--border)'
+  async function copy() {
+    if (!result?.code) return;
+    try { await navigator.clipboard.writeText(result.code); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* ignore */ }
   }
 
-  const inputStyle = {
-    backgroundColor: 'var(--bg-input)',
-    borderColor: 'var(--border)',
-    color: 'var(--text-primary)'
-  }
-
-  const channelConfig = {
-    sms: { icon: 'sms', label: 'SMS', color: '#3FA673', desc: 'Send a text message' },
-    whatsapp: { icon: 'chat', label: 'WhatsApp', color: '#25D366', desc: 'Send via WhatsApp' }
+  if (result) {
+    return (
+      <Modal open onClose={onClose} title="Invite ready" footer={<Button onClick={onClose}>Done</Button>}>
+        <p className="text-[15px] text-ink-2">
+          {result.sms_sent
+            ? `We texted the code to ${result.phone || phone}.`
+            : result.note || `Share this code so they can join ${chamaName}.`}
+        </p>
+        <div className="mt-4 rounded-[18px] bg-tint p-5 text-center">
+          <div className="text-[13px] text-ink-3">Invite code</div>
+          <div className="font-money text-[30px] tracking-[0.12em] mt-1 break-all">{result.code}</div>
+          <button type="button" onClick={copy} className="mt-2 inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-[14px] font-medium hover:bg-raised">
+            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+            {copied ? 'Copied' : 'Copy code'}
+          </button>
+        </div>
+        {result.whatsapp_url && (
+          <a href={result.whatsapp_url} target="_blank" rel="noopener noreferrer" className="mt-3 flex items-center justify-center gap-2 h-12 rounded-full bg-[#25D366] text-[#08311A] text-[15px] font-semibold">
+            <MessageCircle size={18} aria-hidden="true" />Open WhatsApp
+          </a>
+        )}
+        <p className="text-[13px] text-ink-3 mt-3">The code works once and expires in 48 hours.</p>
+      </Modal>
+    );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-
-      <div className="relative z-10 w-full max-w-md rounded-[22px] p-6" style={cardStyle}>
-
-        {/* FORM */}
-        {step === 'form' && (
-          <>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-[20px] font-bold">Invite a Member</h2>
-              <button onClick={onClose} style={{ color: 'var(--text-muted)' }}>
-                <MIcon name="close" className="" />
-              </button>
-            </div>
-
-            {/* Channel selector */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              {(['sms', 'whatsapp'] as Channel[]).map(ch => {
-                const cfg = channelConfig[ch]
-                const active = channel === ch
-                return (
-                  <button
-                    key={ch}
-                    onClick={() => setChannel(ch)}
-                    className="flex flex-col items-center gap-2 p-3 rounded-[14px] border-2 transition-all"
-                    style={{
-                      borderColor: active ? cfg.color : 'var(--border)',
-                      backgroundColor: active ? `${cfg.color}10` : 'var(--bg-subtle)'
-                    }}>
-                    <MIcon name={cfg.icon}  className="text-[24px]" />
-                    <span className="text-[13px] font-semibold" style={{ color: active ? cfg.color : 'var(--text-secondary)' }}>
-                      {cfg.label}
-                    </span>
-                    <span className="text-[13px]" style={{ color: 'var(--text-muted)' }}>{cfg.desc}</span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Info banner */}
-            <div className="rounded-[14px] p-3 mb-5 flex gap-2"
-              style={{ backgroundColor: 'var(--bg-subtle)', borderLeft: `3px solid ${channelConfig[channel].color}` }}>
-              <MIcon name={channel === 'whatsapp' ? 'chat' : 'sms'}  className="text-[16px] flex-shrink-0 mt-0.5" />
-              <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
-                {channel === 'whatsapp'
-                  ? `WhatsApp opens with the invite code for ${chamaName} ready to send.`
-                  : `An SMS with the invite code to join ${chamaName} will be sent to this number.`}
-              </p>
-            </div>
-
-            {/* Name */}
-            <div className="mb-4">
-              <label className="block text-[13px] font-semibold mb-1.5"
-                style={{ color: 'var(--text-secondary)' }}>
-                Member Name <span style={{ color: 'var(--text-muted)' }}>(optional)</span>
-              </label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)}
-                placeholder="Grace Wanjiku"
-                className="w-full px-4 py-3 rounded-[14px] border text-[15px] focus:outline-none focus:border-line-strong focus:ring-2 focus:ring-mint/30"
-                style={inputStyle} />
-            </div>
-
-            {/* Phone */}
-            <div className="mb-6">
-              <label className="block text-[13px] font-semibold mb-1.5"
-                style={{ color: 'var(--text-secondary)' }}>
-                Phone Number
-              </label>
-              <div className="flex">
-                <div className="flex items-center px-3 rounded-l-xl border border-r-0 text-[14px] font-medium"
-                  style={{ backgroundColor: 'transparent', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
-                  +254
-                </div>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                  placeholder="712 345 678"
-                  className="flex-1 px-4 py-3 rounded-r-xl border text-[15px] focus:outline-none"
-                  style={{ ...inputStyle, outlineColor: channelConfig[channel].color }}
-                  onFocus={e => e.target.style.borderColor = channelConfig[channel].color}
-                  onBlur={e => e.target.style.borderColor = 'var(--border)'}
-                />
-              </div>
-            </div>
-
-            {error && (
-              <div className="mb-5 p-3 rounded-[14px] bg-red-50 border border-red-200 text-red-700 text-[13px]">{error}</div>
+    <Modal
+      open
+      onClose={onClose}
+      title={`Invite to ${chamaName || 'your group'}`}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={send} disabled={busy || !canSend}>{busy ? 'Sending…' : 'Send invite'}</Button>
+        </>
+      }
+    >
+      <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Send by">
+        {([
+          { v: 'sms', label: 'SMS', icon: MessageSquareText },
+          { v: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
+        ] as const).map((c) => (
+          <button
+            key={c.v}
+            type="button"
+            role="radio"
+            aria-checked={channel === c.v}
+            onClick={() => setChannel(c.v)}
+            className={cn(
+              'h-12 rounded-[14px] border inline-flex items-center justify-center gap-2 text-[15px] font-medium',
+              channel === c.v ? 'border-brand bg-tint text-brand' : 'border-line bg-surface-2 text-ink-2 hover:bg-raised',
             )}
-
-            <div className="flex gap-3">
-              <button onClick={onClose}
-                className="flex-1 py-3 border rounded-[14px] text-[14px] font-semibold transition-colors"
-                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-                Cancel
-              </button>
-              <button onClick={handleSend} disabled={!phone.trim()}
-                className="flex-1 py-3 text-white rounded-[14px] text-[14px] font-semibold disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-                style={{ backgroundColor: channelConfig[channel].color }}>
-                <MIcon name={channel === 'whatsapp' ? 'chat' : 'sms'}  className="text-[18px]" />
-                Send via {channelConfig[channel].label}
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* SENDING */}
-        {step === 'sending' && (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <span className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: `${channelConfig[channel].color}40`, borderTopColor: 'transparent' }} />
-            <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-              {channel === 'whatsapp' ? 'Preparing WhatsApp message...' : 'Sending SMS...'}
-            </p>
-          </div>
-        )}
-
-        {/* SENT */}
-        {step === 'sent' && (
-          <div className="flex flex-col items-center text-center gap-5 py-2">
-            {(() => {
-              const currentChan = (result?.channel || channel) === 'whatsapp' ? 'whatsapp' : 'sms';
-              const cfg = channelConfig[currentChan];
-              return (
-                <div className="w-14 h-14 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${cfg.color}15` }}>
-                  <MIcon name={result?.sms_sent ? (currentChan === 'whatsapp' ? 'chat' : 'sms') : 'key'}  className="text-[32px]" />
-                </div>
-              );
-            })()}
-
-            <div>
-              <h3 className="font-display font-normal text-[22px] mb-1">
-                {result?.sms_sent ? 'SMS Sent!' : 'Invite Created'}
-              </h3>
-              <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-                {result?.sms_sent
-                  ? `The invite code was sent to ${result?.phone || phone}.`
-                  : result?.note || 'Share this code manually.'}
-              </p>
-            </div>
-
-            {result?.whatsapp_url && (
-              <a
-                href={result.whatsapp_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 rounded-[14px] text-[14px] font-semibold text-white flex items-center justify-center gap-2"
-                style={{ backgroundColor: channelConfig.whatsapp.color }}
-              >
-                <MIcon name="chat"  className="text-[18px]" />
-                Open WhatsApp to send
-              </a>
-            )}
-
-            {/* Code */}
-            <div className="w-full rounded-[14px] p-4 flex flex-col items-center gap-2"
-              style={{ backgroundColor: 'var(--bg-subtle)', border: '1px dashed var(--border)' }}>
-              <span className="text-[13px] font-semibold" style={{ color: 'var(--text-muted)' }}>
-                Invite Code
-              </span>
-              <span className="text-[28px] font-mono font-bold tracking-widest" style={{ color: channelConfig[channel].color }}>
-                {result?.code}
-              </span>
-              <button onClick={() => navigator.clipboard.writeText(result?.code || '')}
-                className="text-[13px] flex items-center gap-1 transition-colors hover:opacity-70"
-                style={{ color: 'var(--text-muted)' }}>
-                <MIcon name="content_copy"  className="text-[14px]" />
-                Copy code
-              </button>
-            </div>
-
-            <p className="text-[13px]" style={{ color: 'var(--text-muted)' }}>
-              Code expires in 48 hours · Single use
-            </p>
-
-            <button onClick={onClose}
-              className="w-full py-3 text-white rounded-[14px] text-[14px] font-semibold transition-colors"
-              style={{ backgroundColor: channelConfig[channel].color }}>
-              Done
-            </button>
-          </div>
-        )}
+          >
+            <c.icon size={18} aria-hidden="true" />{c.label}
+          </button>
+        ))}
       </div>
-    </div>
-  )
+      <p className="text-[13px] text-ink-3 mt-2">
+        {channel === 'whatsapp' ? 'WhatsApp opens on your phone with the invite ready to send.' : 'We text the invite code to their phone.'}
+      </p>
+
+      <div className="flex flex-col gap-4 mt-5">
+        <Field label="Their name" hint="Optional">
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Grace Wanjiku" className={inputClass} autoComplete="off" />
+        </Field>
+        <Field label="Phone number">
+          <div className="flex items-stretch min-w-0">
+            <span className="h-12 px-3.5 inline-flex items-center rounded-l-[14px] border border-r-0 border-line bg-raised text-[15px] text-ink-2 shrink-0">+254</span>
+            <input
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="712 345 678"
+              className={cn(inputClass, 'rounded-l-none min-w-0 flex-1')}
+            />
+          </div>
+        </Field>
+        <Field label="Email" hint="Optional. We also send the code here.">
+          <input type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="grace@example.com" className={inputClass} autoComplete="off" />
+        </Field>
+      </div>
+
+      {error && <Notice tone="danger" className="mt-4">{error}</Notice>}
+    </Modal>
+  );
 }

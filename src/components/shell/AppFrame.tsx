@@ -5,6 +5,7 @@ import MobileHeader from '@/components/MobileHeader';
 import { MobileTabBar } from '@/components/MobileTabBar';
 import { Sidebar } from '@/components/Sidebar';
 import { RingMark } from '@/components/ui';
+import AppTour from '@/components/tour/AppTour';
 
 export function AppFrame({ variant, children, banner }: { variant: 'member' | 'admin'; children: ReactNode; banner?: ReactNode }) {
   return (
@@ -14,13 +15,14 @@ export function AppFrame({ variant, children, banner }: { variant: 'member' | 'a
       </div>
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <MobileHeader isAdmin={variant === 'admin'} />
-        <main id="main" className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-[76px] lg:pt-8 pb-28 lg:pb-12">
+        <main id="main" className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 pt-[76px] lg:pt-8 pb-28 lg:pb-12">
           <div className="max-w-[1240px] mx-auto">
             {banner}
             {children}
           </div>
         </main>
         <MobileTabBar variant={variant} />
+        <AppTour variant={variant} />
       </div>
     </div>
   );

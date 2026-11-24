@@ -163,6 +163,24 @@ export default function OnboardingPage() {
         return
       }
 
+      // Already in a group but asked to start or join another one
+      const intent = new URLSearchParams(window.location.search).get('intent')
+      if (activeOnes.length > 0 && (intent === 'create' || intent === 'join' || inviteCodeFromSignup())) {
+        setFullName(profile.full_name || '')
+        setPhone(profile.phone_number || '')
+        if (intent === 'create' && savedGroup?.name) {
+          setStep('2A')
+          await createGroup({
+            name: String(savedGroup.name),
+            amount: String(savedGroup.amount || ''),
+            schedule: { mode: toScheduleMode(savedGroup.frequency), dates: Array.isArray(savedGroup.dates) ? savedGroup.dates : [] },
+          })
+          return
+        }
+        setStep(intent === 'create' ? '2A' : '2B')
+        return
+      }
+
       if (activeOnes.length > 0) {
         // Already in a chama — 
         // go straight to dashboard

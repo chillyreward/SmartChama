@@ -28,7 +28,7 @@ export function Sidebar({ variant }: { variant: 'admin' | 'member' }) {
         </div>
       </div>
 
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-3" data-tour="group">
         <GroupSwitcher />
       </div>
 
@@ -43,6 +43,7 @@ export function Sidebar({ variant }: { variant: 'admin' | 'member' }) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      data-tour={item.href}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
                         'h-10 px-3 flex items-center gap-3 rounded-[10px] text-[14px] transition-colors',

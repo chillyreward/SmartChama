@@ -8,6 +8,7 @@ import { signOut } from '@/lib/auth-helpers';
 import { useAuth } from '@/components/AuthProvider';
 import { ADMIN_NAV, MEMBER_NAV, OFFICIAL_ROLES, isActive } from '@/components/shell/nav';
 import { cn } from '@/components/ui';
+import GroupSwitcher from '@/components/GroupSwitcher';
 
 const TABS = {
   member: [
@@ -42,14 +43,14 @@ export function MobileTabBar({ variant = 'member' }: { variant?: 'member' | 'adm
     <>
       <nav
         aria-label="App"
-        className="lg:hidden fixed inset-x-3 z-40 h-[66px] rounded-full bg-forest text-[#EEF4EF] shadow-[0_10px_30px_rgba(0,0,0,.28)] flex items-center justify-around px-2"
+        className="lg:hidden fixed inset-x-3 z-40 h-[66px] rounded-full ak-glass-forest text-[#EEF4EF] flex items-center justify-around px-2"
         style={{ bottom: 'max(12px, env(safe-area-inset-bottom))' }}
       >
         {TABS[variant].map((t) => {
           const active = isActive(pathname, t.href);
           if (t.primary) {
             return (
-              <Link key={t.href} href={t.href} aria-label={t.label} className="w-[54px] h-[54px] rounded-full bg-mint text-forest flex items-center justify-center">
+              <Link key={t.href} href={t.href} data-tour={t.href} aria-label={t.label} className="w-[54px] h-[54px] rounded-full bg-mint text-forest flex items-center justify-center">
                 <t.icon size={24} strokeWidth={2.2} aria-hidden="true" />
               </Link>
             );
@@ -58,6 +59,7 @@ export function MobileTabBar({ variant = 'member' }: { variant?: 'member' | 'adm
             <Link
               key={t.href}
               href={t.href}
+              data-tour={t.href}
               aria-label={t.label}
               aria-current={active ? 'page' : undefined}
               className={cn('w-12 h-12 rounded-full flex items-center justify-center', active ? 'bg-[#0B1913] text-mint' : 'text-[#A9C2B3]')}
@@ -69,6 +71,7 @@ export function MobileTabBar({ variant = 'member' }: { variant?: 'member' | 'adm
         <button
           type="button"
           onClick={() => setMore(true)}
+          data-tour="more"
           aria-label="More"
           aria-expanded={more}
           className={cn('w-12 h-12 rounded-full flex items-center justify-center', more ? 'bg-[#0B1913] text-mint' : 'text-[#A9C2B3]')}
@@ -86,6 +89,9 @@ export function MobileTabBar({ variant = 'member' }: { variant?: 'member' | 'adm
               <button type="button" onClick={() => setMore(false)} aria-label="Close" className="w-11 h-11 rounded-full hover:bg-raised flex items-center justify-center">
                 <X size={20} />
               </button>
+            </div>
+            <div className="px-4 pt-1">
+              <GroupSwitcher onShell={false} />
             </div>
             {groups.map((g) => (
               <div key={g.title} className="px-4 pt-3">

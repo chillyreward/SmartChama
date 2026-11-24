@@ -377,9 +377,7 @@ export function Avatar({ name, size = 36, tone = 'lavender', src }: { name?: str
 
 export const tableClass = 'w-full text-[14px] [&_th]:text-left [&_th]:font-medium [&_th]:text-ink-3 [&_th]:px-3 [&_th]:py-2.5 [&_td]:px-3 [&_td]:py-3.5 [&_tbody_tr]:border-t [&_tbody_tr]:border-line';
 
-export function TableWrap({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('overflow-x-auto -mx-3', className)}>{children}</div>;
-}
+export { TableWrap } from './TableWrap';
 
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn('rounded-2xl bg-raised animate-pulse', className)} />;

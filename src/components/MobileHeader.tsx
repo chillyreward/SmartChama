@@ -31,9 +31,9 @@ export default function MobileHeader({ isAdmin = false }: { isAdmin?: boolean })
   }, [group?.id]);
 
   return (
-    <header className="lg:hidden fixed top-0 inset-x-0 z-30 bg-page/90 backdrop-blur-md border-b border-line pt-safe">
+    <header className="lg:hidden fixed top-0 inset-x-0 z-30 ak-glass border-b pt-safe">
       <div className="h-[60px] px-4 flex items-center justify-between gap-3">
-        <Link href={isAdmin ? '/admin/dashboard' : '/dashboard'} className="flex items-center gap-2.5 min-w-0">
+        <Link href={isAdmin ? '/admin/dashboard' : '/dashboard'} data-tour="group" className="flex items-center gap-2.5 min-w-0">
           <LogoMark size={30} />
           <span className="min-w-0">
             <span className="block text-[15px] font-semibold leading-tight truncate">{group?.name || 'Akibora'}</span>
